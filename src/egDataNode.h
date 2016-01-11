@@ -23,6 +23,7 @@ class EgDataNode           // Data Object Instance 1
 public:
 
   EgDataNodeIDtype dataNodeID;
+  quint64 dataFileOffset;
 
   bool isAdded;                         // new data node
 

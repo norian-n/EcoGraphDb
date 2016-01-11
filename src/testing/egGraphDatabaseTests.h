@@ -23,7 +23,7 @@ public:
 
     bool testEgDataNodesTypeGUIDescriptors(EgDataNodesType& testDataNodes);
 
-    bool testEgGraphDatabase();
+    bool testEgGraphDatabaseCreate();
 
     bool testEgLinksCreate();
 

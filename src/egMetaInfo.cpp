@@ -50,6 +50,14 @@ int EgDataNodeTypeMetaInfo::LocalLoadMetaInfo()
         // open file
     QFile ddt_file(typeName + ".ddt");
     QDataStream dStream(&ddt_file);
+
+/*    if (!ddt_file.exists())
+    {
+        qDebug() << FN << "file doesn't exist " << typeName + ".ddt";
+        return -1;
+    }
+*/
+
     if (!ddt_file.open(QIODevice::ReadOnly))
     {
         if (! typeName.contains(EgDataNodesGUInamespace::egGUIfileName))

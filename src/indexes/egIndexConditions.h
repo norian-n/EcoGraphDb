@@ -6,7 +6,7 @@
 #include <QVariant>
 
 #include "egIndexesFiles.h"
-#include "egLocalFiles.h"
+#include "../egLocalFiles.h"
 
 namespace egIndexConditionsNamespace
 {

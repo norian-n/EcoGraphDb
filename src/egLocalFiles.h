@@ -42,9 +42,14 @@ public:
     ~EgDataFiles();
 
     // void Init(QString& FileNameBase, EgFieldDescriptors* a_FD);
-    int Init(EgDataNodeTypeMetaInfo& a_metaInfo);
 
-    inline int LocalOpenFiles();
+    bool CheckFiles(EgDataNodeTypeMetaInfo& a_metaInfo); // check if files exists and not empty
+
+    int Init(EgDataNodeTypeMetaInfo& a_metaInfo); // set names and indexes control
+
+    int LocalOpenFilesToRead();
+    int LocalOpenFilesToUpdate();
+
     inline void LocalCloseFiles();
 
     // int LocalStoreMetaInfo(EgDataNodeTypeMetaInfo& metaInfo);

@@ -40,8 +40,10 @@ int EgGraphDatabase::LoadLinksMetaInfo()
 
     linksMetaInfo.metaInfo = *metaInfo;
 
-    if (linksMetaInfo.LocalFiles-> Init(*metaInfo))  // FIXME server
-        return -1; // no metainfo found
+    if (! linksMetaInfo.LocalFiles-> CheckFiles(*metaInfo))  // FIXME server
+        return -1; // no data found
+
+    linksMetaInfo.LocalFiles-> Init(*metaInfo);
 
     linksMetaInfo.index_tree = new EgIndexConditions(EgDataNodesLinkNamespace::egLinkTypesfileName);
 

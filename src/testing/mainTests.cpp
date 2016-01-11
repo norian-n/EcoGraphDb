@@ -31,16 +31,13 @@ int main() // int argc, char *argv[])
 
     EgGraphDatabase graphDB;
     EgDataNodesType testEgDataNodesType;
-    EgDataNodeTypeMetaInfo egDataNodeTypeMetaInfo("MetaTest");
-
-    EgIndexFiles<qint32> testIndexFiles("IndexesTests");
-    EgIndexesTests<qint32> indexTests;
 
     cleanUpFiles();
 
-    // res = res && egDbTests.testEgDataNodeTypeMetaInfo(egDataNodeTypeMetaInfo);
-
-    // res = res && egDbTests.testEgDataNode(egDataNodeTypeMetaInfo);
+        // indexes standalone
+/*
+    EgIndexFiles<qint32> testIndexFiles("IndexesTests");
+    EgIndexesTests<qint32> indexTests;
 
     res = res && indexTests.testEgDataIndexAddFirst(testIndexFiles);
 
@@ -52,9 +49,20 @@ int main() // int argc, char *argv[])
 
     return 0; // FIXME STUB
 
-    res = res && egDbTests.testEgGraphDatabase();
+    */
 
-    // res = res && egDbTests.testEgLinksCreate();
+        // meta info standalone
+    // EgDataNodeTypeMetaInfo egDataNodeTypeMetaInfo("MetaTest");
+
+    // res = res && egDbTests.testEgDataNodeTypeMetaInfo(egDataNodeTypeMetaInfo);
+
+    // res = res && egDbTests.testEgDataNode(egDataNodeTypeMetaInfo);
+
+        // baisc functionality
+
+    res = res && egDbTests.testEgGraphDatabaseCreate();
+
+    res = res && egDbTests.testEgLinksCreate();
 
     testEgDataNodesType.Connect(graphDB, "test");
 
@@ -62,16 +70,15 @@ int main() // int argc, char *argv[])
 
     res = res && egDbTests.testEgDataNodesTypeBasicLoadStore(testEgDataNodesType);
 
-    return 0; // FIXME STUB
-
     res = res && egDbTests.testEgDataNodesTypeDelNode(testEgDataNodesType);
 
     res = res && egDbTests.testEgDataNodesTypeUpdateNode(testEgDataNodesType);
 
     res = res && egDbTests.testEgDataNodesTypeGUIDescriptors(testEgDataNodesType);
 
-    res = res && egDbTests.testEgLinksBasics(testEgDataNodesType);
+    // return 0; // FIXME STUB
 
+    res = res && egDbTests.testEgLinksBasics(testEgDataNodesType);
 
 
     if (res)

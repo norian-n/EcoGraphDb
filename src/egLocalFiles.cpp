@@ -14,6 +14,19 @@ EgDataFiles::~EgDataFiles()
 
 }
 
+bool EgDataFiles::CheckFiles(EgDataNodeTypeMetaInfo& a_metaInfo)
+{
+    ddt_file.setFileName(a_metaInfo.typeName + ".ddt");
+
+    if (!ddt_file.exists())
+    {
+        // qDebug() << FN << "file doesn't exist' " << a_metaInfo.typeName + ".ddt";
+        return false;
+    }
+
+    return true;
+}
+
 int EgDataFiles::Init(EgDataNodeTypeMetaInfo& a_metaInfo)
 {
     metaInfo = &a_metaInfo;
@@ -32,7 +45,7 @@ int EgDataFiles::Init(EgDataNodeTypeMetaInfo& a_metaInfo)
         // add indexes files classes
     for (QHash<QString, int> ::iterator metaInfoIter = metaInfo-> indexedToOrder.begin(); metaInfoIter != metaInfo-> indexedToOrder.end(); ++metaInfoIter)
     {
-        EgIndexFiles<qint32>* newIndexFiles = new EgIndexFiles<qint32>(a_metaInfo.typeName + "_" + metaInfoIter.key()); // FIXME
+        EgIndexFiles<qint32>* newIndexFiles = new EgIndexFiles<qint32>(a_metaInfo.typeName + "_" + metaInfoIter.key()); // FIXME qint32
 
         // qDebug() << FN << indIter.key() << newIndexFiles;
 
@@ -40,13 +53,14 @@ int EgDataFiles::Init(EgDataNodeTypeMetaInfo& a_metaInfo)
     }
 
         // check if files exists
-
+/*
     int res = LocalOpenFiles(); // FIXME just check if exist + indexes
 
     if (! res)
         LocalCloseFiles();
+*/
 
-    return res;
+    return 0; //res;
 
     // qDebug() << FN << "indexFiles.count() =" << indexFiles.count();
 }
@@ -74,7 +88,46 @@ inline void EgDataFiles::AppendNewData(QDataStream& dat, QList<EgPackedDataNode*
 }
 */
 
-inline int EgDataFiles::LocalOpenFiles()
+inline int EgDataFiles::LocalOpenFilesToRead()
+{
+        // meta info file
+    ddt_file.setFileName(metaInfo-> typeName + ".ddt");
+
+    if (!ddt_file.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
+    {
+        qDebug() << FN << "can't open file " << metaInfo-> typeName + ".ddt";
+        return -1;
+    }
+
+    ddt.setDevice(&ddt_file);
+
+        // data nodes file
+    dat_file.setFileName(metaInfo-> typeName + ".dat");
+
+    if (!dat_file.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
+    {
+        qDebug() << FN << "can't open file " << metaInfo-> typeName + ".dat";
+        return -1;
+    }
+
+    dat.setDevice(&dat_file);
+
+        // primary index
+
+    // QString IndexFileName = metaInfo-> typeName + "_odb_pit"; // FIXME const
+    primIndexFiles-> OpenIndexFilesToRead();
+
+        // other indexes files
+    for (QHash<QString, EgIndexFiles<qint32>*>::iterator indexesIter = indexFiles.begin(); indexesIter != indexFiles.end(); ++indexesIter)
+    {
+        // IndexFileName = metaInfo-> typeName + "_" + indexesIter.key();
+        indexesIter.value()-> OpenIndexFilesToRead();
+    }
+
+    return 0;
+}
+
+inline int EgDataFiles::LocalOpenFilesToUpdate()
 {
         // meta info file
     ddt_file.setFileName(metaInfo-> typeName + ".ddt");
@@ -112,7 +165,6 @@ inline int EgDataFiles::LocalOpenFiles()
 
     return 0;
 }
-
 
 inline void EgDataFiles::LocalCloseFiles()
 {
@@ -187,6 +239,12 @@ int EgDataFiles::LocalLoadData(QSet<quint64>& dataOffsets, QMap<EgDataNodeIDtype
 
     dat_file.setFileName(metaInfo-> typeName + ".dat");
 
+    if (!dat_file.exists())
+    {
+        qDebug() << FN << "file doesn't exist' " << metaInfo-> typeName << ".dat";
+        return -1;
+    }
+
     if (!dat_file.open(QIODevice::ReadOnly))
     {
         qDebug() << FN << "can't open file for read " << metaInfo-> typeName << ".dat";
@@ -216,6 +274,8 @@ int EgDataFiles::LocalLoadData(QSet<quint64>& dataOffsets, QMap<EgDataNodeIDtype
         dat >> tmpNode2.dataNodeID;                
         dat >> tmpNode2;
 
+        tmpNode2.dataFileOffset = *offsets_iter;
+
         // qDebug() << FN <<  "tmpNode2.dataNodeID =" << tmpNode2.dataNodeID;
 
         dataNodesMap.insert(tmpNode2.dataNodeID, tmpNode2);
@@ -240,7 +300,7 @@ int EgDataFiles::LocalStoreData(QMap<EgDataNodeIDtype, EgDataNode*>&  addedDataN
     }
         // TODO lock table
 
-    if (LocalOpenFiles())
+    if (LocalOpenFilesToUpdate())
         return -1;
 
         // update ObjDb metadata (data definition table)
@@ -260,8 +320,6 @@ int EgDataFiles::LocalStoreData(QMap<EgDataNodeIDtype, EgDataNode*>&  addedDataN
         qDebug() << FN << "Error: ddt file is empty: " << metaInfo-> typeName + ".ddt";
     }
 
-    /*
-
         // process deleted objects
     if (! deletedDataNodes.isEmpty())
         LocalDeleteObjects(deletedDataNodes);
@@ -269,8 +327,6 @@ int EgDataFiles::LocalStoreData(QMap<EgDataNodeIDtype, EgDataNode*>&  addedDataN
         // process updated objects
     if (! updatedDataNodes.isEmpty())
         LocalModifyObjects(dat, updatedDataNodes);
-
-        */  // FIXME STUB
 
         // add new records
     if (! addedDataNodes.isEmpty())
@@ -341,6 +397,7 @@ inline void EgDataFiles::LocalDeleteObjects(QMap<EgDataNodeIDtype, EgDataNode>& 
     {
             // del primary index
         primIndexFiles-> theIndex = delIter.value().dataNodeID;
+        primIndexFiles-> dataOffset = delIter.value().dataFileOffset;
         primIndexFiles-> DeleteIndex();   // SIDE estimate old offset stored here
 
             // del other indexes
@@ -378,6 +435,7 @@ inline int EgDataFiles::LocalModifyObjects(QDataStream& dat, QMap<EgDataNodeIDty
             // add primary index
 
         primIndexFiles-> theIndex = addIter.value()-> dataNodeID;
+        primIndexFiles-> dataOffset = addIter.value()-> dataFileOffset;
         primIndexFiles-> UpdateIndex(true);
 
         // qDebug() << FN << "data offset" << hex << (int) primIndexFiles-> dataOffset;

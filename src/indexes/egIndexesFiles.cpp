@@ -1,4 +1,4 @@
-#include "egDataNodesType.h"
+#include "../egDataNodesType.h"
 #include "egIndexesFiles.h"
 
 template <typename KeyType> void EgIndexFiles<KeyType>::RemoveIndexFiles()
@@ -80,7 +80,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_EQ(QSet<quint64>& in
 
     indexChunks.theKey   = Key;
 
-    if (fingersTree.FindIndexChunkFirst(true))
+    if (fingersTree.FindIndexChunkFirst(true) < -1)
         res = -1;
 
     if (! res)
@@ -96,12 +96,17 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GE(QSet<quint64>& in
 {
     int res = 0;
 
+    // qDebug() << "File name " << IndexFileName << FN;
+
     OpenIndexFilesToRead();
 
     indexChunks.theKey   = Key;
 
-    if (fingersTree.FindIndexChunkFirst(true) < 0) // FIXME - process borders
+    if (fingersTree.FindIndexChunkFirst(true) < -1) // FIXME - process borders
+    {
+        qDebug() << "Index chunk not found " << IndexFileName << FN;
         res = -1;
+    }
 
     if (! res)
         indexChunks.LoadDataByChunkUp(index_offsets, EgIndexes<KeyType>::CompareGE);
@@ -119,7 +124,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GT(QSet<quint64>& in
 
     indexChunks.theKey = Key;
 
-    if (fingersTree.FindIndexChunkFirst(false) < 0) // FIXME - process borders
+    if (fingersTree.FindIndexChunkFirst(false) < -1) // FIXME - process borders
         res = -1;
 
     if (! res)
@@ -138,7 +143,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LE(QSet<quint64>& in
 
     indexChunks.theKey   = Key;
 
-    if (fingersTree.FindIndexChunkLast(true) < 0) // FIXME - process borders
+    if (fingersTree.FindIndexChunkLast(true) < -1) // FIXME - process borders
         res = -1;
 
     if (! res)
@@ -157,7 +162,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LT(QSet<quint64>& in
 
     indexChunks.theKey = Key;
 
-    if (fingersTree.FindIndexChunkLast(false) < 0) // FIXME - process borders
+    if (fingersTree.FindIndexChunkLast(false) < -1) // FIXME - process borders
         res = -1;
 
     if (! res)

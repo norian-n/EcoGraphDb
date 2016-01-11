@@ -69,6 +69,8 @@ int EgDataNodesGUIconnect::LoadSimpleControlDesc()
 
     controlDescs-> LoadAllData();
 
+    // qDebug()  << "Control descs count = " << controlDescs-> dataNodes.count() << FN;
+
     for (QMap<EgDataNodeIDtype, EgDataNode>::iterator nodesIter = controlDescs-> dataNodes.begin(); nodesIter != controlDescs-> dataNodes.end(); ++nodesIter)
     {
         if (dataNodesType-> metaInfo.nameToOrder.contains(nodesIter.value()["name"].toString()))
@@ -77,6 +79,8 @@ int EgDataNodesGUIconnect::LoadSimpleControlDesc()
             newDesc.fieldIndex = dataNodesType-> metaInfo.nameToOrder[nodesIter.value()["name"].toString()];
             // newDesc.controlLabel = nodesIter.value()["label"].toString();
             // newDesc.controlDefWidth = nodesIter.value()["width"].toInt();
+
+            // qDebug()  << "Control desc added " << newDesc.fieldIndex << FN;
 
             basicControlDescs.append(newDesc);
             basicControlDescsOrder.insert(nodesIter.value()["name"].toString(), &(basicControlDescs.last()));

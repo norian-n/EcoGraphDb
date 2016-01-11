@@ -1,4 +1,4 @@
-#include "egDataNodesType.h"
+#include "../egDataNodesType.h"
 #include "egIndexes.h"
 #include "egFingers.h"
 
@@ -34,11 +34,17 @@ template <typename KeyType> int EgIndexes<KeyType>::OpenIndexFilesToRead(const Q
     indexFile.setFileName(IndexFileName + ".odx");
     indexStream.setDevice(&indexFile);
 
+    if (!indexFile.exists())
+    {
+        qDebug() << FN << "file doesn't exist " << IndexFileName + ".odx";
+        return -1;
+    }
+
     if (!indexFile.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
     {
         if (! IndexFileName.contains(EgDataNodesGUInamespace::egGUIfileName))
             qDebug() << FN << "can't open index file " << indexFile.fileName();
-        return -1;
+        return -2;
     }
 
     return 0;
@@ -438,7 +444,7 @@ template <typename KeyType> int EgIndexes<KeyType>::FindIndexPosition(QDataStrea
         return 0;
 
         // proportional index lookup
-    indexPosition = (theKey - fingersTree-> currentFinger.minKey)*(fingersTree-> currentFinger.itemsCount)/(fingersTree-> currentFinger.maxKey - fingersTree-> currentFinger.minKey);
+    indexPosition = (theKey - fingersTree-> currentFinger.minKey)*(fingersTree-> currentFinger.itemsCount - 1)/(fingersTree-> currentFinger.maxKey - fingersTree-> currentFinger.minKey);
 
         // load proposed key
     localIndexesStream.device()->seek(indexPosition*oneIndexSize);
@@ -484,7 +490,7 @@ template <typename KeyType> int EgIndexes<KeyType>::FindPosByKeyFirst(QDataStrea
         return 0; // got it
 
         // proportional index lookup
-    indexPosition = (theKey - fingersTree-> currentFinger.minKey)*(fingersTree-> currentFinger.itemsCount)/(fingersTree-> currentFinger.maxKey - fingersTree-> currentFinger.minKey);
+    indexPosition = (theKey - fingersTree-> currentFinger.minKey)*(fingersTree-> currentFinger.itemsCount - 1)/(fingersTree-> currentFinger.maxKey - fingersTree-> currentFinger.minKey);
 
         // load proposed key
     localIndexesStream.device()->seek(indexPosition*oneIndexSize);
@@ -536,7 +542,7 @@ template <typename KeyType> int EgIndexes<KeyType>::FindPosByKeyLast(QDataStream
         return -1; // error
 
         // proportional index lookup
-    indexPosition = (theKey - fingersTree-> currentFinger.minKey)*(fingersTree-> currentFinger.itemsCount)/(fingersTree-> currentFinger.maxKey - fingersTree-> currentFinger.minKey);
+    indexPosition = (theKey - fingersTree-> currentFinger.minKey)*(fingersTree-> currentFinger.itemsCount - 1)/(fingersTree-> currentFinger.maxKey - fingersTree-> currentFinger.minKey);
 
         // load proposed key
     localIndexesStream.device()->seek(indexPosition*oneIndexSize);
@@ -813,6 +819,8 @@ template <typename KeyType> int EgIndexes<KeyType>::FindIndexByDataOffset(QDataS
 
     // memcpy(indexBA.data(), chunk, indexChunkSize);
 
+    // qDebug() << "theKey =  " << hex << (int) theKey  << " , oldDataOffset =  " << hex << (int) oldDataOffset << FN;
+
     // qDebug() << "indexBA =  " << indexBA.toHex() << FN;
 
     nextChunkPtr =  indexesChunkOffset;
@@ -838,6 +846,8 @@ template <typename KeyType> int EgIndexes<KeyType>::FindIndexByDataOffset(QDataS
             localIndexStream.device()->seek((egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2));
             localIndexStream >> chunkCount;
         }
+
+        // qDebug() << "indexPosition =  " << indexPosition;
 
         // qDebug() << "nextChunkPtr =  " << hex << (int) nextChunkPtr  << " , chunkCount =  " << hex << (int) chunkCount << FN;
 

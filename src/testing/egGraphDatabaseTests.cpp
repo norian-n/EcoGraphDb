@@ -151,24 +151,16 @@ bool EgGraphDatabaseTests::testEgDataNodesTypeGUIDescriptors(EgDataNodesType& te
     return res;
 }
 
-bool EgGraphDatabaseTests::testEgGraphDatabase()
+bool EgGraphDatabaseTests::testEgGraphDatabaseCreate()
 {
     EgGraphDatabase graphDB;
 
     graphDB.CreateNodeType("test");
 
     graphDB.AddDataField("name");
-    graphDB.AddDataField("status", true); // , true
+    graphDB.AddDataField("status", true); // true for index
 
     graphDB.CommitNodeType();
-
-/*
-    testDataNodes.GUI.CreateDataNodesForControlDescs();
-
-    testDataNodes.GUI.AddSimpleControlDesc("name", "Name", 100);
-    testDataNodes.GUI.AddSimpleControlDesc("status", "Status", 50);
-
-    */
 
     bool res = (graphDB.metaInfo->dataFields.count() == 2); // && (testDataNodes.dataNodes.count() == 8))
 

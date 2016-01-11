@@ -1,5 +1,5 @@
 #include "egIndexConditions.h"
-#include "egDataNodesType.h"
+#include "../egDataNodesType.h"
 
 using namespace egIndexConditionsNamespace;
 

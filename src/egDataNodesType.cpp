@@ -56,12 +56,13 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
         index_tree = new EgIndexConditions(nodeTypeName);
     }
 
+        // init special data node
     notFound.metaInfo = &metaInfo;
 
     for (int i = 0; i < metaInfo.dataFields.count(); i++)
         notFound.dataFields << QVariant("<Not found>");
 
-    getMyLinkTypes();
+    getMyLinkTypes(); // extract nodetype-specific link types from all link types
 
         // FIXME process server based version
 
