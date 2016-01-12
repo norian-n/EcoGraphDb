@@ -1,6 +1,8 @@
 #include "egDataNodesGUIconnect.h"
 #include "egDataNodesType.h"
 
+#include <QFile>
+
 using namespace EgDataNodesGUInamespace;
 
 EgBasicControlDesc::EgBasicControlDesc(EgDataNode &dataNode):
@@ -93,12 +95,30 @@ int EgDataNodesGUIconnect::LoadSimpleControlDesc()
     return 0;
 }
 
+bool EgDataNodesGUIconnect::CheckLocalGUIFile()
+{
+    QFile ddt_file;
+
+    ddt_file.setFileName(dataNodesType-> metaInfo.typeName + egGUIfileName + ".ddt");
+
+    if (!ddt_file.exists())
+    {
+        // qDebug() << "file doesn't exist' " << dataNodesType-> metaInfo.typeName + egGUIfileName + ".ddt" << FN ;
+        return false;
+    }
+
+    return true;
+}
+
 int EgDataNodesGUIconnect::AddSimpleControlDesc(QString fieldName, QString fieldLabel, int fieldWidth)
 {
     QList<QVariant> addValues;
 
     if (! controlDescs)
         controlDescs = new EgDataNodesType();
+
+    if (! CheckLocalGUIFile())      // FIXME server
+        CreateDataNodesForControlDescs();
 
     controlDescs-> Connect(*(dataNodesType-> metaInfo.myECoGraphDB), dataNodesType-> metaInfo.typeName + egGUIfileName);
 
@@ -359,7 +379,6 @@ QVariant EgDataNodesGUIconnect::GetComboBoxID(QComboBox* my_box)
 
 int EgDataNodesGUIconnect::AddAutoSubstitute(const char* my_field, EgDataNodesType& ref_class, const char* ref_field)
 {
-
     if (basicControlDescsOrder.contains(my_field) && ref_class.metaInfo.nameToOrder.contains(ref_field))
     {
         basicControlDescsOrder[my_field]-> AutoSubstClass = &ref_class;
@@ -368,7 +387,9 @@ int EgDataNodesGUIconnect::AddAutoSubstitute(const char* my_field, EgDataNodesTy
         return 0;
     }
 
-    qDebug() << "Bad field name" << FN;
+    qDebug() << "Bad field name, descs follow" << FN;
+    qDebug() << basicControlDescsOrder << FN;
+    qDebug() << ref_class.metaInfo.nameToOrder << FN;
 
     return -1;
 }

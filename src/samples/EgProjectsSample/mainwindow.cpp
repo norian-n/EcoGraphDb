@@ -276,24 +276,20 @@ void MainWindow::FillTestData()
     graphDB.CreateNodeType("projects");
 
     graphDB.AddDataField("name");
-    graphDB.AddDataField("status"); // , IsIndexed);
+    graphDB.AddDataField("status", IsIndexed);
     graphDB.AddDataField("description");
-    graphDB.AddDataField("owner");
+    graphDB.AddDataField("owner", IsIndexed);
     graphDB.AddDataField("launch_date");
     graphDB.AddDataField("end_date");
 
     graphDB.CommitNodeType();
 
-    graphDB.CreateControlDescs(); // context dependent
-
-    graphDB.AddSimpleControlDesc("name",          "Project name",   120);
-    graphDB.AddSimpleControlDesc("status",        "Status",         90);
-    graphDB.AddSimpleControlDesc("owner",         "Owner",          90);
-    graphDB.AddSimpleControlDesc("launch_date",   "Launched",       90);
-    graphDB.AddSimpleControlDesc("end_date",      "Finished",       90);
-    graphDB.AddSimpleControlDesc("description",   "Description",    250);
-
-    graphDB.CommitControlDesc();
+    Projects.GUI.AddSimpleControlDesc("name",          "Project name",   120);
+    Projects.GUI.AddSimpleControlDesc("status",        "Status",         90);
+    Projects.GUI.AddSimpleControlDesc("owner",         "Owner",          90);
+    Projects.GUI.AddSimpleControlDesc("launch_date",   "Launched",       90);
+    Projects.GUI.AddSimpleControlDesc("end_date",      "Finished",       90);
+    Projects.GUI.AddSimpleControlDesc("description",   "Description",    150);
 
     Projects.Connect(graphDB, "projects");
 

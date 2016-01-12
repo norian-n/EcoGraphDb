@@ -49,6 +49,8 @@ public:
 
   // void Init();
 
+
+  bool CheckLocalGUIFile();
   int CreateDataNodesForControlDescs();
 
   int AddSimpleControlDesc(QString fieldName, QString fieldLabel, int fieldWidth);   // add default control to field descriptor

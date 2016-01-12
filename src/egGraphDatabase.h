@@ -32,10 +32,11 @@ public:
 
     int CreateLinksMetaInfo();
     int AddLinkType(QString linkName, QString firstDataNodeType, QString secondDataNodeType);
-
+/*
     int CreateControlDescs();
     int AddSimpleControlDesc(QString fieldName, QString fieldLabel, int fieldWidth);
     int CommitControlDesc();
+    */
 
     int StoreAllLinks();
     int LoadAllLinks(); // load all links to memory - debug use only

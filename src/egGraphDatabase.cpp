@@ -110,7 +110,7 @@ int EgGraphDatabase::CommitNodeType()
     return 0;
 }
 
-
+/*
 int EgGraphDatabase::CreateControlDescs()
 {
     if (! metaInfo)
@@ -173,6 +173,7 @@ int EgGraphDatabase::CreateLinksMetaInfo()
 
     return 0;
 }
+*/
 
 int  EgGraphDatabase::AddLinkType(QString linkName, QString firstDataNodeType, QString secondDataNodeType)
 {
