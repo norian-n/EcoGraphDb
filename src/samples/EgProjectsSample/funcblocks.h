@@ -9,6 +9,9 @@ class FuncBlocksForm : public QWidget
 {
     Q_OBJECT
 public:
+
+    int project_id;
+
     FuncBlocksForm(QWidget *parent = 0);
 
 private slots:

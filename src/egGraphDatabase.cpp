@@ -2,12 +2,15 @@
 #include "egDataNodesLink.h"
 
 
-int EgGraphDatabase::Connect()
+int EgGraphDatabase::Connect(EgDataNodesType* nType)
 {
     if (! isConnected)
     {
         LoadLinksMetaInfo();
     }
+
+    if (! connNodeTypes.contains(nType->metaInfo.typeName))
+        connNodeTypes.insert(nType->metaInfo.typeName, nType);
 
     isConnected = true;
 
@@ -32,7 +35,7 @@ int EgGraphDatabase::LoadLinksMetaInfo()
 
     EgDataNodesType linksMetaInfo;
 
-    CreateNodeType(EgDataNodesLinkNamespace::egLinkTypesfileName);
+    CreateNodeType(EgDataNodesLinkNamespace::egLinkTypesFileName);
 
     AddDataField("name");
     AddDataField("firstNodeType");
@@ -45,7 +48,7 @@ int EgGraphDatabase::LoadLinksMetaInfo()
 
     linksMetaInfo.LocalFiles-> Init(*metaInfo);
 
-    linksMetaInfo.index_tree = new EgIndexConditions(EgDataNodesLinkNamespace::egLinkTypesfileName);
+    linksMetaInfo.index_tree = new EgIndexConditions(EgDataNodesLinkNamespace::egLinkTypesFileName);
 
     /*
     if (linksMetaInfo.Connect(*(linksMetaInfo.metaInfo.myECoGraphDB), EgDataNodesLinkNamespace::egLinkTypesfileName))
@@ -56,6 +59,8 @@ int EgGraphDatabase::LoadLinksMetaInfo()
     */
 
     linksMetaInfo.LoadAllData();
+
+    newLink.egDatabase = this;
 
     for (QMap<EgDataNodeIDtype, EgDataNode>::iterator nodesIter = linksMetaInfo.dataNodes.begin(); nodesIter != linksMetaInfo.dataNodes.end(); ++nodesIter)
     {
@@ -160,10 +165,11 @@ int  EgGraphDatabase::CommitControlDesc()
 {
     return controlDescs.StoreData();
 }
+*/
 
 int EgGraphDatabase::CreateLinksMetaInfo()
 {
-    CreateNodeType(EgDataNodesLinkNamespace::egLinkTypesfileName);    
+    CreateNodeType(EgDataNodesLinkNamespace::egLinkTypesFileName);
 
     AddDataField("name");
     AddDataField("firstNodeType");
@@ -173,7 +179,6 @@ int EgGraphDatabase::CreateLinksMetaInfo()
 
     return 0;
 }
-*/
 
 int  EgGraphDatabase::AddLinkType(QString linkName, QString firstDataNodeType, QString secondDataNodeType)
 {
@@ -186,7 +191,7 @@ int  EgGraphDatabase::AddLinkType(QString linkName, QString firstDataNodeType, Q
         return -1;
     }
 
-    if (linksTypes.Connect(*(metaInfo-> myECoGraphDB), EgDataNodesLinkNamespace::egLinkTypesfileName))
+    if (linksTypes.Connect(*(metaInfo-> myECoGraphDB), EgDataNodesLinkNamespace::egLinkTypesFileName))
     {
         qDebug()  << "CreateLinksMetaInfo wasn't called, aborting" << FN;
         return -1;
@@ -204,7 +209,7 @@ int  EgGraphDatabase::AddLinkType(QString linkName, QString firstDataNodeType, Q
 
 int  EgGraphDatabase::StoreAllLinks()
 {
-    for (QHash<QString, EgDataNodesLinkType>::iterator linksIter = linkTypes.begin(); linksIter != linkTypes.end(); ++linksIter)
+    for (QMap<QString, EgDataNodesLinkType>::iterator linksIter = linkTypes.begin(); linksIter != linkTypes.end(); ++linksIter)
             linksIter.value().StoreLinks();
 
     return 0;
@@ -212,7 +217,7 @@ int  EgGraphDatabase::StoreAllLinks()
 
 int  EgGraphDatabase::LoadAllLinks()
 {
-    for (QHash<QString, EgDataNodesLinkType>::iterator linksIter = linkTypes.begin(); linksIter != linkTypes.end(); ++linksIter)
+    for (QMap<QString, EgDataNodesLinkType>::iterator linksIter = linkTypes.begin(); linksIter != linkTypes.end(); ++linksIter)
             linksIter.value().LoadLinks();
 
     return 0;

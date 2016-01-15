@@ -14,15 +14,15 @@ public:
 
     EgDataNodesType controlDescs;
 
-
-    QHash<QString, EgDataNodesLinkType>  linkTypes;
+    QMap<QString, EgDataNodesLinkType>  linkTypes;
+    QMap<QString, EgDataNodesType* >  connNodeTypes;
 
     EgGraphDatabase(): isConnected(false), metaInfo(NULL) {}
     // EgGraphDatabase(QString a_typeName) : typeName(a_typeName) {}
 
     ~EgGraphDatabase() { if (metaInfo) delete metaInfo; }
 
-    int Connect();
+    int Connect(EgDataNodesType* nType);
 
     int LoadLinksMetaInfo();
 

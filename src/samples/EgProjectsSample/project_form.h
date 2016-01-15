@@ -30,6 +30,7 @@ public:
     MainWindow * main_callee;
 //    SubProjectsForm * sub_callee;
     int project_id;
+
     void initProject();
     void openProject();
         // primary table

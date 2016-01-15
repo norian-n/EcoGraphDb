@@ -3,7 +3,7 @@
 #include "egMetaInfo.h"
 
 
-EgDataNode::EgDataNode(EgDataNodeTypeMetaInfo& a_metaInfo): isAdded(false), metaInfo(&a_metaInfo)
+EgDataNode::EgDataNode(EgDataNodeTypeMetaInfo& a_metaInfo): isAdded(false), metaInfo(&a_metaInfo), nodeLinks(NULL)
 {
     for (int i = 0; i < a_metaInfo.dataFields.count(); i++)
         dataFields << QVariant();

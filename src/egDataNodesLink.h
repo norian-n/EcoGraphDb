@@ -9,9 +9,11 @@
 
 #include "egCore.h"
 
+class EgGraphDatabase;
+
 namespace EgDataNodesLinkNamespace
 {
-    const char* const egLinkTypesfileName("egLinkTypesMetaInfo");
+    const char* const egLinkTypesFileName("egLinkTypesMetaInfo");
 }
 
 // class EgDataNodesType;
@@ -22,6 +24,8 @@ public:
 
     // EgDataNodesType* firstNodesType;
     // EgDataNodesType* secondNodesType;
+
+    EgGraphDatabase* egDatabase;
 
     QString linkName;           // link file name
 
@@ -46,6 +50,9 @@ public:
     int LoadLinks();            // load data links from file or server
 
     int StoreLinks();           // save data links to file or server
+
+    int ResolveLinks();         // move loaded links to data nodes if loaded
+
 };
 
 

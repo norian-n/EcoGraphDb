@@ -33,9 +33,6 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
 {
     int res = 0;
 
-    if (&myDB)
-        myDB.Connect();
-
     metaInfo.myECoGraphDB = &myDB;
     metaInfo.typeName = nodeTypeName;
     connection = server;    
@@ -62,7 +59,11 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
     for (int i = 0; i < metaInfo.dataFields.count(); i++)
         notFound.dataFields << QVariant("<Not found>");
 
+    if (! res && &myDB)
+        myDB.Connect(this);
+
     getMyLinkTypes(); // extract nodetype-specific link types from all link types
+
 
         // FIXME process server based version
 
@@ -72,7 +73,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
 int EgDataNodesType::getMyLinkTypes()
 {
     if (metaInfo.myECoGraphDB)
-        for (QHash<QString, EgDataNodesLinkType>::iterator linksIter = metaInfo.myECoGraphDB-> linkTypes.begin(); linksIter != metaInfo.myECoGraphDB-> linkTypes.end(); ++linksIter)
+        for (QMap<QString, EgDataNodesLinkType>::iterator linksIter = metaInfo.myECoGraphDB-> linkTypes.begin(); linksIter != metaInfo.myECoGraphDB-> linkTypes.end(); ++linksIter)
         {
             if ((linksIter.value().firstTypeName == metaInfo.typeName) || (linksIter.value().secondTypeName == metaInfo.typeName))
             {
@@ -108,47 +109,54 @@ EgDataNode& EgDataNodesType::operator [](EgDataNodeIDtype objID)
 int EgDataNodesType::AddArrowLink(QString linkName, EgDataNodeIDtype fromNode, EgDataNodesType &toType, EgDataNodeIDtype toNode)
 {
 
+    EgExtendedLinkType fwdLink, backLink;
+    QList<EgExtendedLinkType> newLinks;
+
     if (! myLinkTypes.contains(linkName))
     {
-        qDebug() << metaInfo.typeName << " - bad link name: " << linkName << FN;
+        qDebug() << metaInfo.typeName << " : bad link name: " << linkName << FN;
         return -1;
     }
 
     if (dataNodes.contains(fromNode) && toType.dataNodes.contains(toNode))
     {
+            // fill new links info
+        fwdLink.dataNodeID = toNode;
+        fwdLink.dataNodePtr = &(toType.dataNodes[toNode]);
 
-        EgLoadedLinkType newLoaded;
+        backLink.dataNodeID = fromNode;
+        backLink.dataNodePtr = &(dataNodes[fromNode]);
 
-        newLoaded.dataNodeID = toNode;
-        // if (toType.dataNodes.contains(toNode))
-            newLoaded.dataNodePtr = &(toType.dataNodes[toNode]);
-        // else
-        //     newLoaded.dataNodePtr = NULL;
+            // check/create links
+        if (! dataNodes[fromNode].nodeLinks)
+          dataNodes[fromNode].nodeLinks = new EgDataNodeLinks();
 
-        if (! outLinks.contains(linkName))
+        if (! toType.dataNodes[toNode].nodeLinks)
+          toType.dataNodes[toNode].nodeLinks = new EgDataNodeLinks();
+
+            // write fwd link
+        if (! dataNodes[fromNode].nodeLinks-> outLinks.contains(linkName))
         {
-            QMultiMap <EgDataNodeIDtype, EgLoadedLinkType> newLinks;
+            newLinks.clear();
+            newLinks.append(fwdLink);
 
-            newLinks.insert(toNode, newLoaded);
-
-            outLinks.insert(linkName, newLinks);
+            dataNodes[fromNode].nodeLinks-> outLinks.insert(linkName, newLinks);
         }
         else
-            outLinks[linkName].insert(toNode, newLoaded);
+            dataNodes[fromNode].nodeLinks-> outLinks[linkName].append(fwdLink);
 
-        newLoaded.dataNodeID = fromNode;
-        newLoaded.dataNodePtr = &(dataNodes[fromNode]);
-
-        if (! toType.inLinks.contains(linkName))
+            // write back link
+        if (! toType.dataNodes[toNode].nodeLinks-> outLinks.contains(linkName))
         {
-            QMultiMap <EgDataNodeIDtype, EgLoadedLinkType> newLinks;
+            newLinks.clear();
+            newLinks.append(backLink);
 
-            newLinks.insert(fromNode, newLoaded);
-
-            toType.inLinks.insert(linkName, newLinks);
+            toType.dataNodes[toNode].nodeLinks-> outLinks.insert(linkName, newLinks);
         }
         else
-            toType.inLinks[linkName].insert(fromNode, newLoaded);
+            toType.dataNodes[toNode].nodeLinks-> outLinks[linkName].append(backLink);
+
+            // add record to store links
 
         myLinkTypes[linkName] -> AddLink(fromNode, toNode);
 
@@ -158,10 +166,13 @@ int EgDataNodesType::AddArrowLink(QString linkName, EgDataNodeIDtype fromNode, E
     }
     else
     {
-        qDebug() << metaInfo.typeName << " - not found data node for ID = " << fromNode << " or " << toType.metaInfo.typeName << " " <<  toNode << FN;
+        qDebug() << metaInfo.typeName << " : not found data node for ID = " << fromNode << " or " << toType.metaInfo.typeName << " " <<  toNode << FN;
         return -1;
     }
 }
+
+
+
 
 /*
 EgDataNodesType& EgDataNodesType::operator << (EgDataNode& d_obj)

@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Projects</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="sizePolicy">
@@ -38,7 +38,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Add</string>
+         <string>Func Blocks</string>
         </property>
        </widget>
       </item>
@@ -51,7 +51,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Add form</string>
+         <string>Add</string>
         </property>
        </widget>
       </item>
@@ -90,7 +90,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Init ID</string>
+         <string>Init egDB</string>
         </property>
        </widget>
       </item>

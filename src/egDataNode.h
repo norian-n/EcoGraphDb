@@ -17,27 +17,39 @@ public:
       EgDataNode* dataNodePtr;
 };
 
+struct EgExtendedLinkType
+{
+      EgDataNodeIDtype dataNodeID;
+      EgDataNode* dataNodePtr;
+};
+
+class EgDataNodeLinks           // Data Object Instance 1
+{
+public:
+
+  QHash <QString, QList<EgExtendedLinkType> > inLinks;
+  QHash <QString, QList<EgExtendedLinkType> > outLinks;
+};
 
 class EgDataNode           // Data Object Instance 1
 {
 public:
 
-  EgDataNodeIDtype dataNodeID;
-  quint64 dataFileOffset;
+    EgDataNodeIDtype dataNodeID;
+    quint64 dataFileOffset;
 
   bool isAdded;                         // new data node
 
-  EgDataNodeTypeMetaInfo* metaInfo;     // data type info
+  EgDataNodeTypeMetaInfo* metaInfo;     // data type metainfo backlink
+
+  EgDataNodeLinks* nodeLinks;           // links to other nodes if required
 
   QList<QVariant> dataFields;           // data itself
 
-  // QHash <QString, QList<EgDataNode*> > inLinks;
-  // QHash <QString, QList<EgDataNode*> > outLinks;
-
-  EgDataNode(): isAdded(false), metaInfo(NULL) {}
+  EgDataNode(): isAdded(false), metaInfo(NULL), nodeLinks(NULL) {}
   EgDataNode(EgDataNodeTypeMetaInfo& a_metaInfo);
 
-  ~EgDataNode() {}
+  ~EgDataNode() { if (nodeLinks) delete nodeLinks; }
 
   void clear();
 

@@ -133,10 +133,10 @@ void MainWindow::on_addProjectButton_clicked()
     if (! project_form)
         InitProjectForm();
 
-    project_form->project_id = 0;
+    project_form-> project_id = 0;
 
-    project_form->openProject();
-    project_form->show();
+    project_form-> openProject();
+    project_form-> show();
 }
 
 void MainWindow::on_editProjectButton_clicked()
@@ -146,8 +146,8 @@ void MainWindow::on_editProjectButton_clicked()
 
     project_form->project_id = model->item(Projects.GUI.model_current_row,0)->data(data_id).toInt();
 
-    project_form->openProject();
-    project_form->show();
+    project_form-> openProject();
+    project_form-> show();
 }
 
 void MainWindow::on_saveButton_clicked()
@@ -200,11 +200,13 @@ void MainWindow::refreshView()
 
 void MainWindow::on_addButton_clicked()
 {
+    /*
     QList<QVariant> new_fields;
     QList<QStandardItem *> items;
         // clear and assign
     for (int k = 0; k < Projects.FieldsCount(); k++)
         new_fields << QVariant();
+        */
 
     /*Projects.AddNewData(new_fields);
     Projects.StoreData();
@@ -212,7 +214,19 @@ void MainWindow::on_addButton_clicked()
     refreshView();
     */
 
-    Projects.GUI.AddRowOfModel(model, items);
+    // Projects.GUI.AddRowOfModel(model, items);
+
+
+    if (! funcblocks_form)
+        funcblocks_form = new FuncBlocksForm();
+
+    if (model-> item(Projects.GUI.model_current_row,0))
+    {
+        funcblocks_form-> project_id = model-> item(Projects.GUI.model_current_row,0)-> data(data_id).toInt();;
+        // funcblocks_form->initFuncBlocks();
+        funcblocks_form-> show();
+    }
+
 }
 
 void MainWindow::on_deleteButton_clicked()

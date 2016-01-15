@@ -25,16 +25,19 @@ FuncBlocksForm::FuncBlocksForm(QWidget *parent)
     ui->treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->treeView->setSelectionMode(QAbstractItemView::SingleSelection);
     // ui->treeView->setExpandsOnDoubleClick(true);
-
+/*
     Funcblocks.Connect(graphDB, "funcblocks_data");
     // Funcblocks.parent_field = QString("parent");
-    Funcblocks.LoadData();
+    Funcblocks.LoadAllData();
 
         // ref obj classes
     Statuses.Connect(graphDB, "status_data");
     Statuses.LoadData();
     Owners.Connect(graphDB, "owner_data");
     Owners.LoadData();
+
+    */
+
     /*
         // datalinks:  status - create and set autolink
     FuncblockStatusLink = new LinkData(&Funcblocks, &Statuses); // create link
@@ -49,13 +52,16 @@ FuncBlocksForm::FuncBlocksForm(QWidget *parent)
     QList<LinkData*> autolinks_list;
     autolinks_list << FuncblockStatusLink << FuncblockOwnerLink;
     */
+    /*
     Funcblocks.GUI.AddAutoSubstitute("status", Statuses, "status");
     Funcblocks.GUI.AddAutoSubstitute("owner",  Owners,   "login");
 
     Funcblocks.GUI.DataToModelTree(model); //, autolinks_list);
+    */
         // attach model
     ui->treeView->setModel(model);
-    Funcblocks.GUI.SetViewWidths(ui->treeView);
+
+    // Funcblocks.GUI.SetViewWidths(ui->treeView);
 
     ui->treeView->expandAll();
 }
