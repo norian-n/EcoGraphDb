@@ -465,3 +465,11 @@ int EgDataNodesType::LoadLink(QString linkName)
 
     return 0;
 }
+
+int EgDataNodesType::AddEntryNode(EgDataNodeIDtype entryNodeID)
+{
+    if (dataNodes.contains(entryNodeID))
+        return entryNodesInst.AddEntryNode(dataNodes[entryNodeID]);
+    else
+        return -1;
+}

@@ -259,9 +259,10 @@ void MainWindow::FillTestData()
     QList<QVariant> ins_values;
 
     graphDB.CreateNodeType("statuses");
-    graphDB.AddDataField("status");
-    graphDB.CommitNodeType();
 
+    graphDB.AddDataField("status");
+
+    graphDB.CommitNodeType();
 
     Statuses.Connect(graphDB, "statuses");
 
@@ -274,9 +275,11 @@ void MainWindow::FillTestData()
     Statuses.StoreData();
 
     graphDB.CreateNodeType("owners");
+
     graphDB.AddDataField("login");
     graphDB.AddDataField("name");
     graphDB.AddDataField("mail");
+
     graphDB.CommitNodeType();
 
     Owners.Connect(graphDB, "owners");

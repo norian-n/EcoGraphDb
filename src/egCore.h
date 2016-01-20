@@ -21,11 +21,11 @@
 #define LOCAL NULL          // alias : use local files, not server link
 
     // local files : index size
-const quint64 IndexRecSize2 = 4 + 8; // bytes : ID (4) + pos (8)
+// const quint64 IndexRecSize2 = 4 + 8; // bytes : ID (4) + pos (8)
 
     // indexed flag alias
 const bool IsIndexed = true;
-const qint16 primIndex = -1; // primary index alias for indexes proc
+// const qint16 primIndex = -1; // primary index alias for indexes proc
 
     // ID and other types
 typedef quint32 EgDataNodesTypeID;    // data object class ID type
@@ -41,7 +41,7 @@ typedef int (*FilterCallbackType) (QList<QVariant>& obj_fields_values, QList<QVa
 // filter callback type (remote filter could be set via Qt plugins)
 typedef int (*FilterCallbackType2) (EgDataNode& data_object, QList<QVariant>& filter_values);
 // sample: int FilterTest (DataObj& data_object, QList<QVariant>& filter_values)
-
+/*
 enum DataFieldType  // supported Data Field types
 {
     d_var,      // QVariant
@@ -55,6 +55,7 @@ enum DataFieldType  // supported Data Field types
     d_datetime, // converted to qint64 as superposition of d_date and d_time
     d_attribute // named atttribute - struct NamedAttribute below
 };
+*/
     // fixed field sizes and names directly related to DataFieldType (!!!) (0-variable size) CHECKME obsolete ?
 // const rec_size_type d_type_sizes[9] = {0,4,4,4,0,sizeof(obj_id_type),8,4,8};
 const char* const dtype_names[9] = {"d_var", "d_int32", "d_float", "d_date", "d_string", "d_link", "d_double", "d_time", "d_datetime"};

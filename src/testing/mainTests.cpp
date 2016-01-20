@@ -80,6 +80,8 @@ int main() // int argc, char *argv[])
 
     res = res && egDbTests.testEgLinksBasics(testEgDataNodesType);
 
+    res = res && egDbTests.testEgEntryNodes(testEgDataNodesType);
+
 
     if (res)
         qDebug() << "\nAll tests PASSED\n";

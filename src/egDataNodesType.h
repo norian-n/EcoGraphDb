@@ -7,6 +7,7 @@
 #include "indexes/egIndexConditions.h"
 #include "egDataNodesGUIconnect.h"
 #include "egDataNodesLink.h"
+#include "egEntryNodes.h"
 
 class EgDataClient;     // server connection functionality
 // class EgDataNodesLinkType;
@@ -28,18 +29,20 @@ public:
 
   EgDataNodeTypeMetaInfo metaInfo;
 
-  QMap <QString, EgDataNodesLinkType*>  myLinkTypes;
+  EgEntryNodes entryNodesInst;
 
-  QMap <QString, QMultiMap <EgDataNodeIDtype, EgLoadedLinkType> > inLinks;
-  QMap <QString, QMultiMap <EgDataNodeIDtype, EgLoadedLinkType> > outLinks;
+  // QMap <QString, QMultiMap <EgDataNodeIDtype, EgLoadedLinkType> > inLinks;
+  // QMap <QString, QMultiMap <EgDataNodeIDtype, EgLoadedLinkType> > outLinks;
 
   EgDataNodesGUIconnect GUI;
 
   EgDataNode notFound;             // dummy node
 
+  QMap <QString, EgDataNodesLinkType*>  myLinkTypes;
+
   QMap <EgDataNodeIDtype, EgDataNode>   dataNodes;
 
-  QMap <EgDataNodeIDtype, EgDataNode>   deletedDataNodes;
+  QMap <EgDataNodeIDtype, EgDataNode>   deletedDataNodes; // TODO process entryNodes on delete
   QMap <EgDataNodeIDtype, EgDataNode*>  addedDataNodes;
   QMap <EgDataNodeIDtype, EgDataNode*>  updatedDataNodes;
 
@@ -91,6 +94,8 @@ public:
 
   int StoreLink(QString linkName);
   int LoadLink(QString linkName);
+
+  int AddEntryNode(EgDataNodeIDtype entryNodeID);
 
 private:    // no copy constructors
   EgDataNodesType(const EgDataNodesType&);

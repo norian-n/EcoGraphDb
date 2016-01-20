@@ -29,6 +29,8 @@ public:
 
     bool testEgLinksBasics(EgDataNodesType& testDataNodes);
 
+    bool testEgEntryNodes(EgDataNodesType& testDataNodes);
+
     void testShowResult(bool res, const QString &theMessage)
     {
         if (res)

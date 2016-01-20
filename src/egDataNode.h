@@ -9,13 +9,14 @@
 #include "egCore.h"
 
 class EgDataNodeTypeMetaInfo;
-
+/*
 class EgLoadedLinkType
 {
 public:
       EgDataNodeIDtype dataNodeID;
       EgDataNode* dataNodePtr;
 };
+*/
 
 struct EgExtendedLinkType
 {

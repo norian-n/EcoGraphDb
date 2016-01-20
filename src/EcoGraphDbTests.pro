@@ -30,9 +30,11 @@ SOURCES += \
     indexes/egIndexesFiles.cpp \
     indexes/egIndexConditions.cpp \
     indexes/egFingers.cpp \
-    indexes/egIndexes.cpp
+    indexes/egIndexes.cpp \
+    egEntryNodes.cpp
 
 HEADERS += \
     testing/egIndexesTests.h \
     testing/egGraphDatabaseTests.h \
-    indexes/egIndexesFiles.h
+    indexes/egIndexesFiles.h \
+    egEntryNodes.h
