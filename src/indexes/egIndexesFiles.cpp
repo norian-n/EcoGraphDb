@@ -76,12 +76,18 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_EQ(QSet<quint64>& in
 {
     int res = 0;
 
-    OpenIndexFilesToRead();
+    res = OpenIndexFilesToRead();
+
+    if (res)
+        return res;
 
     indexChunks.theKey   = Key;
 
     if (fingersTree.FindIndexChunkFirst(true) < -1)
         res = -1;
+
+    qDebug() << "filename: " << IndexFileName << " ,key: " << hex << (int) indexChunks.theKey << ", offset: " << hex << (int) indexChunks.indexesChunkOffset << FN;
+
 
     if (! res)
         indexChunks.LoadDataByChunkEqual(index_offsets);
@@ -98,7 +104,10 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GE(QSet<quint64>& in
 
     // qDebug() << "File name " << IndexFileName << FN;
 
-    OpenIndexFilesToRead();
+    res = OpenIndexFilesToRead();
+
+    if (res)
+        return res;
 
     indexChunks.theKey   = Key;
 
@@ -120,7 +129,10 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GT(QSet<quint64>& in
 {
     int res = 0;
 
-    OpenIndexFilesToRead();
+    res = OpenIndexFilesToRead();
+
+    if (res)
+        return res;
 
     indexChunks.theKey = Key;
 
@@ -139,7 +151,10 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LE(QSet<quint64>& in
 {
     int res = 0;
 
-    OpenIndexFilesToRead();
+    res = OpenIndexFilesToRead();
+
+    if (res)
+        return res;
 
     indexChunks.theKey   = Key;
 
@@ -158,7 +173,10 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LT(QSet<quint64>& in
 {
     int res = 0;
 
-    OpenIndexFilesToRead();
+    res = OpenIndexFilesToRead();
+
+    if (res)
+        return res;
 
     indexChunks.theKey = Key;
 

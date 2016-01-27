@@ -26,7 +26,8 @@ SOURCES += main.cpp \
     ../../egDataNodesLink.cpp \
     ../../indexes/egIndexesFiles.cpp \
     ../../indexes/egIndexes.cpp \
-    ../../indexes/egFingers.cpp
+    ../../indexes/egFingers.cpp \
+    ../../egEntryNodes.cpp
 
 
 HEADERS += mainwindow.h \

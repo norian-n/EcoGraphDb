@@ -8,6 +8,7 @@
 
 
 #include "egCore.h"
+#include "indexes/egIndexesFiles.h"
 
 class EgGraphDatabase;
 
@@ -25,7 +26,9 @@ public:
     // EgDataNodesType* firstNodesType;
     // EgDataNodesType* secondNodesType;
 
-    EgGraphDatabase* egDatabase;
+    EgGraphDatabase* egDatabase;            // backlink to db
+
+    EgIndexFiles<qint32>* fwdIndexFiles;    // forward links index
 
     QString linkName;           // link file name
 
@@ -37,8 +40,8 @@ public:
 
     QMultiMap<EgDataNodeIDtype, EgDataNodeIDtype>  loadedLinks;
 
-    EgDataNodesLinkType() {}
-    ~EgDataNodesLinkType() {}
+    EgDataNodesLinkType(): fwdIndexFiles(NULL) {}
+    ~EgDataNodesLinkType() { if (fwdIndexFiles) delete fwdIndexFiles; }
 
 
 
@@ -48,10 +51,10 @@ public:
     // int PrintLinks();        // debug dump
 
     int LoadLinks();            // load data links from file or server
-
     int StoreLinks();           // save data links to file or server
-
     int ResolveLinks();         // move loaded links to data nodes if loaded
+
+    int LoadLinkedNodes(QSet<quint64>& IndexOffsets, EgDataNodeIDtype fromNodeID);
 
 };
 

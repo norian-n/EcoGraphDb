@@ -15,6 +15,12 @@ namespace EgDataNodesGUInamespace
 
 class EgDataNodesType;
 
+struct TreeBuildNodeType
+{
+    EgDataNode* dataNode;
+    QStandardItem* modelItem;
+};
+
 class EgBasicControlDesc
 {
 public:
@@ -67,7 +73,8 @@ public:
   int DataFromModel(QStandardItemModel* model);     // get data from model
   void DataToModel(QStandardItemModel* model);       // pump data to model
 
-  int DataToModelTree(QStandardItemModel* model);   // pump to model with tree support
+  inline QStandardItem *AddNodeToModelTree(QStandardItem* parentItem, EgDataNode* dataNode);
+  int DataToModelTree(QStandardItemModel* model, QString linkName);   // pump to model with tree support
 
     // mark data in model
   int AddRowOfModel(QStandardItemModel* model, QList<QStandardItem *> & items); // add new row

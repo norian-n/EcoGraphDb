@@ -484,13 +484,24 @@ template <typename KeyType> int EgIndexes<KeyType>::FindPosByKeyFirst(QDataStrea
 
         // min/max lookup
     if (theKey >  fingersTree-> currentFinger.maxKey)
+    {
+        qDebug() << "ERROR bad finger for Key = " << theKey << FN;
+
+        fingersTree->PrintFingerInfo(fingersTree-> currentFinger, "currentFinger");
         return -1; // error
+    }
 
     if (theKey <= fingersTree-> currentFinger.minKey)
         return 0; // got it
 
         // proportional index lookup
-    indexPosition = (theKey - fingersTree-> currentFinger.minKey)*(fingersTree-> currentFinger.itemsCount - 1)/(fingersTree-> currentFinger.maxKey - fingersTree-> currentFinger.minKey);
+    if ((fingersTree-> currentFinger.maxKey > fingersTree-> currentFinger.minKey) && (theKey > fingersTree-> currentFinger.minKey))
+        indexPosition = (theKey - fingersTree-> currentFinger.minKey)*(fingersTree-> currentFinger.itemsCount - 1)/(fingersTree-> currentFinger.maxKey - fingersTree-> currentFinger.minKey);
+    else
+        indexPosition = 0;
+
+    // qDebug() << "indexPosition =  " << indexPosition << FN;
+
 
         // load proposed key
     localIndexesStream.device()->seek(indexPosition*oneIndexSize);
@@ -764,6 +775,9 @@ template <typename KeyType> void EgIndexes<KeyType>::LoadDataByChunkEqual(QSet<q
         if (firstChunk)
         {
            indexPosition = FindPosByKeyFirst(localIndexStream, CompareGE);
+           if (indexPosition < 0)
+              indexPosition = 0;    // FIXME
+
            firstChunk = false;
 
            chunkCount = fingersTree-> currentFinger.itemsCount;
@@ -786,6 +800,8 @@ template <typename KeyType> void EgIndexes<KeyType>::LoadDataByChunkEqual(QSet<q
             localIndexStream.device()->seek(indexPosition*oneIndexSize);
             localIndexStream >> currentIndex;
             localIndexStream >> dataOffset;
+
+            // qDebug() << "currentIndex =  " << hex << (int) currentIndex  << " , dataOffset =  " << hex << (int) dataOffset << FN;
 
             if (currentIndex == theKey)
                 index_offsets.insert(dataOffset);
@@ -995,7 +1011,7 @@ template <typename KeyType> void EgIndexes<KeyType>::DeleteIndex()
         // TODO else error
     }
     else
-        qDebug() << "index not found " << FN;
+        qDebug() << "Indexes chunk not found " << indexFile.fileName() << " Key = " << (int) theKey << " Offset = " << oldDataOffset << FN;
 
 }
 

@@ -2,8 +2,10 @@
 #define FUNCBLOCKS_H
 
 #include "ui_funcblocks.h"
+
 #include "../../egDataNodesType.h"
 #include "../../egGraphDatabase.h"
+// #include "../../indexes/egIndexConditions.h"
 
 class FuncBlocksForm : public QWidget
 {
@@ -14,7 +16,11 @@ public:
 
     FuncBlocksForm(QWidget *parent = 0);
 
+    void loadFuncblocks();
+
 private slots:
+
+
     void addSubBlock();
     void addTopBlock();
     void editSubBlock();
@@ -29,11 +35,13 @@ private:
     DataObjects Funcblocks;
     DataObjects Statuses;
     DataObjects Owners;
-    */
+    */    
 
     EgGraphDatabase graphDB;
 
     EgDataNodesType Funcblocks;
+    EgDataNodesType Projects;
+
     EgDataNodesType Statuses;
     EgDataNodesType Owners;
 

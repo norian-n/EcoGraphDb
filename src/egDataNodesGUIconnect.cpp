@@ -250,63 +250,107 @@ void EgDataNodesGUIconnect::DataToModel(QStandardItemModel* model)
     }
 }
 
-int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model) // set to model
+inline QStandardItem* EgDataNodesGUIconnect::AddNodeToModelTree(QStandardItem* parentItem, EgDataNode* dataNode)
 {
     QList<QStandardItem*> items;
-    // QStandardItem* parentItem = model-> invisibleRootItem();
 
-        // push data nodes to model
-    model->clear();
-
-    /*
-    QMultiMap<EgDataNodeIDtype, EgDataNode*>::iterator cur_obj;
-    QList<EgSampleControlDesc>::iterator control_iter;
-    QList<QStandardItem *> items;
-    EgDataNode* data_obj;
-
-    model->clear();     // clear model
-    SetModelHeaders(model);  // fill headers
-        // load data
-    QStandardItem* parentItem = model->invisibleRootItem();
-    cur_obj = parent_map.begin();
-    while (cur_obj != parent_map.end())
+    items.clear();
+    for (QList<EgBasicControlDesc>::iterator curDesc = basicControlDescs.begin(); curDesc != basicControlDescs.end(); ++curDesc)
     {
-        data_obj = cur_obj.value();
-
-        if (data_obj->data_obj_status != is_deleted) // check if data obj was deleted
+        if (! (*curDesc).AutoSubstClass)
+            items << new QStandardItem(dataNode-> dataFields[(*curDesc).fieldIndex].toString());
+        else
         {
-                // add fields
-            items.clear();
-            control_iter = FD.control_desc_list.begin();
-            while (control_iter != FD.control_desc_list.end())
-            {
-                if (! (*control_iter).ALinkClass)
-                {
-                    // items << new QStandardItem(cur_obj.value().data_fields[(*control_iter).field_index].toString());
-                    items << new QStandardItem(data_obj->data_fields[(*control_iter).field_index].toString());
-                }
-                else
-                {
-                    items << new QStandardItem
-((*((*control_iter).ALinkClass))[data_obj->data_fields[(*control_iter).field_index].toInt()].data_fields[(*control_iter).ALinkIndex].toString());
-                }
-                control_iter++;
-            }
-
-            items[0]->setData(QVariant(data_obj->data_obj_status), data_status); // loaded data
-            items[0]->setData(QVariant(data_obj->OBJ_ID), data_id); // OBJ_ID
-
-            data_obj->modelItem = items[0];
-            if (cur_obj.key())
-                parentItem = dobj_map.find(cur_obj.key()).value().modelItem; // parent
-            else
-                parentItem = model->invisibleRootItem();    // top
-
-            parentItem->appendRow(items);
+            EgDataNodeIDtype substNodeID = dataNode-> dataFields[(*curDesc).fieldIndex].toInt();
+            items << new QStandardItem((*(*curDesc).AutoSubstClass)[substNodeID].dataFields[(*curDesc).AutoSubstFieldIndex].toString());
         }
-        cur_obj++;
     }
-    */
+
+    items[0]->setData(QVariant(is_unchanged), data_status);       // loaded data status
+    items[0]->setData(QVariant(dataNode-> dataNodeID), data_id);  // ID
+
+    parentItem-> appendRow(items);
+
+    return items[0];
+}
+
+int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model, QString linkName)
+{
+    // QList<QStandardItem*> items;
+    TreeBuildNodeType buildNode;
+    QList <TreeBuildNodeType> buildNodes;
+    // QList<EgExtendedLinkType> linkedNodes;
+
+    model->clear();    
+    SetModelHeaders(model);  // fill headers
+
+    QStandardItem* topItem = model->invisibleRootItem();
+    QStandardItem* parentItem = NULL;
+    QStandardItem* newItem = NULL;
+
+        // iterate entry nodes
+    for (QMap<EgDataNodeIDtype, EgDataNode*>::iterator Iter = dataNodesType-> entryNodesInst.entryNodes.begin(); Iter != dataNodesType-> entryNodesInst.entryNodes.end(); ++Iter)
+    {
+            // check if node loaded
+        if (! dataNodesType->dataNodes.contains(Iter.key()))
+            continue;
+
+            // add entry node
+        parentItem = topItem;
+        newItem = AddNodeToModelTree(parentItem, Iter.value());
+        parentItem = newItem;
+
+            // add out links to queue (list)
+        if (Iter.value()-> nodeLinks
+            && (! Iter.value()-> nodeLinks-> outLinks.empty()) && Iter.value()-> nodeLinks-> outLinks.contains(linkName))
+        {
+            for (QList<EgExtendedLinkType>::iterator Iter2 = Iter.value()-> nodeLinks-> outLinks[linkName].begin(); Iter2 != Iter.value()-> nodeLinks-> outLinks[linkName].end(); ++Iter2)
+            {
+                // qDebug()  << "node ID = " << (*Iter2).dataNodePtr-> dataNodeID << FN;
+
+                newItem = AddNodeToModelTree(parentItem, (*Iter2).dataNodePtr);
+
+                if ((*Iter2).dataNodePtr && (*Iter2).dataNodePtr-> nodeLinks
+                    && (! (*Iter2).dataNodePtr-> nodeLinks-> outLinks.empty()) && (*Iter2).dataNodePtr-> nodeLinks-> outLinks.contains(linkName))
+                {
+                    buildNode.dataNode = (*Iter2).dataNodePtr;
+                    buildNode.modelItem = newItem;
+
+                    buildNodes.append(buildNode);
+                }
+            }
+        }
+
+
+            // process queue (list)
+        while (! buildNodes.isEmpty())
+        {
+            buildNode = buildNodes.first();
+            buildNodes.pop_front();
+
+            // qDebug()  << "build node ID = " << buildNode.dataNode-> dataNodeID << FN;
+
+            parentItem = buildNode.modelItem;
+
+            for (QList<EgExtendedLinkType>::iterator Iter3 = buildNode.dataNode-> nodeLinks-> outLinks[linkName].begin(); Iter3 != buildNode.dataNode-> nodeLinks-> outLinks[linkName].end(); ++Iter3)
+            {
+                // qDebug()  << "node ID = " << (*Iter3).dataNodePtr-> dataNodeID << FN;
+
+                newItem = AddNodeToModelTree(parentItem, (*Iter3).dataNodePtr);
+
+                    // add next level
+                if ((*Iter3).dataNodePtr && (*Iter3).dataNodePtr-> nodeLinks
+                        && (! (*Iter3).dataNodePtr-> nodeLinks-> outLinks.empty()) && (*Iter3).dataNodePtr-> nodeLinks-> outLinks.contains(linkName)) // FIXME
+                {
+                    buildNode.dataNode = (*Iter3).dataNodePtr;
+                    buildNode.modelItem = newItem;
+
+                    buildNodes.append(buildNode);
+                }
+            }
+        }
+    }
+
     return 0;
 }
 
@@ -316,7 +360,7 @@ int EgDataNodesGUIconnect::DataFromModel(QStandardItemModel* model) // get from 
 
     if (basicControlDescs.size() != model->columnCount())
     {
-        qDebug() << FN << "ERROR: column counts of model and data node desc not match" ;
+        qDebug()  << "ERROR: column counts of model and data node desc not match" << FN;
         return -1;
     }
 

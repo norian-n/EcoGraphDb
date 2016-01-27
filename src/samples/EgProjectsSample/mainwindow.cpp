@@ -216,6 +216,27 @@ void MainWindow::on_addButton_clicked()
 
     // Projects.GUI.AddRowOfModel(model, items);
 
+/*
+    Funcblocks.Connect(graphDB, "funcblocks");
+
+    Funcblocks.LoadAllData();
+
+    Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 2);
+    Funcblocks.AddArrowLink("funcblocksTree", 2, Funcblocks, 3);
+    Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 4);
+
+    Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 1);
+    Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 2);
+    Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 3);
+
+    Funcblocks.StoreLinks();
+
+    Projects.StoreLinks();
+
+    Funcblocks.StoreLinks();
+
+*/
+
 
     if (! funcblocks_form)
         funcblocks_form = new FuncBlocksForm();
@@ -223,9 +244,10 @@ void MainWindow::on_addButton_clicked()
     if (model-> item(Projects.GUI.model_current_row,0))
     {
         funcblocks_form-> project_id = model-> item(Projects.GUI.model_current_row,0)-> data(data_id).toInt();;
-        // funcblocks_form->initFuncBlocks();
+        funcblocks_form-> loadFuncblocks();
         funcblocks_form-> show();
     }
+
 
 }
 
@@ -301,14 +323,14 @@ void MainWindow::FillTestData()
 
     graphDB.CommitNodeType();
 
+    Projects.Connect(graphDB, "projects");
+
     Projects.GUI.AddSimpleControlDesc("name",          "Project name",   120);
     Projects.GUI.AddSimpleControlDesc("status",        "Status",         90);
     Projects.GUI.AddSimpleControlDesc("owner",         "Owner",          90);
     Projects.GUI.AddSimpleControlDesc("launch_date",   "Launched",       90);
     Projects.GUI.AddSimpleControlDesc("end_date",      "Finished",       90);
     Projects.GUI.AddSimpleControlDesc("description",   "Description",    150);
-
-    Projects.Connect(graphDB, "projects");
 
         // add reordered fields by name
     ins_values.clear();
@@ -366,9 +388,70 @@ void MainWindow::FillTestData()
 
     Projects.StoreData();
 
-#undef ADD_RECORD
 
         // funcblocks
+
+    graphDB.CreateNodeType("funcblocks");
+
+    graphDB.AddDataField("name");
+/*
+    graphDB.AddDataField("status", IsIndexed);
+    graphDB.AddDataField("description");
+    graphDB.AddDataField("owner", IsIndexed);
+    graphDB.AddDataField("launch_date");
+    graphDB.AddDataField("end_date");
+    */
+
+    graphDB.CommitNodeType();
+
+        // add link type
+
+    graphDB.CreateLinksMetaInfo();
+    graphDB.AddLinkType("funcblocksTree", "funcblocks", "funcblocks");
+    graphDB.AddLinkType("projects_funcblocks", "projects", "funcblocks");
+
+    Funcblocks.Connect(graphDB, "funcblocks");
+
+    Funcblocks.GUI.AddSimpleControlDesc("name",          "Project name",   120);
+    /*
+    Funcblocks.GUI.AddSimpleControlDesc("status",        "Status",         90);
+    Funcblocks.GUI.AddSimpleControlDesc("owner",         "Owner",          90);
+    Funcblocks.GUI.AddSimpleControlDesc("launch_date",   "Launched",       90);
+    Funcblocks.GUI.AddSimpleControlDesc("end_date",      "Finished",       90);
+    Funcblocks.GUI.AddSimpleControlDesc("description",   "Description",    150);
+    */
+
+    ADD_RECORD("Test Root Funcblock 1", Funcblocks);
+    ADD_RECORD("Test Root Funcblock 2", Funcblocks);
+    ADD_RECORD("Test Root Funcblock 3", Funcblocks);
+    ADD_RECORD("Test Root Funcblock 4", Funcblocks);
+
+    Funcblocks.AddEntryNode(1);
+    // Funcblocks.AddEntryNode(2);
+    // Funcblocks.AddEntryNode(3);
+
+    Funcblocks.StoreData();
+/*
+    Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 2);
+    Funcblocks.AddArrowLink("funcblocksTree", 2, Funcblocks, 3);
+    Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 4);        
+
+    Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 1);
+    Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 2);
+    Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 3);
+
+    Funcblocks.StoreLinks();
+
+    Projects.StoreLinks();
+    */
+
+
+}
+
+// =============================================================================================
+//                              JUNKYARD
+// =============================================================================================
+
     /*
     Funcblocks.StartCreateObjdb("funcblocks");
     Funcblocks.AddFieldDesc("project",     d_link, false);
@@ -419,58 +502,11 @@ void MainWindow::FillTestData()
     Funcblocks.AddNewData(ins_values);
 
     Funcblocks.StoreData();
+
+}
+
     */
-}
 
-
-// =============================================================================================
-//                              JUNKYARD
-// =============================================================================================
-
-/*
-void MainWindow::GetServerData()
-{
-    QByteArray block;
-    QDataStream out(&block, QIODevice::WriteOnly);
-
-    QDataStream in(tcpSocket);
-    in.setVersion(QDataStream::Qt_4_0);
-
-    out << opcode_store_metaInfo.nameToOrderesc; // datadesc.h
-    tcpSocket->write(block);
-    block.clear();
-    out.device()->seek(0);
-    // int b_written =
-    out << Projects.field_count;
-    tcpSocket->write(block); // TODO : process error
-
-    if (! tcpSocket->waitForReadyRead(10000)) // up to 10 seconds
-    {
-        // process error
-      qDebug() << "GetServerData(): tcpSocket waitForReadyRead error";
-      return;
-    }
-
-    if (blockSize == 0) {
-        if (tcpSocket->bytesAvailable() < (int)sizeof(quint16))
-            return;
-
-        in >> blockSize;
-    }
-
-    if (tcpSocket->bytesAvailable() < blockSize)
-    {
-        qDebug() << "tcpSocket data size mismatch: " << tcpSocket->bytesAvailable() << " available, required " << blockSize;
-        return;
-    }
-
-    QString test_str;
-    in >> test_str;
-
-    qDebug() << "Got string: " <<  test_str;
-
-}
-*/
 
 /*
 void MainWindow::displayError(QAbstractSocket::SocketError socketError)
@@ -499,254 +535,5 @@ void MainWindow::displayError(QAbstractSocket::SocketError socketError)
 
 }
 */
-// QByteArray test_bytearray;
 
-/*
-Projects.StartCreateObjdb("projects");
-
-Projects.metaInfo.nameToOrder
-        << DFieldDesc("123", d_link)
-        << DFieldDesc(QString::fromLocal8Bit("руссиш"), d_int32);
-
-// test_bytearray << Projects.metaInfo.nameToOrder;
-// test_bytearray >> Projects.metaInfo.nameToOrder;
-
-Projects.metaInfo.nameToOrder.AddControlDesc("123", "456", ct_table_view, 0x6789);
-Projects.metaInfo.nameToOrder.AddControlDesc(QString::fromLocal8Bit("руссиш"), QString::fromLocal8Bit("руссиш label"), ct_table_view, 0x1234);
-
-// Projects.metaInfo.nameToOrder.PackControlDescs(&test_bytearray);
-// Projects.metaInfo.nameToOrder.UnpackControlDescs(&test_bytearray);
-
-Projects.FinishCreateObjdb();
-
-*/
-// Projects.Connect("projects");
-
-// Projects.PrintFieldDesc();
-
-// qDebug() << FN << test_bytearray.toHex();
-
-/*
-test_bytearray << Projects.metaInfo.nameToOrder;
-test_bytearray >> Projects.metaInfo.nameToOrder;
-
-Projects.PrintFieldDesc();
-*/
-
-/*
-QByteArray test_bytearray;
-QVariant test_variant;
-QString test_string("12345");
-QTextCodec *codec = QTextCodec::codecForName("Windows-1251");
-
-test_variant = test_string;
-test_bytearray = test_variant.toByteArray();
-test_string.clear();
-test_string = codec->toUnicode(test_bytearray);
-
- qDebug() << FN << test_bytearray.toHex();
-
-DFieldDesc my_desc("test descriptor 1", d_link);
-
-Projects.metaInfo.nameToOrder << my_desc << DFieldDesc("test descriptor 2", d_int32);
-Projects.PrintFieldDesc();
-*/
- // qDebug() << FN << codec->toUnicode(QVariant(QString("test string локальная строка")).toByteArray());
-
-// Projects.PackControlDescs(&my_packed_descs, Projects.field_desc_list);
-// Projects.ParseControlDescs(&my_packed_descs, Projects.field_desc_list);
-
-/*
-if (! funcblocks_form)
-    funcblocks_form = new FuncBlocksForm;
-// funcblocks_form->project_id = project_id;
-// funcblocks_form->initFuncBlocks();
-funcblocks_form->show();
-*/
-
-
-
-// ObjDBtest.TestAllLocal();
-
-/*
-
-void MainWindow::TestFunc()
-{
-    // qDebug() << Owners.DClassName;
-    qDebug() << FN << "Test error message";
-};
-
-    Projects.filter_values.clear();
-    Projects.filter_values << "Test 4";
-    Projects.RemoteFilterID = 3;
-
-
-QList<QVariant> test_values;
-qint32 my_value = 355;
-QString my_string("test_string");
-
-test_values << my_value << my_string;
-
-qDebug() << "Test type 0: " <<  test_values[0].typeName() << " " << (int) test_values[0].type();
-qDebug() << "Test type 1: " <<  test_values[1].typeName() << " " << (int) test_values[1].type();
-*/
-
-//Projects.connection = &test_server; // remote
-//Projects.connection = LOCAL;
-
-// Projects.CompressData();
-
-
-// Projects.GetOdbId(); // test odb_id
-// Projects.StoreFieldDesc();
-// Projects.LoadFieldDesc();
-// Projects.RemoteAppendData();
-// Projects.RemoteDeleteData();
-// Projects.RemoteUpdateData();
-// Projects.LoadData();
-
-
-/*  connect(tcpSocket, SIGNAL(connected()), this, SLOT(GetServerData()));
-  // connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(GetServerData()));
-  connect(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-          this, SLOT(displayError(QAbstractSocket::SocketError)));
-*/
-  // connect(ui->addFormButton, SIGNAL(clicked()), this, SLOT(addProject()));
-  // connect(ui->editFormButton, SIGNAL(clicked()), this, SLOT(editProject()));
-
-  // QLocale::setDefault(QLocale::Russian);
-
-  // my_database = new ObjectDatabase("test_database");
-
-
-// current_row(0)
-//cur_item(NULL)
-
-// connect(ui->saveButton, SIGNAL(clicked()), this, SLOT(on_saveButton_clicked()));
-// connect(ui->loadButton, SIGNAL(clicked()), this, SLOT(on_loadButton_clicked()));
-
-// connect(ui->tableView->commitData();
-
-/*
-void MainWindow::changeEvent(QEvent *e)
-{
-    QMainWindow::changeEvent(e);
-    switch (e->type()) {
-    case QEvent::LanguageChange:
-        ui->retranslateUi(this);
-        break;
-    default:
-        break;
-    }
-}
-*/
-
-// tcpSocket->waitForReadyWrite(1000);
-
-//block.append(14);
-//tcpSocket->write(block, 1);
-//tcpSocket->flush();
-
-// qDebug() << "Written bytes 1: " <<  b_written;
-
-/*
-if (! tcpSocket->waitForBytesWritten(10000)) // up to 10 seconds
-{
-    // process error
-  qDebug() << "GetServerData(): tcpSocket waitForBytesWritten error";
-  return;
-}
-*/
-/*
-
-// block.clear();
-// out2 << Projects.field_count;
-// b_written =
-// tcpSocket->write(block2); // TODO : process error
-
-// qDebug() << "Written bytes 2: " <<  b_written;
-*/
-
-
-/*
-    if (! tcpSocket->waitForBytesWritten(10000)) // up to 10 seconds
-    {
-        // process error
-      qDebug() << "RemoteStoreFieldDesc(): tcpSocket waitForBytesWritten error";
-      return -3;
-    }
-*/
-
-// srvSocket.read(command_buffer, 1);
-// command_id = command_buffer[0];
-
-/*   if (! srvSocket.waitForReadyRead(10000)) // wait up to 10 sec
-   {
-     // process error
-     return -2;
-   }
-
-
-   // srvSocket.read(db_id_buffer, 4);    // TODO: process error
-   // db_id = (quint32) *db_id_buffer;  // ?? check bytes order
-*/
-
-       // get database name
-
-       // get desc count
-   /*
-   if (! srvSocket.waitForReadyRead(10000)) // wait up to 10 sec
-   {
-     qDebug() << "Execute(): tcpSocket waitForReadyRead error";
-     // process error
-     return -2;
-   }
-   */
-   // srvSocket.read(desc_count_buffer, 2); // TODO: process error: int read_count = if (read_count != 2) { // process error ; return -3;}
-   // quint16 desc_count = (quint16) *desc_count_buffer;  // ?? check bytes order
-
-// char command_buffer[1];
-// char db_id_buffer[4];
-// char desc_count_buffer[2];
-
-/*
-        // smoke test
-    if (! tcpSocket.waitForReadyRead(10000)) // up to 10 seconds
-    {
-        // process error
-        qDebug() << "RemoteStoreFieldDesc(): tcpSocket waitForReadyRead error";
-        return -4;
-    }
-
-    if (tcpSocket.bytesAvailable() < (int)sizeof(quint16))
-    {
-        qDebug() << "RemoteStoreFieldDesc(): no block size bytes available";
-        return -5;
-    }
-
-    in >> blockSize;
-
-    if (tcpSocket.bytesAvailable() < blockSize)
-    {
-        qDebug() << "RemoteStoreFieldDesc: tcpSocket data size mismatch: " << tcpSocket.bytesAvailable() << " available, required " << blockSize;
-        return -6;
-    }
-
-    QString test_str;
-    in >> test_str;
-
-    qDebug() << "Got string: " <<  test_str;
-*/
-
-/*
-    if (! tcpSocket.waitForBytesWritten(10000)) // up to 10 seconds
-    {
-        // process error
-      qDebug() << "GetServerData(): tcpSocket waitForBytesWritten error";
-      return -3;
-    }
-*/
-
-// tcpSocket = new QTcpSocket(this);
-// tcpSocket.disconnectFromHost();
 

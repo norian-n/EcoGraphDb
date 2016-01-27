@@ -64,6 +64,7 @@ public:
   int LoadData();
 
   int LoadAllData();            // select *
+  int LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeID);
 
   int AddNewData(QList<QVariant>& myData);
   int AddNewData(EgDataNode& tmpObj);

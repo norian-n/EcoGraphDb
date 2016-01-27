@@ -17,7 +17,7 @@
 
     // debug info definition
 #define FN " [" << __FUNCTION__  << ", " << __FILE__ << "] "
-#define FNS " [" + QString(__FUNCTION__) + ", " + QString(__FILE__) + "] "
+#define FNS QString(" [") + __FUNCTION__ + ", " + __FILE__ + "] "
 #define LOCAL NULL          // alias : use local files, not server link
 
     // local files : index size

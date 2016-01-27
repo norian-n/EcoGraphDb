@@ -18,6 +18,9 @@ int EgEntryNodes::StoreEntryNodes(EgDataNodesType& egType)
     QFile dat_file;             // data file
     QDataStream dat;
 
+    if (entryNodes.empty())
+        return 1;
+
     dat_file.setFileName(egType.metaInfo.typeName + ".ent");
 
     if (!dat_file.open(QIODevice::WriteOnly | QIODevice::Truncate)) // WriteOnly Append | QIODevice::Truncate
@@ -56,10 +59,16 @@ int EgEntryNodes::LoadEntryNodes(EgDataNodesType& egType)
 
      dat_file.setFileName(egType.metaInfo.typeName + ".ent");
 
+     if ( ! dat_file.exists())
+     {
+         // qDebug() << FN << "file doesn't exist " << IndexFileName + ".odx";
+         return 1;
+     }
+
      if (!dat_file.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
      {
          qDebug() << "can't open file " << egType.metaInfo.typeName + ".ent" << FN;
-         return 1;
+         return -1;
      }
 
      dat.setDevice(&dat_file);

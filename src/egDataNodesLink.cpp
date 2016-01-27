@@ -24,11 +24,23 @@ int EgDataNodesLinkType::AddLink (EgDataNodeIDtype leftNodeID, EgDataNodeIDtype 
 
 int EgDataNodesLinkType::StoreLinks()
 {
+    EgDataNodesType* /*firstType, * */ secondType;
     QFile dat_file;             // data file
     QDataStream dat;
 
+    quint64 secondDataOffset;
+
     if (addedLinks.isEmpty())
         return 1;
+
+    if (! egDatabase-> connNodeTypes.contains(secondTypeName))
+    {
+        qDebug() << "NodeType not found: " << secondTypeName << FN;
+
+        return -1;
+    }
+
+    secondType = egDatabase-> connNodeTypes[secondTypeName];
 
     dat_file.setFileName(linkName + ".dln");
 
@@ -37,6 +49,11 @@ int EgDataNodesLinkType::StoreLinks()
         qDebug() << "can't open file " << linkName + ".dln" << FN;
         return -1;
     }
+        // create index
+    if (! fwdIndexFiles)
+        fwdIndexFiles = new EgIndexFiles<qint32>(linkName + "_fwd");
+
+    fwdIndexFiles-> OpenIndexFilesToUpdate();
 
     dat.setDevice(&dat_file);
 
@@ -52,16 +69,25 @@ int EgDataNodesLinkType::StoreLinks()
         dat << addIter.key();
         dat << addIter.value();
 
-            // add primary index
-        // primIndexFiles.the_index = addIter.key();
-        // primIndexFiles.AddObjToIndex();
+            // add forward index
+        if (secondType-> dataNodes.contains(addIter.value()))
+        {
+                // get second type data offset
+            secondDataOffset =   secondType-> dataNodes[addIter.value()].dataFileOffset;
+
+                // add to index first ID and second offset
+            fwdIndexFiles-> theIndex = addIter.key();
+            fwdIndexFiles-> dataOffset = secondDataOffset;
+            fwdIndexFiles-> AddObjToIndex();
+        }
+
     }
 
     addedLinks.clear();
 
     dat_file.close();
 
-    // primIndexFiles.CloseIndexFiles();
+    fwdIndexFiles-> CloseIndexFiles();
 
     return 0;
 }
@@ -136,6 +162,8 @@ int EgDataNodesLinkType::ResolveLinks()
         fromNode = Iter.key();
         toNode = Iter.value();
 
+        // qDebug() << "From Node ID = " << fromNode << " To Node ID = " << toNode << FN;
+
         /*if (firstType-> dataNodes.contains(Iter.key()))
             qDebug() << "Node ID found: " << (int) Iter.key() << FN;
 
@@ -161,7 +189,7 @@ int EgDataNodesLinkType::ResolveLinks()
             if (! secondType-> dataNodes[toNode].nodeLinks)
               secondType-> dataNodes[toNode].nodeLinks = new EgDataNodeLinks();
 
-                // write fwd link
+                // write fwd link to outLinks
             if (! firstType-> dataNodes[fromNode].nodeLinks-> outLinks.contains(linkName))
             {
                 newLinks.clear();
@@ -172,16 +200,16 @@ int EgDataNodesLinkType::ResolveLinks()
             else
                 firstType-> dataNodes[fromNode].nodeLinks-> outLinks[linkName].append(fwdLink);
 
-                // write back link
-            if (! secondType-> dataNodes[toNode].nodeLinks-> outLinks.contains(linkName))
+                // write back link to inLinks
+            if (! secondType-> dataNodes[toNode].nodeLinks-> inLinks.contains(linkName))
             {
                 newLinks.clear();
                 newLinks.append(backLink);
 
-                secondType-> dataNodes[toNode].nodeLinks-> outLinks.insert(linkName, newLinks);
+                secondType-> dataNodes[toNode].nodeLinks-> inLinks.insert(linkName, newLinks);
             }
             else
-                secondType-> dataNodes[toNode].nodeLinks-> outLinks[linkName].append(backLink);
+                secondType-> dataNodes[toNode].nodeLinks-> inLinks[linkName].append(backLink);
 
             // qDebug() << firstType->  metaInfo.typeName << "link added " << fromNode << "to" <<  toNode << FN;
         }
@@ -194,3 +222,15 @@ int EgDataNodesLinkType::ResolveLinks()
     }
     return 0;
 }
+
+int EgDataNodesLinkType::LoadLinkedNodes(QSet <quint64>& IndexOffsets, EgDataNodeIDtype fromNodeID)
+{
+    if (! fwdIndexFiles)
+        fwdIndexFiles = new EgIndexFiles<qint32>(linkName + "_fwd");
+
+    IndexOffsets.clear();
+
+    return fwdIndexFiles-> Load_EQ(IndexOffsets, fromNodeID);
+}
+
+

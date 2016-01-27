@@ -200,11 +200,45 @@ int EgDataNodesType::RemoveLocalFiles()
 int EgDataNodesType::LoadAllData()
 {
     index_tree-> clear();
-    index_tree-> AddNode(NULL, 1, 0, GE, "odb_pit", 1);
+    index_tree-> AddNode(NULL, true, false, GE, "odb_pit", 1);  // all nodes, ID >= 1
 
     return LoadData();
 }
 
+int EgDataNodesType::LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeID)
+{
+    int res = 0;
+       // clear lists
+    deletedDataNodes.clear();
+    addedDataNodes.clear();
+    updatedDataNodes.clear();
+
+        // clear objects data
+    dataNodes.clear();
+
+        // find link
+    if (! myLinkTypes.contains(linkName))
+    {
+        qDebug() << metaInfo.typeName << " : bad link name: " << linkName << FN;
+        return -1;
+    }
+
+        // load linked offsets
+    res = myLinkTypes[linkName]-> LoadLinkedNodes(IndexOffsets, fromNodeID);
+
+    if (res)
+        return res;
+
+    // qDebug() << "IndexOffsets.count() = " << IndexOffsets.count() << FN;
+
+    if (! IndexOffsets.isEmpty())
+        res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
+
+    if (! res)
+        res = entryNodesInst.LoadEntryNodes(*this);
+
+    return res;
+}
 
 int EgDataNodesType::CompressData()
 {
@@ -349,12 +383,14 @@ int EgDataNodesType::StoreData()
 
     ret_val = LocalFiles-> LocalStoreData(addedDataNodes, deletedDataNodes, updatedDataNodes);
 
+    entryNodesInst.StoreEntryNodes(*this); // FIXME check changes
+
     deletedDataNodes.clear();
     addedDataNodes.clear();
     updatedDataNodes.clear();
 
     if (ret_val)
-       qDebug() << FN << "ERROR: got non-zero error code from callee" ;
+       qDebug()  << "ERROR: got non-zero error code from callee" << FN;
 
     return  ret_val;
 }
@@ -376,6 +412,8 @@ int EgDataNodesType::LoadData()
 
     if (! IndexOffsets.isEmpty())
         res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
+
+    entryNodesInst.LoadEntryNodes(*this);
 
     index_tree-> clear();
 

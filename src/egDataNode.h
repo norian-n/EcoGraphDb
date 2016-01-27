@@ -37,25 +37,26 @@ class EgDataNode           // Data Object Instance 1
 public:
 
     EgDataNodeIDtype dataNodeID;
+
     quint64 dataFileOffset;
 
-  bool isAdded;                         // new data node
+    bool isAdded;                         // new data node
 
-  EgDataNodeTypeMetaInfo* metaInfo;     // data type metainfo backlink
+    EgDataNodeTypeMetaInfo* metaInfo;     // data type metainfo backlink
 
-  EgDataNodeLinks* nodeLinks;           // links to other nodes if required
+    EgDataNodeLinks* nodeLinks;           // links to other nodes if required
 
-  QList<QVariant> dataFields;           // data itself
+    QList<QVariant> dataFields;           // data itself
 
-  EgDataNode(): isAdded(false), metaInfo(NULL), nodeLinks(NULL) {}
-  EgDataNode(EgDataNodeTypeMetaInfo& a_metaInfo);
+    EgDataNode(): isAdded(false), metaInfo(NULL), nodeLinks(NULL) {}
+    EgDataNode(EgDataNodeTypeMetaInfo& a_metaInfo);
 
-  ~EgDataNode() { if (nodeLinks) delete nodeLinks; }
+    ~EgDataNode() { if (nodeLinks) delete nodeLinks; }
 
-  void clear();
+    void clear();
 
-  QVariant& operator [] (QString& fieldName);  // value by name 1
-  QVariant& operator [] (const char* fName);   // value by name 2
+    QVariant& operator [] (QString& fieldName);  // value by name 1
+    QVariant& operator [] (const char* fName);   // value by name 2
 
 };
 

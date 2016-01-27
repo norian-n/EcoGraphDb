@@ -2,8 +2,9 @@
 #include <QtDebug>
 
 FuncBlocksForm::FuncBlocksForm(QWidget *parent)
-    : QWidget(parent),
-    ui(new Ui::FuncBlocksForm)
+    : QWidget(parent)
+  ,  ui(new Ui::FuncBlocksForm)
+  , model (NULL)
 {
     ui->setupUi(this);
         // connect buttons
@@ -26,10 +27,16 @@ FuncBlocksForm::FuncBlocksForm(QWidget *parent)
     ui->treeView->setSelectionMode(QAbstractItemView::SingleSelection);
     // ui->treeView->setExpandsOnDoubleClick(true);
 /*
-    Funcblocks.Connect(graphDB, "funcblocks_data");
+    Funcblocks.Connect(graphDB, "funcblocks");
     // Funcblocks.parent_field = QString("parent");
     Funcblocks.LoadAllData();
 
+    Funcblocks.LoadLinkedData("projects_funcblocks", project_id);
+
+    Funcblocks.LoadLinks();
+    */
+
+/*
         // ref obj classes
     Statuses.Connect(graphDB, "status_data");
     Statuses.LoadData();
@@ -46,7 +53,7 @@ FuncBlocksForm::FuncBlocksForm(QWidget *parent)
     FuncblockOwnerLink = new LinkData(&Funcblocks, &Owners); // create link
     FuncblockOwnerLink->SetAutoLinkFields(Funcblocks.FD["owner"],Owners.FD["login"]); // set autolink
     */
-    model = new QStandardItemModel(0, Funcblocks.ModelFieldsCount());
+
 
     /*
     QList<LinkData*> autolinks_list;
@@ -56,8 +63,58 @@ FuncBlocksForm::FuncBlocksForm(QWidget *parent)
     Funcblocks.GUI.AddAutoSubstitute("status", Statuses, "status");
     Funcblocks.GUI.AddAutoSubstitute("owner",  Owners,   "login");
 
-    Funcblocks.GUI.DataToModelTree(model); //, autolinks_list);
+
     */
+
+    /*
+    model = new QStandardItemModel(0, Funcblocks.ModelFieldsCount());
+
+    Funcblocks.GUI.DataToModelTree(model, "funcblocksTree");
+        // attach model
+    ui->treeView->setModel(model);
+
+    // Funcblocks.GUI.SetViewWidths(ui->treeView);
+
+    ui->treeView->expandAll();
+    */
+
+    Funcblocks.Connect(graphDB, "funcblocks");
+    Projects.Connect(graphDB, "projects");
+
+    if (! model)
+        model = new QStandardItemModel(0, Funcblocks.ModelFieldsCount());
+}
+
+
+void FuncBlocksForm::loadFuncblocks()
+{
+    // IC RootCond = IC(Projects, "odb_pit", EQ, project_id);
+
+    Projects.index_tree-> clear();
+    Projects.index_tree-> AddNode(NULL, true, false, EQ, "odb_pit", project_id);  // FIXME STUB
+
+    // Funcblocks.Connect(graphDB, "funcblocks");
+    // Projects.Connect(graphDB, "projects");
+
+    Projects.LoadData();
+
+
+    // Funcblocks.LoadAllData(); // STUB
+
+    // Projects.LoadLinks();
+
+    Funcblocks.LoadLinkedData("projects_funcblocks", project_id);
+    Funcblocks.LoadLinks();
+/*
+    qDebug() << "project ID = " << project_id << FN;
+    qDebug() << "projects count = " << Projects.dataNodes.count() << FN;
+    qDebug() << "funcblocks count = " << Funcblocks.dataNodes.count() << FN;
+    */
+
+
+
+    Funcblocks.GUI.DataToModelTree(model, "funcblocksTree");
+
         // attach model
     ui->treeView->setModel(model);
 
@@ -65,7 +122,6 @@ FuncBlocksForm::FuncBlocksForm(QWidget *parent)
 
     ui->treeView->expandAll();
 }
-
 
 void FuncBlocksForm::addSubBlock()
 {
