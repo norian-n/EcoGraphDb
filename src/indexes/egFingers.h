@@ -58,8 +58,8 @@ public:
     EgFingers():
         //  rootHeaderSize(sizeof(KeyType) * 2 + sizeof(egIndexes3Namespace::fingersLevelType) + sizeof(egIndexes3Namespace::keysCountType) + sizeof(quint64))
         // ,fingersHeaderSize(sizeof(KeyType) * 2 + sizeof(egIndexes3Namespace::fingersCountType) + sizeof(egIndexes3Namespace::fingersLevelType))
-         oneFingerSize(sizeof(KeyType) * 2 + sizeof(keysCountType) + sizeof(quint64))
-        ,fingersChunkSize(/*fingersHeaderSize + */(egIndexes3Namespace::egChunkVolume * oneFingerSize) + sizeof(quint64)) // parent chunk offset
+         oneFingerSize(sizeof(KeyType) * 2 + sizeof(keysCountType) + sizeof(quint64)) // next chunk offset
+        ,fingersChunkSize(/*fingersHeaderSize + */(egIndexes3Namespace::egChunkVolume * oneFingerSize) + sizeof(quint64) + sizeof(keysCountType)) // parent chunk offset, level
 
         ,fingersChunk(new char[fingersChunkSize])
         ,zeroFingersChunk(new char[fingersChunkSize])
@@ -112,11 +112,12 @@ public:
 
     int AppendFingersChunk(QDataStream &localFingersStream);
 
-    int FindIndexChunkFirst(bool isExact); // CompareFunctionType myCompareFunc
-    int FindNextLevelOffsetFirst(bool isExact);
+    int FindIndexChunkFirst(bool isExactEqual); // CompareFunctionType myCompareFunc
+    int FindNextLevelOffsetFirst(QDataStream &localFingersStream, bool isExactEqual);
 
     int FindIndexChunkLast(bool isExact); // CompareFunctionType myCompareFunc
     int FindNextLevelOffsetLast(bool isExact);
+    int FindNextLevelOffsetLast2(QDataStream &localFingersStream, bool isExactEqual);
 
     int StoreParentOffset(quint64 fingersChunkOffset, quint64 parentFingerOffset);
 

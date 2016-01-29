@@ -35,7 +35,7 @@ int main() // int argc, char *argv[])
     cleanUpFiles();
 
         // indexes standalone
-/*
+
     EgIndexFiles<qint32> testIndexFiles("IndexesTests");
     EgIndexesTests<qint32> indexTests;
 
@@ -49,7 +49,7 @@ int main() // int argc, char *argv[])
 
     return 0; // FIXME STUB
 
-    */
+
 
         // meta info standalone
     // EgDataNodeTypeMetaInfo egDataNodeTypeMetaInfo("MetaTest");

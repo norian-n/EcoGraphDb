@@ -220,140 +220,265 @@ template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetToInsert(
 }
 
 
-template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetFirst(bool isExact)
+template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetFirst(QDataStream &localFingersStream, bool isExactEqual)
 {
-    egFinger<KeyType> localFingers[2];
-
-    int activeFinger = 0;
-    int direction = 0;
-
-    int emergencyCounter = 0;
+    int fingerPosition;
+    egFinger<KeyType> secondFinger;
 
     if (parentFinger.itemsCount == 0)  // no fingers
         return -2;
 
-    QDataStream localFingersStream(&fingersBA, QIODevice::ReadWrite);
-    memcpy(fingersBA.data(), fingersChunk, fingersChunkSize);
-
-    if (indexChunks-> theKey > parentFinger.maxKey) // out of range
-    {
-        currentFinger.myOffset = (parentFinger.itemsCount-1)*oneFingerSize;
-        ReadFinger(localFingersStream, currentFinger);
-
-        return -1;
-    }
-    else if ((indexChunks-> theKey < parentFinger.minKey) || (parentFinger.itemsCount == 1)) // out of range or the one
+    if ((indexChunks-> theKey < parentFinger.minKey) || (parentFinger.itemsCount == 1)) // out of range or only one
     {
         currentFinger.myOffset = 0;
         ReadFinger(localFingersStream, currentFinger);
-        return -1;
+
+        if (indexChunks-> theKey < parentFinger.minKey) // out of range
+            return 1;
+
+        return 0;
     }
 
     // FIXME - write tests
 
     // PrintFingerInfo(parentFinger, "parentFinger " + FNS);
         // proportional finger lookup
-    int posToInsert = (indexChunks-> theKey - parentFinger.minKey)*(parentFinger.itemsCount)/(parentFinger.maxKey - parentFinger.minKey);
+
+    if (parentFinger.maxKey > parentFinger.minKey)
+        fingerPosition = (indexChunks-> theKey - parentFinger.minKey)*(parentFinger.itemsCount - 1)/(parentFinger.maxKey - parentFinger.minKey);
+    else // parentFinger.maxKey == parentFinger.minKey
+    {
+        currentFinger.myOffset = 0;
+        ReadFinger(localFingersStream, currentFinger);
+
+        return 0;
+    }
+
+    currentFinger.myOffset = fingerPosition*oneFingerSize;
+    ReadFinger(localFingersStream, currentFinger);
+
+    if (isExactEqual)
+    do
+    {
+        if (indexChunks-> theKey > currentFinger.maxKey)
+        {
+            fingerPosition ++;
+
+            if (fingerPosition < (parentFinger.itemsCount - 1))
+            {
+                currentFinger.myOffset = fingerPosition*oneFingerSize;
+                ReadFinger(localFingersStream, currentFinger);
+            }
+        }
+        else
+        {
+            if (indexChunks-> theKey > currentFinger.minKey)
+            {
+                // PrintFingerInfo(currentFinger, "currentFinger (equal) found " + FNS);
+                return 0;
+            }
+            else
+            {
+                if (fingerPosition > 0)
+                {
+                    secondFinger.myOffset = (fingerPosition+1)*oneFingerSize;
+                    ReadFinger(localFingersStream, secondFinger);
+
+                    if (indexChunks-> theKey > secondFinger.maxKey) // finger found
+                    {
+                        return 1;   // between fingers
+                    }
+                    else
+                    {
+                        fingerPosition --;
+
+                        currentFinger = secondFinger;
+                    }
+                }
+            }
+        }
+    }
+    while ((fingerPosition > 0) && (fingerPosition < (parentFinger.itemsCount - 1)) /*&& (emergencyCounter < (parentFinger.itemsCount + 1))*/);
+
+    else    // ! isExactEqual
 
     do
     {
-        localFingers[activeFinger].myOffset = posToInsert*oneFingerSize;
-        ReadFinger(localFingersStream, localFingers[activeFinger]);
-
-        // PrintFingerInfo(localFingers[activeFinger], "localFingers[activeFinger] " + FNS);
-        // qDebug() << "posToInsert = " << posToInsert << "theKey = " << hex << indexChunks-> theKey << FN; //  << "localFingers[activeFinger].minKey = " << hex << localFingers[activeFinger].minKey << FN;
-        // qDebug() << "condition = "  << (indexChunks-> theKey <= localFingers[activeFinger].maxKey) <<  " " << (indexChunks-> theKey > localFingers[activeFinger].minKey) << FN;
-
-        if ((indexChunks-> theKey < localFingers[activeFinger].maxKey) && (indexChunks-> theKey > localFingers[activeFinger].minKey)) // finger found
+        if (indexChunks-> theKey >= currentFinger.maxKey)
         {
-            currentFinger = localFingers[activeFinger];
-            currentFinger.myOffset = posToInsert*oneFingerSize;
+            fingerPosition ++;
 
-            // PrintFingerInfo(currentFinger, "currentFinger 2 " + FNS);
-
-            return 0;
-        }
-
-        if (isExact && (indexChunks-> theKey == localFingers[activeFinger].maxKey) && (indexChunks-> theKey > localFingers[activeFinger].minKey)) // exact match
-        {
-            currentFinger = localFingers[activeFinger];
-            currentFinger.myOffset = posToInsert*oneFingerSize;
-
-            // PrintFingerInfo(currentFinger, "currentFinger 2 " + FNS);
-
-            return 0;
-        }
-
-        if ((direction < 0) && (indexChunks-> theKey < localFingers[!activeFinger].minKey) && (indexChunks-> theKey > localFingers[activeFinger].maxKey))
-        {
-            currentFinger = localFingers[!activeFinger];
-            currentFinger.myOffset = (posToInsert+1)*oneFingerSize;
-            return 1; // key between fingers
-        }
-
-        if ((direction > 0) && (indexChunks-> theKey < localFingers[activeFinger].minKey) && (indexChunks-> theKey > localFingers[!activeFinger].maxKey))
-        {
-            currentFinger = localFingers[activeFinger];
-            currentFinger.myOffset = posToInsert*oneFingerSize;
-            return 1; // key between fingers
-        }
-            // ???
-        if ((direction < 0) && (indexChunks-> theKey > localFingers[activeFinger].maxKey) && (indexChunks-> theKey == localFingers[!activeFinger].minKey))
-        {
-            currentFinger = localFingers[!activeFinger];
-            currentFinger.myOffset = (posToInsert+1)*oneFingerSize;
-
-            // PrintFingerInfo(currentFinger, "currentFinger 2 " + FNS);
-
-            return 0;
-        }
-
-        if ((indexChunks-> theKey > localFingers[activeFinger].maxKey) && (posToInsert < (parentFinger.itemsCount-1)))
-        {
-            posToInsert++;
-            direction = 1;
+            if (fingerPosition < (parentFinger.itemsCount - 1))
+            {
+                currentFinger.myOffset = fingerPosition*oneFingerSize;
+                ReadFinger(localFingersStream, currentFinger);
+            }
         }
         else
         {
-            posToInsert--;
-            direction = -1;
+            if (indexChunks-> theKey >= currentFinger.minKey)
+            {
+                // PrintFingerInfo(currentFinger, "currentFinger (not equal) found " + FNS);
+                return 0;
+            }
+            else
+            {
+                if (fingerPosition > 0)
+                {
+                    secondFinger.myOffset = (fingerPosition+1)*oneFingerSize;
+                    ReadFinger(localFingersStream, secondFinger);
+
+                    if (indexChunks-> theKey >= secondFinger.maxKey) // finger found
+                    {
+                        return 0;
+                    }
+                    else
+                    {
+                        fingerPosition --;
+                        currentFinger = secondFinger;
+                    }
+                }
+            }
         }
-
-        // qDebug() << "posToInsert = " << posToInsert << "direction = " << direction << FN;
-
-        if (posToInsert >= (parentFinger.itemsCount-1)) // take last one
-        {
-            currentFinger.myOffset = (parentFinger.itemsCount-1)*oneFingerSize;
-            ReadFinger(localFingersStream, currentFinger);
-
-            return 0;
-        }
-
-        if (posToInsert < 0) // take first one
-        {
-            currentFinger.myOffset = 0;
-            ReadFinger(localFingersStream, currentFinger);
-
-            return 0;
-        }
-
-            // swap
-        if (activeFinger == 0)
-        {
-            localFingers[1] = localFingers[0];
-            activeFinger = 1;
-        }
-        else
-        {
-            localFingers[0] = localFingers[1];
-            activeFinger = 0;
-        }
-
-        emergencyCounter++;
     }
-    while (emergencyCounter < (parentFinger.itemsCount + 1));
+    while ((fingerPosition > 0) && (fingerPosition < (parentFinger.itemsCount - 1)) /*&& (emergencyCounter < (parentFinger.itemsCount + 1))*/);
 
-    return -3; // emergency counter overflow
+    currentFinger.myOffset = fingerPosition*oneFingerSize;
+    ReadFinger(localFingersStream, currentFinger);
+
+    return 0;
+}
+
+
+template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetLast2(QDataStream &localFingersStream, bool isExactEqual)
+{
+    int fingerPosition;
+    egFinger<KeyType> secondFinger;
+
+    if (parentFinger.itemsCount == 0)  // no fingers
+        return -2;
+
+    if ((indexChunks-> theKey > parentFinger.maxKey) || (parentFinger.itemsCount == 1)) // out of range or only one
+    {
+        currentFinger.myOffset = (parentFinger.itemsCount - 1)*oneFingerSize;
+        ReadFinger(localFingersStream, currentFinger);
+
+        if (indexChunks-> theKey > parentFinger.maxKey) // out of range
+            return 1;
+
+        return 0;
+    }
+
+    // FIXME - write tests
+
+    // PrintFingerInfo(parentFinger, "parentFinger " + FNS);
+
+
+        // proportional finger lookup
+
+    if (parentFinger.maxKey > parentFinger.minKey)
+        fingerPosition = (indexChunks-> theKey - parentFinger.minKey)*(parentFinger.itemsCount - 1)/(parentFinger.maxKey - parentFinger.minKey);
+    else // parentFinger.maxKey == parentFinger.minKey
+    {
+        currentFinger.myOffset = (parentFinger.itemsCount - 1)*oneFingerSize;
+        ReadFinger(localFingersStream, currentFinger);
+
+        return 0;
+    }
+
+    currentFinger.myOffset = fingerPosition*oneFingerSize;
+    ReadFinger(localFingersStream, currentFinger);
+
+    if (isExactEqual)
+    do
+    {
+        if (indexChunks-> theKey > currentFinger.maxKey)
+        {
+            fingerPosition ++;
+
+            if (fingerPosition < (parentFinger.itemsCount - 1))
+            {
+                currentFinger.myOffset = fingerPosition*oneFingerSize;
+                ReadFinger(localFingersStream, currentFinger);
+            }
+        }
+        else
+        {
+            if (indexChunks-> theKey > currentFinger.minKey)
+            {
+                // PrintFingerInfo(currentFinger, "currentFinger (equal) found " + FNS);
+                return 0;
+            }
+            else
+            {
+                if (fingerPosition > 0)
+                {
+                    secondFinger.myOffset = (fingerPosition+1)*oneFingerSize;
+                    ReadFinger(localFingersStream, secondFinger);
+
+                    if (indexChunks-> theKey > secondFinger.maxKey) // finger found
+                    {
+                        return 1;   // between fingers
+                    }
+                    else
+                    {
+                        fingerPosition --;
+
+                        currentFinger = secondFinger;
+                    }
+                }
+            }
+        }
+    }
+    while ((fingerPosition > 0) && (fingerPosition < (parentFinger.itemsCount - 1)) /*&& (emergencyCounter < (parentFinger.itemsCount + 1))*/);
+
+    else    // ! isExactEqual
+
+    do
+    {
+        if (indexChunks-> theKey >= currentFinger.maxKey)
+        {
+            fingerPosition ++;
+
+            if (fingerPosition < (parentFinger.itemsCount - 1))
+            {
+                currentFinger.myOffset = fingerPosition*oneFingerSize;
+                ReadFinger(localFingersStream, currentFinger);
+            }
+        }
+        else
+        {
+            if (indexChunks-> theKey >= currentFinger.minKey)
+            {
+                // PrintFingerInfo(currentFinger, "currentFinger (not equal) found " + FNS);
+                return 0;
+            }
+            else
+            {
+                if (fingerPosition > 0)
+                {
+                    secondFinger.myOffset = (fingerPosition+1)*oneFingerSize;
+                    ReadFinger(localFingersStream, secondFinger);
+
+                    if (indexChunks-> theKey >= secondFinger.maxKey) // finger found
+                    {
+                        return 0;
+                    }
+                    else
+                    {
+                        fingerPosition --;
+                        currentFinger = secondFinger;
+                    }
+                }
+            }
+        }
+    }
+    while ((fingerPosition > 0) && (fingerPosition < (parentFinger.itemsCount - 1)) /*&& (emergencyCounter < (parentFinger.itemsCount + 1))*/);
+
+    currentFinger.myOffset = fingerPosition*oneFingerSize;
+    ReadFinger(localFingersStream, currentFinger);
+
+    return 0;
 }
 
 
@@ -590,28 +715,41 @@ template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkToInsert()
     return 0;
 }
 
-template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkFirst(bool isExact)
+template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkFirst(bool isExactEqual)
 {
     // PrintFingerInfo(fingersRootHeader, "fingersRootHeader " + FNS);
 
     int res = 0;
 
+        // check root borders
+    if (indexChunks-> theKey > fingersRootHeader.maxKey) // no first chunk found
+        return -1;
+
     int myLevel  = fingersRootHeader.myLevel;
     parentFinger = fingersRootHeader;
 
-        // fill fingers chain
-    while ((myLevel >= 0) && (res > -2))
+        // go fingers chain
+    while ((myLevel >= 0) && (res >= 0)) // FIXME
     {
-        // qDebug() << "myLevel = " << myLevel << FN;
-
         LoadFingersChunk(parentFinger.nextChunkOffset);
-        res = FindNextLevelOffsetFirst(isExact);  // get currentFinger
+
+        QDataStream localFingersStream(&fingersBA, QIODevice::ReadWrite);
+        memcpy(fingersBA.data(), fingersChunk, fingersChunkSize);
+
+            // get level
+        localFingersStream.device()->seek(egChunkVolume * oneFingerSize + sizeof(quint64));
+        localFingersStream >> parentFinger.myLevel;
+
+        qDebug() << "myLevel = " << parentFinger.myLevel << FN;
+
+        res = FindNextLevelOffsetFirst(localFingersStream, isExactEqual);  // get currentFinger
 
         // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
 
         parentFinger = currentFinger;
         myLevel--;
     }
+    // while (parentFinger.myLevel > 0)
 
     // PrintFingerInfo(parentFinger, "parentFinger " + FNS);
     // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
