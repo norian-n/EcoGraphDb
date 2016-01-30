@@ -115,7 +115,7 @@ public:
     int FindIndexChunkFirst(bool isExactEqual); // CompareFunctionType myCompareFunc
     int FindNextLevelOffsetFirst(QDataStream &localFingersStream, bool isExactEqual);
 
-    int FindIndexChunkLast(bool isExact); // CompareFunctionType myCompareFunc
+    int FindIndexChunkLast(bool isExactEqual); // CompareFunctionType myCompareFunc
     int FindNextLevelOffsetLast(bool isExact);
     int FindNextLevelOffsetLast2(QDataStream &localFingersStream, bool isExactEqual);
 
