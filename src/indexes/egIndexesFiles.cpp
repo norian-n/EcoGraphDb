@@ -64,7 +64,8 @@ template <typename KeyType> void EgIndexFiles<KeyType>::AddObjToIndex()
     else
     {
         // indexChunks.LoadRootHeader();
-        fingersTree.FindIndexChunkToInsert();
+        fingersTree.FindIndexChunkToInsert2();
+        // fingersTree.FindIndexChunkToInsert();
 
         // qDebug() << "finger to insert key: " << hex << (int) indexChunks.theKey << ", offset: " << hex << (int) indexChunks.indexesChunkOffset << FN;
 
@@ -83,7 +84,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_EQ(QSet<quint64>& in
 
     indexChunks.theKey   = Key;
 
-    if (fingersTree.FindIndexChunkFirst(true) < -1)
+    if (fingersTree.FindIndexChunkFirst(true) < 0)
         res = -1;
 
     qDebug() << "filename: " << IndexFileName << " ,key: " << hex << (int) indexChunks.theKey << ", offset: " << hex << (int) indexChunks.indexesChunkOffset << FN;
@@ -111,9 +112,9 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GE(QSet<quint64>& in
 
     indexChunks.theKey   = Key;
 
-    if (fingersTree.FindIndexChunkFirst(true) < -1) // FIXME - process borders
+    if (fingersTree.FindIndexChunkFirst(true) < 0) // FIXME - process borders
     {
-        qDebug() << "Index chunk not found " << IndexFileName << FN;
+        // qDebug() << "Index chunk not found " << IndexFileName << FN;
         res = -1;
     }
 
@@ -136,7 +137,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GT(QSet<quint64>& in
 
     indexChunks.theKey = Key;
 
-    if (fingersTree.FindIndexChunkFirst(false) < -1) // FIXME - process borders
+    if (fingersTree.FindIndexChunkFirst(false) < 0) // FIXME - process borders
         res = -1;
 
     if (! res)
@@ -158,7 +159,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LE(QSet<quint64>& in
 
     indexChunks.theKey   = Key;
 
-    if (fingersTree.FindIndexChunkLast(true) < -1) // FIXME - process borders
+    if (fingersTree.FindIndexChunkLast(true) < 0) // FIXME - process borders
         res = -1;
 
     if (! res)
@@ -180,7 +181,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LT(QSet<quint64>& in
 
     indexChunks.theKey = Key;
 
-    if (fingersTree.FindIndexChunkLast(false) < -1) // FIXME - process borders
+    if (fingersTree.FindIndexChunkLast(false) < 0) // FIXME - process borders
         res = -1;
 
     if (! res)
@@ -198,7 +199,10 @@ template <typename KeyType> int EgIndexFiles<KeyType>::UpdateIndex(bool isChange
     indexChunks.newDataOffset = newOffset;
 
     if (fingersTree.FindIndexChunkFirst(true))
+    {
+        qDebug() << "IndexChunk not found " << FN;
         return -1;
+    }
 
     if (! isChanged)
         indexChunks.UpdateIndex();
@@ -208,7 +212,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::UpdateIndex(bool isChange
 
         indexChunks.oldDataOffset = newOffset;
 
-        fingersTree.FindIndexChunkToInsert();
+        fingersTree.FindIndexChunkToInsert2();
 
         // qDebug() << "nextOffset: " << hex << (int) indexChunks. << FN;
 

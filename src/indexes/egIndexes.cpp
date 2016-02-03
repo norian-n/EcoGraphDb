@@ -81,7 +81,7 @@ template <typename KeyType> void EgIndexes<KeyType>::InitRootHeader()
 {
     fingersTree-> fingersRootHeader.minKey = theKey;
     fingersTree-> fingersRootHeader.maxKey = theKey;
-    fingersTree-> fingersRootHeader.myLevel = 0;
+    fingersTree-> fingersRootHeader.myLevel = 1;
     fingersTree-> fingersRootHeader.itemsCount = 1;
     fingersTree-> fingersRootHeader.nextChunkOffset = 0;
     fingersTree-> fingersRootHeader.myChunkOffset = 0;
@@ -132,6 +132,8 @@ template <typename KeyType> int EgIndexes<KeyType>::StoreIndexChunk(char* chunkP
     indexStream.device()->seek(indexesChunkOffset);
     indexStream.writeRawData(chunkPtr, indexChunkSize);
 
+    // qDebug() << "indexesChunkOffset = " << hex << (int) indexesChunkOffset << FN;
+
     return 0; // FIXME
 }
 
@@ -169,11 +171,13 @@ template <typename KeyType> int EgIndexes<KeyType>::InsertToIndexChunk()
 
     if (fingersTree-> currentFinger.itemsCount < egChunkVolume)
     {
-        indexPosition = FindIndexPosition(localIndexStream);
-        // qDebug() << "indexPosition = " << indexPosition << ", itemsCount = " << fingersTree-> currentFinger.itemsCount << FN;
+        // indexPosition = FindIndexPosition(localIndexStream);
+
+        indexPosition = FindPosByKeyLast(localIndexStream, EgIndexes<KeyType>::CompareLE) + 1;
+        qDebug() << "indexPosition = " << indexPosition << ", itemsCount = " << fingersTree-> currentFinger.itemsCount << FN;
 
             // check if not last position, move tail
-        if (indexPosition != (fingersTree-> currentFinger.itemsCount)) // last one
+        if (indexPosition < (fingersTree-> currentFinger.itemsCount)) // not last one
         {
             // qDebug() << "chunk before memmove" << QByteArray(chunk, egChunkVolume*oneIndexSize).toHex() << FN;
             memmove (chunk + (indexPosition+1)*oneIndexSize, chunk + indexPosition*oneIndexSize,  oneIndexSize*(fingersTree-> currentFinger.itemsCount - indexPosition + 1));
@@ -218,9 +222,10 @@ template <typename KeyType> int EgIndexes<KeyType>::SplitIndexChunk(QDataStream&
 
     fingersTree-> newFinger.nextChunkOffset = indexStream.device()->size(); // append to the end of indexes file
 
-    indexPosition = FindIndexPosition(localIndexStream);
+    // indexPosition = FindIndexPosition(localIndexStream);
 
-    // qDebug() << "initialindexPosition = " << indexPosition << ", itemsCount = " << fingersTree-> currentFinger.itemsCount << FN;
+    indexPosition = FindPosByKeyLast(localIndexStream, EgIndexes<KeyType>::CompareLE) + 1;
+    qDebug() << "indexPosition = " << indexPosition << ", itemsCount = " << fingersTree-> currentFinger.itemsCount << FN;
 
         // init new chunk
     memmove (new_chunk, zero_chunk, indexChunkSize);
@@ -346,10 +351,10 @@ template <typename KeyType> int EgIndexes<KeyType>::SplitIndexChunk(QDataStream&
     memcpy(indexBA.data(), chunk, indexChunkSize);
 
     localIndexStream.device()->seek(egChunkVolume * oneIndexSize + sizeof(quint64));
-    localIndexStream >> fwdOffsetPtr;
+    localIndexStream >> fwdOffsetPtr;                                                   // store fwd ptr
 
     localIndexStream.device()->seek(egChunkVolume * oneIndexSize + sizeof(quint64));
-    localIndexStream << fingersTree-> newFinger.nextChunkOffset;
+    localIndexStream << fingersTree-> newFinger.nextChunkOffset;                        // new fwd ptr
 
     // localIndexStream.device()->seek((egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2));
     localIndexStream << (keysCountType) (fingersTree-> currentFinger.itemsCount);
@@ -366,6 +371,13 @@ template <typename KeyType> int EgIndexes<KeyType>::SplitIndexChunk(QDataStream&
     localIndexStream << (keysCountType) (fingersTree-> newFinger.itemsCount);
 
     memcpy(new_chunk, indexBA.constData(), indexChunkSize);
+
+        // update backlink
+    if (fwdOffsetPtr)
+    {
+        indexStream.device()->seek(fwdOffsetPtr + egChunkVolume * oneIndexSize);
+        indexStream << fingersTree-> newFinger.nextChunkOffset;
+    }
 
         // save both chunks
     indexesChunkOffset = fingersTree-> currentFinger.nextChunkOffset;
@@ -396,10 +408,10 @@ template <typename KeyType> int EgIndexes<KeyType>::AppendIndexChunk(QDataStream
     memcpy(indexBA.data(), chunk, indexChunkSize);
 
     localIndexStream.device()->seek(egChunkVolume * oneIndexSize + sizeof(quint64));
-    localIndexStream >> fwdOffsetPtr;
+    localIndexStream >> fwdOffsetPtr;                                                   // store fwd ptr
 
     localIndexStream.device()->seek(egChunkVolume * oneIndexSize + sizeof(quint64));
-    localIndexStream << fingersTree-> newFinger.nextChunkOffset;
+    localIndexStream << fingersTree-> newFinger.nextChunkOffset;                        // new fwd ptr
 
     memcpy(chunk, indexBA.constData(), indexChunkSize);
 
@@ -412,11 +424,18 @@ template <typename KeyType> int EgIndexes<KeyType>::AppendIndexChunk(QDataStream
 
         // update pointers & count
     localIndexStream.device()->seek(egChunkVolume * oneIndexSize);
-    localIndexStream << fingersTree-> currentFinger.nextChunkOffset;
-    localIndexStream << fwdOffsetPtr;
+    localIndexStream << fingersTree-> currentFinger.nextChunkOffset;    // back ptr
+    localIndexStream << fwdOffsetPtr;                                   // stored fwd ptr
 
     localIndexStream.device()->seek((egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2));
     localIndexStream << (keysCountType) (fingersTree-> newFinger.itemsCount);
+
+        // update backlink
+    if (fwdOffsetPtr)
+    {
+        indexStream.device()->seek(fwdOffsetPtr + egChunkVolume * oneIndexSize);
+        indexStream << fingersTree-> newFinger.nextChunkOffset;
+    }
 
     // memcpy(new_chunk, indexBA.constData(), indexChunkSize);
 
@@ -444,7 +463,10 @@ template <typename KeyType> int EgIndexes<KeyType>::FindIndexPosition(QDataStrea
         return 0;
 
         // proportional index lookup
-    indexPosition = (theKey - fingersTree-> currentFinger.minKey)*(fingersTree-> currentFinger.itemsCount - 1)/(fingersTree-> currentFinger.maxKey - fingersTree-> currentFinger.minKey);
+    if ((fingersTree-> currentFinger.maxKey > fingersTree-> currentFinger.minKey))
+        indexPosition = (theKey - fingersTree-> currentFinger.minKey)*(fingersTree-> currentFinger.itemsCount - 1)/(fingersTree-> currentFinger.maxKey - fingersTree-> currentFinger.minKey);
+    else
+       currentIndex = fingersTree-> currentFinger.itemsCount - 1;
 
         // load proposed key
     localIndexesStream.device()->seek(indexPosition*oneIndexSize);

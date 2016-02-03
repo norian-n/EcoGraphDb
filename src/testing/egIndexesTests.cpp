@@ -23,8 +23,16 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataInsertIndexe
 
     for (int i= 0; i < 23; i++) // 14 23
     {
-        egIndexFiles.theIndex   = /*0x6160*/ i + 0x10;
-        egIndexFiles.dataOffset = 0xabcd00 + i + 0x10;
+        if (i % 2)
+        {
+            egIndexFiles.theIndex   = 0x100 - i ;
+            egIndexFiles.dataOffset = 0xabcd20 -  i ;
+        }
+        else
+        {
+            egIndexFiles.theIndex   = i + 0x10;
+            egIndexFiles.dataOffset = 0xabcd00 + i + 0x10;
+        }
 
         egIndexFiles.AddObjToIndex();
     }
@@ -39,7 +47,7 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testSelectOperations(E
 {
     bool res = true;
 
-    KeyType theKey = 0x15; // i < 23, i + 0x10
+    KeyType theKey = 0x15; // 0x15
 
     QSet<quint64> theIndexOffsets;
 
