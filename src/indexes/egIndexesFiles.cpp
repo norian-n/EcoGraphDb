@@ -87,7 +87,8 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_EQ(QSet<quint64>& in
     if (fingersTree.FindIndexChunkFirst(true) < 0)
         res = -1;
 
-    qDebug() << "filename: " << IndexFileName << " ,key: " << hex << (int) indexChunks.theKey << ", offset: " << hex << (int) indexChunks.indexesChunkOffset << FN;
+    qDebug() << "filename: " << IndexFileName << " ,key: " << hex << (int) indexChunks.theKey
+             << ", offset: " << hex << (int) indexChunks.indexesChunkOffset << "res = " << res << FN;
 
 
     if (! res)

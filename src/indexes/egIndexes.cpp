@@ -174,7 +174,7 @@ template <typename KeyType> int EgIndexes<KeyType>::InsertToIndexChunk()
         // indexPosition = FindIndexPosition(localIndexStream);
 
         indexPosition = FindPosByKeyLast(localIndexStream, EgIndexes<KeyType>::CompareLE) + 1;
-        qDebug() << "indexPosition = " << indexPosition << ", itemsCount = " << fingersTree-> currentFinger.itemsCount << FN;
+        // qDebug() << "indexPosition = " << indexPosition << ", itemsCount = " << fingersTree-> currentFinger.itemsCount << FN;
 
             // check if not last position, move tail
         if (indexPosition < (fingersTree-> currentFinger.itemsCount)) // not last one
@@ -218,14 +218,14 @@ template <typename KeyType> int EgIndexes<KeyType>::InsertToIndexChunk()
 
 template <typename KeyType> int EgIndexes<KeyType>::SplitIndexChunk(QDataStream& localIndexStream)
 {
-    KeyType minKey, maxKey;
+    // KeyType minKey, maxKey;
 
     fingersTree-> newFinger.nextChunkOffset = indexStream.device()->size(); // append to the end of indexes file
 
     // indexPosition = FindIndexPosition(localIndexStream);
 
     indexPosition = FindPosByKeyLast(localIndexStream, EgIndexes<KeyType>::CompareLE) + 1;
-    qDebug() << "indexPosition = " << indexPosition << ", itemsCount = " << fingersTree-> currentFinger.itemsCount << FN;
+    // qDebug() << "indexPosition = " << indexPosition << ", itemsCount = " << fingersTree-> currentFinger.itemsCount << FN;
 
         // init new chunk
     memmove (new_chunk, zero_chunk, indexChunkSize);
@@ -242,14 +242,14 @@ template <typename KeyType> int EgIndexes<KeyType>::SplitIndexChunk(QDataStream&
 
         // recalc position to splitted chunks
 
-    if ( indexPosition <= egChunkVolume/2) // insert to first part
+    if ( indexPosition < (egChunkVolume/2+1)) // insert to first part
     {
         // check if not last position, move tail
-        if (indexPosition != (egChunkVolume/2)) // last one
+        if (indexPosition < (egChunkVolume/2)) // last one
         {
             // qDebug() << "indexPosition = " << indexPosition << ", itemsCount = " << fingersTree-> currentFinger.itemsCount << FN;
             // qDebug() << "chunk before memmove" << QByteArray(chunk, egChunkVolume*oneIndexSize).toHex() << FN;
-            memmove (chunk + (indexPosition+1)*oneIndexSize, chunk + indexPosition*oneIndexSize,  oneIndexSize*(egChunkVolume/2 - indexPosition + 1));
+            memmove (chunk + (indexPosition+1)*oneIndexSize, chunk + indexPosition*oneIndexSize,  oneIndexSize*(egChunkVolume/2 - indexPosition)); //  + 1
             // qDebug() << "chunk after memmove " << QByteArray(chunk, egChunkVolume*oneIndexSize).toHex() << FN;
         }
 
@@ -265,29 +265,25 @@ template <typename KeyType> int EgIndexes<KeyType>::SplitIndexChunk(QDataStream&
         memcpy(chunk, indexBA.constData(), indexChunkSize);
 
         localIndexStream.device()->seek(0);
-        localIndexStream >> minKey;
+        localIndexStream >> fingersTree-> currentFinger.minKey;
 
         localIndexStream.device()->seek(egChunkVolume/2 * oneIndexSize);
-        localIndexStream >> maxKey;
+        localIndexStream >> fingersTree-> currentFinger.maxKey;
 
             // update fingers               
         fingersTree-> currentFinger.itemsCount = egChunkVolume/2+1;
-        fingersTree-> currentFinger.minKey = minKey; // get first index
-        fingersTree-> currentFinger.maxKey = maxKey; // get last index
 
         // qDebug() << "fingersTree-> currentFinger.minKey =  " << hex << (int) fingersTree-> currentFinger.minKey << ", fingersTree-> currentFinger.maxKey = " << hex << (int) fingersTree-> currentFinger.maxKey << FN;
 
         memcpy(indexBA.data(), new_chunk, indexChunkSize);
 
         localIndexStream.device()->seek(0);
-        localIndexStream >> minKey;
+        localIndexStream >> fingersTree-> newFinger.minKey;
 
         localIndexStream.device()->seek((egChunkVolume/2 - 1) * oneIndexSize);
-        localIndexStream >> maxKey;
+        localIndexStream >> fingersTree-> newFinger.maxKey;
 
         fingersTree-> newFinger.itemsCount = egChunkVolume/2;
-        fingersTree-> newFinger.minKey = minKey; // get first index
-        fingersTree-> newFinger.maxKey = maxKey; // get last index
 
         // qDebug() << "newFinger.minKey =  " << hex << (int) fingersTree-> newFinger.minKey << ", newFinger.maxKey = " << hex << (int) fingersTree-> newFinger.maxKey << FN;
 
@@ -297,11 +293,11 @@ template <typename KeyType> int EgIndexes<KeyType>::SplitIndexChunk(QDataStream&
         indexPosition -= egChunkVolume/2;
 
         // check if not last position, move tail
-        if (indexPosition != (egChunkVolume/2)) // last one
+        if (indexPosition < (egChunkVolume/2)) // last one
         {
             // qDebug() << "indexPosition = " << indexPosition << ", itemsCount = " << fingersTree-> currentFinger.itemsCount << FN;
             // qDebug() << "new_chunk before memmove" << QByteArray(new_chunk, egChunkVolume*oneIndexSize).toHex() << FN;
-            memmove (new_chunk + (indexPosition+1)*oneIndexSize, new_chunk + indexPosition*oneIndexSize,  oneIndexSize*(egChunkVolume/2 - indexPosition + 1));
+            memmove (new_chunk + (indexPosition+1)*oneIndexSize, new_chunk + indexPosition*oneIndexSize,  oneIndexSize*(egChunkVolume/2 - indexPosition)); //  + 1
             // qDebug() << "new_chunk after memmove " << QByteArray(new_chunk, egChunkVolume*oneIndexSize).toHex() << FN;
         }
 
@@ -319,28 +315,24 @@ template <typename KeyType> int EgIndexes<KeyType>::SplitIndexChunk(QDataStream&
             // update fingers
 
         localIndexStream.device()->seek(0);
-        localIndexStream >> minKey;
+        localIndexStream >> fingersTree-> newFinger.minKey;
 
         localIndexStream.device()->seek(egChunkVolume/2 * oneIndexSize);
-        localIndexStream >> maxKey;
+        localIndexStream >> fingersTree-> newFinger.maxKey;
 
         fingersTree-> newFinger.itemsCount = egChunkVolume/2+1;
-        fingersTree-> newFinger.minKey = minKey; // get first index
-        fingersTree-> newFinger.maxKey = maxKey; // get last index
 
         // qDebug() << "newFinger.minKey =  " << hex << (int) fingersTree-> newFinger.minKey << ", newFinger.maxKey = " << hex << (int) fingersTree-> newFinger.maxKey << FN;
 
         memcpy(indexBA.data(), chunk, indexChunkSize);
 
         localIndexStream.device()->seek(0);
-        localIndexStream >> minKey;
+        localIndexStream >> fingersTree-> currentFinger.minKey;
 
         localIndexStream.device()->seek((egChunkVolume/2 - 1) * oneIndexSize);
-        localIndexStream >> maxKey;
+        localIndexStream >> fingersTree-> currentFinger.maxKey;
 
         fingersTree-> currentFinger.itemsCount = egChunkVolume/2;
-        fingersTree-> currentFinger.minKey = minKey; // get first index
-        fingersTree-> currentFinger.maxKey = maxKey; // get last index
 
         // qDebug() << "fingersTree-> currentFinger.minKey =  " << hex << (int) fingersTree-> currentFinger.minKey << ", fingersTree-> currentFinger.maxKey = " << hex << (int) fingersTree-> currentFinger.maxKey << FN;
     }
@@ -367,6 +359,8 @@ template <typename KeyType> int EgIndexes<KeyType>::SplitIndexChunk(QDataStream&
     localIndexStream << fingersTree-> currentFinger.nextChunkOffset;
     localIndexStream << fwdOffsetPtr;
 
+    qDebug() << "new backptr =  " << hex << (int) fingersTree-> currentFinger.nextChunkOffset << ", fwdptr = " << hex << (int) fwdOffsetPtr << FN;
+
     localIndexStream.device()->seek((egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2));
     localIndexStream << (keysCountType) (fingersTree-> newFinger.itemsCount);
 
@@ -386,7 +380,7 @@ template <typename KeyType> int EgIndexes<KeyType>::SplitIndexChunk(QDataStream&
     StoreIndexChunk(new_chunk);
 
         // update fingers tree
-    fingersTree-> UpdateFingersChainAfterSplit(false);
+    fingersTree-> UpdateFingersChainAfterSplit(); // false);
 
     return 0;
 }
@@ -446,7 +440,7 @@ template <typename KeyType> int EgIndexes<KeyType>::AppendIndexChunk(QDataStream
     StoreIndexChunk(indexBA.data());
 
         // update fingers tree
-    fingersTree-> UpdateFingersChainAfterSplit(true);
+    fingersTree-> UpdateFingersChainAfterSplit(); // true);
 
     return 0;
 }

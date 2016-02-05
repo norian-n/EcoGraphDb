@@ -27,7 +27,7 @@ public:
 
     int posToInsert;
 
-    quint64 newFingerChunkOffset;
+    // quint64 newFingerChunkOffset;
     quint64 parentFingerOffset;
 
     KeyType newMinValue;
@@ -94,7 +94,7 @@ public:
 
     int UpdateFingerAfterInsert();
     int UpdateFingersChainAfterInsert();    
-    int UpdateFingersChainAfterSplit(bool appendMode);
+    int UpdateFingersChainAfterSplit();
 
     int UpdateFingerAfterDelete();
     int UpdateFingersChainAfterDelete();
