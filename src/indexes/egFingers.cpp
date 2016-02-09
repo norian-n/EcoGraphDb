@@ -798,7 +798,7 @@ template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkToInsert2()
     }
     while ((currentFinger.myLevel > 0) && (res >= 0));
 
-    qDebug() << "theKey = " << hex << (int) indexChunks-> theKey << FN;
+    // qDebug() << "theKey = " << hex << (int) indexChunks-> theKey << FN;
 
     // PrintFingerInfo(parentFinger, "parentFinger " + FNS);
     // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
@@ -904,7 +904,7 @@ template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkLast(bool isEx
     while ((currentFinger.myLevel > 0) && (res >= 0)); // FIXME
 
     // PrintFingerInfo(parentFinger, "parentFinger " + FNS);
-    PrintFingerInfo(currentFinger, "currentFinger " + FNS);
+    // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
 
     indexChunks-> indexesChunkOffset = currentFinger.nextChunkOffset;
 
@@ -1482,6 +1482,10 @@ template <typename KeyType> int EgFingers<KeyType>::SplitFingersChunk(QDataStrea
 
         // newFingerOffset = parentFinger.nextChunkOffset +  posToInsert*oneFingerSize; // current level
 
+            // write level
+        localFingersStream.device()->seek(egChunkVolume * oneFingerSize + sizeof(quint64));
+        localFingersStream << currentFinger.myLevel;
+
         memcpy(fingersChunk, fingersBA.constData(), fingersChunkSize);
 
         // PrintFingersChunk(fingersChunk, "old chunk after all " + FNS);
@@ -1498,6 +1502,12 @@ template <typename KeyType> int EgFingers<KeyType>::SplitFingersChunk(QDataStrea
         // qDebug() << "currentFinger.minKey =  " << hex << (int) currentFinger.minKey << ", currentFinger.maxKey = " << hex << (int) currentFinger.maxKey << FN;
 
         memcpy(fingersBA.data(), newFingersChunk, fingersChunkSize);
+
+            // write level
+        localFingersStream.device()->seek(egChunkVolume * oneFingerSize + sizeof(quint64));
+        localFingersStream << currentFinger.myLevel;
+
+        memcpy(newFingersChunk, fingersBA.constData(), fingersChunkSize);
 
         localFingersStream.device()->seek(0);
         localFingersStream >> newFinger.minKey;
@@ -1553,6 +1563,12 @@ template <typename KeyType> int EgFingers<KeyType>::SplitFingersChunk(QDataStrea
         // qDebug() << "newFinger.minKey =  " << hex << (int) newFinger.minKey << ", newFinger.maxKey = " << hex << (int) newFinger.maxKey << FN;
 
         memcpy(fingersBA.data(), fingersChunk, fingersChunkSize);
+
+            // write level
+        localFingersStream.device()->seek(egChunkVolume * oneFingerSize + sizeof(quint64));
+        localFingersStream << currentFinger.myLevel;
+
+        memcpy(fingersChunk, fingersBA.constData(), fingersChunkSize);
 
         localFingersStream.device()->seek(0);
         localFingersStream >> currentFinger.minKey; // level up

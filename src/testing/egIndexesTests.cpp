@@ -23,14 +23,14 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataInsertIndexe
 
     egIndexFiles.OpenIndexFilesToUpdate();
 
-    for (int i= 0; i < 15; i++) // 14 23 19
+    for (int i= 0; i < 66; i++) // 14 23 19
     {
-        if (i % 2)
+        /*if (i % 2)
         {
             egIndexFiles.theIndex   = 0x100 - i ;
             egIndexFiles.dataOffset = 0xabcd20 -  i ;
         }
-        else
+        else*/
         {
             egIndexFiles.theIndex   = i + 0x10;
             egIndexFiles.dataOffset = 0xabcd00 + i + 0x10;

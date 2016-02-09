@@ -46,7 +46,7 @@ int main() // int argc, char *argv[])
 
     // res = res && indexTests.testEgDataDeleteIndex(testIndexFiles);
 
-    // res = res && indexTests.testSelectOperations(testIndexFiles);
+    res = res && indexTests.testSelectOperations(testIndexFiles);
 
     return 0; // FIXME STUB
 

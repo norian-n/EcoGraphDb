@@ -28,6 +28,10 @@ public:
     keysCountType chunkCount;
 
     quint64 indexesChunkOffset; // file position
+
+    quint64 prevOffsetPtr;
+    quint64 nextOffsetPtr;
+
 /*
     egFinger<KeyType> fingersRootHeader; // (!) stored in the indexes file
     egFinger<KeyType> currentFinger;
@@ -52,7 +56,7 @@ public:
          rootHeaderSize(sizeof(KeyType) * 2 + sizeof(fingersLevelType) + sizeof(keysCountType) + sizeof(quint64))
         ,oneIndexSize(sizeof(KeyType) + sizeof(quint64))
         ,indexChunkSize((egIndexes3Namespace::egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2) + sizeof(keysCountType) + sizeof(quint64))
-            // chain neighbors offsets, count, parent chunk offset
+            // chain neighbors offsets (prev, next), count, parent chunk offset
         ,chunk(new char[indexChunkSize])
         ,zero_chunk(new char[indexChunkSize])
         ,new_chunk(new char[indexChunkSize])
@@ -89,7 +93,7 @@ public:
     void LoadIndexChunk(char *chunkPtr);
     int StoreIndexChunk(char* chunkPtr);
 
-    int FindIndexPosition(QDataStream &localIndexesStream);
+    int FindIndexPosition(QDataStream &localIndexesStream); // FIXME obsolete
     int InsertToIndexChunk();
 
     int SplitIndexChunk(QDataStream &localIndexStream);
@@ -100,7 +104,7 @@ public:
     int FindPosByKeyLast(QDataStream &localIndexesStream, CompareFunctionType myCompareFunc);
 
     void LoadDataByChunkUp(QSet<quint64>& index_offsets, CompareFunctionType myCompareFunc);
-    void LoadDataByChunkDown(QSet<quint64>& index_offsets, CompareFunctionType myCompareFunc);
+    int LoadDataByChunkDown(QSet<quint64>& index_offsets, CompareFunctionType myCompareFunc);
 
     void LoadDataByChunkEqual(QSet<quint64>& index_offsets);
 
