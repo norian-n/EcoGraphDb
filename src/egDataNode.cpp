@@ -1,7 +1,14 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
+ *
+ * License: propietary open source, free for non-commercial applications
+ *
+ */
+
 #include "egDataNode.h"
-
 #include "egMetaInfo.h"
-
 
 EgDataNode::EgDataNode(EgDataNodeTypeMetaInfo& a_metaInfo): isAdded(false), metaInfo(&a_metaInfo), nodeLinks(NULL)
 {

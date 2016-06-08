@@ -1,3 +1,12 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
+ *
+ * License: propietary open source, free for non-commercial applications
+ *
+ */
+
 #include "../egDataNodesType.h"
 #include "egIndexesFiles.h"
 
@@ -12,8 +21,13 @@ template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToUpdate()
     int res = indexChunks.OpenIndexFilesToUpdate(IndexFileName);
     res += fingersTree.OpenIndexFilesToUpdate(IndexFileName);
 
-    if (indexChunks.indexStream.device()->size() && ! res) // is not empty 
-        indexChunks.LoadRootHeader();
+    fingersTree.IndexFileName = IndexFileName;
+
+    if (fingersTree.fingerStream.device()->size() && ! res) // is not empty FIXME check both files
+    {
+        // indexChunks.LoadRootHeader();
+        fingersTree.LoadRootHeader();
+    }
     // else
     //    qDebug() << "Can't load Root Header " << FN;
 
@@ -25,8 +39,13 @@ template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToRead()
     int res = indexChunks.OpenIndexFilesToRead(IndexFileName);
     res += fingersTree.OpenIndexFilesToRead(IndexFileName);
 
-    if (indexChunks.indexStream.device()->size() && ! res) // is not empty
-        indexChunks.LoadRootHeader();
+    fingersTree.IndexFileName = IndexFileName;
+
+    if (fingersTree.fingerStream.device()->size() && ! res) // is not empty FIXME check both files
+    {
+        // indexChunks.LoadRootHeader();
+        fingersTree.LoadRootHeader();
+    }
     // else
     //    qDebug() << "Can't load Root Header " << res << FN;
 
@@ -53,18 +72,22 @@ template <typename KeyType> void EgIndexFiles<KeyType>::AddObjToIndex()
 
         indexChunks.InitRootHeader();
         indexChunks.InitIndexChunk();
+
+        fingersTree.InitRootHeader();
         fingersTree.InitFingersChunk();
 
         indexChunks.StoreRootHeader();
+        fingersTree.StoreRootHeader();
+
         indexChunks.StoreIndexChunk(indexChunks.chunk);
-        fingersTree.StoreFingersChunk(0, fingersTree.fingersChunk);
+        fingersTree.StoreFingersChunk(indexChunks.rootHeaderSize, fingersTree.fingersChunk);
 
         return;
     }
     else
     {
         // indexChunks.LoadRootHeader();
-        fingersTree.FindIndexChunkToInsert2();
+        fingersTree.FindIndexChunkToInsert();
         // fingersTree.FindIndexChunkToInsert();
 
         // qDebug() << "finger to insert key: " << hex << (int) indexChunks.theKey << ", offset: " << hex << (int) indexChunks.indexesChunkOffset << FN;
@@ -87,8 +110,8 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_EQ(QSet<quint64>& in
     if (fingersTree.FindIndexChunkFirst(true) < 0)
         res = -1;
 
-    qDebug() << "filename: " << IndexFileName << " ,key: " << hex << (int) indexChunks.theKey
-             << ", offset: " << hex << (int) indexChunks.indexesChunkOffset << "res = " << res << FN;
+    // qDebug() << "filename: " << IndexFileName << " ,key: " << hex << (int) indexChunks.theKey
+    //         << ", offset: " << hex << (int) indexChunks.indexesChunkOffset << "res = " << res << FN;
 
 
     if (! res)
@@ -213,7 +236,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::UpdateIndex(bool isChange
 
         indexChunks.oldDataOffset = newOffset;
 
-        fingersTree.FindIndexChunkToInsert2();
+        fingersTree.FindIndexChunkToInsert();
 
         // qDebug() << "nextOffset: " << hex << (int) indexChunks. << FN;
 

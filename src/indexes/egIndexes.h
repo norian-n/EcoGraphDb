@@ -1,3 +1,12 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
+ *
+ * License: propietary open source, free for non-commercial applications
+ *
+ */
+
 #ifndef EG_INDEXES3_H
 #define EG_INDEXES3_H
 
@@ -55,7 +64,7 @@ public:
     EgIndexes():
          rootHeaderSize(sizeof(KeyType) * 2 + sizeof(fingersLevelType) + sizeof(keysCountType) + sizeof(quint64))
         ,oneIndexSize(sizeof(KeyType) + sizeof(quint64))
-        ,indexChunkSize((egIndexes3Namespace::egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2) + sizeof(keysCountType) + sizeof(quint64))
+        ,indexChunkSize((egIndexesNamespace::egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2) + sizeof(keysCountType) + sizeof(quint64))
             // chain neighbors offsets (prev, next), count, parent chunk offset
         ,chunk(new char[indexChunkSize])
         ,zero_chunk(new char[indexChunkSize])
@@ -83,9 +92,9 @@ public:
     void RemoveIndexFiles(const QString& IndexFileName);
 
     void InitIndexChunk();
-    void InitRootHeader();
 
-    void LoadRootHeader();              // meta-info of fingers tree, stored into indexes file for not-zero offset
+    void InitRootHeader(); // meta-info of indexes (first chunk for loadAll, empty chain(TBD)), also for non-zero offset
+    void LoadRootHeader();
     void StoreRootHeader(bool minMaxOnly = false);
 
     int StoreFingerOffset(quint64 fingerOffset);

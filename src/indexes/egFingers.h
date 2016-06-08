@@ -1,3 +1,12 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
+ *
+ * License: propietary open source, free for non-commercial applications
+ *
+ */
+
 #ifndef EG_FINGERS_H
 #define EG_FINGERS_H
 
@@ -19,6 +28,8 @@ public:
 
     EgIndexes<KeyType> * indexChunks;
 
+    QString IndexFileName;
+
     // quint64 fingersChunkOffset; // finger file position
 
     // int rootHeaderSize;
@@ -26,9 +37,6 @@ public:
     int fingersChunkSize;
 
     int posToInsert;
-
-    // quint64 newFingerChunkOffset;
-    quint64 parentFingerOffset;
 
     KeyType newMinValue;
     KeyType newMaxValue;
@@ -42,10 +50,15 @@ public:
     char* zeroFingersChunk; // filled with 0
     char* newFingersChunk;  // new chunk buffer to split
 
+    quint64 parentFingerOffset;
+    quint64 currentFingerOffset;
+
+    keysCountType currentKeysCount;
+
     egFinger<KeyType> currentFinger;
     egFinger<KeyType> newFinger;         // to split chunks
     egFinger<KeyType> parentFinger;
-    egFinger<KeyType> fingersRootHeader; // (!) stored in the indexes file
+    egFinger<KeyType> fingersRootHeader;
 
     QList < egFinger<KeyType> > fingersChain;
 
@@ -59,7 +72,7 @@ public:
         //  rootHeaderSize(sizeof(KeyType) * 2 + sizeof(egIndexes3Namespace::fingersLevelType) + sizeof(egIndexes3Namespace::keysCountType) + sizeof(quint64))
         // ,fingersHeaderSize(sizeof(KeyType) * 2 + sizeof(egIndexes3Namespace::fingersCountType) + sizeof(egIndexes3Namespace::fingersLevelType))
          oneFingerSize(sizeof(KeyType) * 2 + sizeof(keysCountType) + sizeof(quint64)) // next chunk offset
-        ,fingersChunkSize(/*fingersHeaderSize + */(egIndexes3Namespace::egChunkVolume * oneFingerSize) + sizeof(quint64) + sizeof(fingersLevelType)) // parent chunk offset, level
+        ,fingersChunkSize(/*fingersHeaderSize + */(egIndexesNamespace::egChunkVolume * oneFingerSize) + sizeof(quint64) + sizeof(fingersLevelType)) // parent chunk offset, level
 
         ,fingersChunk(new char[fingersChunkSize])
         ,zeroFingersChunk(new char[fingersChunkSize])
@@ -86,11 +99,16 @@ public:
     void LoadFingersChunk(quint64 fingersChunkOffset);
     int StoreFingersChunk(quint64 fingersChunkOffset, char* chunkPtr);
 
-    int FindIndexChunkToInsert();
-    int FindNextLevelOffsetToInsert();
-    int SelectClosestFingerToInsert(QDataStream &localFingersStream);
+    void InitRootHeader();
 
-    int FindIndexChunkToInsert2();
+    void LoadRootHeader();              // meta-info of fingers tree, also for non-zero offset
+    void StoreRootHeader(bool minMaxOnly = false);
+
+    // int FindIndexChunkToInsert();
+    // int FindNextLevelOffsetToInsert();
+    // int SelectClosestFingerToInsert(QDataStream &localFingersStream);
+
+    int FindIndexChunkToInsert();
 
     int UpdateFingerAfterInsert();
     int UpdateFingersChainAfterInsert();    
@@ -99,8 +117,9 @@ public:
     int UpdateFingerAfterDelete();
     int UpdateFingersChainAfterDelete();
 
-    void DeleteFinger();
-    bool DeleteSpecificFinger();
+    void DeleteParentFinger();
+    void DeleteSpecificFinger();
+    void DeleteFingersChunk(quint64 fingersChunkOffset);
 
     inline void ReadFinger  (QDataStream &localFingersStream, egFinger<KeyType>& theFinger);
     inline void WriteFinger (QDataStream &localFingersStream, egFinger<KeyType>& theFinger);
@@ -110,7 +129,6 @@ public:
     int InsertSplittedFinger(QDataStream &localFingersStream);
     int SplitFingersChunk(QDataStream &localFingersStream);
     void AddNewRootChunk(QDataStream &localFingersStream);
-
 
     int AppendFingersChunk(QDataStream &localFingersStream);
 

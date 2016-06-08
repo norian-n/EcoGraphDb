@@ -1,3 +1,12 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
+ *
+ * License: propietary open source, free for non-commercial applications
+ *
+ */
+
 #include "egIndexesTests.h"
 
 template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataIndexAddFirst(EgIndexFiles<KeyType> &egIndexFiles)
@@ -23,7 +32,7 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataInsertIndexe
 
     egIndexFiles.OpenIndexFilesToUpdate();
 
-    for (int i= 0; i < 66; i++) // 14 23 19
+    for (int i= 0; i < 23; i++) // 14 23 19
     {
         /*if (i % 2)
         {
@@ -55,31 +64,31 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testSelectOperations(E
 
     egIndexFiles.Load_EQ(theIndexOffsets, theKey);
 
-    qDebug() <<  "Load_EQ count = " << theIndexOffsets.count() << FN;
+    // qDebug() <<  "Load_EQ count = " << theIndexOffsets.count() << FN;
     res = res && (theIndexOffsets.count() == 1) ;
 
     theIndexOffsets.clear();
     egIndexFiles.Load_GE(theIndexOffsets, theKey);
 
-    qDebug() <<  "Load_GE count = " << theIndexOffsets.count() << FN;
+    // qDebug() <<  "Load_GE count = " << theIndexOffsets.count() << FN;
     res = res && (theIndexOffsets.count() == 18) ;
 
     theIndexOffsets.clear();
     egIndexFiles.Load_GT(theIndexOffsets, theKey);
 
-    qDebug() <<  "Load_GT count = " << theIndexOffsets.count() << FN;
+    // qDebug() <<  "Load_GT count = " << theIndexOffsets.count() << FN;
     res = res && (theIndexOffsets.count() == 17) ;
 
     theIndexOffsets.clear();
     egIndexFiles.Load_LE(theIndexOffsets, theKey);
 
-    qDebug() <<  "Load_LE count = " << theIndexOffsets.count() << FN;
+    // qDebug() <<  "Load_LE count = " << theIndexOffsets.count() << FN;
     res = res && (theIndexOffsets.count() == 6) ;
 
     theIndexOffsets.clear();
     egIndexFiles.Load_LT(theIndexOffsets, theKey);
 
-    qDebug() <<  "Load_LT count = " << theIndexOffsets.count() << FN;
+    // qDebug() <<  "Load_LT count = " << theIndexOffsets.count() << FN;
     res = res && (theIndexOffsets.count() == 5) ;
 
     // for (QSet<quint64>::iterator offsets_iter = theIndexOffsets.begin(); offsets_iter != theIndexOffsets.end(); ++offsets_iter)

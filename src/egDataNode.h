@@ -1,3 +1,12 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
+ *
+ * License: propietary open source, free for non-commercial applications
+ *
+ */
+
 #ifndef EG_DATANODE_H
 #define EG_DATANODE_H
 
@@ -9,14 +18,6 @@
 #include "egCore.h"
 
 class EgDataNodeTypeMetaInfo;
-/*
-class EgLoadedLinkType
-{
-public:
-      EgDataNodeIDtype dataNodeID;
-      EgDataNode* dataNodePtr;
-};
-*/
 
 struct EgExtendedLinkType
 {
@@ -65,3 +66,12 @@ QDataStream& operator >> (QDataStream& d_stream, EgDataNode& d_object);    // tr
 
 
 #endif // EG_DATANODE_H
+
+/*
+class EgLoadedLinkType
+{
+public:
+      EgDataNodeIDtype dataNodeID;
+      EgDataNode* dataNodePtr;
+};
+*/

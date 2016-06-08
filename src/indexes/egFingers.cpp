@@ -1,8 +1,17 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
+ *
+ * License: propietary open source, free for non-commercial applications
+ *
+ */
+
 #include "../egDataNodesType.h"
 #include "egFingers.h"
 #include "egIndexes.h"
 
-using namespace egIndexes3Namespace;
+using namespace egIndexesNamespace;
 
 template <typename KeyType> void EgFingers<KeyType>::PrintFingerInfo(egFinger<KeyType>& fingerInfo, const QString &theMessage)
 {
@@ -74,6 +83,44 @@ template <typename KeyType> void EgFingers<KeyType>::CloseIndexFiles()
     fingerFile.close();
 }
 
+
+template <typename KeyType> void EgFingers<KeyType>::InitRootHeader()
+{
+    fingersRootHeader.minKey = indexChunks-> theKey;
+    fingersRootHeader.maxKey = indexChunks-> theKey;
+    fingersRootHeader.myLevel = 1;
+    fingersRootHeader.itemsCount = 1;
+    fingersRootHeader.nextChunkOffset = indexChunks-> rootHeaderSize; // FIXME check
+    fingersRootHeader.myChunkOffset = 0;
+    fingersRootHeader.myOffset = 0;
+}
+
+
+template <typename KeyType> void EgFingers<KeyType>::LoadRootHeader()
+{
+    fingerStream.device()->seek(0);
+
+    fingerStream >> fingersRootHeader.minKey;
+    fingerStream >> fingersRootHeader.maxKey;
+    fingerStream >> fingersRootHeader.myLevel;
+    fingerStream >> fingersRootHeader.itemsCount;
+    fingerStream >> fingersRootHeader.nextChunkOffset;
+}
+
+template <typename KeyType> void EgFingers<KeyType>::StoreRootHeader(bool minMaxOnly)
+{
+    fingerStream.device()->seek(0);
+
+    fingerStream << (KeyType) fingersRootHeader.minKey;
+    fingerStream << (KeyType) fingersRootHeader.maxKey;
+
+    if (! minMaxOnly)
+    {
+        fingerStream << (fingersLevelType) fingersRootHeader.myLevel;
+        fingerStream << (keysCountType) fingersRootHeader.itemsCount;
+        fingerStream << (quint64) fingersRootHeader.nextChunkOffset;
+    }
+}
 
 template <typename KeyType> inline void EgFingers<KeyType>::InitFingersChunk()
 {
@@ -152,6 +199,7 @@ template <typename KeyType> inline void EgFingers<KeyType>::ReadFinger(QDataStre
     localFingersStream >> theFinger.nextChunkOffset;
 }
 
+/*
 template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetToInsert()
 {
     int chunkDirection;  // shift fingers until match
@@ -244,7 +292,7 @@ template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetToInsert(
 
     return 0;
 }
-
+*/
 
 template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetFirst(QDataStream &localFingersStream, bool isExactEqual)
 {
@@ -671,7 +719,7 @@ template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetLast(bool
     return -3; // emergency counter overflow
 }
 */
-
+/*
 template <typename KeyType> int EgFingers<KeyType>::SelectClosestFingerToInsert(QDataStream& localFingersStream)
 {
 
@@ -726,8 +774,8 @@ template <typename KeyType> int EgFingers<KeyType>::SelectClosestFingerToInsert(
 
     return 0;   // finger found
 }
-
-
+*/
+/*
 template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkToInsert()
 {
     parentFinger = fingersRootHeader;
@@ -762,8 +810,9 @@ template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkToInsert()
 
     return 0;
 }
+*/
 
-template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkToInsert2()
+template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkToInsert()
 {
     int res = 0;
 
@@ -840,6 +889,14 @@ template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkFirst(bool isE
 
         res = FindNextLevelOffsetFirst(localFingersStream, isExactEqual);  // get currentFinger
 
+            // FIXME debug
+/*
+        localFingersStream.device()->seek(egChunkVolume * oneFingerSize);
+        localFingersStream >> parentFingerOffset;
+
+        qDebug() << "parentFingerOffset 1 = " << parentFingerOffset << "parentFingerOffset 2 = " << parentFinger.myChunkOffset + parentFinger.myOffset << FN;
+        */
+
         currentFinger.myChunkOffset = parentFinger.nextChunkOffset; // shortcut (???)
 
         // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
@@ -895,7 +952,16 @@ template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkLast(bool isEx
 
         // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
 
+                    // FIXME debug
+/*
+        localFingersStream.device()->seek(egChunkVolume * oneFingerSize);
+        localFingersStream >> parentFingerOffset;
+
+        qDebug() << "parentFingerOffset 1 = " << parentFingerOffset << "parentFingerOffset 2 = " << parentFinger.myChunkOffset + parentFinger.myOffset << FN;
+        */
+
         currentFinger.myChunkOffset = parentFinger.nextChunkOffset; // shortcut (???)
+
 
         if (currentFinger.myLevel > 0)
             parentFinger = currentFinger;
@@ -961,7 +1027,8 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterInser
     {
         UpdateTheFinger(fingersRootHeader, false);   // false means do not increment count
 
-        indexChunks-> StoreRootHeader(true); // true means store min max only
+        // indexChunks-> StoreRootHeader(true); // true means store min max only
+        StoreRootHeader(true);
     }
 
     return 0;
@@ -969,28 +1036,62 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterInser
 
 template <typename KeyType> int EgFingers<KeyType>::UpdateFingerAfterDelete()
 {
-    fingerStream.device()->seek(parentFingerOffset + sizeof(KeyType) * 2 );
+        // assume currentFingerOffset != 0
+    keysCountType fingersCount;
+
+    bool isFirstFinger;
+    bool isLastFinger;
+
+    fingerStream.device()->seek(currentFingerOffset + sizeof(KeyType) * 2 );
     fingerStream << indexChunks-> chunkCount;
 
     // qDebug() << "newKeysCount = " << (int) indexChunks-> chunkCount << FN;
 
     if (maxValueChanged)
     {
-        fingerStream.device()->seek(parentFingerOffset + sizeof(KeyType));
+        fingerStream.device()->seek(currentFingerOffset + sizeof(KeyType));
         fingerStream << newMaxValue;
 
         // qDebug() << "newMaxValue = " << (int) newMaxValue << FN;
     }
     else if (minValueChanged)
     {
-        fingerStream.device()->seek(parentFingerOffset);
+        fingerStream.device()->seek(currentFingerOffset);
         fingerStream << newMinValue;
 
         // qDebug() << "newMinValue = " << (int) newMinValue << FN;
     }
 
     if (maxValueChanged || minValueChanged)
-        UpdateFingersChainAfterDelete();
+    {
+            // calc this chunk offset
+        quint64 fingersChunkOffset = currentFingerOffset - ( currentFingerOffset % fingersChunkSize );
+
+            // get next parent finger offset
+        fingerStream.device()->seek(fingersChunkOffset + egChunkVolume * oneFingerSize);
+        fingerStream >> parentFingerOffset;
+
+            // check first/last finger for min/max update of root finger
+        keysCountType fingerNum = (currentFingerOffset - fingersChunkOffset) / oneFingerSize;
+
+        if (parentFingerOffset)
+        {
+            fingerStream.device()->seek(parentFingerOffset + sizeof(KeyType)*2);
+            fingerStream >> fingersCount;
+        }
+        else
+            fingersCount = fingersRootHeader.itemsCount;
+
+        isFirstFinger = (fingerNum == 0);
+        isLastFinger  = (fingerNum == fingersCount-1);
+
+        if ((isFirstFinger && minValueChanged) || (isLastFinger && maxValueChanged))
+            UpdateFingersChainAfterDelete();
+    }
+
+        // reset
+    maxValueChanged = false;
+    minValueChanged = false;
 
     return 0;
 }
@@ -1004,31 +1105,48 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterDelet
     bool isFirstFinger;
     bool isLastFinger;
 
-        // calc this chunk offset
-    quint64 fingersChunkOffset = parentFingerOffset - ( parentFingerOffset % fingersChunkSize );
-
-        // check first/last finger for min/max update of root finger
-    keysCountType fingerNum = (parentFingerOffset - fingersChunkOffset) / oneFingerSize;
-
-    fingerStream.device()->seek(parentFingerOffset + sizeof(KeyType)*2);
-    fingerStream >> fingersCount;
-
-    isFirstFinger = (fingerNum == 0);
-    isLastFinger  = (fingerNum == fingersCount-1);
-
-        // get next parent finger offset
-    fingerStream.device()->seek(fingersChunkOffset + egChunkVolume * oneFingerSize);
-    fingerStream >> parentFingerOffset;
-
-        // qDebug() << "parentFingerOffset = " << parentFingerOffset << FN;
-
-    while (parentFingerOffset) // not root
+        // check / update root header
+    if(! parentFingerOffset)
     {
+        if (maxValueChanged || minValueChanged)
+        {
+            if (maxValueChanged)
+                fingersRootHeader.maxKey =  newMaxValue;
+            else if (minValueChanged)
+                fingersRootHeader.minKey =  newMinValue;
 
-        fingerStream.device()->seek(parentFingerOffset + sizeof(KeyType)*2);
-        fingerStream >> fingersCount;
+            StoreRootHeader(true);
+        }
 
-        if (maxValueChanged && isLastFinger)
+        return 0;
+    }
+
+    while (parentFingerOffset && (maxValueChanged || minValueChanged))
+    {
+        currentFingerOffset = parentFingerOffset; // up
+
+            // calc this chunk offset
+        quint64 fingersChunkOffset = currentFingerOffset - ( currentFingerOffset % fingersChunkSize );
+
+            // get next parent finger offset
+        fingerStream.device()->seek(fingersChunkOffset + egChunkVolume * oneFingerSize);
+        fingerStream >> parentFingerOffset;
+
+            // check first/last finger for min/max update of root finger
+        keysCountType fingerNum = (currentFingerOffset - fingersChunkOffset) / oneFingerSize;
+
+        if (parentFingerOffset)
+        {
+            fingerStream.device()->seek(parentFingerOffset + sizeof(KeyType)*2);
+            fingerStream >> fingersCount;
+        }
+        else
+            fingersCount = fingersRootHeader.itemsCount;
+
+        isFirstFinger = (fingerNum == 0);
+        isLastFinger  = (fingerNum == fingersCount-1);
+
+        if (maxValueChanged)
         {
             fingerStream.device()->seek(parentFingerOffset + sizeof(KeyType));
             fingerStream >> oldValue;
@@ -1038,7 +1156,8 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterDelet
                 fingerStream.device()->seek(parentFingerOffset + sizeof(KeyType));
                 fingerStream << newMaxValue;
             }
-            else
+
+            if ((newMaxValue >= oldValue) || (! isLastFinger))
             {
                 maxValueChanged = false;
                 break;
@@ -1046,7 +1165,7 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterDelet
 
             // qDebug() << "newMaxValue = " << newMaxValue << FN;
         }
-        else if (minValueChanged && isFirstFinger)
+        else if (minValueChanged)
         {
             fingerStream.device()->seek(parentFingerOffset);
             fingerStream >> oldValue;
@@ -1056,7 +1175,8 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterDelet
                 fingerStream.device()->seek(parentFingerOffset);
                 fingerStream << newMinValue;
             }
-            else
+
+            if ((newMinValue <= oldValue) || (! isFirstFinger))
             {
                 minValueChanged = false;
                 break;
@@ -1070,33 +1190,22 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterDelet
             minValueChanged = false;
             break;
         }
-            // calc this chunk offset
-        fingersChunkOffset = parentFingerOffset - ( parentFingerOffset % fingersChunkSize );
-        fingerNum = (parentFingerOffset - fingersChunkOffset) / oneFingerSize;
+    }   // while
 
-        fingerStream.device()->seek(parentFingerOffset + sizeof(KeyType)*2);
-        fingerStream >> fingersCount;
+        // qDebug() << "parentFingerOffset = " << parentFingerOffset << FN;
 
-        isFirstFinger = (fingerNum == 0);
-        isLastFinger  = (fingerNum == (fingersCount-1));
-
-            // get next parent finger offset
-        fingerStream.device()->seek(fingersChunkOffset + egChunkVolume * oneFingerSize);
-        fingerStream >> parentFingerOffset;
-    }
-
-        // update root header
-    if ((maxValueChanged && isLastFinger) || (minValueChanged && isFirstFinger))
+        // check / update root header
+    if(! parentFingerOffset)
     {
-        if (maxValueChanged && isLastFinger)
-            fingersRootHeader.maxKey =  newMaxValue;
-        else if (minValueChanged && isFirstFinger)
-            fingersRootHeader.minKey =  newMinValue;
+        if (maxValueChanged || minValueChanged)
+        {
+            if (maxValueChanged)
+                fingersRootHeader.maxKey =  newMaxValue;
+            else if (minValueChanged)
+                fingersRootHeader.minKey =  newMinValue;
 
-        indexChunks-> indexStream.device()->seek(0);
-
-        indexChunks-> indexStream << fingersRootHeader.minKey;
-        indexChunks-> indexStream << fingersRootHeader.maxKey;
+            StoreRootHeader(true);
+        }
     }
 
         // reset
@@ -1106,89 +1215,139 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterDelet
     return 0;
 }
 
-template <typename KeyType> bool EgFingers<KeyType>::DeleteSpecificFinger()
+template <typename KeyType> void EgFingers<KeyType>::DeleteSpecificFinger()
 {
-    keysCountType fingersCount;
-
     bool isFirstFinger;
     bool isLastFinger;
 
-    // calc this chunk offset
-    quint64 fingersChunkOffset = parentFingerOffset - ( parentFingerOffset % fingersChunkSize );
+    KeyType oldValue;
 
-    // qDebug() << "parentFingerOffset = " << parentFingerOffset << FN;
+    QDataStream localFingersStream(&fingersBA, QIODevice::ReadWrite);
 
-    // check first/last finger for min/max update
-    keysCountType fingerNum = (parentFingerOffset - fingersChunkOffset) / oneFingerSize;
-
-    fingerStream.device()->seek(parentFingerOffset + sizeof(KeyType)*2);
-    fingerStream >> fingersCount;
-
-        // update count
-    fingerStream.device()->seek(parentFingerOffset + sizeof(KeyType)*2);
-    fingerStream >> fingersCount;
+        // calc this chunk offset and finger position
+    quint64 fingersChunkOffset = currentFingerOffset - ( currentFingerOffset % fingersChunkSize );
+    keysCountType fingerNum = (currentFingerOffset - fingersChunkOffset) / oneFingerSize;
 
     isFirstFinger = (fingerNum == 0);
-    isLastFinger  = (fingerNum == fingersCount-1);
+    isLastFinger  = (fingerNum == currentKeysCount-1);
 
-        // FIXME
+    LoadFingersChunk(fingersChunkOffset);
 
-    if (fingersCount > 1)
+        // update min/max
+    if (isLastFinger)
     {
-            // load chunk
-        LoadFingersChunk(fingersChunkOffset);
-        // memcpy(fingersBA.data(), fingersChunk, fingersChunkSize);
+        memcpy(fingersBA.data(), fingersChunk, fingersChunkSize);
 
-        // PrintFingersChunk(fingersChunk, "fingers chunk before delete " + FNS);
+        localFingersStream.device()->seek(fingerNum * oneFingerSize + sizeof(KeyType));
+        localFingersStream >> oldValue;
+
+        localFingersStream.device()->seek((fingerNum - 1) * oneFingerSize + sizeof(KeyType));
+        localFingersStream >> newMaxValue;
+
+        if (newMaxValue < oldValue)
+        {
+            maxValueChanged = true;
+        }
+    }
+    else if (isFirstFinger)
+    {
+        memcpy(fingersBA.data(), fingersChunk, fingersChunkSize);
+
+        localFingersStream.device()->seek(0);
+        localFingersStream >> oldValue;
+
+        localFingersStream.device()->seek(oneFingerSize);
+        localFingersStream >> newMinValue;
+
+        if (newMinValue > oldValue)
+        {
+            minValueChanged = true;
+        }
+    }
+
+    // PrintFingersChunk(fingersChunk, "fingers chunk before delete " + FNS);
 
         // move tail if required
-        if (! isLastFinger)
-        {
-            memmove (fingersChunk + fingerNum*oneFingerSize, fingersChunk + (fingerNum+1)*oneFingerSize,  oneFingerSize*(fingersCount - fingerNum)); // + 1
-        }
-            // write zeroes to last and decrease count
-        memmove (fingersChunk + oneFingerSize*(fingersCount - 1), zeroFingersChunk,  oneFingerSize);
-
-        // PrintFingersChunk(fingersChunk, "fingers chunk after delete " + FNS);
-
-            // store chunk
-        StoreFingersChunk(fingersChunkOffset,fingersChunk);
-
-            // TODO - update min/max
-
-
-    }
-    else   // write zeroes
+    if (! isLastFinger)
     {
-        StoreFingersChunk(fingersChunkOffset, zeroFingersChunk);
+        memmove (fingersChunk + fingerNum*oneFingerSize, fingersChunk + (fingerNum+1)*oneFingerSize,  oneFingerSize*(currentKeysCount - fingerNum)); // + 1
     }
+        // write zeroes to last and decrease count
+    memmove (fingersChunk + oneFingerSize*(currentKeysCount - 1), zeroFingersChunk,  oneFingerSize);
 
-    // update parent
+    // PrintFingersChunk(fingersChunk, "fingers chunk after delete " + FNS);
 
-    fingerStream.device()->seek(fingersChunkOffset + egChunkVolume * oneFingerSize);
-    fingerStream >> parentFingerOffset;
-
-    if (parentFingerOffset)
-    {
-        fingerStream.device()->seek(parentFingerOffset + sizeof(KeyType)*2);
-        fingerStream << (keysCountType)(fingersCount - 1);
-    }
-
-    return (fingersCount <= 1); // TODO process < 1
+    StoreFingersChunk(fingersChunkOffset, fingersChunk);    
 }
 
-template <typename KeyType> void EgFingers<KeyType>::DeleteFinger()
+template <typename KeyType> void EgFingers<KeyType>::DeleteFingersChunk(quint64 fingersChunkOffset)
 {
-    bool isOnlyFinger = true; // stub
+    StoreFingersChunk(fingersChunkOffset, zeroFingersChunk);
+}
 
-    while (parentFingerOffset && isOnlyFinger) // not root and to update
-    {
-        isOnlyFinger = DeleteSpecificFinger(); // parentFingerOffset updated
-    }
+
+template <typename KeyType> void EgFingers<KeyType>::DeleteParentFinger()
+{
+    // bool isOnlyFinger = true; // stub
+
+    // keysCountType fingersCount;
+
+    // quint64 currentFingerOffset = parentFingerOffset;
 
     if (parentFingerOffset)
-        UpdateFingersChainAfterDelete(); // FIXME
+    {
+        currentFingerOffset = parentFingerOffset; // up
 
+            // calc this chunk offset
+        quint64 fingersChunkOffset = parentFingerOffset - ( parentFingerOffset % fingersChunkSize );
+
+            // get parent
+        fingerStream.device()->seek(fingersChunkOffset + egChunkVolume * oneFingerSize);
+        fingerStream >> parentFingerOffset;
+
+        // quint64 parentChunkOffset = parentFingerOffset - ( parentFingerOffset % fingersChunkSize );
+
+        if (parentFingerOffset) // parent not root
+        {
+            // check count
+            fingerStream.device()->seek(parentFingerOffset + sizeof(KeyType)*2);
+            fingerStream >> currentKeysCount;
+        }
+        else
+            currentKeysCount = fingersRootHeader.itemsCount;
+
+        if (currentKeysCount > 1) // not Only One Finger
+        {
+            DeleteSpecificFinger(); // only one by currentFingerOffset and currentKeysCount
+
+                // decrease parent items count
+            if (parentFingerOffset) // parent not root
+            {
+                fingerStream.device()->seek(parentFingerOffset + sizeof(KeyType) * 2 );
+                fingerStream << currentKeysCount-1;
+            }
+            else
+            {
+                fingersRootHeader.itemsCount--;
+                StoreRootHeader();
+            }
+
+            UpdateFingersChainAfterDelete(); // update min/max - parent and up
+        }
+        else // == 1
+        {
+            DeleteFingersChunk(fingersChunkOffset);
+
+            DeleteParentFinger(); // recursion
+        }
+    }
+    else
+    {
+            // remove all if no more fingers
+        RemoveIndexFiles(IndexFileName);
+
+        indexChunks-> RemoveIndexFiles(IndexFileName);
+    }
 }
 
 template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterSplit()
@@ -1264,8 +1423,8 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterSplit
             splitParentChunk = true;
 
 
-            if (parentFinger.myLevel < fingersRootHeader.myLevel)
-            {
+            //if (parentFinger.myLevel < fingersRootHeader.myLevel)
+            //{
                 /*
                 PrintFingerInfo(parentFinger, "parentFinger " + FNS);
                 PrintFingerInfo(newFinger, "newFinger " + FNS);
@@ -1274,18 +1433,18 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterSplit
                 qDebug() << "parentFinger.newOffset = " << hex << (int) (parentFinger.myChunkOffset + parentFinger.myOffset + oneFingerSize) << FN;
                 */
 
-                StoreParentOffset(newFinger.nextChunkOffset, parentFinger.myChunkOffset + parentFinger.myOffset + oneFingerSize);
+                // StoreParentOffset(newFinger.nextChunkOffset, parentFinger.myChunkOffset + parentFinger.myOffset + oneFingerSize); // wrong !!
 
                     // shift parent up
                 // fingersChain.removeLast();
-            }
+            //}
         }
     }
     while ((parentFinger.myLevel < fingersRootHeader.myLevel) && splitParentChunk);
 
     if (splitParentChunk && (parentFinger.myLevel == fingersRootHeader.myLevel)) // new root chunk is required
     {
-        qDebug() << "fingersChain.count() = " << fingersChain.count() << FN;
+        // qDebug() << "fingersChain.count() = " << fingersChain.count() << FN;
 /*
         PrintFingerInfo(parentFinger, "parentFinger " + FNS);
         PrintFingerInfo(currentFinger, "currentFinger " + FNS);
@@ -1295,7 +1454,7 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterSplit
         if (appendMode)
             currentFinger = fingersRootHeader;
             // shift up
-        fingersRootHeader.nextChunkOffset = fingerStream.device()->size();
+        fingersRootHeader.nextChunkOffset = fingerStream.device()->size(); // up
         AddNewRootChunk(localFingersStream);
 
         StoreParentOffset(currentFinger.nextChunkOffset, fingersRootHeader.nextChunkOffset); // FIXME CHECK
@@ -1306,7 +1465,9 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterSplit
         fingersRootHeader.myLevel++;
         fingersRootHeader.itemsCount = 2; // new top chunk
 
-        indexChunks-> StoreRootHeader();
+        // indexChunks-> StoreRootHeader();
+
+        StoreRootHeader();
 
         // PrintFingerInfo(fingersRootHeader, "fingersRootHeader " + FNS);
     }
@@ -1316,7 +1477,9 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterSplit
         {
             UpdateTheFinger(fingersRootHeader);
 
-            indexChunks-> StoreRootHeader();
+            // indexChunks-> StoreRootHeader();
+
+            StoreRootHeader();
         }
         else
         {
@@ -1398,6 +1561,11 @@ template <typename KeyType> int EgFingers<KeyType>::InsertSplittedFinger(QDataSt
     // PrintFingerInfo(parentFinger, "parentFinger " + FNS);
 
     StoreFingersChunk(parentFinger.nextChunkOffset, fingersBA.data());
+
+    if (currentFinger.myLevel == 0)
+        indexChunks-> StoreFingerOffset(parentFinger.nextChunkOffset + currentFinger.myOffset + oneFingerSize);
+    else
+        StoreParentOffset(newFinger.nextChunkOffset, parentFinger.nextChunkOffset + currentFinger.myOffset + oneFingerSize);
 
     // newFingerOffset = parentFinger.nextChunkOffset + posToInsert * oneFingerSize; // current level for back link
 
@@ -1507,6 +1675,7 @@ template <typename KeyType> int EgFingers<KeyType>::SplitFingersChunk(QDataStrea
         localFingersStream.device()->seek(egChunkVolume * oneFingerSize + sizeof(quint64));
         localFingersStream << currentFinger.myLevel;
 
+            // get new min/max
         memcpy(newFingersChunk, fingersBA.constData(), fingersChunkSize);
 
         localFingersStream.device()->seek(0);
@@ -1518,6 +1687,25 @@ template <typename KeyType> int EgFingers<KeyType>::SplitFingersChunk(QDataStrea
         newFinger.itemsCount = egChunkVolume/2; // level up
 
         // qDebug() << "newFinger.minKey =  " << hex << (int) newFinger.minKey << ", newFinger.maxKey = " << hex << (int) newFinger.maxKey << FN;
+
+            // update parent backlinks - shifted fingers
+        for (int i=posToInsert; i < currentFinger.itemsCount; i++)
+        {
+            quint64 nextLevelOffset;
+
+                // get next level offset
+            localFingersStream.device()->seek(i * oneFingerSize + sizeof(KeyType)*2);
+            localFingersStream >> nextLevelOffset;
+
+                // write actual backlink
+            if (currentFinger.myLevel == 0)
+            {
+                indexChunks-> indexesChunkOffset = nextLevelOffset;
+                indexChunks-> StoreFingerOffset(currentFinger.myChunkOffset + i * oneFingerSize);
+            }
+            else
+              StoreParentOffset(nextLevelOffset, currentFinger.myChunkOffset + i * oneFingerSize);
+        }
 
     }
     else // insert to second Part
@@ -1559,6 +1747,25 @@ template <typename KeyType> int EgFingers<KeyType>::SplitFingersChunk(QDataStrea
         localFingersStream >> newFinger.maxKey;
 
         newFinger.itemsCount = egChunkVolume/2+1; // level up
+
+            // update parent backlinks - all fingers
+        for (int i=0; i < newFinger.itemsCount; i++)
+        {
+            quint64 nextLevelOffset;
+
+                // get next level offset
+            localFingersStream.device()->seek(i * oneFingerSize + sizeof(KeyType)*2);
+            localFingersStream >> nextLevelOffset;
+
+                // write actual backlink
+            if (currentFinger.myLevel == 0)
+            {
+                indexChunks-> indexesChunkOffset = nextLevelOffset;
+                indexChunks-> StoreFingerOffset(currentFinger.myChunkOffset + i * oneFingerSize);
+            }
+            else
+                StoreParentOffset(nextLevelOffset, currentFinger.myChunkOffset + i * oneFingerSize);
+        }
 
         // qDebug() << "newFinger.minKey =  " << hex << (int) newFinger.minKey << ", newFinger.maxKey = " << hex << (int) newFinger.maxKey << FN;
 
@@ -1617,8 +1824,17 @@ template <typename KeyType> int EgFingers<KeyType>::AppendFingersChunk(QDataStre
     localFingersStream.device()->seek(0);
     WriteFinger(localFingersStream, newFinger);
 
+        // prepare parent back link
+    // indexChunks-> indexesChunkOffset = newFinger.nextChunkOffset; // already set in indexes
+    if (currentFinger.myLevel > 0)
+        StoreParentOffset(newFinger.nextChunkOffset, fingerStream.device()->size()); // FIXME check
+
     newFinger.nextChunkOffset = fingerStream.device()->size();  // level up
     // newFingerChunkOffset = fingerStream.device()->size();            // current level
+
+            // set parent back link
+    if (currentFinger.myLevel == 0)
+        indexChunks-> StoreFingerOffset(newFinger.nextChunkOffset);
 
     localFingersStream.device()->seek(egChunkVolume * oneFingerSize + sizeof(quint64));
     localFingersStream << (fingersLevelType) (currentFinger.myLevel);

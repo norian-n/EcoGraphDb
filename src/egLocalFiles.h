@@ -1,3 +1,12 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
+ *
+ * License: propietary open source, free for non-commercial applications
+ *
+ */
+
 #ifndef EG_LOCAL_FILES_H
 #define EG_LOCAL_FILES_H
 
@@ -15,10 +24,6 @@ class EgDataNodesType;
 class EgDataFiles // Data Files operations
 {
 public:
-    // DataObjects* d_class;                    // link to ObjDB class ??
-
-    // EgFieldDescriptors* FD;                     // field descriptors ptr - FIXME
-    // EgIndex* indexes;                           // indexes class ptr
 
     EgDataNodeTypeMetaInfo* metaInfo;
 

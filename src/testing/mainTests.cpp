@@ -1,3 +1,12 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
+ *
+ * License: propietary open source, free for non-commercial applications
+ *
+ */
+
 #include <QtDebug>
 #include <QFile>
 #include <QDir>
@@ -41,6 +50,7 @@ int main() // int argc, char *argv[])
 
 
     // res = res && indexTests.testEgDataIndexAddFirst(testIndexFiles);
+
 
     res = res && indexTests.testEgDataInsertIndexes(testIndexFiles);
 

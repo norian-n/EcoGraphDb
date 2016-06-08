@@ -1,7 +1,7 @@
 /*
  * EcoGraphDB - Exo Cortex Graph Database Engine
  *
- * Copyright (c) 2014 Dmitry 'Norian' Solodkiy
+ * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
  *
  * License: propietary open source, free for non-commercial applications
  *
@@ -20,12 +20,8 @@
 #define FNS QString(" [") + __FUNCTION__ + ", " + __FILE__ + "] "
 #define LOCAL NULL          // alias : use local files, not server link
 
-    // local files : index size
-// const quint64 IndexRecSize2 = 4 + 8; // bytes : ID (4) + pos (8)
-
     // indexed flag alias
 const bool IsIndexed = true;
-// const qint16 primIndex = -1; // primary index alias for indexes proc
 
     // ID and other types
 typedef quint32 EgDataNodesTypeID;    // data object class ID type
@@ -41,28 +37,10 @@ typedef int (*FilterCallbackType) (QList<QVariant>& obj_fields_values, QList<QVa
 // filter callback type (remote filter could be set via Qt plugins)
 typedef int (*FilterCallbackType2) (EgDataNode& data_object, QList<QVariant>& filter_values);
 // sample: int FilterTest (DataObj& data_object, QList<QVariant>& filter_values)
-/*
-enum DataFieldType  // supported Data Field types
-{
-    d_var,      // QVariant
-    d_int2,      // int
-    d_float,    // float (32 bit)
-    d_date,     // converted to qint32
-    d_string,   // QString
-    d_link,     // reference OBJ_ID
-    d_double,   // double (64 bit)
-    d_time,     // converted to qint32
-    d_datetime, // converted to qint64 as superposition of d_date and d_time
-    d_attribute // named atttribute - struct NamedAttribute below
-};
-*/
-    // fixed field sizes and names directly related to DataFieldType (!!!) (0-variable size) CHECKME obsolete ?
-// const rec_size_type d_type_sizes[9] = {0,4,4,4,0,sizeof(obj_id_type),8,4,8};
-const char* const dtype_names[9] = {"d_var", "d_int32", "d_float", "d_date", "d_string", "d_link", "d_double", "d_time", "d_datetime"};
 
     // index-based filter type
 
-enum FilterType // filter type
+enum FilterType     // fortran-style indexes logical abbreviations
 {
     EQ, // ==
     GE, // >=
@@ -72,13 +50,13 @@ enum FilterType // filter type
     NE  // !=
 };
 
-enum LOType // logical operation type
+enum LOType         // indexes logical operations
 {
     AND,
     OR
 };
 
-    // internal record status (similar to model data_status below)
+    // internal data node status (similar to Qt model data_status below)
 enum DataStatusType // data status type
 {
     is_unchanged,
@@ -90,7 +68,7 @@ enum DataStatusType // data status type
     // Qt data model related constants - service fields location
 
 const int data_status = Qt::UserRole + 1;   // data_status_type
-const int data_id     = Qt::UserRole + 2;   // ObjDb OBJ_ID
+const int data_id     = Qt::UserRole + 2;   // egDb data node ID
 
     // forward decl
 // class DFieldDescriptors;
@@ -113,6 +91,25 @@ struct NamedAttribute
 //                              JUNKYARD
 // =============================================================================================
 
+/*
+enum DataFieldType  // supported Data Field types
+{
+    d_var,      // QVariant
+    d_int2,      // int
+    d_float,    // float (32 bit)
+    d_date,     // converted to qint32
+    d_string,   // QString
+    d_link,     // reference OBJ_ID
+    d_double,   // double (64 bit)
+    d_time,     // converted to qint32
+    d_datetime, // converted to qint64 as superposition of d_date and d_time
+    d_attribute // named atttribute - struct NamedAttribute below
+};
+*/
+    // fixed field sizes and names directly related to DataFieldType (!!!) (0-variable size) CHECKME obsolete ?
+// const rec_size_type d_type_sizes[9] = {0,4,4,4,0,sizeof(obj_id_type),8,4,8};
+// const char* const dtype_names[9] = {"d_var", "d_int32", "d_float", "d_date", "d_string", "d_link", "d_double", "d_time", "d_datetime"};
+
 // const char* const stype_names[4] = {"is_unchanged", "is_added", "is_modified", "is_deleted"};
 
 /*
@@ -134,5 +131,9 @@ const data_status_type is_added      = 1;
 const data_status_type is_modified   = 2;
 const data_status_type is_deleted    = 4;
 */
+
+// local files : index size
+// const quint64 IndexRecSize2 = 4 + 8; // bytes : ID (4) + pos (8)
+// const qint16 primIndex = -1; // primary index alias for indexes proc
 
 #endif // EG_CORE_H

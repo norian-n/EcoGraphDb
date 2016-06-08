@@ -1,8 +1,17 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
+ *
+ * License: propietary open source, free for non-commercial applications
+ *
+ */
+
 #include "../egDataNodesType.h"
 #include "egIndexes.h"
 #include "egFingers.h"
 
-using namespace egIndexes3Namespace;
+using namespace egIndexesNamespace;
 
 template <typename KeyType> void EgIndexes<KeyType>::RemoveIndexFiles(const QString& IndexFileName)
 {
@@ -121,7 +130,7 @@ template <typename KeyType> int EgIndexes<KeyType>::StoreFingerOffset(quint64 fi
     indexStream << fingerOffset;
 
     // qDebug() << "indexesChunkOffset = " << hex << (int) indexesChunkOffset
-    //          << ", fingerOffset = " << hex << (int) fingerOffset << FN;
+    //         << ", fingerOffset = " << hex << (int) fingerOffset << FN;
 
 
     return 0; // FIXME
@@ -963,7 +972,6 @@ template <typename KeyType> int EgIndexes<KeyType>::UpdateDataOffset(QDataStream
 
 template <typename KeyType> int EgIndexes<KeyType>::DeleteDataOffset(QDataStream &localIndexStream)
 {
-    int newMaxKey, newMinKey;
 
         // get count
     localIndexStream.device()->seek((egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2));
@@ -1034,11 +1042,6 @@ template <typename KeyType> void EgIndexes<KeyType>::DeleteIndex()
 
     if (FindIndexByDataOffset(localIndexStream) == 0) // index found
     {
-
-            // get parent ptr
-        localIndexStream.device()->seek((egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2) + sizeof(keysCountType));
-        localIndexStream >> fingersTree-> parentFingerOffset;
-
         // qDebug() << "delete index of parent offset: " << hex << (int) fingersTree-> parentFingerOffset << FN;
 
         // qDebug() << "chunkCount =  " << hex << (int) chunkCount << FN;
@@ -1047,15 +1050,24 @@ template <typename KeyType> void EgIndexes<KeyType>::DeleteIndex()
         {
             DeleteDataOffset(localIndexStream);
 
+                // get finger ptr
+            localIndexStream.device()->seek((egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2) + sizeof(keysCountType));
+            localIndexStream >> fingersTree-> currentFingerOffset;
+
             fingersTree-> UpdateFingerAfterDelete();
         }
         else if (chunkCount == 1)
         {
             RemoveChunkFromChain();
 
-            fingersTree-> DeleteFinger();
+                // get finger ptr
+            localIndexStream.device()->seek((egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2) + sizeof(keysCountType));
+            localIndexStream >> fingersTree-> parentFingerOffset;
+
+            fingersTree-> DeleteParentFinger(); // probably recursive
         }
-        // TODO else error
+        else
+            qDebug() << "Bad indexes count at " << indexFile.fileName() << " Key = " << (int) theKey << " Offset = " << oldDataOffset << FN;
     }
     else
         qDebug() << "Indexes chunk not found " << indexFile.fileName() << " Key = " << (int) theKey << " Offset = " << oldDataOffset << FN;

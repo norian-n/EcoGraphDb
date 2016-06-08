@@ -1,3 +1,12 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
+ *
+ * License: propietary open source, free for non-commercial applications
+ *
+ */
+
 #ifndef EG_DATA_NODES_TYPE_H
 #define EG_DATA_NODES_TYPE_H
 
@@ -10,7 +19,6 @@
 #include "egEntryNodes.h"
 
 class EgDataClient;     // server connection functionality
-// class EgDataNodesLinkType;
 
 struct EgRemoteConnect    // server connection info
 {
@@ -30,9 +38,6 @@ public:
   EgDataNodeTypeMetaInfo metaInfo;
 
   EgEntryNodes entryNodesInst;
-
-  // QMap <QString, QMultiMap <EgDataNodeIDtype, EgLoadedLinkType> > inLinks;
-  // QMap <QString, QMultiMap <EgDataNodeIDtype, EgLoadedLinkType> > outLinks;
 
   EgDataNodesGUIconnect GUI;
 
@@ -56,7 +61,9 @@ public:
   ~EgDataNodesType();
 
         // basic operations
-  int Connect(EgGraphDatabase& myDB,const QString& nodeTypeName, EgRemoteConnect* server = NULL);   // connect to local connection or server, load fields and controls descriptions
+
+        // connect to local connection or server, load fields and controls descriptions
+  int Connect(EgGraphDatabase& myDB,const QString& nodeTypeName, EgRemoteConnect* server = NULL);
 
   int getMyLinkTypes(); // from myDB TODO
 
@@ -104,5 +111,9 @@ private:    // no copy constructors
 
 };
 
-
 #endif // EG_DATA_NODES_TYPE_H
+
+// class EgDataNodesLinkType;
+
+// QMap <QString, QMultiMap <EgDataNodeIDtype, EgLoadedLinkType> > inLinks;
+// QMap <QString, QMultiMap <EgDataNodeIDtype, EgLoadedLinkType> > outLinks;

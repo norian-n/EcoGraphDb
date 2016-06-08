@@ -1,6 +1,14 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
+ *
+ * License: propietary open source, free for non-commercial applications
+ *
+ */
+
 #include "egGraphDatabase.h"
 #include "egDataNodesLink.h"
-
 
 int EgGraphDatabase::Connect(EgDataNodesType* nType)
 {

@@ -1,3 +1,12 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
+ *
+ * License: propietary open source, free for non-commercial applications
+ *
+ */
+
 #ifndef EGENTRYNODES_H
 #define EGENTRYNODES_H
 
@@ -15,7 +24,6 @@ public:
 
       int StoreEntryNodes(EgDataNodesType &egType);
       int LoadEntryNodes(EgDataNodesType& egType);
-
 };
 
 

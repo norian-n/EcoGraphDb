@@ -1,14 +1,22 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
+ *
+ * License: propietary open source, free for non-commercial applications
+ *
+ */
+
 #ifndef EGINDEXES_CORE_H
 #define EGINDEXES_CORE_H
 
 typedef quint16 keysCountType;
 typedef quint16 fingersLevelType;
 
-namespace egIndexes3Namespace
+namespace egIndexesNamespace
 {
 
-const keysCountType egChunkVolume = 4;              // keys in chunk
-
+    const keysCountType egChunkVolume = 4;              // keys in chunk
 
 } // egIndexesNamespace
 
