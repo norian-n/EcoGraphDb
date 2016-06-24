@@ -98,6 +98,7 @@ public:
     void StoreRootHeader(bool minMaxOnly = false);
 
     int StoreFingerOffset(quint64 fingerOffset);
+    int StoreFingerOffset(quint64 chunkOffset, quint64 fingerOffset);
 
     void LoadIndexChunk(char *chunkPtr);
     int StoreIndexChunk(char* chunkPtr);

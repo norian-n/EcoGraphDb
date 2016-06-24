@@ -15,6 +15,9 @@ using namespace egIndexesNamespace;
 
 template <typename KeyType> void EgIndexes<KeyType>::RemoveIndexFiles(const QString& IndexFileName)
 {
+    if (indexFile.isOpen())
+        indexFile.close();
+
     indexFile.setFileName(IndexFileName + ".odx");
     indexFile.remove();
 }
@@ -79,6 +82,8 @@ template <typename KeyType> inline void EgIndexes<KeyType>::InitIndexChunk()
     localIndexStream.device()->seek((egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2));
     localIndexStream << (keysCountType) 1;
 
+        // parent finger offset
+    localIndexStream << (quint64) rootHeaderSize;
 
     memcpy(chunk, indexBA.constData(), indexChunkSize);
 
@@ -124,6 +129,17 @@ template <typename KeyType> void EgIndexes<KeyType>::StoreRootHeader(bool minMax
     }
 }
 
+template <typename KeyType> int EgIndexes<KeyType>::StoreFingerOffset(quint64 chunkOffset, quint64 fingerOffset)
+{
+    indexStream.device()->seek(chunkOffset + egChunkVolume * oneIndexSize + sizeof(quint64) * 2 + sizeof(keysCountType));
+    indexStream << fingerOffset;
+
+    // qDebug() << "chunkOffset = " << hex << (int) chunkOffset
+    //         << ", fingerOffset = " << hex << (int) fingerOffset << FN;
+
+    return 0; // FIXME
+}
+
 template <typename KeyType> int EgIndexes<KeyType>::StoreFingerOffset(quint64 fingerOffset)
 {
     indexStream.device()->seek(indexesChunkOffset + egChunkVolume * oneIndexSize + sizeof(quint64) * 2 + sizeof(keysCountType));
@@ -132,9 +148,9 @@ template <typename KeyType> int EgIndexes<KeyType>::StoreFingerOffset(quint64 fi
     // qDebug() << "indexesChunkOffset = " << hex << (int) indexesChunkOffset
     //         << ", fingerOffset = " << hex << (int) fingerOffset << FN;
 
-
     return 0; // FIXME
 }
+
 
 template <typename KeyType> int EgIndexes<KeyType>::StoreIndexChunk(char* chunkPtr)
 {
@@ -1067,10 +1083,10 @@ template <typename KeyType> void EgIndexes<KeyType>::DeleteIndex()
             fingersTree-> DeleteParentFinger(); // probably recursive
         }
         else
-            qDebug() << "Bad indexes count at " << indexFile.fileName() << " Key = " << (int) theKey << " Offset = " << oldDataOffset << FN;
+            qDebug() << "Bad indexes count at " << indexFile.fileName() << " Key = " << hex << (int) theKey << " Offset = " << hex << (int) oldDataOffset << FN;
     }
     else
-        qDebug() << "Indexes chunk not found " << indexFile.fileName() << " Key = " << (int) theKey << " Offset = " << oldDataOffset << FN;
+        qDebug() << "Indexes chunk not found " << indexFile.fileName() << " Key = " << hex << (int) theKey << " Offset = " << hex << (int) oldDataOffset << FN;
 
 }
 

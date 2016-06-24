@@ -18,6 +18,8 @@ template <typename KeyType> void EgIndexFiles<KeyType>::RemoveIndexFiles()
 
 template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToUpdate()
 {
+    // qDebug() << "In OpenIndexFilesToUpdate()" << FN;
+
     int res = indexChunks.OpenIndexFilesToUpdate(IndexFileName);
     res += fingersTree.OpenIndexFilesToUpdate(IndexFileName);
 
@@ -36,6 +38,8 @@ template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToUpdate()
 
 template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToRead()
 {
+    // qDebug() << "In OpenIndexFilesToRead()" << FN;
+
     int res = indexChunks.OpenIndexFilesToRead(IndexFileName);
     res += fingersTree.OpenIndexFilesToRead(IndexFileName);
 
@@ -54,6 +58,8 @@ template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToRead()
 
 template <typename KeyType> void EgIndexFiles<KeyType>::CloseIndexFiles()
 {
+    // qDebug() << "In CloseIndexFiles()" << FN;
+
     indexChunks.CloseIndexFiles();
     fingersTree.CloseIndexFiles();
 }

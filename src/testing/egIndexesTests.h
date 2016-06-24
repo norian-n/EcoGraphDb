@@ -21,11 +21,17 @@ public:
     // add first index / init
     bool testEgDataIndexAddFirst(EgIndexFiles<KeyType>& egIndexFiles);
 
+    bool testEgDataDeleteIndex(EgIndexFiles<KeyType>& egIndexFiles);
+
+    bool testEgDataIndexDelFirst(EgIndexFiles<KeyType>& egIndexFiles);
+
     bool testEgDataInsertIndexes(EgIndexFiles<KeyType>& egIndexFiles);
+
+    bool testEgDataDeleteAllIndexes(EgIndexFiles<KeyType>& egIndexFiles);
 
     bool testSelectOperations(EgIndexFiles<KeyType>& egIndexFiles);
 
-    bool testEgDataDeleteIndex(EgIndexFiles<KeyType>& egIndexFiles);
+
 
     void testShowResult(bool res, const QString &theMessage)
     {

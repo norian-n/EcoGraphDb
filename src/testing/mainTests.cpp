@@ -48,15 +48,19 @@ int main() // int argc, char *argv[])
     EgIndexFiles<qint32> testIndexFiles("IndexesTests");
     EgIndexesTests<qint32> indexTests;
 
-
-    // res = res && indexTests.testEgDataIndexAddFirst(testIndexFiles);
-
+    /*
+    res = res && indexTests.testEgDataIndexAddFirst(testIndexFiles);
+    res = res && indexTests.testEgDataIndexDelFirst(testIndexFiles);
+    */
 
     res = res && indexTests.testEgDataInsertIndexes(testIndexFiles);
+    res = res && indexTests.testEgDataDeleteAllIndexes(testIndexFiles);
+
+    // return 0; // FIXME STUB testEgDataDeleteAllIndexes
 
     // res = res && indexTests.testEgDataDeleteIndex(testIndexFiles);
 
-    res = res && indexTests.testSelectOperations(testIndexFiles);
+    // res = res && indexTests.testSelectOperations(testIndexFiles);
 
     return 0; // FIXME STUB
 

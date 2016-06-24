@@ -87,6 +87,9 @@ public:
 
     void PrintFingerInfo(egFinger<KeyType>& fingerInfo, const QString &theMessage);
     void PrintFingersChunk(char* theFingersChunk, const QString& theMessage);
+    void PrintChunkInfo(quint64 fingersChunkOffset);
+
+    void PrintAllChunksInfo(const QString& theMessage);
 
     int OpenIndexFilesToUpdate(const QString& IndexFileName);
     int OpenIndexFilesToRead(const QString& IndexFileName);
@@ -129,6 +132,14 @@ public:
     int InsertSplittedFinger(QDataStream &localFingersStream);
     int SplitFingersChunk(QDataStream &localFingersStream);
     void AddNewRootChunk(QDataStream &localFingersStream);
+
+    int InsertSplittedFinger2(QDataStream &localFingersStream);
+
+    int SplitFingersChunk2(QDataStream &localFingersStream);
+    int InsertNewFinger2(QDataStream &localFingersStream, char* theChunk, int posToInsert, int itemsCount);
+    int UpdateParentsOffsets2(QDataStream &localFingersStream, char* theChunk, quint64 myChunkOffset,  int posToInsert, int itemsCount);
+
+    void UpdateMinMax(QDataStream& localFingersStream, egFinger<KeyType>& theFinger, char* theChunk);
 
     int AppendFingersChunk(QDataStream &localFingersStream);
 
