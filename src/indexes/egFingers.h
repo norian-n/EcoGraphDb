@@ -35,6 +35,7 @@ public:
     // int rootHeaderSize;
     int oneFingerSize;
     int fingersChunkSize;
+    int rootHeaderSize;
 
     int posToInsert;
 
@@ -119,6 +120,9 @@ public:
 
     int UpdateFingerAfterDelete();
     int UpdateFingersChainAfterDelete();
+
+    int UpdateMinValueUp();
+    int UpdateMaxValueUp();
 
     void DeleteParentFinger();
     void DeleteSpecificFinger();

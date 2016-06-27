@@ -31,6 +31,7 @@ public:
     {
         indexChunks.fingersTree = &fingersTree;
         fingersTree.indexChunks = &indexChunks;
+        fingersTree.rootHeaderSize = indexChunks.rootHeaderSize; // FIXME STUB
     }
 
     ~EgIndexFiles() { }

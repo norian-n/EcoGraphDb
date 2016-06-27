@@ -65,7 +65,7 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataInsertIndexe
         egIndexFiles.AddObjToIndex();
     }
 
-    egIndexFiles.fingersTree.PrintAllChunksInfo("After insert");
+    // egIndexFiles.fingersTree.PrintAllChunksInfo("After insert");
 
     egIndexFiles.CloseIndexFiles();
 
@@ -76,7 +76,7 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataDeleteAllInd
 {
     egIndexFiles.OpenIndexFilesToUpdate();
 
-    for (int i= 0; i < 23; i++) // 14 23 19
+    for (int i= 0; i < 3; i++) // 14 23 19
     {
         /* if (i % 2)
         {
@@ -92,7 +92,7 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataDeleteAllInd
         egIndexFiles.DeleteIndex();
     }
 
-    egIndexFiles.fingersTree.PrintAllChunksInfo("After delete");
+    // egIndexFiles.fingersTree.PrintAllChunksInfo("After delete");
 
     egIndexFiles.CloseIndexFiles();
 

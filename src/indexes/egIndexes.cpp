@@ -1058,9 +1058,7 @@ template <typename KeyType> void EgIndexes<KeyType>::DeleteIndex()
 
     if (FindIndexByDataOffset(localIndexStream) == 0) // index found
     {
-        // qDebug() << "delete index of parent offset: " << hex << (int) fingersTree-> parentFingerOffset << FN;
-
-        // qDebug() << "chunkCount =  " << hex << (int) chunkCount << FN;
+        // qDebug() << "chunkCount 1 =  " << hex << (int) chunkCount << FN;
 
         if (chunkCount > 1)
         {
@@ -1070,7 +1068,18 @@ template <typename KeyType> void EgIndexes<KeyType>::DeleteIndex()
             localIndexStream.device()->seek((egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2) + sizeof(keysCountType));
             localIndexStream >> fingersTree-> currentFingerOffset;
 
+            // qDebug() << "chunkCount 2 =  " << hex << (int) chunkCount << FN;
+            qDebug() << "fingersTree-> currentFingerOffset " << hex << (int) fingersTree-> currentFingerOffset << FN;
+
+            fingersTree-> currentKeysCount = chunkCount;
+
             fingersTree-> UpdateFingerAfterDelete();
+
+            if (fingersTree-> minValueChanged)
+                fingersTree-> UpdateMinValueUp();
+            else if (fingersTree-> maxValueChanged)
+                fingersTree-> UpdateMaxValueUp();
+
         }
         else if (chunkCount == 1)
         {
