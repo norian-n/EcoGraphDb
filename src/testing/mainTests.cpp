@@ -53,8 +53,10 @@ int main() // int argc, char *argv[])
     res = res && indexTests.testEgDataIndexDelFirst(testIndexFiles);
     */
 
+    /*
     res = res && indexTests.testEgDataInsertIndexes(testIndexFiles);
     res = res && indexTests.testEgDataDeleteAllIndexes(testIndexFiles);
+    */
 
     // return 0; // FIXME STUB testEgDataDeleteAllIndexes
 
@@ -62,7 +64,7 @@ int main() // int argc, char *argv[])
 
     // res = res && indexTests.testSelectOperations(testIndexFiles);
 
-    return 0; // FIXME STUB
+    // return 0; // FIXME STUB
 
 
 

@@ -76,7 +76,7 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataDeleteAllInd
 {
     egIndexFiles.OpenIndexFilesToUpdate();
 
-    for (int i= 0; i < 3; i++) // 14 23 19
+    for (int i= 0; i < 22; i++) // 14 23 19
     {
         /* if (i % 2)
         {

@@ -1060,36 +1060,28 @@ template <typename KeyType> void EgIndexes<KeyType>::DeleteIndex()
     {
         // qDebug() << "chunkCount 1 =  " << hex << (int) chunkCount << FN;
 
+            // get finger ptr
+        localIndexStream.device()->seek((egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2) + sizeof(keysCountType));
+        localIndexStream >> fingersTree-> currentFingerOffset;
+
         if (chunkCount > 1)
         {
-            DeleteDataOffset(localIndexStream);
-
-                // get finger ptr
-            localIndexStream.device()->seek((egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2) + sizeof(keysCountType));
-            localIndexStream >> fingersTree-> currentFingerOffset;
+            DeleteDataOffset(localIndexStream); // count decrase
 
             // qDebug() << "chunkCount 2 =  " << hex << (int) chunkCount << FN;
-            qDebug() << "fingersTree-> currentFingerOffset " << hex << (int) fingersTree-> currentFingerOffset << FN;
+            // qDebug() << "fingersTree-> currentFingerOffset " << hex << (int) fingersTree-> currentFingerOffset << FN;
 
             fingersTree-> currentKeysCount = chunkCount;
-
             fingersTree-> UpdateFingerAfterDelete();
-
-            if (fingersTree-> minValueChanged)
-                fingersTree-> UpdateMinValueUp();
-            else if (fingersTree-> maxValueChanged)
-                fingersTree-> UpdateMaxValueUp();
-
         }
         else if (chunkCount == 1)
         {
-            RemoveChunkFromChain();
 
-                // get finger ptr
-            localIndexStream.device()->seek((egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2) + sizeof(keysCountType));
-            localIndexStream >> fingersTree-> parentFingerOffset;
+            // qDebug() << "fingersTree-> currentFingerOffset " << hex << (int) fingersTree-> currentFingerOffset << FN;
 
             fingersTree-> DeleteParentFinger(); // probably recursive
+
+            RemoveChunkFromChain();
         }
         else
             qDebug() << "Bad indexes count at " << indexFile.fileName() << " Key = " << hex << (int) theKey << " Offset = " << hex << (int) oldDataOffset << FN;
@@ -1104,19 +1096,32 @@ template <typename KeyType> void EgIndexes<KeyType>::RemoveChunkFromChain()
 {
     quint64 prevChunkPtr, nextChunkPtr;
 
-    // TODO get pointers
+        // get pointers
+    indexStream.device()->seek(indexesChunkOffset + egChunkVolume * oneIndexSize);
+    indexStream >> nextChunkPtr;
+    indexStream >> prevChunkPtr;
 
+    /* qDebug() << "indexesChunkOffset = " << hex << (int) indexesChunkOffset <<
+                "nextChunkPtr = " << hex << (int) nextChunkPtr <<
+                ", prevChunkPtr = " << hex << (int) prevChunkPtr << FN;
+    */
+
+        // update backlinks
     if (prevChunkPtr)
-    {
-        // get ptr to update
+    {        
+        indexStream.device()->seek(prevChunkPtr + egChunkVolume * oneIndexSize);
+        indexStream << nextChunkPtr;
     }
 
     if (nextChunkPtr)
     {
-        // get ptr to update
+        indexStream.device()->seek(nextChunkPtr + egChunkVolume * oneIndexSize + sizeof(quint64));
+        indexStream << prevChunkPtr;
     }
 
-    // TODO fill chunk by zeroes and add to vacant chunks chain
+    StoreIndexChunk(zero_chunk);
+
+    // TODO add to vacant chunks chain
 
 }
 
