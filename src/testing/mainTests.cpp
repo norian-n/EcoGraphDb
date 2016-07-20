@@ -19,9 +19,12 @@
 void cleanUpFiles()
 {
     QDir dir("");
+
+    dir.setCurrent("egdb");
+
     QStringList nameFilters;
 
-    nameFilters  << "*.odf" << "*.odx" << "*.dat" << "*.ddt" << "*.dln"; // << "test*.*";
+    nameFilters  << "*.odf" << "*.odx" << "*.dat" << "*.ddt" << "*.dln" << "*.ent"; // << "test*.*";
 
         // get filtered filenames
     QStringList ent = dir.entryList(nameFilters);
@@ -30,6 +33,8 @@ void cleanUpFiles()
         // remove files
     foreach (const QString& str, ent)
         dir.remove(str);
+
+    dir.setCurrent("..");
 }
 
 int main() // int argc, char *argv[])

@@ -14,6 +14,7 @@
 #include <QList>
 #include <QVariant>
 #include <QFile>
+#include <QDir>
 
 // class DataObjects;
 #include "egMetaInfo.h"
@@ -26,6 +27,8 @@ class EgDataFiles // Data Files operations
 public:
 
     EgDataNodeTypeMetaInfo* metaInfo;
+
+    QDir dir;
 
     QFile ddt_file;                             // meta info file
     QDataStream ddt;

@@ -51,7 +51,7 @@ int EgDataNodesLinkType::StoreLinks()
 
     secondType = egDatabase-> connNodeTypes[secondTypeName];
 
-    dat_file.setFileName(linkName + ".dln");
+    dat_file.setFileName("egdb/" + linkName + ".dln");
 
     if (!dat_file.open(QIODevice::ReadWrite)) // WriteOnly Append | QIODevice::Truncate
     {
@@ -60,7 +60,7 @@ int EgDataNodesLinkType::StoreLinks()
     }
         // create index
     if (! fwdIndexFiles)
-        fwdIndexFiles = new EgIndexFiles<qint32>(linkName + "_fwd");
+        fwdIndexFiles = new EgIndexFiles<qint32>("egdb/" + linkName + "_fwd");
 
     fwdIndexFiles-> OpenIndexFilesToUpdate();
 

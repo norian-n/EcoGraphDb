@@ -10,6 +10,8 @@
 #ifndef EGENTRYNODES_H
 #define EGENTRYNODES_H
 
+#include <QDir>
+
 #include "egDataNode.h"
 
 class EgDataNodesType;
@@ -19,6 +21,8 @@ class EgEntryNodes   // Data Objects head API
 public:
 
       QMap <EgDataNodeIDtype, EgDataNode*> entryNodes;   // aka "root" nodes
+
+      QDir dir;
 
       int AddEntryNode(EgDataNode& entryNode);
 

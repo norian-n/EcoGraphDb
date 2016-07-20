@@ -1305,19 +1305,19 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateMaxValueUp() // recurs
     quint64 fingersChunkOffset = currentFingerOffset - ( (currentFingerOffset-rootHeaderSize) % fingersChunkSize );
 
     // qDebug() << "(currentFingerOffset-rootHeaderSize) % fingersChunkSize = " << hex << (int) (currentFingerOffset-rootHeaderSize) % fingersChunkSize << FN;
-    qDebug() << "fingersChunkOffset = " << hex << (int) fingersChunkOffset << FN;
+    // qDebug() << "fingersChunkOffset = " << hex << (int) fingersChunkOffset << FN;
 
     fingerStream.device()->seek(fingersChunkOffset + egChunkVolume * oneFingerSize);
     fingerStream >> parentFingerOffset;
 
-    qDebug() << "parentFingerOffset = " << hex << (int) parentFingerOffset << FN;
+    // qDebug() << "parentFingerOffset = " << hex << (int) parentFingerOffset << FN;
 
     if (parentFingerOffset)
     {
         fingerStream.device()->seek(parentFingerOffset + sizeof(KeyType));
         fingerStream >> oldMaxValue;
 
-        qDebug() << "parentMaxValue = " << (int) oldMaxValue << FN;
+        // qDebug() << "parentMaxValue = " << (int) oldMaxValue << FN;
 
         if (newMaxValue != oldMaxValue)
         {

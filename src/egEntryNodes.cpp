@@ -30,7 +30,13 @@ int EgEntryNodes::StoreEntryNodes(EgDataNodesType& egType)
     if (entryNodes.empty())
         return 1;
 
-    dat_file.setFileName(egType.metaInfo.typeName + ".ent");
+    if (! dir.exists("egdb"))
+    {
+        qDebug()  << "can't find the egdb dir " << FN;
+        return -1;
+    }
+
+    dat_file.setFileName("egdb/" + egType.metaInfo.typeName + ".ent");
 
     if (!dat_file.open(QIODevice::WriteOnly | QIODevice::Truncate)) // WriteOnly Append | QIODevice::Truncate
     {
@@ -66,7 +72,13 @@ int EgEntryNodes::LoadEntryNodes(EgDataNodesType& egType)
 
      entryNodes.clear();
 
-     dat_file.setFileName(egType.metaInfo.typeName + ".ent");
+     if (! dir.exists("egdb"))
+     {
+         qDebug()  << "can't find the egdb dir " << FN;
+         return -1;
+     }
+
+     dat_file.setFileName("egdb/" + egType.metaInfo.typeName + ".ent");
 
      if ( ! dat_file.exists())
      {
@@ -76,7 +88,7 @@ int EgEntryNodes::LoadEntryNodes(EgDataNodesType& egType)
 
      if (!dat_file.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
      {
-         qDebug() << "can't open file " << egType.metaInfo.typeName + ".ent" << FN;
+         qDebug() << "can't open file " << "egdb/" + egType.metaInfo.typeName + ".ent" << FN;
          return -1;
      }
 

@@ -202,6 +202,7 @@ EgDataNodesType& EgDataNodesType::operator << (EgDataNode& d_obj)
 
 int EgDataNodesType::RemoveLocalFiles()
 {
+    // FIXME check dir
     return LocalFiles->RemoveLocalFiles();
 }
 

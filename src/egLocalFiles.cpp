@@ -25,11 +25,9 @@ EgDataFiles::~EgDataFiles()
 
 bool EgDataFiles::CheckFiles(EgDataNodeTypeMetaInfo& a_metaInfo)
 {
-    ddt_file.setFileName(a_metaInfo.typeName + ".ddt");
-
-    if (!ddt_file.exists())
+    if (! dir.exists("egdb/" + a_metaInfo.typeName + ".ddt"))
     {
-        // qDebug() << FN << "file doesn't exist' " << a_metaInfo.typeName + ".ddt";
+        // qDebug()  << "can't find the egdb dir " << FN;
         return false;
     }
 
@@ -99,12 +97,17 @@ inline void EgDataFiles::AppendNewData(QDataStream& dat, QList<EgPackedDataNode*
 
 inline int EgDataFiles::LocalOpenFilesToRead()
 {
+    if (! dir.setCurrent("egdb"))
+    {
+        qDebug()  << "can't find the egdb dir " << FN;
+        return -1;
+    }
         // meta info file
     ddt_file.setFileName(metaInfo-> typeName + ".ddt");
 
-    if (!ddt_file.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
+    if (! ddt_file.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
     {
-        qDebug() << FN << "can't open file " << metaInfo-> typeName + ".ddt";
+        qDebug() << "can't open file " << metaInfo-> typeName + ".ddt" << FN;
         return -1;
     }
 
@@ -113,9 +116,9 @@ inline int EgDataFiles::LocalOpenFilesToRead()
         // data nodes file
     dat_file.setFileName(metaInfo-> typeName + ".dat");
 
-    if (!dat_file.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
+    if (! dat_file.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
     {
-        qDebug() << FN << "can't open file " << metaInfo-> typeName + ".dat";
+        qDebug() << "can't open file " << metaInfo-> typeName + ".dat" << FN;
         return -1;
     }
 
@@ -137,7 +140,12 @@ inline int EgDataFiles::LocalOpenFilesToRead()
 }
 
 inline int EgDataFiles::LocalOpenFilesToUpdate()
-{
+{   
+    if (! dir.exists("egdb"))
+        dir.mkdir("egdb");
+
+    dir.setCurrent("egdb");
+
         // meta info file
     ddt_file.setFileName(metaInfo-> typeName + ".ddt");
 
@@ -185,6 +193,8 @@ inline void EgDataFiles::LocalCloseFiles()
         // other indexes files
     for (QHash<QString, EgIndexFiles<qint32>*>::iterator indexesIter = indexFiles.begin(); indexesIter != indexFiles.end(); ++indexesIter)
         indexesIter.value()-> CloseIndexFiles();
+
+    dir.setCurrent("..");
 }
 
 /*
@@ -236,6 +246,7 @@ int EgDataFiles::LocalLoadFieldDesc(QByteArray* field_descs, QByteArray* control
 
 int EgDataFiles::RemoveLocalFiles()
 {
+        // FIXME check dir
     return (int)(ddt_file.remove() && dat_file.remove());
 }
 
@@ -246,7 +257,7 @@ int EgDataFiles::LocalLoadData(QSet<quint64>& dataOffsets, QMap<EgDataNodeIDtype
 
     tmpNode2.metaInfo = metaInfo;
 
-    dat_file.setFileName(metaInfo-> typeName + ".dat");
+    dat_file.setFileName("egdb/" + metaInfo-> typeName + ".dat");
 
     if (!dat_file.exists())
     {

@@ -29,12 +29,18 @@ void EgDataNodeTypeMetaInfo::AddDataField(QString fieldName, bool indexed)
 
 int EgDataNodeTypeMetaInfo::LocalStoreMetaInfo()
 {
+    QDir dir;
+
+    if (! dir.exists("egdb"))
+        dir.mkdir("egdb");
+
         // open file
-    QFile ddt_file(typeName + ".ddt");
+    QFile ddt_file("egdb/" + typeName + ".ddt");
     QDataStream dStream(&ddt_file);
     if (!ddt_file.open(QIODevice::WriteOnly | QIODevice::Truncate))
     {
-        qDebug() << FN << "can't open " << typeName + ".ddt" << " file";
+        qDebug() << FN << "can't open " << typeName + ".ddt" << " file";        
+
         return -1;
     }
 
@@ -44,7 +50,7 @@ int EgDataNodeTypeMetaInfo::LocalStoreMetaInfo()
     dStream << dataFields;
     dStream << indexedToOrder.keys();
 
-    ddt_file.close();
+    ddt_file.close();    
 
     return 0;
 }
@@ -57,7 +63,7 @@ int EgDataNodeTypeMetaInfo::LocalLoadMetaInfo()
     int order = 0;
 
         // open file
-    QFile ddt_file(typeName + ".ddt");
+    QFile ddt_file("egdb/" + typeName + ".ddt");
     QDataStream dStream(&ddt_file);
 
 /*    if (!ddt_file.exists())

@@ -106,7 +106,15 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_EQ(QSet<quint64>& in
 {
     int res = 0;
 
+    if (! dir.setCurrent("egdb"))
+    {
+        qDebug()  << "can't find the egdb dir " << FN;
+        return -1;
+    }
+
     res = OpenIndexFilesToRead();
+
+    dir.setCurrent("..");
 
     if (res)
         return res;
@@ -135,7 +143,15 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GE(QSet<quint64>& in
 
     // qDebug() << "File name " << IndexFileName << FN;
 
+    if (! dir.setCurrent("egdb"))
+    {
+        qDebug()  << "can't find the egdb dir " << FN;
+        return -1;
+    }
+
     res = OpenIndexFilesToRead();
+
+    dir.setCurrent("..");
 
     if (res)
         return res;
@@ -160,7 +176,16 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GT(QSet<quint64>& in
 {
     int res = 0;
 
+    if (! dir.setCurrent("egdb"))
+    {
+        qDebug()  << "can't find the egdb dir " << FN;
+        return -1;
+    }
+
     res = OpenIndexFilesToRead();
+
+    dir.setCurrent("..");
+
 
     if (res)
         return res;
@@ -182,7 +207,15 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LE(QSet<quint64>& in
 {
     int res = 0;
 
+    if (! dir.setCurrent("egdb"))
+    {
+        qDebug()  << "can't find the egdb dir " << FN;
+        return -1;
+    }
+
     res = OpenIndexFilesToRead();
+
+    dir.setCurrent("..");
 
     if (res)
         return res;
@@ -204,7 +237,15 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LT(QSet<quint64>& in
 {
     int res = 0;
 
+    if (! dir.setCurrent("egdb"))
+    {
+        qDebug()  << "can't find the egdb dir " << FN;
+        return -1;
+    }
+
     res = OpenIndexFilesToRead();
+
+    dir.setCurrent("..");
 
     if (res)
         return res;

@@ -10,6 +10,8 @@
 #ifndef META_INFO_H
 #define META_INFO_H
 
+#include <QDir>
+
 #include "egDataNode.h"
 
 class EgGraphDatabase;

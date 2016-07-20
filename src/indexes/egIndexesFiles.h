@@ -10,6 +10,8 @@
 #ifndef EGINDEXES_FILES3_H
 #define EGINDEXES_FILES3_H
 
+#include <QDir>
+
 // #include "egMetaInfo.h"
 #include "egIndexes.h"
 #include "egFingers.h"
@@ -18,9 +20,12 @@ template <typename KeyType> class EgIndexFiles // main API
 {
 public:
 
+
     EgIndexes<KeyType> indexChunks;
     EgFingers<KeyType> fingersTree;
     // EgIndexesComparator<KeyType> indexesComparator;
+
+    QDir dir;
 
     QString IndexFileName;
 

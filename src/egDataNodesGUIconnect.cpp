@@ -108,7 +108,7 @@ bool EgDataNodesGUIconnect::CheckLocalGUIFile()
 {
     QFile ddt_file;
 
-    ddt_file.setFileName(dataNodesType-> metaInfo.typeName + egGUIfileName + ".ddt");
+    ddt_file.setFileName("egdb/" + dataNodesType-> metaInfo.typeName + egGUIfileName + ".ddt");
 
     if (!ddt_file.exists())
     {
