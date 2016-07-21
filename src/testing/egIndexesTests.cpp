@@ -101,6 +101,8 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataDeleteAllInd
 
 template <typename KeyType> bool EgIndexesTests<KeyType>::testSelectOperations(EgIndexFiles<KeyType> &egIndexFiles)
 {
+    // FIXME check the egdb folder
+
     bool res = true;
 
     KeyType theKey = 0x15; // 0x15

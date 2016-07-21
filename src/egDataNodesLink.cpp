@@ -112,7 +112,7 @@ int EgDataNodesLinkType::LoadLinks()
 
      loadedLinks.clear();
 
-     dat_file.setFileName(linkName + ".dln");
+     dat_file.setFileName("egdb/" + linkName + ".dln");
 
      if (!dat_file.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
      {

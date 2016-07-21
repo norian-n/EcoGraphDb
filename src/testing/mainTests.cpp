@@ -20,14 +20,25 @@ void cleanUpFiles()
 {
     QDir dir("");
 
-    dir.setCurrent("egdb");
-
     QStringList nameFilters;
 
     nameFilters  << "*.odf" << "*.odx" << "*.dat" << "*.ddt" << "*.dln" << "*.ent"; // << "test*.*";
 
         // get filtered filenames
     QStringList ent = dir.entryList(nameFilters);
+    // qDebug() << dir.entryList();
+
+        // remove files
+    foreach (const QString& str, ent)
+        dir.remove(str);
+
+    if (! dir.exists("egdb"))
+        return;
+
+    dir.setCurrent("egdb");
+
+        // get filtered filenames
+    ent = dir.entryList(nameFilters);
     // qDebug() << dir.entryList();
 
         // remove files
@@ -48,22 +59,24 @@ int main() // int argc, char *argv[])
 
     cleanUpFiles();
 
+    // return 0; // FIXME STUB
+
         // indexes standalone
 
     EgIndexFiles<qint32> testIndexFiles("IndexesTests");
     EgIndexesTests<qint32> indexTests;
 
-    /*
-    res = res && indexTests.testEgDataIndexAddFirst(testIndexFiles);
-    res = res && indexTests.testEgDataIndexDelFirst(testIndexFiles);
-    */
+
+    // res = res && indexTests.testEgDataIndexAddFirst(testIndexFiles);
+    // res = res && indexTests.testEgDataIndexDelFirst(testIndexFiles);
+
 
     /*
     res = res && indexTests.testEgDataInsertIndexes(testIndexFiles);
     res = res && indexTests.testEgDataDeleteAllIndexes(testIndexFiles);
     */
 
-    // return 0; // FIXME STUB testEgDataDeleteAllIndexes
+    // return 0; // FIXME STUB
 
     // res = res && indexTests.testEgDataDeleteIndex(testIndexFiles);
 

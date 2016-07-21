@@ -86,7 +86,7 @@ template <typename KeyType> void EgIndexFiles<KeyType>::AddObjToIndex()
         fingersTree.StoreRootHeader();
 
         indexChunks.StoreIndexChunk(indexChunks.chunk);
-        fingersTree.StoreFingersChunk(indexChunks.rootHeaderSize, fingersTree.fingersChunk);
+        fingersTree.StoreFingersChunk(fingersTree.rootHeaderSize, fingersTree.fingersChunk);
 
         return;
     }

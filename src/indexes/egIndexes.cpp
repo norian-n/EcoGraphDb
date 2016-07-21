@@ -83,7 +83,7 @@ template <typename KeyType> inline void EgIndexes<KeyType>::InitIndexChunk()
     localIndexStream << (keysCountType) 1;
 
         // parent finger offset
-    localIndexStream << (quint64) rootHeaderSize;
+    localIndexStream << (quint64) fingersTree-> rootHeaderSize;
 
     memcpy(chunk, indexBA.constData(), indexChunkSize);
 
@@ -93,18 +93,20 @@ template <typename KeyType> inline void EgIndexes<KeyType>::InitIndexChunk()
 
 template <typename KeyType> void EgIndexes<KeyType>::InitRootHeader()
 {
-    fingersTree-> fingersRootHeader.minKey = theKey;
+    /*fingersTree-> fingersRootHeader.minKey = theKey;
     fingersTree-> fingersRootHeader.maxKey = theKey;
     fingersTree-> fingersRootHeader.myLevel = 1;
     fingersTree-> fingersRootHeader.itemsCount = 1;
     fingersTree-> fingersRootHeader.nextChunkOffset = 0;
     fingersTree-> fingersRootHeader.myChunkOffset = 0;
     fingersTree-> fingersRootHeader.myOffset = 0;
+    */
 }
 
 
 template <typename KeyType> void EgIndexes<KeyType>::LoadRootHeader()
 {
+    /*
     indexStream.device()->seek(0);
 
     indexStream >> fingersTree-> fingersRootHeader.minKey;
@@ -112,12 +114,16 @@ template <typename KeyType> void EgIndexes<KeyType>::LoadRootHeader()
     indexStream >> fingersTree-> fingersRootHeader.myLevel;
     indexStream >> fingersTree-> fingersRootHeader.itemsCount;
     indexStream >> fingersTree-> fingersRootHeader.nextChunkOffset;
+    */
 }
 
 template <typename KeyType> void EgIndexes<KeyType>::StoreRootHeader(bool minMaxOnly)
 {
     indexStream.device()->seek(0);
 
+    indexStream << (quint64) 0xabcd;
+    indexStream << (quint64) 0xef12;
+/*
     indexStream << (KeyType) fingersTree-> fingersRootHeader.minKey;
     indexStream << (KeyType) fingersTree-> fingersRootHeader.maxKey;
 
@@ -127,6 +133,7 @@ template <typename KeyType> void EgIndexes<KeyType>::StoreRootHeader(bool minMax
         indexStream << (keysCountType) fingersTree-> fingersRootHeader.itemsCount;
         indexStream << (quint64) fingersTree-> fingersRootHeader.nextChunkOffset;
     }
+    */
 }
 
 template <typename KeyType> int EgIndexes<KeyType>::StoreFingerOffset(quint64 chunkOffset, quint64 fingerOffset)

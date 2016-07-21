@@ -62,7 +62,7 @@ public:
     QByteArray indexBA;
 
     EgIndexes():
-         rootHeaderSize(sizeof(KeyType) * 2 + sizeof(fingersLevelType) + sizeof(keysCountType) + sizeof(quint64))
+         rootHeaderSize(sizeof(quint64) * 2)
         ,oneIndexSize(sizeof(KeyType) + sizeof(quint64))
         ,indexChunkSize((egIndexesNamespace::egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2) + sizeof(keysCountType) + sizeof(quint64))
             // chain neighbors offsets (prev, next), count, parent chunk offset

@@ -217,7 +217,7 @@ template <typename KeyType> void EgFingers<KeyType>::InitRootHeader()
     fingersRootHeader.maxKey = indexChunks-> theKey;
     fingersRootHeader.myLevel = 1;
     fingersRootHeader.itemsCount = 1;
-    fingersRootHeader.nextChunkOffset = indexChunks-> rootHeaderSize; // FIXME check
+    fingersRootHeader.nextChunkOffset = rootHeaderSize; // FIXME check
     fingersRootHeader.myChunkOffset = 0;
     fingersRootHeader.myOffset = 0;
 }
