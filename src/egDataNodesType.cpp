@@ -54,9 +54,11 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
                 qDebug()  << "Can't load meta info of data nodes type " << nodeTypeName << FN;
             res = -1;
         }
+        /*
         else
             if (! nodeTypeName.contains(EgDataNodesGUInamespace::egGUIfileName))
                 GUI.LoadSimpleControlDesc();
+                */
 
         LocalFiles-> Init(metaInfo);
         index_tree = new EgIndexConditions(nodeTypeName);
@@ -69,14 +71,18 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
         notFound.dataFields << QVariant("<Not found>");
 
     if (! res && &myDB)
-        myDB.Connect(this);
+        res = myDB.Attach(this);
 
     getMyLinkTypes(); // extract nodetype-specific link types from all link types
-
 
         // FIXME process server based version
 
     return res;
+}
+
+int EgDataNodesType::getGUIinfo()
+{
+    return GUI.LoadSimpleControlDesc();
 }
 
 int EgDataNodesType::getMyLinkTypes()
@@ -84,6 +90,10 @@ int EgDataNodesType::getMyLinkTypes()
     if (metaInfo.myECoGraphDB)
         for (QMap<QString, EgDataNodesLinkType>::iterator linksIter = metaInfo.myECoGraphDB-> linkTypes.begin(); linksIter != metaInfo.myECoGraphDB-> linkTypes.end(); ++linksIter)
         {
+            // qDebug() << "linksIter.key() = " << linksIter.key()
+            //         << "linksIter.value().firstTypeName = " << linksIter.value().firstTypeName
+            //         << "linksIter.value().secondTypeName = " << linksIter.value().secondTypeName << FN;
+
             if ((linksIter.value().firstTypeName == metaInfo.typeName) || (linksIter.value().secondTypeName == metaInfo.typeName))
             {
                 myLinkTypes.insert(linksIter.key(), &(linksIter.value()));
@@ -209,10 +219,35 @@ int EgDataNodesType::RemoveLocalFiles()
 
 int EgDataNodesType::LoadAllData()
 {
-    index_tree-> clear();
-    index_tree-> AddNode(NULL, true, false, GE, "odb_pit", 1);  // all nodes, ID >= 1
+    // index_tree-> clear();
+    // index_tree-> AddNode(NULL, true, false, GE, "odb_pit", 1);  // all nodes, ID >= 1
 
-    return LoadData();
+
+    int res = 0;
+
+       // clear lists
+    deletedDataNodes.clear();
+    addedDataNodes.clear();
+    updatedDataNodes.clear();
+
+        // clear objects data
+    dataNodes.clear();
+
+    IndexOffsets.clear();
+
+    LocalFiles-> primIndexFiles -> LoadAllDataOffsets(IndexOffsets);
+
+    // qDebug() << FN << "IndexOffsets) = " << IndexOffsets;
+
+    if (! IndexOffsets.isEmpty())
+        res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
+
+    entryNodesInst.LoadEntryNodes(*this);
+
+    return res;
+
+
+    // return LoadData();
 }
 
 int EgDataNodesType::LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeID)

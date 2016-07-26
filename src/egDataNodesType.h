@@ -64,6 +64,7 @@ public:
 
         // connect to local connection or server, load fields and controls descriptions
   int Connect(EgGraphDatabase& myDB,const QString& nodeTypeName, EgRemoteConnect* server = NULL);
+  int getGUIinfo();
 
   int getMyLinkTypes(); // from myDB TODO
 

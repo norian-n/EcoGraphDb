@@ -33,9 +33,9 @@ public:
     // quint64 fingersChunkOffset; // finger file position
 
     // int rootHeaderSize;
+    int rootHeaderSize;
     int oneFingerSize;
     int fingersChunkSize;
-    int rootHeaderSize;
 
     int posToInsert;
 

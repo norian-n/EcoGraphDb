@@ -47,7 +47,7 @@ public:
     egFinger<KeyType> newFinger;         // to split chunks
 */
 
-    int rootHeaderSize;
+    int indexHeaderSize;
     int oneIndexSize;
     int indexChunkSize;
 
@@ -62,7 +62,7 @@ public:
     QByteArray indexBA;
 
     EgIndexes():
-         rootHeaderSize(sizeof(quint64) * 2)
+         indexHeaderSize(sizeof(quint64) * 2)
         ,oneIndexSize(sizeof(KeyType) + sizeof(quint64))
         ,indexChunkSize((egIndexesNamespace::egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2) + sizeof(keysCountType) + sizeof(quint64))
             // chain neighbors offsets (prev, next), count, parent chunk offset
@@ -95,7 +95,7 @@ public:
 
     void InitRootHeader(); // meta-info of indexes (first chunk for loadAll, empty chain(TBD)), also for non-zero offset
     void LoadRootHeader();
-    void StoreRootHeader(bool minMaxOnly = false);
+    void StoreRootHeader();
 
     int StoreFingerOffset(quint64 fingerOffset);
     int StoreFingerOffset(quint64 chunkOffset, quint64 fingerOffset);
@@ -112,6 +112,10 @@ public:
         // load data nodes
     int FindPosByKeyFirst(QDataStream &localIndexesStream, CompareFunctionType myCompareFunc);
     int FindPosByKeyLast(QDataStream &localIndexesStream, CompareFunctionType myCompareFunc);
+
+    void LoadAllData(QSet<quint64>& index_offsets);
+
+    void LoadDataUp(QSet<quint64>& index_offsets, QDataStream &localIndexStream);
 
     void LoadDataByChunkUp(QSet<quint64>& index_offsets, CompareFunctionType myCompareFunc);
     int LoadDataByChunkDown(QSet<quint64>& index_offsets, CompareFunctionType myCompareFunc);

@@ -57,6 +57,8 @@ public:
     int DeleteIndex();
 
         // load data nodes
+    int LoadAllDataOffsets(QSet<quint64>& index_offsets);
+
     int Load_EQ(QSet<quint64>& index_offsets, KeyType Key);                  // load equal objects
     // int Load_NE(QSet<quint64>& index_offsets, KeyType& Key, const QString& IndexFileName);          // load not equal objects
 

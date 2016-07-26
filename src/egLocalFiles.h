@@ -51,7 +51,7 @@ public:
 
     // void Init(QString& FileNameBase, EgFieldDescriptors* a_FD);
 
-    bool CheckFiles(EgDataNodeTypeMetaInfo& a_metaInfo); // check if files exists and not empty
+    bool CheckMetaInfoFile(EgDataNodeTypeMetaInfo& a_metaInfo); // check if files exists and not empty
 
     int Init(EgDataNodeTypeMetaInfo& a_metaInfo); // set names and indexes control
 

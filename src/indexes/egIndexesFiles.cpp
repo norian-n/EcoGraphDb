@@ -102,6 +102,30 @@ template <typename KeyType> void EgIndexFiles<KeyType>::AddObjToIndex()
     }
 }
 
+template <typename KeyType> int EgIndexFiles<KeyType>::LoadAllDataOffsets(QSet<quint64>& index_offsets)
+{
+    int res = 0;
+
+    if (! dir.setCurrent("egdb"))
+    {
+        qDebug()  << "can't find the egdb dir " << FN;
+        return -1;
+    }
+
+    res = OpenIndexFilesToRead();
+
+    dir.setCurrent("..");
+
+    if (res)
+        return res;
+
+    indexChunks.LoadAllData(index_offsets);
+
+    CloseIndexFiles();
+
+    return res;
+}
+
 template <typename KeyType> int EgIndexFiles<KeyType>::Load_EQ(QSet<quint64>& index_offsets, KeyType Key)
 {
     int res = 0;

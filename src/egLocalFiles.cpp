@@ -23,7 +23,7 @@ EgDataFiles::~EgDataFiles()
 
 }
 
-bool EgDataFiles::CheckFiles(EgDataNodeTypeMetaInfo& a_metaInfo)
+bool EgDataFiles::CheckMetaInfoFile(EgDataNodeTypeMetaInfo& a_metaInfo)
 {
     if (! dir.exists("egdb/" + a_metaInfo.typeName + ".ddt"))
     {

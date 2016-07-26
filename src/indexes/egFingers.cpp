@@ -259,7 +259,7 @@ template <typename KeyType> inline void EgFingers<KeyType>::InitFingersChunk()
     localFingersStream << (KeyType) indexChunks-> theKey;               // min
     localFingersStream << (KeyType) indexChunks-> theKey;               // max
     localFingersStream << (keysCountType) 1;    // count
-    localFingersStream << (quint64) indexChunks-> rootHeaderSize; // indexes chunk offset // indexChunks-> indexesChunkOffset; // theFinger.chunkOffset;
+    localFingersStream << (quint64) indexChunks-> indexHeaderSize; // indexes chunk offset // indexChunks-> indexesChunkOffset; // theFinger.chunkOffset;
 
     // qDebug() << fingersBA.toHex() << FN;
 

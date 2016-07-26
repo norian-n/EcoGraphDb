@@ -38,6 +38,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
 
+    graphDB.Connect();
+
     // test_server.server_address = "106.109.9.43";
         // dataclasses
     // Projects.Connect("projects", &test_server);
@@ -70,6 +72,8 @@ MainWindow::MainWindow(QWidget *parent) :
     // Owners.PrintObjData();
 
     Projects.Connect(graphDB, "projects");
+
+    Projects.getGUIinfo();
 
     Projects.GUI.AddAutoSubstitute("status", Statuses, "status");
     Projects.GUI.AddAutoSubstitute("owner",  Owners,   "login");

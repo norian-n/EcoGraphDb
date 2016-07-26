@@ -10,17 +10,27 @@
 #include "egGraphDatabase.h"
 #include "egDataNodesLink.h"
 
-int EgGraphDatabase::Connect(EgDataNodesType* nType)
+int EgGraphDatabase::Connect()
 {
     if (! isConnected)
     {
-        LoadLinksMetaInfo();
+       LoadLinksMetaInfo();
+    }
+
+    isConnected = true;
+
+    return 0;
+}
+
+int EgGraphDatabase::Attach(EgDataNodesType* nType)
+{
+    if (! isConnected)
+    {
+        return -1;
     }
 
     if (! connNodeTypes.contains(nType->metaInfo.typeName))
         connNodeTypes.insert(nType->metaInfo.typeName, nType);
-
-    isConnected = true;
 
     return 0;
 }
@@ -43,6 +53,7 @@ int EgGraphDatabase::LoadLinksMetaInfo()
 
     EgDataNodesType linksMetaInfo;
 
+    /*
     CreateNodeType(EgDataNodesLinkNamespace::egLinkTypesFileName);
 
     AddDataField("name");
@@ -51,27 +62,54 @@ int EgGraphDatabase::LoadLinksMetaInfo()
 
     linksMetaInfo.metaInfo = *metaInfo;
 
-    if (! linksMetaInfo.LocalFiles-> CheckFiles(*metaInfo))  // FIXME server
+    if (! linksMetaInfo.LocalFiles-> CheckMetaInfoFile(*metaInfo))  // FIXME server
         return -1; // no data found
 
     linksMetaInfo.LocalFiles-> Init(*metaInfo);
 
     linksMetaInfo.index_tree = new EgIndexConditions(EgDataNodesLinkNamespace::egLinkTypesFileName);
 
-    /*
-    if (linksMetaInfo.Connect(*(linksMetaInfo.metaInfo.myECoGraphDB), EgDataNodesLinkNamespace::egLinkTypesfileName))
+
+
+    if (linksMetaInfo.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName))
     {
         qDebug()  << "No links found " << linksMetaInfo.metaInfo.typeName << FN;
         return 1;
     }
-    */
+
+        */
+
+    // int res = 0;
+
+    linksMetaInfo.metaInfo.myECoGraphDB = this;
+    linksMetaInfo.metaInfo.typeName = EgDataNodesLinkNamespace::egLinkTypesFileName;
+    // connection = server;
+
+    if (! linksMetaInfo.LocalFiles-> CheckMetaInfoFile(linksMetaInfo.metaInfo))  // FIXME server
+    {
+        qDebug()  << "Can't load linksMetaInfo " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
+        return -1;
+    }
+
+    if (linksMetaInfo.metaInfo.LocalLoadMetaInfo())
+    {
+        qDebug()  << "Can't load linksMetaInfo " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
+        return -1;
+    }
+
+    linksMetaInfo.LocalFiles-> Init(linksMetaInfo.metaInfo);
+    linksMetaInfo.index_tree = new EgIndexConditions(EgDataNodesLinkNamespace::egLinkTypesFileName);
 
     linksMetaInfo.LoadAllData();
+
+    linkTypes.clear();
 
     newLink.egDatabase = this;
 
     for (QMap<EgDataNodeIDtype, EgDataNode>::iterator nodesIter = linksMetaInfo.dataNodes.begin(); nodesIter != linksMetaInfo.dataNodes.end(); ++nodesIter)
     {
+        // qDebug()  << "nodesIter.value().dataFields = " << nodesIter.value().dataFields << FN;
+
         newLink.linkName = nodesIter.value()["name"].toString();
         newLink.firstTypeName = nodesIter.value()["firstNodeType"].toString();
         newLink.secondTypeName = nodesIter.value()["secondNodeType"].toString();

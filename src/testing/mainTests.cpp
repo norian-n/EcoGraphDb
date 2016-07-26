@@ -70,11 +70,9 @@ int main() // int argc, char *argv[])
     // res = res && indexTests.testEgDataIndexAddFirst(testIndexFiles);
     // res = res && indexTests.testEgDataIndexDelFirst(testIndexFiles);
 
+    // res = res && indexTests.testEgDataInsertIndexes(testIndexFiles);
+    // res = res && indexTests.testEgDataDeleteAllIndexes(testIndexFiles);
 
-    /*
-    res = res && indexTests.testEgDataInsertIndexes(testIndexFiles);
-    res = res && indexTests.testEgDataDeleteAllIndexes(testIndexFiles);
-    */
 
     // return 0; // FIXME STUB
 
@@ -99,7 +97,13 @@ int main() // int argc, char *argv[])
 
     res = res && egDbTests.testEgLinksCreate();
 
+    graphDB.Connect();
+
+
+
     testEgDataNodesType.Connect(graphDB, "test");
+
+    // return 0; // FIXME STUB
 
     res = res && egDbTests.testEgDataNodesTypeBasicNodeOps(testEgDataNodesType);
 
@@ -109,7 +113,7 @@ int main() // int argc, char *argv[])
 
     res = res && egDbTests.testEgDataNodesTypeUpdateNode(testEgDataNodesType);
 
-    res = res && egDbTests.testEgDataNodesTypeGUIDescriptors(testEgDataNodesType);
+    // res = res && egDbTests.testEgDataNodesTypeGUIDescriptors(testEgDataNodesType);
 
     // return 0; // FIXME STUB
 

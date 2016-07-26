@@ -29,7 +29,7 @@ void EgDataNode::clear()
 
 QVariant& EgDataNode::operator [] (QString& fieldName)
 {
-    static QVariant not_found; // to return index error as QVariant.isNull()
+    static QVariant not_found("<Not found>"); // to return index error as QVariant.isNull()
 
     if (metaInfo)
         if (metaInfo-> nameToOrder.contains(fieldName))
@@ -41,7 +41,7 @@ QVariant& EgDataNode::operator [] (QString& fieldName)
 QVariant& EgDataNode::operator [] (const char* fName)
 {
     QString fieldName(fName);
-    static QVariant not_found; // to return index error as QVariant.isNull()
+    static QVariant not_found("<Not found>"); // to return index error as QVariant.isNull()
 
     if (metaInfo)
         if (metaInfo-> nameToOrder.contains(fieldName))
