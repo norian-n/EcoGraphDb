@@ -288,6 +288,24 @@ void MainWindow::model_data_changed(const QModelIndex & topLeft, const QModelInd
 
 void MainWindow::FillTestData()
 {
+   /* Funcblocks.Connect(graphDB, "funcblocks");
+
+    Funcblocks.LoadAllData();
+
+    Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 2);
+    Funcblocks.AddArrowLink("funcblocksTree", 2, Funcblocks, 3);
+    Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 4);
+
+    Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 1);
+    Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 2);
+    Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 3);
+
+    Funcblocks.StoreLinks();
+
+    Projects.StoreLinks();
+
+    return;
+    */
 
 #define ADD_RECORD(values,dataNodesType) ins_values.clear(); ins_values << values; dataNodesType.AddNewData(ins_values);
 

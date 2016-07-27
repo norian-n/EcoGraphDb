@@ -98,7 +98,7 @@ int EgDataNodesType::getMyLinkTypes()
             {
                 myLinkTypes.insert(linksIter.key(), &(linksIter.value()));
 
-                // qDebug() << "added link " << linksIter.key() << FN;
+                // qDebug() << "Node type : " << metaInfo.typeName << "added link " << linksIter.key() << FN;
             }
         }
 

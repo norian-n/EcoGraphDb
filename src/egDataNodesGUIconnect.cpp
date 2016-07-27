@@ -263,7 +263,9 @@ inline QStandardItem* EgDataNodesGUIconnect::AddNodeToModelTree(QStandardItem* p
 {
     QList<QStandardItem*> items;
 
-    items.clear();
+    // FIXME check if GUI info loaded
+
+    // items.clear();
     for (QList<EgBasicControlDesc>::iterator curDesc = basicControlDescs.begin(); curDesc != basicControlDescs.end(); ++curDesc)
     {
         if (! (*curDesc).AutoSubstClass)
@@ -300,14 +302,21 @@ int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model, QString li
         // iterate entry nodes
     for (QMap<EgDataNodeIDtype, EgDataNode*>::iterator Iter = dataNodesType-> entryNodesInst.entryNodes.begin(); Iter != dataNodesType-> entryNodesInst.entryNodes.end(); ++Iter)
     {
+        qDebug()  << "Entry node ID = " << Iter.key() << FN;
+
             // check if node loaded
-        if (! dataNodesType->dataNodes.contains(Iter.key()))
+        if (! dataNodesType-> dataNodes.contains(Iter.key()))
+        {
+            qDebug()  << "Entry node ID not found in dataNodesType-> dataNodes " << Iter.key() << FN;
             continue;
+        }
 
             // add entry node
         parentItem = topItem;
         newItem = AddNodeToModelTree(parentItem, Iter.value());
         parentItem = newItem;
+
+        // return 1; // FIXME STUB
 
             // add out links to queue (list)
         if (Iter.value()-> nodeLinks
@@ -315,7 +324,7 @@ int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model, QString li
         {
             for (QList<EgExtendedLinkType>::iterator Iter2 = Iter.value()-> nodeLinks-> outLinks[linkName].begin(); Iter2 != Iter.value()-> nodeLinks-> outLinks[linkName].end(); ++Iter2)
             {
-                // qDebug()  << "node ID = " << (*Iter2).dataNodePtr-> dataNodeID << FN;
+                qDebug()  << "branch node ID = " << (*Iter2).dataNodePtr-> dataNodeID << FN;
 
                 newItem = AddNodeToModelTree(parentItem, (*Iter2).dataNodePtr);
 
@@ -337,13 +346,13 @@ int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model, QString li
             buildNode = buildNodes.first();
             buildNodes.pop_front();
 
-            // qDebug()  << "build node ID = " << buildNode.dataNode-> dataNodeID << FN;
+            qDebug()  << "build node ID = " << buildNode.dataNode-> dataNodeID << FN;
 
             parentItem = buildNode.modelItem;
 
             for (QList<EgExtendedLinkType>::iterator Iter3 = buildNode.dataNode-> nodeLinks-> outLinks[linkName].begin(); Iter3 != buildNode.dataNode-> nodeLinks-> outLinks[linkName].end(); ++Iter3)
             {
-                // qDebug()  << "node ID = " << (*Iter3).dataNodePtr-> dataNodeID << FN;
+                qDebug()  << "subbranch node ID = " << (*Iter3).dataNodePtr-> dataNodeID << FN;
 
                 newItem = AddNodeToModelTree(parentItem, (*Iter3).dataNodePtr);
 

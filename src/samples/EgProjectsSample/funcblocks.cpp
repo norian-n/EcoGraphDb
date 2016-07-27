@@ -87,7 +87,11 @@ FuncBlocksForm::FuncBlocksForm(QWidget *parent)
     ui->treeView->expandAll();
     */
 
+    graphDB.Connect();
+
     Funcblocks.Connect(graphDB, "funcblocks");
+    Funcblocks.getGUIinfo();
+
     Projects.Connect(graphDB, "projects");
 
     if (! model)
@@ -113,7 +117,10 @@ void FuncBlocksForm::loadFuncblocks()
     // Projects.LoadLinks();
 
     Funcblocks.LoadLinkedData("projects_funcblocks", project_id);
-    Funcblocks.LoadLinks();
+    Funcblocks.LoadLink("funcblocksTree");
+
+    Funcblocks.myLinkTypes["funcblocksTree"]-> ResolveLinks(); // FIXME STUB
+
 /*
     qDebug() << "project ID = " << project_id << FN;
     qDebug() << "projects count = " << Projects.dataNodes.count() << FN;
