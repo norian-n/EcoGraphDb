@@ -29,6 +29,7 @@ void MainWindow::on_initButton_clicked()
     Funcblocks.connection = &test_server;
 */
     FillTestData();
+    close();
 }
 
 MainWindow::~MainWindow()
@@ -209,7 +210,10 @@ void MainWindow::FillTestData()
     graphDB.AddLinkType("funcblocksTree", "funcblocks", "funcblocks");
     graphDB.AddLinkType("projects_funcblocks", "projects", "funcblocks");
 
+    graphDB.Connect();
+
     Funcblocks.Connect(graphDB, "funcblocks");
+    Projects.Connect(graphDB, "projects");
 
     Funcblocks.GUI.AddSimpleControlDesc("name",          "Project name",   120);
     /*
@@ -221,29 +225,32 @@ void MainWindow::FillTestData()
     */
 
     ADD_RECORD("Test Root Funcblock 1", Funcblocks);
-    ADD_RECORD("Test Root Funcblock 2", Funcblocks);
-    ADD_RECORD("Test Root Funcblock 3", Funcblocks);
+    ADD_RECORD("Test Funcblock 2", Funcblocks);
+    ADD_RECORD("Test Funcblock 3", Funcblocks);
     ADD_RECORD("Test Root Funcblock 4", Funcblocks);
 
     Funcblocks.AddEntryNode(1);
-    // Funcblocks.AddEntryNode(2);
+    Funcblocks.AddEntryNode(4);
     // Funcblocks.AddEntryNode(3);
 
     Funcblocks.StoreData();
-/*
+
+    Funcblocks.Connect(graphDB, "funcblocks");
+
+    Funcblocks.LoadAllData();
+
     Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 2);
     Funcblocks.AddArrowLink("funcblocksTree", 2, Funcblocks, 3);
-    Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 4);        
+    // Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 4);
 
     Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 1);
     Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 2);
     Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 3);
+    Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 4);
 
     Funcblocks.StoreLinks();
 
     Projects.StoreLinks();
-    */
-
 
 }
 
