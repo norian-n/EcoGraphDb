@@ -22,7 +22,8 @@ EgBasicControlDesc::EgBasicControlDesc(EgDataNode &dataNode):
 }
 
 EgDataNodesGUIconnect::EgDataNodesGUIconnect():
-    controlDescs(NULL)
+      controlDescs(NULL)
+    , model_current_item(NULL)
 { }
 
 EgDataNodesGUIconnect::~EgDataNodesGUIconnect()
@@ -263,7 +264,12 @@ inline QStandardItem* EgDataNodesGUIconnect::AddNodeToModelTree(QStandardItem* p
 {
     QList<QStandardItem*> items;
 
-    // FIXME check if GUI info loaded
+        // check if GUI info loaded
+    if (basicControlDescs.isEmpty())
+    {
+        qDebug() << "GUI info not loaded for node type " << dataNode->metaInfo-> typeName << FN;
+        return NULL;
+    }
 
     // items.clear();
     for (QList<EgBasicControlDesc>::iterator curDesc = basicControlDescs.begin(); curDesc != basicControlDescs.end(); ++curDesc)
@@ -302,7 +308,7 @@ int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model, QString li
         // iterate entry nodes
     for (QMap<EgDataNodeIDtype, EgDataNode*>::iterator Iter = dataNodesType-> entryNodesInst.entryNodes.begin(); Iter != dataNodesType-> entryNodesInst.entryNodes.end(); ++Iter)
     {
-        qDebug()  << "Entry node ID = " << Iter.key() << FN;
+        // qDebug()  << "Entry node ID = " << Iter.key() << FN;
 
             // check if node loaded
         if (! dataNodesType-> dataNodes.contains(Iter.key()))
@@ -314,6 +320,10 @@ int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model, QString li
             // add entry node
         parentItem = topItem;
         newItem = AddNodeToModelTree(parentItem, Iter.value());
+
+        if (! newItem)
+            return -1; // ERR
+
         parentItem = newItem;
 
         // return 1; // FIXME STUB
@@ -324,7 +334,7 @@ int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model, QString li
         {
             for (QList<EgExtendedLinkType>::iterator Iter2 = Iter.value()-> nodeLinks-> outLinks[linkName].begin(); Iter2 != Iter.value()-> nodeLinks-> outLinks[linkName].end(); ++Iter2)
             {
-                qDebug()  << "branch node ID = " << (*Iter2).dataNodePtr-> dataNodeID << FN;
+                // qDebug()  << "branch node ID = " << (*Iter2).dataNodePtr-> dataNodeID << FN;
 
                 newItem = AddNodeToModelTree(parentItem, (*Iter2).dataNodePtr);
 
@@ -346,13 +356,13 @@ int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model, QString li
             buildNode = buildNodes.first();
             buildNodes.pop_front();
 
-            qDebug()  << "build node ID = " << buildNode.dataNode-> dataNodeID << FN;
+            // qDebug()  << "build node ID = " << buildNode.dataNode-> dataNodeID << FN;
 
             parentItem = buildNode.modelItem;
 
             for (QList<EgExtendedLinkType>::iterator Iter3 = buildNode.dataNode-> nodeLinks-> outLinks[linkName].begin(); Iter3 != buildNode.dataNode-> nodeLinks-> outLinks[linkName].end(); ++Iter3)
             {
-                qDebug()  << "subbranch node ID = " << (*Iter3).dataNodePtr-> dataNodeID << FN;
+                // qDebug()  << "subbranch node ID = " << (*Iter3).dataNodePtr-> dataNodeID << FN;
 
                 newItem = AddNodeToModelTree(parentItem, (*Iter3).dataNodePtr);
 

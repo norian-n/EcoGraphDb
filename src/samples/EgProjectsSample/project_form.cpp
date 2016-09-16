@@ -98,9 +98,9 @@ void ProjectForm::okExit()
             Projects->SetModifiedData(theProject.dataFields, project_id);
                 // save data
             Projects->StoreData();
-                // update parent view
-            if (main_callee)
-                main_callee->refreshView();
+                // update parent view  FIXME
+            // if (main_callee)
+            //    main_callee->refreshView();
         }
     }
     else // insert project
@@ -129,9 +129,9 @@ void ProjectForm::okExit()
         Projects->AddNewData(theProject.dataFields);
             // save data
         Projects->StoreData();
-            // update parent view
-        if (main_callee)
-            main_callee->refreshView();
+            // update parent view  FIXME
+        // if (main_callee)
+        //    main_callee->refreshView();
     }
         // clean up
     theProject.dataFields.clear();

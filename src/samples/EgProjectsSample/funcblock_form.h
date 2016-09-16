@@ -1,13 +1,13 @@
-#ifndef PROJECT_FORM_H
-#define PROJECT_FORM_H
+#ifndef FUNCBLOCK_FORM_H
+#define FUNCBLOCK_FORM_H
 
-#include "ui_project_form.h"
+#include "ui_funcblock_form.h"
 #include "../../egDataNodesType.h"
 
-class MainWindow;
+class FuncBlocksForm;
 
 /*
-class CustomProject
+class CustomFuncBlock
 {
 public:
 
@@ -20,51 +20,51 @@ public:
 };
 */
 
-class ProjectForm :  public QWidget
+class FuncblockForm :  public QWidget
 {
     Q_OBJECT
 
 public:
-    ProjectForm(QWidget *parent = 0);
+    FuncblockForm(QWidget *parent = 0);
 
-    QWidget * main_callee;
+    FuncBlocksForm* main_callee;
 //    SubProjectsForm * sub_callee;
-    int project_id;
+    int FuncBlock_id;
 
-    void initProject();
-    void openProject();
+    void initFuncBlock();
+    void openFuncBlock();
         // primary table
     /*
 
-    DataObjects* Projects;
-    DataObj TheProject; // local ptr, move to
+    DataObjects* FuncBlocks;
+    DataObj TheFuncBlock; // local ptr, move to
         // references
     DataObjects* Statuses;
     DataObjects* Owners;
     */
-    EgDataNode newProject;
+    EgDataNode newFuncBlock;
 
-    EgDataNodesType* Projects;
-    EgDataNode theProject; // update or delete
+    EgDataNodesType* FuncBlocks;
+    EgDataNode theFuncBlock; // update or delete
 
         // references
     EgDataNodesType* Statuses;
     EgDataNodesType* Owners;
 
-    // CustomProject cp;
+    // CustomFuncBlock cp;
 
     // QList<QVariant> new_fields;
 
 private slots:
     // void on_inputSpinBox1_valueChanged(int value);
     // void on_inputSpinBox2_valueChanged(int value);
-    // void addProject();
-    // void deleteSubProject();
+    // void addFuncBlock();
+    // void deleteSubFuncBlock();
     void okExit();
     void cancelExit();
 
 private:
-    Ui::ProjectForm *ui;
+    Ui::FuncblockForm *ui;
 };
 
-#endif // PROJECT_FORM_H
+#endif // FUNCBLOCK_FORM_H

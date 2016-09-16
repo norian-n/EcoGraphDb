@@ -13,7 +13,8 @@
 FuncBlocksForm::FuncBlocksForm(QWidget *parent)
     : QWidget(parent)
   ,  ui(new Ui::FuncBlocksForm)
-  , model (NULL)
+  ,  funcBlockForm(NULL)
+  ,  model (NULL)
 {
     ui->setupUi(this);
         // connect buttons
@@ -99,6 +100,11 @@ FuncBlocksForm::FuncBlocksForm(QWidget *parent)
 }
 
 
+void FuncBlocksForm::refreshView()
+{
+    // FIXME
+}
+
 void FuncBlocksForm::loadFuncblocks()
 {
     // IC RootCond = IC(Projects, "odb_pit", EQ, project_id);
@@ -139,13 +145,78 @@ void FuncBlocksForm::loadFuncblocks()
     ui->treeView->expandAll();
 }
 
+void FuncBlocksForm::on_treeView_clicked(const QModelIndex &index)
+{
+        Funcblocks.GUI.model_current_row = index.row();
+
+        Funcblocks.GUI.model_current_item = model-> itemFromIndex(index);
+}
+
 void FuncBlocksForm::addSubBlock()
 {
+    QStandardItem* parentItem = Funcblocks.GUI.model_current_item;
+    // QStandardItem* newItem = NULL;
 
+    if (! parentItem)
+        return;
+
+    QList<QStandardItem*> items;
+
+    items << new QStandardItem("Test sub item");
+
+    items[0]->setData(QVariant(is_unchanged), data_status);     // loaded data status
+    items[0]->setData(QVariant(0), data_id);                    // ID
+
+    parentItem-> appendRow(items);
+
+    ui->treeView->expand(model->indexFromItem(parentItem));
+}
+
+
+inline void FuncBlocksForm::InitFunkblockForm()   // project details form setup
+{
+    funcBlockForm = new FuncblockForm;
+    funcBlockForm-> main_callee = this;
+    // funcBlockForm->Projects = &Projects;
+    // funcBlockForm->Statuses = &Statuses;
+    // funcBlockForm->Owners = &Owners;
+    // funcBlockForm-> initProject();
 }
 
 void FuncBlocksForm::addTopBlock()
 {
+    QStandardItem* topItem = model-> invisibleRootItem();
+    QStandardItem* parentItem = NULL;
+    // QStandardItem* newItem = NULL;
+
+    // open fucblock form
+
+    if (! funcBlockForm)
+        InitFunkblockForm();
+
+    funcBlockForm-> FuncBlock_id = 0;
+
+    // funcBlockForm-> openProject();
+    funcBlockForm-> show();
+
+        // process return code
+
+        // add node to egdb transaction
+
+        // add link
+
+        // show new item
+
+    parentItem = topItem;
+
+    QList<QStandardItem*> items;
+
+    items << new QStandardItem("Test top item");
+
+    items[0]->setData(QVariant(is_unchanged), data_status);     // loaded data status
+    items[0]->setData(QVariant(0), data_id);                    // ID
+
+    parentItem-> appendRow(items);
 
 }
 
@@ -219,4 +290,6 @@ void FuncBlocksForm::FillTestData()
 
 // qDebug() << FN << "data indexes : " << Funcblocks.dobj_map.size();
 // qDebug() << FN << "parent indexes : " << Funcblocks.parent_map.size();
+
+
 

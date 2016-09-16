@@ -11,6 +11,7 @@
 #define FUNCBLOCKS_H
 
 #include "ui_funcblocks.h"
+#include "funcblock_form.h"
 
 #include "../../egDataNodesType.h"
 #include "../../egGraphDatabase.h"
@@ -26,6 +27,7 @@ public:
     FuncBlocksForm(QWidget *parent = 0);
 
     void loadFuncblocks();
+    void refreshView();
 
 private slots:
 
@@ -37,6 +39,8 @@ private slots:
     void openCompForm();
     void okExit();
     void cancelExit();
+
+    void on_treeView_clicked(const QModelIndex &index);
 
 private:
     Ui::FuncBlocksForm* ui;
@@ -57,7 +61,11 @@ private:
     // LinkData* FuncblockStatusLink;
     // LinkData* FuncblockOwnerLink;
 
+    FuncblockForm* funcBlockForm;
+
     QStandardItemModel* model;
+
+    inline void InitFunkblockForm();
 
 };
 

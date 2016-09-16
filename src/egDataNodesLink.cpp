@@ -132,7 +132,7 @@ int EgDataNodesLinkType::LoadLinks()
 
      dat_file.close();
 
-     qDebug() << "Link name: " << linkName << " , loadedLinks.count = " << loadedLinks.count() << FN;
+     // qDebug() << "Link name: " << linkName << " , loadedLinks.count = " << loadedLinks.count() << FN;
 
      // ResolveLinks(); // FIXME STUB
 

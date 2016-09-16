@@ -27,16 +27,22 @@ SOURCES += main.cpp \
     ../../indexes/egIndexesFiles.cpp \
     ../../indexes/egIndexes.cpp \
     ../../indexes/egFingers.cpp \
-    ../../egEntryNodes.cpp
+    ../../egEntryNodes.cpp \
+    funcblock_form.cpp \
+    projects.cpp
 
 
 HEADERS += mainwindow.h \
     project_form.h \
     funcblocks.h \
     ../../indexes/egIndexesFiles.h \
-    ../../indexes/egIndexConditions.h
+    ../../indexes/egIndexConditions.h \
+    funcblock_form.h \
+    projects.h
 
 
 FORMS += mainwindow.ui \
     project_form.ui \
-    funcblocks.ui
+    funcblocks.ui \
+    funcblock_form.ui \
+    projects.ui

@@ -1,34 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FuncBlocksForm</class>
- <widget class="QWidget" name="FuncBlocksForm">
+ <class>ProjectsForm</class>
+ <widget class="QWidget" name="ProjectsForm">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>785</width>
-    <height>498</height>
+    <width>756</width>
+    <height>466</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Projects</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QPushButton" name="addTopBlockButton">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Add root</string>
-       </property>
-      </widget>
-     </item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="addButton">
        <property name="sizePolicy">
@@ -38,12 +31,25 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Add branch</string>
+        <string>Func Blocks</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="editButton">
+      <widget class="QPushButton" name="addProjectButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Add</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="editProjectButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -69,7 +75,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="compButton">
+      <widget class="QPushButton" name="initButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -77,23 +83,19 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Component</string>
+        <string>Init egDB</string>
        </property>
       </widget>
      </item>
     </layout>
    </item>
    <item>
-    <widget class="QTreeView" name="treeView">
-     <property name="editTriggers">
-      <set>QAbstractItemView::NoEditTriggers</set>
-     </property>
-    </widget>
+    <widget class="QTableView" name="tableView"/>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QPushButton" name="okButton">
+      <widget class="QPushButton" name="saveButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -101,12 +103,12 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Ok</string>
+        <string>Save</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="cancelButton">
+      <widget class="QPushButton" name="loadButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -114,7 +116,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Cancel</string>
+        <string>Load</string>
        </property>
       </widget>
      </item>
@@ -122,6 +124,7 @@
    </item>
   </layout>
  </widget>
+ <layoutdefault spacing="6" margin="11"/>
  <resources/>
  <connections/>
 </ui>

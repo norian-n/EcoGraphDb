@@ -55,6 +55,7 @@ public:
   EgDataNodesType* controlDescs;    // my, new-delete
 
   qint32 model_current_row;         // current row of model savepoint
+  QStandardItem* model_current_item;
 
   QList <EgBasicControlDesc> basicControlDescs;
   QHash <QString, EgBasicControlDesc*> basicControlDescsOrder;
