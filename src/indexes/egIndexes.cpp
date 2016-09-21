@@ -29,6 +29,8 @@ template <typename KeyType> void EgIndexes<KeyType>::PrintIndexesChunk(char* the
 
 template <typename KeyType> int EgIndexes<KeyType>::OpenIndexFilesToUpdate(const QString& IndexFileName)
 {
+    indexFile.close();
+
     indexFile.setFileName(IndexFileName + ".odx");
     indexStream.setDevice(&indexFile);
 
@@ -43,6 +45,8 @@ template <typename KeyType> int EgIndexes<KeyType>::OpenIndexFilesToUpdate(const
 
 template <typename KeyType> int EgIndexes<KeyType>::OpenIndexFilesToRead(const QString& IndexFileName)
 {
+    indexFile.close();
+
     indexFile.setFileName(IndexFileName + ".odx");
     indexStream.setDevice(&indexFile);
 

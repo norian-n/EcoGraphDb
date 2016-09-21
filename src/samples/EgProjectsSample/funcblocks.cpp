@@ -99,18 +99,12 @@ FuncBlocksForm::FuncBlocksForm(QWidget *parent)
         model = new QStandardItemModel(0, Funcblocks.ModelFieldsCount());
 }
 
-
-void FuncBlocksForm::refreshView()
-{
-    // FIXME
-}
-
 void FuncBlocksForm::loadFuncblocks()
 {
     // IC RootCond = IC(Projects, "odb_pit", EQ, project_id);
 
     Projects.index_tree-> clear();
-    Projects.index_tree-> AddNode(NULL, true, false, EQ, "odb_pit", project_id);  // FIXME STUB
+    Projects.index_tree-> AddNode(NULL, true, false, EQ, "odb_pit", projectID);  // FIXME STUB
 
     // Funcblocks.Connect(graphDB, "funcblocks");
     // Projects.Connect(graphDB, "projects");
@@ -122,7 +116,7 @@ void FuncBlocksForm::loadFuncblocks()
 
     // Projects.LoadLinks();
 
-    Funcblocks.LoadLinkedData("projects_funcblocks", project_id);
+    Funcblocks.LoadLinkedData("projects_funcblocks", projectID);
     Funcblocks.LoadLink("funcblocksTree");
 
     Funcblocks.myLinkTypes["funcblocksTree"]-> ResolveLinks(); // FIXME STUB
@@ -152,72 +146,94 @@ void FuncBlocksForm::on_treeView_clicked(const QModelIndex &index)
         Funcblocks.GUI.model_current_item = model-> itemFromIndex(index);
 }
 
-void FuncBlocksForm::addSubBlock()
-{
-    QStandardItem* parentItem = Funcblocks.GUI.model_current_item;
-    // QStandardItem* newItem = NULL;
-
-    if (! parentItem)
-        return;
-
-    QList<QStandardItem*> items;
-
-    items << new QStandardItem("Test sub item");
-
-    items[0]->setData(QVariant(is_unchanged), data_status);     // loaded data status
-    items[0]->setData(QVariant(0), data_id);                    // ID
-
-    parentItem-> appendRow(items);
-
-    ui->treeView->expand(model->indexFromItem(parentItem));
-}
-
-
 inline void FuncBlocksForm::InitFunkblockForm()   // project details form setup
 {
     funcBlockForm = new FuncblockForm;
     funcBlockForm-> main_callee = this;
+    funcBlockForm-> FuncBlocks = &Funcblocks;
     // funcBlockForm->Projects = &Projects;
     // funcBlockForm->Statuses = &Statuses;
     // funcBlockForm->Owners = &Owners;
     // funcBlockForm-> initProject();
 }
 
-void FuncBlocksForm::addTopBlock()
+void FuncBlocksForm::addSubBlock()
 {
-    QStandardItem* topItem = model-> invisibleRootItem();
-    QStandardItem* parentItem = NULL;
-    // QStandardItem* newItem = NULL;
+    isTop = false;
 
-    // open fucblock form
+        // open fucblock form
 
     if (! funcBlockForm)
         InitFunkblockForm();
 
-    funcBlockForm-> FuncBlock_id = 0;
+    funcBlockForm-> FuncBlockID = 0;
 
-    // funcBlockForm-> openProject();
+    funcBlockForm-> openFuncBlock();
     funcBlockForm-> show();
+}
+
+void FuncBlocksForm::addTopBlock()
+{
+    isTop = true;
+
+        // open fucblock form
+
+    if (! funcBlockForm)
+        InitFunkblockForm();
+
+    funcBlockForm-> FuncBlockID = 0;
+
+    funcBlockForm-> openFuncBlock();
+    funcBlockForm-> show();
+}
+
+void FuncBlocksForm::refreshView()
+{
+    QStandardItem* parentItem;
+    // EgDataNode theFuncBlock;
+
+    // qDebug() << "funcBlockForm-> FuncBlockID = " << funcBlockForm-> FuncBlockID << FN;
 
         // process return code
 
-        // add node to egdb transaction
+    if (funcBlockForm-> FuncBlockID)
+    {
+        // theFuncBlock = Funcblocks[funcBlockForm-> FuncBlockID];
 
-        // add link
+        // qDebug() << "name = " << theFuncBlock["name"].toString() << FN;
 
-        // show new item
+        // FIXME add links
 
-    parentItem = topItem;
 
-    QList<QStandardItem*> items;
+        Projects.AddArrowLink("projects_funcblocks", projectID, Funcblocks, funcBlockForm-> FuncBlockID);
 
-    items << new QStandardItem("Test top item");
+        if (isTop)
+        {
+            Funcblocks.AddEntryNode(funcBlockForm-> FuncBlockID);
+        }
+        else
+        {
+            Funcblocks.AddArrowLink("funcblocksTree", Funcblocks.GUI.model_current_item-> data(data_id).toInt(), Funcblocks, funcBlockForm-> FuncBlockID);
 
-    items[0]->setData(QVariant(is_unchanged), data_status);     // loaded data status
-    items[0]->setData(QVariant(0), data_id);                    // ID
+        }
 
-    parentItem-> appendRow(items);
+        Funcblocks.StoreLinks();
 
+            // show new item
+        if (isTop)
+            parentItem = model-> invisibleRootItem();
+        else
+            parentItem = Funcblocks.GUI.model_current_item;
+
+        QList<QStandardItem*> items;
+
+        items << new QStandardItem(Funcblocks[funcBlockForm-> FuncBlockID]["name"].toString());
+
+        items[0]->setData(QVariant(is_unchanged), data_status);     // loaded data status
+        items[0]->setData(QVariant(funcBlockForm-> FuncBlockID), data_id);                    // ID
+
+        parentItem-> appendRow(items);
+    }
 }
 
 void FuncBlocksForm::editSubBlock()

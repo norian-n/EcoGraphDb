@@ -49,18 +49,26 @@ int EgDataNodesLinkType::StoreLinks()
         return -1;
     }
 
+    if (! dir.exists("egdb"))
+        dir.mkdir("egdb");
+
+    dir.setCurrent("egdb");
+
     secondType = egDatabase-> connNodeTypes[secondTypeName];
 
-    dat_file.setFileName("egdb/" + linkName + ".dln");
+    dat_file.setFileName(linkName + ".dln");
 
     if (!dat_file.open(QIODevice::ReadWrite)) // WriteOnly Append | QIODevice::Truncate
     {
         qDebug() << "can't open file " << linkName + ".dln" << FN;
+
+        dir.setCurrent("..");
+
         return -1;
     }
         // create index
     if (! fwdIndexFiles)
-        fwdIndexFiles = new EgIndexFiles<qint32>("egdb/" + linkName + "_fwd");
+        fwdIndexFiles = new EgIndexFiles<qint32>(linkName + "_fwd");
 
     fwdIndexFiles-> OpenIndexFilesToUpdate();
 
@@ -84,10 +92,21 @@ int EgDataNodesLinkType::StoreLinks()
                 // get second type data offset
             secondDataOffset =   secondType-> dataNodes[addIter.value()].dataFileOffset;
 
+            // qDebug() << "theIndex = " << addIter.key() << " secondDataOffset = " << hex << (int) secondDataOffset << FN;
+
                 // add to index first ID and second offset
             fwdIndexFiles-> theIndex = addIter.key();
             fwdIndexFiles-> dataOffset = secondDataOffset;
             fwdIndexFiles-> AddObjToIndex();
+        }
+        else
+        {
+            qDebug() << "Cant find secondType-> dataNodes of " << secondType-> metaInfo.typeName << " ID = " << addIter.value() << FN;
+            qDebug() << secondType-> dataNodes.keys() << FN;
+
+            dir.setCurrent("..");
+
+            return -1;
         }
 
     }
@@ -97,6 +116,8 @@ int EgDataNodesLinkType::StoreLinks()
     dat_file.close();
 
     fwdIndexFiles-> CloseIndexFiles();
+
+    dir.setCurrent("..");
 
     return 0;
 }
@@ -226,7 +247,7 @@ int EgDataNodesLinkType::ResolveLinks()
         }
         else
         {
-            qDebug() << firstType-> metaInfo.typeName << " : not found data node for ID = " << fromNode << " or " << secondType-> metaInfo.typeName << " " <<  toNode << FN;
+            qDebug() << firstType-> metaInfo.typeName << " : not found data node for ID = " << hex << fromNode << " or " << secondType-> metaInfo.typeName << " " << hex <<  toNode << FN;
         }
 
 

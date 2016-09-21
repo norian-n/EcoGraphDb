@@ -18,10 +18,10 @@ template <typename KeyType> void EgIndexFiles<KeyType>::RemoveIndexFiles()
 
 template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToUpdate()
 {
-    // qDebug() << "In OpenIndexFilesToUpdate()" << FN;
+    // qDebug() << "IndexFileName = " << IndexFileName << FN;
 
     int res = indexChunks.OpenIndexFilesToUpdate(IndexFileName);
-    res += fingersTree.OpenIndexFilesToUpdate(IndexFileName);
+    res += fingersTree.OpenFingerFileToUpdate(IndexFileName);
 
     fingersTree.IndexFileName = IndexFileName;
 
@@ -31,7 +31,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToUpdate()
         fingersTree.LoadRootHeader();
     }
     // else
-    //    qDebug() << "Can't load Root Header " << FN;
+    //   qDebug() << "Can't load Root Header " << FN;
 
     return res;
 }
@@ -41,7 +41,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToRead()
     // qDebug() << "In OpenIndexFilesToRead()" << FN;
 
     int res = indexChunks.OpenIndexFilesToRead(IndexFileName);
-    res += fingersTree.OpenIndexFilesToRead(IndexFileName);
+    res += fingersTree.OpenFingerFileToRead(IndexFileName);
 
     fingersTree.IndexFileName = IndexFileName;
 
@@ -71,10 +71,12 @@ template <typename KeyType> void EgIndexFiles<KeyType>::AddObjToIndex()
     indexChunks.theKey = theIndex;
     indexChunks.oldDataOffset = dataOffset;
 
+    // qDebug()  << "IndexFileName = " << IndexFileName << FN;
+
         // check for empty file
     if ( ! indexChunks.indexStream.device()->size() ) // is empty
     {
-        // qDebug()  << "index" << the_index << "empty file, calling AppendNewChunk() << FN";
+        // qDebug()  << "index" << the_index << "empty file, calling AppendNewChunk()" << FN;
 
         indexChunks.InitRootHeader();
         indexChunks.InitIndexChunk();
@@ -138,10 +140,11 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_EQ(QSet<quint64>& in
 
     res = OpenIndexFilesToRead();
 
-    dir.setCurrent("..");
-
     if (res)
+    {
+        dir.setCurrent("..");
         return res;
+    }
 
     indexChunks.theKey   = Key;
 
@@ -156,6 +159,8 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_EQ(QSet<quint64>& in
         indexChunks.LoadDataByChunkEqual(index_offsets);
 
     CloseIndexFiles();
+
+    dir.setCurrent("..");
 
     return res;
 }

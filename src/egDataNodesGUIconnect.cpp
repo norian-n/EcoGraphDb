@@ -313,7 +313,9 @@ int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model, QString li
             // check if node loaded
         if (! dataNodesType-> dataNodes.contains(Iter.key()))
         {
-            qDebug()  << "Entry node ID not found in dataNodesType-> dataNodes " << Iter.key() << FN;
+            // qDebug()  << "Entry node ID not found in dataNodesType-> dataNodes " << Iter.key() << FN;
+            // qDebug()  << dataNodesType-> dataNodes.keys() << FN;
+
             continue;
         }
 

@@ -100,7 +100,13 @@ int EgEntryNodes::LoadEntryNodes(EgDataNodesType& egType)
 
          if (egType.dataNodes.contains(entryNodeID))
              entryNodes.insert(entryNodeID, &(egType.dataNodes[entryNodeID]));
-         // TODO else error
+         else
+         {
+             qDebug()  << "Entry node ID not found in egType.dataNodes " << entryNodeID << FN;
+             qDebug()  << egType.dataNodes.keys() << FN;
+
+             continue;
+         }
      }
 
      dat_file.close();

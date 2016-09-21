@@ -29,7 +29,7 @@ public:
 
     FuncBlocksForm* main_callee;
 //    SubProjectsForm * sub_callee;
-    int FuncBlock_id;
+    int FuncBlockID;
 
     void initFuncBlock();
     void openFuncBlock();

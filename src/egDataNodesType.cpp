@@ -297,6 +297,8 @@ int EgDataNodesType::AddNewData(EgDataNode& tmpObj)
 {
     QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodesIter;
 
+    // qDebug() << "metaInfo.nextObjID = " << metaInfo.nextObjID << FN;
+
         // set next available ID FIXME : thread safe
     tmpObj.dataNodeID = metaInfo.nextObjID++;
     tmpObj.isAdded = true;
@@ -305,6 +307,8 @@ int EgDataNodesType::AddNewData(EgDataNode& tmpObj)
         // copy to map and then add to pointers list
     dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, tmpObj);
     addedDataNodes.insert(tmpObj.dataNodeID, &(dataNodesIter.value()));
+
+    // qDebug() << "tmpObj.dataNodeID = " << tmpObj.dataNodeID << FN;
 
     return 0;
 }
@@ -552,7 +556,16 @@ int EgDataNodesType::LoadLink(QString linkName)
 int EgDataNodesType::AddEntryNode(EgDataNodeIDtype entryNodeID)
 {
     if (dataNodes.contains(entryNodeID))
-        return entryNodesInst.AddEntryNode(dataNodes[entryNodeID]);
+    {
+        entryNodesInst.AddEntryNode(dataNodes[entryNodeID]);
+        entryNodesInst.StoreEntryNodes(*this);
+
+        return 0;
+    }
     else
+    {
+        qDebug() << "Cant find data node ID of " << metaInfo.typeName << " " << hex << entryNodeID << FN;
+        qDebug() << dataNodes.keys() << FN;
         return -1;
+    }
 }

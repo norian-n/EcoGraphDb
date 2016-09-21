@@ -14,7 +14,7 @@
 #include <QMap>
 #include <QVariant>
 #include <QFile>
-
+#include <QDir>
 
 #include "egCore.h"
 #include "indexes/egIndexesFiles.h"
@@ -38,6 +38,8 @@ public:
     EgGraphDatabase* egDatabase;            // backlink to db
 
     EgIndexFiles<qint32>* fwdIndexFiles;    // forward links index
+
+    QDir dir;
 
     QString linkName;           // link file name
 

@@ -5,6 +5,8 @@
 // #include <QList>
 
 FuncblockForm::FuncblockForm(QWidget *parent): QWidget(parent)
+  , main_callee(NULL)
+  , FuncBlocks(NULL)
   , ui(new Ui::FuncblockForm)
 
 {
@@ -17,7 +19,7 @@ FuncblockForm::FuncblockForm(QWidget *parent): QWidget(parent)
 void FuncblockForm::initFuncBlock()
 {
         // set field descriptors
-    // theFuncBlock.field_descs = &(FuncBlocks->FD);
+    theFuncBlock.metaInfo = &(FuncBlocks-> metaInfo);
         // init combos
     // Owners->  GUI.FillComboBox(ui->ownerBox);
     // Statuses-> GUI.FillComboBox(ui->statusBox);
@@ -25,12 +27,15 @@ void FuncblockForm::initFuncBlock()
 
 void FuncblockForm::openFuncBlock()
 {
+    theFuncBlock.metaInfo = &(FuncBlocks-> metaInfo);
         // check mode
-    if (FuncBlock_id != 0)    // edit data object
+    if (FuncBlockID != 0)    // edit data node
     {
-        theFuncBlock = (*FuncBlocks)[FuncBlock_id];
+        theFuncBlock = (*FuncBlocks)[FuncBlockID];
 
         ui->nameEdit->setText(theFuncBlock["name"].toString());
+
+        /*
         ui->descEdit->setText(theFuncBlock["description"].toString());
 
         Owners-> GUI.SetComboBox(ui->ownerBox, theFuncBlock["owner"]);
@@ -40,6 +45,7 @@ void FuncblockForm::openFuncBlock()
         ui->completeDateEdit->setDate(theFuncBlock["end_date"].toDate());
 
         ui->idLabel->setText(QVariant(theFuncBlock.dataNodeID).toString());
+        */
     }
     else    // add new
     {
@@ -58,6 +64,8 @@ void FuncblockForm::openFuncBlock()
 
 void FuncblockForm::okExit()
 {
+    // theFuncBlock.metaInfo = &(FuncBlocks-> metaInfo);
+
         // check mandatory fields
     if (ui->nameEdit->text().isEmpty())
     {
@@ -68,7 +76,7 @@ void FuncblockForm::okExit()
     // theFuncBlock = new DataObj();
 
 
-    if (FuncBlock_id) // edit FuncBlock
+    if (FuncBlockID) // edit FuncBlock
     {
         theFuncBlock.dataFields.clear();
         for (int k = 0; k < FuncBlocks->FieldsCount(); k++)
@@ -76,6 +84,7 @@ void FuncblockForm::okExit()
 
             // update data fields
         theFuncBlock["name"]        = ui->nameEdit->text();
+        /*
         theFuncBlock["description"] = ui->descEdit->text();
 
         theFuncBlock["status"]      = Statuses-> GUI.GetComboBoxID(ui->statusBox);
@@ -90,11 +99,12 @@ void FuncblockForm::okExit()
             theFuncBlock["end_date"] = ui->completeDateEdit->date();
         else
             theFuncBlock["end_date"] = QDate();
+            */
 
             // check for modified fields
-        if (theFuncBlock.dataFields != (*FuncBlocks)[FuncBlock_id].dataFields)
+        if (theFuncBlock.dataFields != (*FuncBlocks)[FuncBlockID].dataFields)
         {
-            FuncBlocks->SetModifiedData(theFuncBlock.dataFields, FuncBlock_id);
+            FuncBlocks->SetModifiedData(theFuncBlock.dataFields, FuncBlockID);
                 // save data
             FuncBlocks->StoreData();
                 // update parent view
@@ -110,6 +120,13 @@ void FuncblockForm::okExit()
 
             // update data fields
         theFuncBlock["name"]        = ui->nameEdit->text();
+/*
+        if (theFuncBlock.metaInfo)
+            qDebug() << "dataFields = " << theFuncBlock.metaInfo-> dataFields << FN;
+        qDebug() << "theFuncBlock[name] = " << theFuncBlock["name"].toString() << FN;
+        */
+
+        /*
         theFuncBlock["description"] = ui->descEdit->text();
 
         theFuncBlock["status"]      = Statuses-> GUI.GetComboBoxID(ui->statusBox);
@@ -124,10 +141,17 @@ void FuncblockForm::okExit()
             theFuncBlock["end_date"] = ui->completeDateEdit->date();
         else
             theFuncBlock["end_date"] = QDate();
+            */
 
-        FuncBlocks->AddNewData(theFuncBlock.dataFields);
+        FuncBlocks-> AddNewData(theFuncBlock);
+
+        FuncBlockID = theFuncBlock.dataNodeID;
+
+        // qDebug() << "FuncBlockID = " << FuncBlockID << FN;
+
             // save data
         FuncBlocks->StoreData();
+
             // update parent view
         if (main_callee)
             main_callee->refreshView();

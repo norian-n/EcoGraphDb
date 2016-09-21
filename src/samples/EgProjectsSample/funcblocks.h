@@ -22,7 +22,9 @@ class FuncBlocksForm : public QWidget
     Q_OBJECT
 public:
 
-    int project_id;
+    int projectID;
+
+    bool isTop;
 
     FuncBlocksForm(QWidget *parent = 0);
 

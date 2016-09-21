@@ -382,9 +382,8 @@ inline void EgDataFiles::LocalAddObjects(QDataStream& dat, QMap<EgDataNodeIDtype
     {
         // qDebug() << FN << "Adding object" << (int) addIter.value()-> dataNodeID << " on offset" << hex << (int) dat.device()-> pos();
 
-        // addIter.value()-> dataOffset = dat.device()-> pos();    // save offset;
-
         primIndexFiles-> dataOffset = dat.device()-> pos();
+        addIter.value()-> dataFileOffset = primIndexFiles-> dataOffset;    // save offset;
 
         dat << addIter.value()-> dataNodeID;
         dat << *(addIter.value());
@@ -457,6 +456,8 @@ inline int EgDataFiles::LocalModifyObjects(QDataStream& dat, QMap<EgDataNodeIDty
         primIndexFiles-> theIndex = addIter.value()-> dataNodeID;
         primIndexFiles-> dataOffset = addIter.value()-> dataFileOffset;
         primIndexFiles-> UpdateIndex(true);
+
+        addIter.value()-> dataFileOffset = primIndexFiles-> newOffset;
 
         // qDebug() << FN << "data offset" << hex << (int) primIndexFiles-> dataOffset;
 

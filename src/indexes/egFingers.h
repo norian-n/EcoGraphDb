@@ -93,8 +93,8 @@ public:
 
     void PrintAllChunksInfo(const QString& theMessage);
 
-    int OpenIndexFilesToUpdate(const QString& IndexFileName);
-    int OpenIndexFilesToRead(const QString& IndexFileName);
+    int OpenFingerFileToUpdate(const QString& IndexFileName);
+    int OpenFingerFileToRead(const QString& IndexFileName);
 
     void CloseIndexFiles();
     void RemoveIndexFiles(const QString& IndexFileName);

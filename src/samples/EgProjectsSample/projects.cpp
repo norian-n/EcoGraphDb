@@ -268,7 +268,7 @@ void ProjectsForm::on_addButton_clicked()
 
     if (model-> item(Projects.GUI.model_current_row,0))
     {
-        funcblocks_form-> project_id = model-> item(Projects.GUI.model_current_row,0)-> data(data_id).toInt();;
+        funcblocks_form-> projectID = model-> item(Projects.GUI.model_current_row,0)-> data(data_id).toInt();;
         funcblocks_form-> loadFuncblocks();
         funcblocks_form-> show();
     }
