@@ -12,15 +12,51 @@
 
 #include <QFile>
 
-int EgEntryNodes::AddEntryNode(EgDataNode& entryNode)
+int EgEntryNodes::AddEntryNode(EgDataNodesType& egType, EgDataNode& entryNode)
 {
+    QFile dat_file;             // data file
+    QDataStream dat;
+
     if (! entryNodes.contains(entryNode.dataNodeID))
+    {
         entryNodes.insert(entryNode.dataNodeID, &entryNode);
+
+        if (! dir.exists("egdb"))
+        {
+            qDebug()  << "Can't find the egdb dir " << FN;
+            return -1;
+        }
+
+        dat_file.setFileName("egdb/" + egType.metaInfo.typeName + ".ent");
+
+        if (!dat_file.open(QIODevice::ReadWrite)) // WriteOnly Append | QIODevice::Truncate
+        {
+            qDebug() << "can't open file " << egType.metaInfo.typeName + ".ent" << FN;
+            return -1;
+        }
+
+        dat.setDevice(&dat_file);
+
+        dat.device()-> seek(dat.device()->size());
+
+            // walk add list
+        // for (QMap<EgDataNodeIDtype, EgDataNode*>::iterator Iter = entryNodes.begin(); Iter != entryNodes.end(); ++Iter)
+        // {
+            // qDebug() << "Adding link" << (int) addIter.key() << (int) addIter.value() << " on offset" << hex << (int) dat.device()-> pos() << FN;
+
+        dat << entryNode.dataNodeID; // Iter.key();
+            // dat << addIter.value();
+        //}
+
+        dat_file.close();
+    }
     else
         return 1;
 
     return 0;
 }
+
+/*
 
 int EgEntryNodes::StoreEntryNodes(EgDataNodesType& egType)
 {
@@ -61,7 +97,7 @@ int EgEntryNodes::StoreEntryNodes(EgDataNodesType& egType)
 
     return 0;
 }
-
+*/
 
 int EgEntryNodes::LoadEntryNodes(EgDataNodesType& egType)
 {
@@ -102,8 +138,8 @@ int EgEntryNodes::LoadEntryNodes(EgDataNodesType& egType)
              entryNodes.insert(entryNodeID, &(egType.dataNodes[entryNodeID]));
          else
          {
-             qDebug()  << "Entry node ID not found in egType.dataNodes " << entryNodeID << FN;
-             qDebug()  << egType.dataNodes.keys() << FN;
+             // qDebug()  << "Entry node ID not found in egType.dataNodes " << entryNodeID << FN;
+             // qDebug()  << egType.dataNodes.keys() << FN;
 
              continue;
          }

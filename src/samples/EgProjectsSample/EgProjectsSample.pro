@@ -29,7 +29,8 @@ SOURCES += main.cpp \
     ../../indexes/egFingers.cpp \
     ../../egEntryNodes.cpp \
     funcblock_form.cpp \
-    projects.cpp
+    projects.cpp \
+    references.cpp
 
 
 HEADERS += mainwindow.h \
@@ -38,11 +39,13 @@ HEADERS += mainwindow.h \
     ../../indexes/egIndexesFiles.h \
     ../../indexes/egIndexConditions.h \
     funcblock_form.h \
-    projects.h
+    projects.h \
+    references.h
 
 
 FORMS += mainwindow.ui \
     project_form.ui \
     funcblocks.ui \
     funcblock_form.ui \
-    projects.ui
+    projects.ui \
+    references.ui

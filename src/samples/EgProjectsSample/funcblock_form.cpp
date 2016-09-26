@@ -105,11 +105,14 @@ void FuncblockForm::okExit()
         if (theFuncBlock.dataFields != (*FuncBlocks)[FuncBlockID].dataFields)
         {
             FuncBlocks->SetModifiedData(theFuncBlock.dataFields, FuncBlockID);
+                // save old offset
+
                 // save data
-            FuncBlocks->StoreData();
+            FuncBlocks->StoreData();            
+
                 // update parent view
             if (main_callee)
-                main_callee->refreshView();
+                main_callee->refreshView2();
         }
     }
     else // insert FuncBlock

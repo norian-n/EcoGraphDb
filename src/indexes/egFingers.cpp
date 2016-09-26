@@ -480,10 +480,12 @@ template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetFirst(QDa
         return 0;
     }
 
-    // qDebug() << "fingerPosition = " << fingerPosition << FN;
+    // qDebug() << "indexChunks-> theKey = " << indexChunks-> theKey << "fingerPosition = " << fingerPosition << FN;
 
     currentFinger.myOffset = fingerPosition*oneFingerSize;
     ReadFinger(localFingersStream, currentFinger);
+
+    // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
 
     secondFinger.myLevel = currentFinger.myLevel;
 
@@ -495,6 +497,8 @@ template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetFirst(QDa
             if (fingerPosition < (parentFinger.itemsCount - 1))
             {
                 fingerPosition ++;
+
+                // qDebug() << "fingerPosition = " << fingerPosition << FN;
 
                 currentFinger.myOffset = fingerPosition*oneFingerSize;
                 ReadFinger(localFingersStream, currentFinger);
@@ -516,6 +520,9 @@ template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetFirst(QDa
 
                     if (indexChunks-> theKey > secondFinger.maxKey) // finger found
                     {
+                        if (indexChunks-> theKey == currentFinger.minKey)
+                            return 0;
+
                         return 1;   // between fingers
                     }
                     else
@@ -660,6 +667,9 @@ template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetLast(QDat
 
                     if (indexChunks-> theKey < secondFinger.minKey) // finger found
                     {
+                        if (indexChunks-> theKey == currentFinger.maxKey)
+                            return 0;
+
                         return 1;   // between fingers
                     }
                     else

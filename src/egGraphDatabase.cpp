@@ -29,7 +29,7 @@ int EgGraphDatabase::Attach(EgDataNodesType* nType)
         return -1;
     }
 
-    if (! connNodeTypes.contains(nType->metaInfo.typeName))
+    if (! connNodeTypes.contains(nType->metaInfo.typeName)) // FIXME multi instances
         connNodeTypes.insert(nType->metaInfo.typeName, nType);
 
     return 0;

@@ -20,11 +20,11 @@ FuncBlocksForm::FuncBlocksForm(QWidget *parent)
         // connect buttons
     connect(ui->addTopBlockButton, SIGNAL(clicked()),this, SLOT(addTopBlock()));
     connect(ui->addButton, SIGNAL(clicked()),this, SLOT(addSubBlock()));
-    connect(ui->editButton, SIGNAL(clicked()),this, SLOT(editSubBlock()));
-    connect(ui->deleteButton, SIGNAL(clicked()),this, SLOT(deleteSubBlock()));
+    // connect(ui->editButton, SIGNAL(clicked()),this, SLOT(editSubBlock()));
+    // connect(ui->deleteButton, SIGNAL(clicked()),this, SLOT(deleteSubBlock()));
     connect(ui->cancelButton, SIGNAL(clicked()),this, SLOT(cancelExit()));
     connect(ui->okButton, SIGNAL(clicked()),this, SLOT(okExit()));
-    connect(ui->compButton, SIGNAL(clicked()),this, SLOT(openCompForm()));
+    // connect(ui->compButton, SIGNAL(clicked()),this, SLOT(openCompForm()));
 /*
     ui->treeWidget->setColumnCount(2);
     ui->treeWidget->setHeaderLabels(QStringList(QString("Func block")) << QString("Description"));
@@ -119,7 +119,8 @@ void FuncBlocksForm::loadFuncblocks()
     Funcblocks.LoadLinkedData("projects_funcblocks", projectID);
     Funcblocks.LoadLink("funcblocksTree");
 
-    Funcblocks.myLinkTypes["funcblocksTree"]-> ResolveLinks(); // FIXME STUB
+    Funcblocks.myLinkTypes["projects_funcblocks"]-> ResolveLinks(Projects, Funcblocks);
+    Funcblocks.myLinkTypes["funcblocksTree"]-> ResolveLinks(Funcblocks, Funcblocks);
 
 /*
     qDebug() << "project ID = " << project_id << FN;
@@ -144,9 +145,11 @@ void FuncBlocksForm::on_treeView_clicked(const QModelIndex &index)
         Funcblocks.GUI.model_current_row = index.row();
 
         Funcblocks.GUI.model_current_item = model-> itemFromIndex(index);
+
+        // qDebug() << "model_current_item->column() = " << Funcblocks.GUI.model_current_item->column() << FN;
 }
 
-inline void FuncBlocksForm::InitFunkblockForm()   // project details form setup
+inline void FuncBlocksForm::InitFuncblockForm()   // project details form setup
 {
     funcBlockForm = new FuncblockForm;
     funcBlockForm-> main_callee = this;
@@ -159,12 +162,15 @@ inline void FuncBlocksForm::InitFunkblockForm()   // project details form setup
 
 void FuncBlocksForm::addSubBlock()
 {
+    if (! Funcblocks.GUI.model_current_item)
+        return;
+
     isTop = false;
 
         // open fucblock form
 
     if (! funcBlockForm)
-        InitFunkblockForm();
+        InitFuncblockForm();
 
     funcBlockForm-> FuncBlockID = 0;
 
@@ -179,7 +185,7 @@ void FuncBlocksForm::addTopBlock()
         // open fucblock form
 
     if (! funcBlockForm)
-        InitFunkblockForm();
+        InitFuncblockForm();
 
     funcBlockForm-> FuncBlockID = 0;
 
@@ -213,7 +219,8 @@ void FuncBlocksForm::refreshView()
         }
         else
         {
-            Funcblocks.AddArrowLink("funcblocksTree", Funcblocks.GUI.model_current_item-> data(data_id).toInt(), Funcblocks, funcBlockForm-> FuncBlockID);
+            Funcblocks.AddArrowLink("funcblocksTree", Funcblocks.GUI.model_current_item-> data(data_id).toInt(),
+                                    Funcblocks, funcBlockForm-> FuncBlockID);
 
         }
 
@@ -233,23 +240,39 @@ void FuncBlocksForm::refreshView()
         items[0]->setData(QVariant(funcBlockForm-> FuncBlockID), data_id);                    // ID
 
         parentItem-> appendRow(items);
+
+        if (! isTop)
+            ui->treeView-> expand(parentItem->index());
     }
 }
 
-void FuncBlocksForm::editSubBlock()
+void FuncBlocksForm::refreshView2()
 {
+        // update link
+    Projects.myLinkTypes["projects_funcblocks"]-> UpdateLinkIndex(projectID, oldOffset, Funcblocks[funcBlockForm-> FuncBlockID].dataFileOffset);
 
+    // if (Funcblocks.GUI.model_current_item-> parent())
+    //    qDebug() << "Not top item, " << FN;
+
+    // qDebug() << "oldOffset = " << oldOffset << ", link name = " << Projects.myLinkTypes["projects_funcblocks"]-> linkName << FN;
+
+    if (Funcblocks.GUI.model_current_item-> parent())
+        Funcblocks.myLinkTypes["funcblocksTree"]-> UpdateLinkIndex(Funcblocks.GUI.model_current_item-> parent()-> data(data_id).toInt(),
+                                                                   oldOffset, Funcblocks[funcBlockForm-> FuncBlockID].dataFileOffset);
+
+
+    Funcblocks.GUI.model_current_item->setText(Funcblocks[funcBlockForm-> FuncBlockID]["name"].toString());
+
+    // Funcblocks.GUI.DataToModelTree(model, "funcblocksTree");
+
+        // attach model
+    // ui->treeView->setModel(model);
+
+    // Funcblocks.GUI.SetViewWidths(ui->treeView);
+
+    // ui->treeView->expandAll();
 }
 
-void FuncBlocksForm::deleteSubBlock()
-{
-
-}
-
-void FuncBlocksForm::openCompForm()
-{
-
-}
 
 void FuncBlocksForm::okExit()
 {
@@ -265,47 +288,37 @@ void FuncBlocksForm::cancelExit()
     close();
 }
 
-// =============================================================================================
-//                              JUNKYARD
-// =============================================================================================
+
+void FuncBlocksForm::on_editButton_clicked()
+{
+    if (! Funcblocks.GUI.model_current_item)
+        return;
+
+    if (! funcBlockForm)
+        InitFuncblockForm();
+
+    funcBlockForm-> FuncBlockID = Funcblocks.GUI.model_current_item-> data(data_id).toInt();
+
+    oldOffset = Funcblocks[funcBlockForm-> FuncBlockID].dataFileOffset;
+
+    funcBlockForm-> openFuncBlock();
+    funcBlockForm-> show();
+}
+
 
 /*
-void FuncBlocksForm::FillTestData()
+void FuncBlocksForm::editSubBlock()
 {
 
-    QList<QVariant> ins_values;
+}
 
-        // funcblocks
-    Funcblocks.AddFieldDesc("project",       "Project link",        d_link);
-    Funcblocks.AddFieldDesc("parent",        "Parent link",         d_link);
-    // Funcblocks.AddFieldDesc("status",        "Funcblock status",        d_link);
-    // Funcblocks.AddFieldDesc("owner",         "Funcblock owner",         d_link);
-    Funcblocks.AddFieldDesc("launch_date",   "Launch date",           d_date);
-    Funcblocks.AddFieldDesc("end_date",      "End_date",              d_date);
-    Funcblocks.AddFieldDesc("name",          "Funcblock name",          d_string);
-    Funcblocks.AddFieldDesc("description",   "Funcblock description",   d_string);
+void FuncBlocksForm::deleteSubBlock()
+{
 
-    Funcblocks.StoreFieldDesc();
+}
 
-#define ADD_RECORD(values,dataclass) ins_values.clear(); ins_values << values; dataclass.AddNewData(ins_values);
+void FuncBlocksForm::openCompForm()
+{
 
-        // Funcblocks
-    ADD_RECORD(QVariant(1) << QVariant(0) << QVariant(QDate(2010,10,1)) << QVariant(0) <<
-               QVariant("Top level funcblock") << QVariant("Test Funcblock Description"), Funcblocks);
-    ADD_RECORD(QVariant(1) << QVariant(1) << QVariant(QDate(2011,11,2)) << QVariant(0) <<
-               QVariant("Detail funcblock 1") << QVariant("Test Funcblock Description"), Funcblocks);
-    ADD_RECORD(QVariant(1) << QVariant(1) << QVariant(QDate(2012,12,3)) << QVariant(0) <<
-               QVariant("Detail funcblock 2") << QVariant("Test Funcblock Description"), Funcblocks);
-
-#undef ADD_RECORD
-
-    Funcblocks.PrintObjData();
-    Funcblocks.StoreData();    
 }
 */
-
-// qDebug() << FN << "data indexes : " << Funcblocks.dobj_map.size();
-// qDebug() << FN << "parent indexes : " << Funcblocks.parent_map.size();
-
-
-

@@ -20,6 +20,7 @@
 #include "indexes/egIndexesFiles.h"
 
 class EgGraphDatabase;
+class EgDataNodesType;
 
 namespace EgDataNodesLinkNamespace
 {
@@ -37,7 +38,7 @@ public:
 
     EgGraphDatabase* egDatabase;            // backlink to db
 
-    EgIndexFiles<qint32>* fwdIndexFiles;    // forward links index
+    EgIndexFiles<EgDataNodeIDtype>* fwdIndexFiles;    // forward links index
 
     QDir dir;
 
@@ -58,12 +59,13 @@ public:
 
     // int AddLink (EgDataNode& left_obj, EgDataNode& right_obj); // link objects
     int AddLink (EgDataNodeIDtype leftNodeID, EgDataNodeIDtype rightNodeID);
+    int UpdateLinkIndex (EgDataNodeIDtype ID, quint64 oldDataOffset, quint64 newDataOffset);
 
     // int PrintLinks();        // debug dump
 
     int LoadLinks();            // load data links from file or server
     int StoreLinks();           // save data links to file or server
-    int ResolveLinks();         // move loaded links to data nodes if loaded
+    int ResolveLinks(EgDataNodesType& firstType, EgDataNodesType& secondType);         // move loaded links to data nodes if loaded
 
     int LoadLinkedNodes(QSet<quint64>& IndexOffsets, EgDataNodeIDtype fromNodeID);
 

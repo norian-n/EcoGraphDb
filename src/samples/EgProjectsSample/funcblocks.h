@@ -24,25 +24,31 @@ public:
 
     int projectID;
 
+    quint64 oldOffset;
+
     bool isTop;
 
     FuncBlocksForm(QWidget *parent = 0);
 
     void loadFuncblocks();
+
     void refreshView();
+    void refreshView2();
 
 private slots:
 
 
     void addSubBlock();
     void addTopBlock();
-    void editSubBlock();
-    void deleteSubBlock();
-    void openCompForm();
+    // void editSubBlock();
+    // void deleteSubBlock();
+    // void openCompForm();
     void okExit();
     void cancelExit();
 
     void on_treeView_clicked(const QModelIndex &index);
+
+    void on_editButton_clicked();
 
 private:
     Ui::FuncBlocksForm* ui;
@@ -57,8 +63,8 @@ private:
     EgDataNodesType Funcblocks;
     EgDataNodesType Projects;
 
-    EgDataNodesType Statuses;
-    EgDataNodesType Owners;
+    // EgDataNodesType Statuses;
+    // EgDataNodesType Owners;
 
     // LinkData* FuncblockStatusLink;
     // LinkData* FuncblockOwnerLink;
@@ -67,7 +73,7 @@ private:
 
     QStandardItemModel* model;
 
-    inline void InitFunkblockForm();
+    inline void InitFuncblockForm();
 
 };
 

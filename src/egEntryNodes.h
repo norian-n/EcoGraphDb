@@ -24,9 +24,9 @@ public:
 
       QDir dir;
 
-      int AddEntryNode(EgDataNode& entryNode);
+      int AddEntryNode(EgDataNodesType &egType, EgDataNode& entryNode);
 
-      int StoreEntryNodes(EgDataNodesType &egType);
+      // int StoreEntryNodes(EgDataNodesType &egType);
       int LoadEntryNodes(EgDataNodesType& egType);
 };
 

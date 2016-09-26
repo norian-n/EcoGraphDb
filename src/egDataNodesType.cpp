@@ -154,27 +154,26 @@ int EgDataNodesType::AddArrowLink(QString linkName, EgDataNodeIDtype fromNode, E
           toType.dataNodes[toNode].nodeLinks = new EgDataNodeLinks();
 
             // write fwd link
-        if (! dataNodes[fromNode].nodeLinks-> outLinks.contains(linkName))
+        if (dataNodes[fromNode].nodeLinks-> outLinks.contains(linkName))
+            dataNodes[fromNode].nodeLinks-> outLinks[linkName].append(fwdLink);
+        else
         {
             newLinks.clear();
             newLinks.append(fwdLink);
 
             dataNodes[fromNode].nodeLinks-> outLinks.insert(linkName, newLinks);
         }
-        else
-            dataNodes[fromNode].nodeLinks-> outLinks[linkName].append(fwdLink);
 
-            // write back link
-        if (! toType.dataNodes[toNode].nodeLinks-> outLinks.contains(linkName))
+            // FIXME RUNTIME SEGFAULT write back link
+        if (toType.dataNodes[toNode].nodeLinks-> outLinks.contains(linkName))
+            toType.dataNodes[toNode].nodeLinks-> outLinks[linkName].append(backLink);
+        else
         {
             newLinks.clear();
             newLinks.append(backLink);
 
             toType.dataNodes[toNode].nodeLinks-> outLinks.insert(linkName, newLinks);
         }
-        else
-            toType.dataNodes[toNode].nodeLinks-> outLinks[linkName].append(backLink);
-
             // add record to store links
 
         myLinkTypes[linkName] -> AddLink(fromNode, toNode);
@@ -432,7 +431,7 @@ int EgDataNodesType::StoreData()
 
     ret_val = LocalFiles-> LocalStoreData(addedDataNodes, deletedDataNodes, updatedDataNodes);
 
-    entryNodesInst.StoreEntryNodes(*this); // FIXME check changes
+    // entryNodesInst.StoreEntryNodes(*this); // FIXME check changes
 
     deletedDataNodes.clear();
     addedDataNodes.clear();
@@ -557,8 +556,8 @@ int EgDataNodesType::AddEntryNode(EgDataNodeIDtype entryNodeID)
 {
     if (dataNodes.contains(entryNodeID))
     {
-        entryNodesInst.AddEntryNode(dataNodes[entryNodeID]);
-        entryNodesInst.StoreEntryNodes(*this);
+        entryNodesInst.AddEntryNode(*this, dataNodes[entryNodeID]);
+        // entryNodesInst.StoreEntryNodes(*this);
 
         return 0;
     }

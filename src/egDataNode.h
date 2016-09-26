@@ -29,8 +29,8 @@ class EgDataNodeLinks           // Data Object Instance 1
 {
 public:
 
-  QHash <QString, QList<EgExtendedLinkType> > inLinks;
-  QHash <QString, QList<EgExtendedLinkType> > outLinks;
+  QMap <QString, QList<EgExtendedLinkType> > inLinks;
+  QMap <QString, QList<EgExtendedLinkType> > outLinks;
 };
 
 class EgDataNode           // Data Object Instance 1
@@ -49,7 +49,7 @@ public:
 
     QList<QVariant> dataFields;           // data itself
 
-    EgDataNode(): isAdded(false), metaInfo(NULL), nodeLinks(NULL) {}
+    EgDataNode(): dataNodeID(0), dataFileOffset(0), isAdded(false), metaInfo(NULL), nodeLinks(NULL) {}
     EgDataNode(EgDataNodeTypeMetaInfo& a_metaInfo);
 
     ~EgDataNode() { if (nodeLinks) delete nodeLinks; }
