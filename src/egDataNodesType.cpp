@@ -178,13 +178,18 @@ int EgDataNodesType::AddArrowLink(QString linkName, EgDataNodeIDtype fromNode, E
 
         myLinkTypes[linkName] -> AddLink(fromNode, toNode);
 
-        // qDebug() << metaInfo.typeName << "link added " << fromNode << "to" <<  toNode << FN;
+
+
+        qDebug() << "Link " << linkName << " added " << metaInfo.typeName << " " << fromNode << " to "
+                 << toType.metaInfo.typeName << " " <<  toNode << FN;
 
         return 0;
     }
     else
     {
-        qDebug() << metaInfo.typeName << " : not found data node for ID = " << fromNode << " or " << toType.metaInfo.typeName << " " <<  toNode << FN;
+        qDebug() << "Link " << linkName << " of " << metaInfo.typeName << " link NOT added for ID = " << fromNode << " to "
+                 << toType.metaInfo.typeName << " " << toNode << FN;
+
         return -1;
     }
 }
@@ -326,6 +331,26 @@ int EgDataNodesType::AddNewData(QList<QVariant>& myData)
         // copy to map and then add to pointers list
     dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, tmpObj);
     addedDataNodes.insert(tmpObj.dataNodeID, &(dataNodesIter.value()));
+
+    return 0;
+}
+
+int EgDataNodesType::AddNewData(QList<QVariant>& myData, EgDataNodeIDtype& newID)
+{
+    QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodesIter;
+    EgDataNode tmpObj;
+
+        // set next available ID FIXME : thread safe
+    tmpObj.dataNodeID = metaInfo.nextObjID++;
+    tmpObj.dataFields = myData;
+    tmpObj.isAdded = true;
+    tmpObj.metaInfo = &metaInfo;
+
+        // copy to map and then add to pointers list
+    dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, tmpObj);
+    addedDataNodes.insert(tmpObj.dataNodeID, &(dataNodesIter.value()));
+
+    newID = tmpObj.dataNodeID;
 
     return 0;
 }

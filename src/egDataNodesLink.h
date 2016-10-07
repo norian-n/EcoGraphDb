@@ -52,7 +52,7 @@ public:
 
     QMultiMap<EgDataNodeIDtype, EgDataNodeIDtype>  loadedLinks;
 
-    EgDataNodesLinkType(): fwdIndexFiles(NULL) {}
+    EgDataNodesLinkType(): egDatabase(NULL), fwdIndexFiles(NULL) {}
     ~EgDataNodesLinkType() { if (fwdIndexFiles) delete fwdIndexFiles; }
 
 

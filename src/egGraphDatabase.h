@@ -27,7 +27,7 @@ public:
     QMap<QString, EgDataNodesLinkType>  linkTypes;
     QMap<QString, EgDataNodesType*>  connNodeTypes;
 
-    EgGraphDatabase(): isConnected(false), metaInfo(NULL) {}
+    EgGraphDatabase(): isConnected(false), metaInfo(NULL), connection(NULL) {}
 
     ~EgGraphDatabase() { if (metaInfo) delete metaInfo; }
 

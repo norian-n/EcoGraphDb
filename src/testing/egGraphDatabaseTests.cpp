@@ -226,7 +226,7 @@ bool EgGraphDatabaseTests::testEgEntryNodes(EgDataNodesType& testDataNodes)
     testDataNodes.AddEntryNode(1);
     testDataNodes.AddEntryNode(4);
 
-    testDataNodes.entryNodesInst.StoreEntryNodes(testDataNodes);
+    // testDataNodes.entryNodesInst.StoreEntryNodes(testDataNodes);
     testDataNodes.entryNodesInst.LoadEntryNodes(testDataNodes);
 
     bool res = (testDataNodes.entryNodesInst.entryNodes.count() == 2); // (graphDB.metaInfo->dataFields.count() == 2) // && (testDataNodes.dataNodes.count() == 8))

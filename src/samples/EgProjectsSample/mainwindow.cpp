@@ -76,6 +76,7 @@ void MainWindow::FillTestData()
     return;
     */
 
+
 #define ADD_RECORD(values,dataNodesType) ins_values.clear(); ins_values << values; dataNodesType.AddNewData(ins_values);
 
     QList<QVariant> ins_values;

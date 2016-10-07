@@ -21,6 +21,17 @@ EgDataNode::EgDataNode(EgDataNodeTypeMetaInfo& a_metaInfo):
         dataFields << QVariant();
 }
 
+EgDataNode::~EgDataNode()
+{
+    dataFields.clear();
+    if (nodeLinks)
+    {
+        nodeLinks-> inLinks.clear();
+        nodeLinks-> outLinks.clear();
+        delete nodeLinks;
+    }
+}
+
 void EgDataNode::clear()
 {
     dataFields.clear();
@@ -30,29 +41,41 @@ void EgDataNode::clear()
     if (metaInfo)
         for (int i = 0; i < metaInfo-> dataFields.count(); i++)
             dataFields << QVariant();
+
+    if (nodeLinks)
+    {
+        nodeLinks-> inLinks.clear();
+        nodeLinks-> outLinks.clear();
+        delete nodeLinks;
+
+        nodeLinks = NULL;
+    }
+
+    dataFileOffset = 0;
+    dataNodeID = 0;
 }
 
 QVariant& EgDataNode::operator [] (QString& fieldName)
 {
-    static QVariant not_found("<Not found>"); // to return index error as QVariant.isNull()
+    // static QVariant not_found("<Not found>"); // to return index error as QVariant.isNull()
 
     if (metaInfo)
         if (metaInfo-> nameToOrder.contains(fieldName))
             return dataFields[metaInfo-> nameToOrder[fieldName]];
 
-    return not_found;
+    return egNotFound;
 }
 
 QVariant& EgDataNode::operator [] (const char* fName)
 {
     QString fieldName(fName);
-    static QVariant not_found("<Not found>"); // to return index error as QVariant.isNull()
+    // static QVariant not_found("<Not found>"); // to return index error as QVariant.isNull()
 
     if (metaInfo)
         if (metaInfo-> nameToOrder.contains(fieldName))
             return dataFields[metaInfo-> nameToOrder[fieldName]];
 
-    return not_found;
+    return egNotFound;
 }
 
 

@@ -15,6 +15,7 @@
 
 #include "egGraphDatabaseTests.h"
 #include "egIndexesTests.h"
+#include "egLinksTests.h"
 
 void cleanUpFiles()
 {
@@ -66,6 +67,11 @@ int main() // int argc, char *argv[])
     EgIndexFiles<qint32> testIndexFiles("IndexesTests");
     EgIndexesTests<qint32> indexTests;
 
+    EgLinksTests linksTests;
+
+    linksTests.testFuncblocksCase();
+
+    return 0; // FIXME STUB
 
     // res = res && indexTests.testEgDataIndexAddFirst(testIndexFiles);
     // res = res && indexTests.testEgDataIndexDelFirst(testIndexFiles);

@@ -27,13 +27,14 @@ void FuncblockForm::initFuncBlock()
 
 void FuncblockForm::openFuncBlock()
 {
-    theFuncBlock.metaInfo = &(FuncBlocks-> metaInfo);
-        // check mode
-    if (FuncBlockID != 0)    // edit data node
-    {
-        theFuncBlock = (*FuncBlocks)[FuncBlockID];
+    // theFuncBlock.metaInfo = &(FuncBlocks-> metaInfo);
 
-        ui->nameEdit->setText(theFuncBlock["name"].toString());
+        // check mode
+    if (FuncBlockID)    // edit data node
+    {
+        // theFuncBlock = (*FuncBlocks)[FuncBlockID];
+
+        ui->nameEdit->setText((*FuncBlocks)[FuncBlockID]["name"].toString());
 
         /*
         ui->descEdit->setText(theFuncBlock["description"].toString());
@@ -65,7 +66,7 @@ void FuncblockForm::openFuncBlock()
 void FuncblockForm::okExit()
 {
     // theFuncBlock.metaInfo = &(FuncBlocks-> metaInfo);
-
+    theFuncBlock.clear();
         // check mandatory fields
     if (ui->nameEdit->text().isEmpty())
     {
@@ -78,9 +79,11 @@ void FuncblockForm::okExit()
 
     if (FuncBlockID) // edit FuncBlock
     {
+        /*
         theFuncBlock.dataFields.clear();
         for (int k = 0; k < FuncBlocks->FieldsCount(); k++)
             theFuncBlock.dataFields << QVariant();   // FIXME theFuncBlock.Init(); or clearData();
+            */
 
             // update data fields
         theFuncBlock["name"]        = ui->nameEdit->text();
@@ -104,7 +107,7 @@ void FuncblockForm::okExit()
             // check for modified fields
         if (theFuncBlock.dataFields != (*FuncBlocks)[FuncBlockID].dataFields)
         {
-            FuncBlocks->SetModifiedData(theFuncBlock.dataFields, FuncBlockID);
+            FuncBlocks-> SetModifiedData(theFuncBlock.dataFields, FuncBlockID);
                 // save old offset
 
                 // save data
@@ -117,9 +120,11 @@ void FuncblockForm::okExit()
     }
     else // insert FuncBlock
     {
+        /*
         theFuncBlock.dataFields.clear();
         for (int k = 0; k < FuncBlocks->FieldsCount(); k++)
             theFuncBlock.dataFields << QVariant();   // FIXME theFuncBlock.Init(); or clearData();
+            */
 
             // update data fields
         theFuncBlock["name"]        = ui->nameEdit->text();
@@ -148,7 +153,7 @@ void FuncblockForm::okExit()
 
         FuncBlocks-> AddNewData(theFuncBlock);
 
-        FuncBlockID = theFuncBlock.dataNodeID;
+        FuncBlockID = theFuncBlock.dataNodeID; // show to funcblocks form
 
         // qDebug() << "FuncBlockID = " << FuncBlockID << FN;
 
@@ -168,9 +173,6 @@ void FuncblockForm::okExit()
 
 void FuncblockForm::cancelExit()
 {
-        // clean up
-    theFuncBlock.dataFields.clear();
-
     close();
 }
 

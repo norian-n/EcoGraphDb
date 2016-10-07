@@ -41,6 +41,8 @@ struct EgIndexNode
     EgIndexNode* left;
     EgIndexNode* right;
     EgIndexNode* parent;
+
+    EgIndexNode(): left(NULL), right(NULL), parent(NULL) {}
 };
 
 

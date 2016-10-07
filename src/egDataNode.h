@@ -17,12 +17,16 @@
 
 #include "egCore.h"
 
+static QVariant egNotFound("<Not found>");
+
 class EgDataNodeTypeMetaInfo;
 
 struct EgExtendedLinkType
 {
       EgDataNodeIDtype dataNodeID;
       EgDataNode* dataNodePtr;
+
+      EgExtendedLinkType(): dataNodeID(0), dataNodePtr(NULL) {}
 };
 
 class EgDataNodeLinks           // Data Object Instance 1
@@ -52,7 +56,7 @@ public:
     EgDataNode(): dataNodeID(0), dataFileOffset(0), isAdded(false), metaInfo(NULL), nodeLinks(NULL) {}
     EgDataNode(EgDataNodeTypeMetaInfo& a_metaInfo);
 
-    ~EgDataNode() { if (nodeLinks) delete nodeLinks; }
+    ~EgDataNode();
 
     void clear();
 
@@ -66,12 +70,3 @@ QDataStream& operator >> (QDataStream& d_stream, EgDataNode& d_object);    // tr
 
 
 #endif // EG_DATANODE_H
-
-/*
-class EgLoadedLinkType
-{
-public:
-      EgDataNodeIDtype dataNodeID;
-      EgDataNode* dataNodePtr;
-};
-*/

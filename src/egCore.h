@@ -70,10 +70,6 @@ enum DataStatusType // data status type
 const int data_status = Qt::UserRole + 1;   // data_status_type
 const int data_id     = Qt::UserRole + 2;   // egDb data node ID
 
-    // forward decl
-// class DFieldDescriptors;
-// class DataObjects;
-
 
 struct NamedAttribute
 {
@@ -81,59 +77,5 @@ struct NamedAttribute
     QVariant value;
 };
 
-
-
-
-
-
-
-// =============================================================================================
-//                              JUNKYARD
-// =============================================================================================
-
-/*
-enum DataFieldType  // supported Data Field types
-{
-    d_var,      // QVariant
-    d_int2,      // int
-    d_float,    // float (32 bit)
-    d_date,     // converted to qint32
-    d_string,   // QString
-    d_link,     // reference OBJ_ID
-    d_double,   // double (64 bit)
-    d_time,     // converted to qint32
-    d_datetime, // converted to qint64 as superposition of d_date and d_time
-    d_attribute // named atttribute - struct NamedAttribute below
-};
-*/
-    // fixed field sizes and names directly related to DataFieldType (!!!) (0-variable size) CHECKME obsolete ?
-// const rec_size_type d_type_sizes[9] = {0,4,4,4,0,sizeof(obj_id_type),8,4,8};
-// const char* const dtype_names[9] = {"d_var", "d_int32", "d_float", "d_date", "d_string", "d_link", "d_double", "d_time", "d_datetime"};
-
-// const char* const stype_names[4] = {"is_unchanged", "is_added", "is_modified", "is_deleted"};
-
-/*
-enum CtrlType    // supported Qt controls
-{
-    ct_none,
-    ct_line_edit,   // QLineEdit
-    ct_date_edit,   // QDateEdit
-    ct_combo_box,   // QComboBox
-    ct_model        // QStandardItemModel : QTableView, QTreeView
-};
-*/
-
-// const char* const ctrltype_names[6] = {"ct_none","ct_line_edit","ct_date_edit","ct_combo_box","ct_table_view","ct_tree_view"};
-
-/*
-const data_status_type is_unchanged  = 0;
-const data_status_type is_added      = 1;
-const data_status_type is_modified   = 2;
-const data_status_type is_deleted    = 4;
-*/
-
-// local files : index size
-// const quint64 IndexRecSize2 = 4 + 8; // bytes : ID (4) + pos (8)
-// const qint16 primIndex = -1; // primary index alias for indexes proc
 
 #endif // EG_CORE_H

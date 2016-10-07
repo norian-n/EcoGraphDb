@@ -22,7 +22,8 @@ EgBasicControlDesc::EgBasicControlDesc(EgDataNode &dataNode):
 }
 
 EgDataNodesGUIconnect::EgDataNodesGUIconnect():
-      controlDescs(NULL)
+      dataNodesType(NULL)
+    , controlDescs(NULL)
     , model_current_item(NULL)
 { }
 
@@ -294,7 +295,7 @@ inline QStandardItem* EgDataNodesGUIconnect::AddNodeToModelTree(QStandardItem* p
 int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model, QString linkName)
 {
     // QList<QStandardItem*> items;
-    TreeBuildNodeType buildNode;
+    TreeBuildNodeType buildNode, buildNode2;
     QList <TreeBuildNodeType> buildNodes;
     // QList<EgExtendedLinkType> linkedNodes;
 
@@ -308,7 +309,7 @@ int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model, QString li
         // iterate entry nodes
     for (QMap<EgDataNodeIDtype, EgDataNode*>::iterator Iter = dataNodesType-> entryNodesInst.entryNodes.begin(); Iter != dataNodesType-> entryNodesInst.entryNodes.end(); ++Iter)
     {
-        // qDebug()  << "Entry node ID = " << Iter.key() << FN;
+        qDebug()  << "Entry node ID = " << Iter.key() << FN;
 
             // check if node loaded
         if (! dataNodesType-> dataNodes.contains(Iter.key()))
@@ -346,6 +347,9 @@ int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model, QString li
                     buildNode.dataNode = (*Iter2).dataNodePtr;
                     buildNode.modelItem = newItem;
 
+                    // qDebug()  << "new buildNode ID = " << buildNode.dataNode-> dataNodeID
+                    //          << "ptr = " << hex << (int) buildNode.dataNode << FN;
+
                     buildNodes.append(buildNode);
                 }
             }
@@ -362,8 +366,11 @@ int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model, QString li
 
             parentItem = buildNode.modelItem;
 
+            // if (buildNode.dataNode && buildNode.dataNode-> nodeLinks && (! buildNode.dataNode-> nodeLinks-> outLinks.empty()) && buildNode.dataNode-> nodeLinks-> outLinks.contains(linkName))
+
             for (QList<EgExtendedLinkType>::iterator Iter3 = buildNode.dataNode-> nodeLinks-> outLinks[linkName].begin(); Iter3 != buildNode.dataNode-> nodeLinks-> outLinks[linkName].end(); ++Iter3)
             {
+
                 // qDebug()  << "subbranch node ID = " << (*Iter3).dataNodePtr-> dataNodeID << FN;
 
                 newItem = AddNodeToModelTree(parentItem, (*Iter3).dataNodePtr);
@@ -372,10 +379,13 @@ int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model, QString li
                 if ((*Iter3).dataNodePtr && (*Iter3).dataNodePtr-> nodeLinks
                         && (! (*Iter3).dataNodePtr-> nodeLinks-> outLinks.empty()) && (*Iter3).dataNodePtr-> nodeLinks-> outLinks.contains(linkName)) // FIXME
                 {
-                    buildNode.dataNode = (*Iter3).dataNodePtr;
-                    buildNode.modelItem = newItem;
+                    buildNode2.dataNode = (*Iter3).dataNodePtr;
+                    buildNode2.modelItem = newItem;
 
-                    buildNodes.append(buildNode);
+                    // qDebug()  << "new buildNode ID = " << buildNode2.dataNode-> dataNodeID
+                    //          << "ptr = " << hex << (int) buildNode2.dataNode << FN;
+
+                    buildNodes.append(buildNode2);
                 }
             }
         }

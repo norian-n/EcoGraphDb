@@ -26,7 +26,7 @@ public:
     // typedef bool (*CompareFunctionType) (KeyType&, KeyType&);
     // static bool CompareEQ (KeyType& key1, KeyType& key2) {return (key1 == key2);}
 
-    EgIndexes<KeyType> * indexChunks;
+    EgIndexes<KeyType>* indexChunks;
 
     QString IndexFileName;
 
@@ -70,9 +70,10 @@ public:
     QByteArray fingersBA;
 
     EgFingers():
+         indexChunks(NULL)
         //  rootHeaderSize(sizeof(KeyType) * 2 + sizeof(egIndexes3Namespace::fingersLevelType) + sizeof(egIndexes3Namespace::keysCountType) + sizeof(quint64))
         // ,fingersHeaderSize(sizeof(KeyType) * 2 + sizeof(egIndexes3Namespace::fingersCountType) + sizeof(egIndexes3Namespace::fingersLevelType))
-         rootHeaderSize(sizeof(KeyType) * 2 + sizeof(fingersLevelType) + sizeof(keysCountType) + sizeof(quint64))
+        ,rootHeaderSize(sizeof(KeyType) * 2 + sizeof(fingersLevelType) + sizeof(keysCountType) + sizeof(quint64))
         ,oneFingerSize(sizeof(KeyType) * 2 + sizeof(keysCountType) + sizeof(quint64)) // next chunk offset
         ,fingersChunkSize(/*fingersHeaderSize + */(egIndexesNamespace::egChunkVolume * oneFingerSize) + sizeof(quint64) + sizeof(fingersLevelType)) // parent chunk offset, level
 

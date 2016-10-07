@@ -28,6 +28,8 @@ struct TreeBuildNodeType
 {
     EgDataNode* dataNode;
     QStandardItem* modelItem;
+
+    TreeBuildNodeType(): dataNode(NULL), modelItem(NULL) {}
 };
 
 class EgBasicControlDesc
@@ -40,7 +42,7 @@ public:
     EgDataNodesType*    AutoSubstClass;         // auto/substitute link class
     EgFieldIDtype       AutoSubstFieldIndex;    // auto/substitute link index
 
-    EgBasicControlDesc() {}
+    EgBasicControlDesc(): AutoSubstClass(NULL) {}
 
     EgBasicControlDesc(EgDataNode &dataNode);
     ~EgBasicControlDesc() {}

@@ -29,7 +29,9 @@ public:
 
     FuncBlocksForm* main_callee;
 //    SubProjectsForm * sub_callee;
-    int FuncBlockID;
+    EgDataNodeIDtype FuncBlockID;
+
+    // EgDataNodeIDtype newNodeID;
 
     void initFuncBlock();
     void openFuncBlock();

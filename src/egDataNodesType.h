@@ -75,6 +75,7 @@ public:
   int LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeID);
 
   int AddNewData(QList<QVariant>& myData);
+  int AddNewData(QList<QVariant>& myData, EgDataNodeIDtype &newID);
   int AddNewData(EgDataNode& tmpObj);
 
   int MarkDeletedData(EgDataNodeIDtype nodeID);

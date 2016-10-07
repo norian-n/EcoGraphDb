@@ -119,7 +119,9 @@ void FuncBlocksForm::loadFuncblocks()
     Funcblocks.LoadLinkedData("projects_funcblocks", projectID);
     Funcblocks.LoadLink("funcblocksTree");
 
-    Funcblocks.myLinkTypes["projects_funcblocks"]-> ResolveLinks(Projects, Funcblocks);
+    Projects.LoadLink("projects_funcblocks");
+    Projects.myLinkTypes["projects_funcblocks"]-> ResolveLinks(Projects, Funcblocks);
+
     Funcblocks.myLinkTypes["funcblocksTree"]-> ResolveLinks(Funcblocks, Funcblocks);
 
 /*
@@ -154,10 +156,10 @@ inline void FuncBlocksForm::InitFuncblockForm()   // project details form setup
     funcBlockForm = new FuncblockForm;
     funcBlockForm-> main_callee = this;
     funcBlockForm-> FuncBlocks = &Funcblocks;
-    // funcBlockForm->Projects = &Projects;
-    // funcBlockForm->Statuses = &Statuses;
-    // funcBlockForm->Owners = &Owners;
-    // funcBlockForm-> initProject();
+    // funcBlockForm-> Projects = &Projects;
+    // funcBlockForm-> Statuses = &Statuses;
+    // funcBlockForm-> Owners = &Owners;
+    funcBlockForm-> initFuncBlock();
 }
 
 void FuncBlocksForm::addSubBlock()

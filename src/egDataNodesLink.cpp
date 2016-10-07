@@ -273,11 +273,13 @@ int EgDataNodesLinkType::ResolveLinks(EgDataNodesType& firstType, EgDataNodesTyp
                 secondType.dataNodes[toNode].nodeLinks-> inLinks.insert(linkName, newLinks);
             }
 
-            qDebug() << firstType->  metaInfo.typeName << "link added " << fromNode << "to" <<  toNode << FN;
+            qDebug() << "Link " << linkName << " added " << firstType.metaInfo.typeName << " " << fromNode << " to "
+                     << secondType.metaInfo.typeName << " " <<  toNode << FN;
         }
         else
         {
-            // qDebug() << firstType-> metaInfo.typeName << " : not found data node for ID = " << hex << fromNode << " or " << secondType-> metaInfo.typeName << " " << hex <<  toNode << FN;
+            // qDebug() << "Link " << linkName << " of " << firstType.metaInfo.typeName << " link NOT added for ID = " << fromNode << " to "
+            //         << secondType.metaInfo.typeName << " " << toNode << FN;
         }
 
 
