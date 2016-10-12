@@ -67,35 +67,19 @@ private:
     int added_row; // new record auto-gen number
 
     QStandardItemModel* linked_model;
-    // ObjectDatabase* my_database;
-    // LinkData* ProjectStatusLink;
-    // LinkData* ProjectOwnerLink;
-
-    // QList<LinkData*> autolinks_list;
 
     ProjectForm* project_form;
     FuncBlocksForm* funcblocks_form;
 
     inline void InitProjectForm();
-    // void FillTestData();
-    void TestLinks();
 
 private slots:
-    // void on_initButton_clicked();
     void model_data_changed(const QModelIndex&, const QModelIndex&);
     void on_tableView_clicked(QModelIndex index);
     void on_deleteButton_clicked();
     void on_addButton_clicked();
-    // void on_loadButton_clicked();
-    // void on_saveButton_clicked();
     void on_addProjectButton_clicked();
     void on_editProjectButton_clicked();
-
-    // void GetServerData();
-    // void displayError(QAbstractSocket::SocketError socketError);
-
-    // void addProject();
-    // void editProject();
 };
 
 #endif // PROJECTS_H

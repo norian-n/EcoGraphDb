@@ -101,15 +101,15 @@ FuncBlocksForm::FuncBlocksForm(QWidget *parent)
 
 void FuncBlocksForm::loadFuncblocks()
 {
-    // IC RootCond = IC(Projects, "odb_pit", EQ, project_id);
+    // IC RootCond = IC("odb_pit", EQ, projectID);
 
-    Projects.index_tree-> clear();
-    Projects.index_tree-> AddNode(NULL, true, false, EQ, "odb_pit", projectID);  // FIXME STUB
+    // Projects.index_tree-> clear();
+    // Projects.index_tree-> AddNode(NULL, true, false, EQ, "odb_pit", projectID);  // FIXME STUB
 
     // Funcblocks.Connect(graphDB, "funcblocks");
     // Projects.Connect(graphDB, "projects");
 
-    Projects.LoadData();
+    Projects.LoadData("odb_pit", EQ, projectID);
 
 
     // Funcblocks.LoadAllData(); // STUB

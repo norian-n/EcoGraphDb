@@ -33,7 +33,7 @@ public:
   EgDataClient* ConnectonClient;    // server connection client
   EgRemoteConnect*  connection;     // connection data (NULL means local files)
 
-  EgIndexConditions* index_tree;
+  EgIndexConditionsTree* index_tree;
 
   EgDataNodeTypeMetaInfo metaInfo;
 
@@ -69,7 +69,9 @@ public:
   int getMyLinkTypes(); // from myDB TODO
 
   int StoreData();
-  int LoadData();
+
+  int LoadData(QString a_FieldName, int an_oper, QVariant a_value);
+  int LoadData(const EgIndexCondition &indexCondition);
 
   int LoadAllData();            // select *
   int LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeID);

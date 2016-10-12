@@ -7,24 +7,12 @@
  *
  */
 
-#include "egIndexConditions.h"
+#include "EgIndexConditions.h"
 #include "../egDataNodesType.h"
 
 using namespace egIndexConditionsNamespace;
 
-EgIndexCondition::EgIndexCondition(EgIndexConditions* myTree):
-        iTree(myTree),
-        iTreeNode(new EgIndexNode())
-{
-    iTreeNode-> left   = NULL;
-    iTreeNode-> right  = NULL;
-    iTreeNode-> parent = NULL;
-
-    iTreeNode-> is_leaf = false;
-}
-
-EgIndexCondition::EgIndexCondition(EgDataNodesType& odb, QString a_FieldName, int an_oper, QVariant a_value):
-        iTree(odb.index_tree),
+EgIndexCondition::EgIndexCondition(QString a_FieldName, int an_oper, QVariant a_value):
         iTreeNode(new EgIndexNode())
 {
     iTreeNode-> oper = an_oper;
@@ -34,65 +22,80 @@ EgIndexCondition::EgIndexCondition(EgDataNodesType& odb, QString a_FieldName, in
     iTreeNode-> is_leaf = true;
 }
 
+EgIndexCondition::EgIndexCondition(QString a_FieldName, QString str_oper, QVariant a_value):
+        iTreeNode(new EgIndexNode())
+{
+
+    iTreeNode-> FieldName = a_FieldName;
+    iTreeNode-> value = a_value;
+
+    iTreeNode-> is_leaf = true;
+
+    if (str_oper == strEQ)
+        iTreeNode-> oper = EQ;
+    else if (str_oper == strGE)
+        iTreeNode-> oper = GE;
+    else if (str_oper == strLE)
+        iTreeNode-> oper = LE;
+    else if (str_oper == strGT)
+        iTreeNode-> oper = GT;
+    else if (str_oper == strLT)
+        iTreeNode-> oper = LT;
+    else if (str_oper == strLT)
+        iTreeNode-> oper = GE;
+    else if (str_oper == strNE)
+        iTreeNode-> oper = NE;
+    else
+        qDebug() << "Bad operation code: " << str_oper << FN;
+
+}
+
 EgIndexCondition& EgIndexCondition::operator && (const EgIndexCondition rvalue)
 {
-    EgIndexCondition* new_cond = new EgIndexCondition(iTree);
+    EgIndexCondition* newCond = new EgIndexCondition();
+    EgIndexNode* newNode = new EgIndexNode();
 
-    new_cond-> iTreeNode-> oper = AND;
+    newNode-> oper = AND;
+    // newNode-> is_leaf = false; // constructor
 
-    iTree-> AddNode(NULL, new_cond-> iTreeNode, 0);
+    AddNode(newNode, (EgIndexNode*) (rvalue.iTreeNode), RIGHT);
+    AddNode(newNode, iTreeNode, LEFT);
 
-    iTree-> AddNode(new_cond-> iTreeNode, (EgIndexNode*) (rvalue.iTreeNode), RIGHT);
-    iTree-> AddNode(new_cond-> iTreeNode, iTreeNode, LEFT);
+    newCond-> iTreeNode = newNode;
 
-    iTree-> root = new_cond-> iTreeNode;
-
-    return *new_cond;
+    return *newCond;
 }
 
 EgIndexCondition& EgIndexCondition::operator || (const EgIndexCondition rvalue)
 {
-    EgIndexCondition* new_cond = new EgIndexCondition(iTree);
+    EgIndexCondition* newCond = new EgIndexCondition();
+    EgIndexNode* newNode = new EgIndexNode();
 
-    new_cond-> iTreeNode-> oper = OR;
+    newNode-> oper = OR;
+    // newNode-> is_leaf = false; // constructor
 
-    iTree-> AddNode(NULL, new_cond-> iTreeNode, 0);
+    AddNode(newNode, (EgIndexNode*) (rvalue.iTreeNode), RIGHT);
+    AddNode(newNode, iTreeNode, LEFT);
 
-    iTree-> AddNode(new_cond-> iTreeNode, (EgIndexNode*) (rvalue.iTreeNode), RIGHT);
-    iTree-> AddNode(new_cond-> iTreeNode, iTreeNode, LEFT);
+    newCond-> iTreeNode = newNode;
 
-    iTree-> root = new_cond-> iTreeNode;
-
-    return *new_cond;
+    return *newCond;
 }
 
-/*
-void EgIndexConditions::Init(EgIndexFiles *indexes_ptr)
+int EgIndexConditionsTree::CalcTreeSet(EgIndexNode* rootNode, QSet<quint64>& final_set, EgDataFiles *LocalFiles)
 {
-    indexes = indexes_ptr;
-}
-*/
-
-int EgIndexConditions::CalcTreeSet(QSet<quint64>& final_set, EgDataFiles *LocalFiles)
-{
-    if (root)
+    if (rootNode)
     {
-        RecursiveCalc(root, LocalFiles);
-        final_set = root-> my_set;
+        RecursiveCalc(rootNode, LocalFiles);
+        final_set = rootNode-> my_set; // FIXME remove copy
 
-        clearSets();
+        RecursiveClearSets(rootNode);
     }
 
     return 0;
 }
 
-void EgIndexConditions::clear()
-{
-    RecursiveClear(root);
-    root = NULL;
-}
-
-void EgIndexConditions::RecursiveClear(EgIndexNode* branch)
+void EgIndexConditionsTree::RecursiveClear(EgIndexNode* branch)
 {
     if (branch)
     {
@@ -105,12 +108,7 @@ void EgIndexConditions::RecursiveClear(EgIndexNode* branch)
     }
 }
 
-void EgIndexConditions::clearSets()
-{
-    RecursiveClearSets(root);
-}
-
-void EgIndexConditions::RecursiveClearSets(EgIndexNode* branch)
+void EgIndexConditionsTree::RecursiveClearSets(EgIndexNode* branch)
 {
     if (branch)
     {
@@ -123,7 +121,7 @@ void EgIndexConditions::RecursiveClearSets(EgIndexNode* branch)
     }
 }
 
-void EgIndexConditions::RecursiveCalc(EgIndexNode* branch,   EgDataFiles*  LocalFiles)
+void EgIndexConditionsTree::RecursiveCalc(EgIndexNode* branch,   EgDataFiles*  LocalFiles)
 {
     // qDebug() << "Select tree index " << branch->FieldName << (int) branch-> oper << FN;
     if (! branch)
@@ -133,20 +131,20 @@ void EgIndexConditions::RecursiveCalc(EgIndexNode* branch,   EgDataFiles*  Local
 
     // FIXME find index
 
-    if (branch->FieldName == "odb_pit")
-        theIndexPtr = LocalFiles-> primIndexFiles;
-    else if (LocalFiles-> indexFiles.contains(branch->FieldName))
-    {
-        theIndexPtr = LocalFiles-> indexFiles[branch->FieldName];
-    }
-    else
-    {
-        qDebug() << FN << "Index not found: " << branch->FieldName;
-        return;
-    }
-
     if (branch-> is_leaf)
     {
+        if (branch->FieldName == "odb_pit")
+            theIndexPtr = LocalFiles-> primIndexFiles;
+        else if (LocalFiles-> indexFiles.contains(branch->FieldName))
+        {
+            theIndexPtr = LocalFiles-> indexFiles[branch->FieldName];
+        }
+        else
+        {
+            qDebug() << FN << "Index not found: " << branch->FieldName;
+            return;
+        }
+
         switch (branch-> oper)
         {
         case EQ:
@@ -188,39 +186,7 @@ void EgIndexConditions::RecursiveCalc(EgIndexNode* branch,   EgDataFiles*  Local
     // qDebug() << FN << branch->my_set;
 }
 
-void EgIndexConditions::AddNode(EgIndexNode* parent, bool is_leaf, bool is_left, int oper, QString FieldName, QVariant value)   // add combination node
-{
-    EgIndexNode* new_node;
-
-    new_node = new EgIndexNode();
-    // new_node-> my_set = new QSet<quint64>();
-
-    new_node->left = NULL;
-    new_node->right = NULL;
-    new_node->parent = parent;
-
-    new_node-> is_leaf = is_leaf;
-
-    new_node-> oper = oper;
-    new_node-> FieldName = FieldName;
-    new_node-> value = value;
-
-    if (! parent) // add root node
-    {
-        if (! root)
-            root = new_node;
-        // else error
-    }
-    else
-    {
-        if (is_left)
-            parent->left = new_node;
-        else
-            parent->right = new_node;
-    }
-}
-
-void EgIndexConditions::AddNode(EgIndexNode* parent, EgIndexNode* new_node, bool is_left)
+void EgIndexCondition::AddNode(EgIndexNode* parent, EgIndexNode* new_node, bool is_left)
 {
     // new_node->left = NULL;
     // new_node->right = NULL;

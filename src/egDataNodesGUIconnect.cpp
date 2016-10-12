@@ -309,7 +309,7 @@ int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model, QString li
         // iterate entry nodes
     for (QMap<EgDataNodeIDtype, EgDataNode*>::iterator Iter = dataNodesType-> entryNodesInst.entryNodes.begin(); Iter != dataNodesType-> entryNodesInst.entryNodes.end(); ++Iter)
     {
-        qDebug()  << "Entry node ID = " << Iter.key() << FN;
+        // qDebug()  << "Entry node ID = " << Iter.key() << FN;
 
             // check if node loaded
         if (! dataNodesType-> dataNodes.contains(Iter.key()))

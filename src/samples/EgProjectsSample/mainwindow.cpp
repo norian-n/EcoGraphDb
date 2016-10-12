@@ -28,8 +28,15 @@ void MainWindow::on_initButton_clicked()
     Projects.connection = &test_server;
     Funcblocks.connection = &test_server;
 */
-    FillTestData();
-    close();
+    int res = QMessageBox::question(this,
+                tr("Warning"),
+                tr("All existing data will be deleted and sample data created"));
+
+    if (res == QMessageBox::Yes)
+    {
+        FillTestData();
+        close();
+    }
 }
 
 MainWindow::~MainWindow()

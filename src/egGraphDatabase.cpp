@@ -98,7 +98,7 @@ int EgGraphDatabase::LoadLinksMetaInfo()
     }
 
     linksMetaInfo.LocalFiles-> Init(linksMetaInfo.metaInfo);
-    linksMetaInfo.index_tree = new EgIndexConditions(EgDataNodesLinkNamespace::egLinkTypesFileName);
+    // linksMetaInfo.index_tree = new EgIndexConditions(EgDataNodesLinkNamespace::egLinkTypesFileName);
 
     linksMetaInfo.LoadAllData();
 

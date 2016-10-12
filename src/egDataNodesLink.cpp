@@ -273,8 +273,8 @@ int EgDataNodesLinkType::ResolveLinks(EgDataNodesType& firstType, EgDataNodesTyp
                 secondType.dataNodes[toNode].nodeLinks-> inLinks.insert(linkName, newLinks);
             }
 
-            qDebug() << "Link " << linkName << " added " << firstType.metaInfo.typeName << " " << fromNode << " to "
-                     << secondType.metaInfo.typeName << " " <<  toNode << FN;
+            // qDebug() << "Link " << linkName << " added " << firstType.metaInfo.typeName << " " << fromNode << " to "
+            //         << secondType.metaInfo.typeName << " " <<  toNode << FN;
         }
         else
         {

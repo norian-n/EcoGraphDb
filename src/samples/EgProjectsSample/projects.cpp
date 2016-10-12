@@ -96,45 +96,15 @@ ProjectsForm::ProjectsForm(QWidget *parent) :
     model = new QStandardItemModel(); // 0, Projects.ModelFieldsCount() count control descriptors only
     connect(model, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(model_data_changed(const QModelIndex&, const QModelIndex&)));
 
+    // IC RootCond = IC("owner", EQ, 2) &&  IC("status", EQ, 3);
+
+    // Projects.LoadData(IC("owner", EQ, 2) &&  IC("status", EQ, 3));
+
     Projects.LoadAllData();
 
     refreshView();
 
 }
-
-
-void ProjectsForm::TestLinks()
-{
-    // Projects.AddArrowLink("treeLinkType", 1, 2);
-    // Projects.AddArrowLink("detailLinkType", Projects[1], Detail[2]);
-}
-
-/*
-
-void ProjectsForm::on_initButton_clicked()
-{
-*/
-/*
-    Statuses.connection = &test_server;
-    Owners.connection = &test_server;
-    Projects.connection = &test_server;
-    Funcblocks.connection = &test_server;
-*/
-    // FillTestData();
-
-    // Projects.ClearIndex("status"); // delete old index files
-
-    // Projects.AddIndex("owner");
-    // Projects.PrintFieldDesc();
-/*
-    if (! funcblocks_form)
-        funcblocks_form = new FuncBlocksForm();
-    // funcblocks_form->project_id = project_id;
-    // funcblocks_form->initFuncBlocks();
-    funcblocks_form->show();
-    */
-
-// }
 
 ProjectsForm::~ProjectsForm()
 {
@@ -169,6 +139,9 @@ void ProjectsForm::on_addProjectButton_clicked()
     project_form-> project_id = 0;
 
     project_form-> openProject();
+
+    project_form-> hide();
+    project_form-> setWindowModality(Qt::WindowModal);
     project_form-> show();
 }
 
@@ -180,6 +153,9 @@ void ProjectsForm::on_editProjectButton_clicked()
     project_form->project_id = model->item(Projects.GUI.model_current_row,0)->data(data_id).toInt();
 
     project_form-> openProject();
+
+    project_form-> hide();
+    project_form-> setWindowModality(Qt::WindowModal);
     project_form-> show();
 }
 
@@ -251,38 +227,19 @@ void ProjectsForm::on_addButton_clicked()
 
     // Projects.GUI.AddRowOfModel(model, items);
 
-/*
-    Funcblocks.Connect(graphDB, "funcblocks");
-
-    Funcblocks.LoadAllData();
-
-    Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 2);
-    Funcblocks.AddArrowLink("funcblocksTree", 2, Funcblocks, 3);
-    Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 4);
-
-    Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 1);
-    Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 2);
-    Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 3);
-
-    Funcblocks.StoreLinks();
-
-    Projects.StoreLinks();
-
-    Funcblocks.StoreLinks();
-
-*/
-
-
     if (! funcblocks_form)
+    {
         funcblocks_form = new FuncBlocksForm();
+    }
 
     if (model-> item(Projects.GUI.model_current_row,0))
     {
         funcblocks_form-> projectID = model-> item(Projects.GUI.model_current_row,0)-> data(data_id).toInt();;
         funcblocks_form-> loadFuncblocks();
+        funcblocks_form-> hide();
+        funcblocks_form-> setWindowModality(Qt::WindowModal);
         funcblocks_form-> show();
     }
-
 
 }
 
@@ -306,40 +263,5 @@ void ProjectsForm::model_data_changed(const QModelIndex & topLeft, const QModelI
         // modify row in dataclass and model
     Projects.GUI.ModifyRowOfModel(model);
 }
-
-
-
-// =============================================================================================
-//                              JUNKYARD
-// =============================================================================================
-
-
-/*
-void ProjectsForm::displayError(QAbstractSocket::SocketError socketError)
-{
-
-    switch (socketError) {
-    case QAbstractSocket::RemoteHostClosedError:
-        break;
-    case QAbstractSocket::HostNotFoundError:
-        QMessageBox::information(this, tr("Database Error"),
-                                 tr("The host was not found. Please check the "
-                                    "host name and port settings."));
-        break;
-    case QAbstractSocket::ConnectionRefusedError:
-        QMessageBox::information(this, tr("Database Error"),
-                                 tr("The connection was refused by the peer. "
-                                    "Make sure the database server is running, "
-                                    "and check that the host name and port "
-                                    "settings are correct."));
-        break;
-    default:
-        QMessageBox::information(this, tr("Database Error"),
-                                 tr("The following error occurred: %1.")
-                                 .arg(tcpSocket->errorString()));
-    }
-
-}
-*/
 
 

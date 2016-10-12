@@ -61,7 +61,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
                 */
 
         LocalFiles-> Init(metaInfo);
-        index_tree = new EgIndexConditions(nodeTypeName);
+        index_tree = new EgIndexConditionsTree();
     }
 
         // init special data node
@@ -180,15 +180,15 @@ int EgDataNodesType::AddArrowLink(QString linkName, EgDataNodeIDtype fromNode, E
 
 
 
-        qDebug() << "Link " << linkName << " added " << metaInfo.typeName << " " << fromNode << " to "
-                 << toType.metaInfo.typeName << " " <<  toNode << FN;
+        // qDebug() << "Link " << linkName << " added " << metaInfo.typeName << " " << fromNode << " to "
+        //         << toType.metaInfo.typeName << " " <<  toNode << FN;
 
         return 0;
     }
     else
     {
-        qDebug() << "Link " << linkName << " of " << metaInfo.typeName << " link NOT added for ID = " << fromNode << " to "
-                 << toType.metaInfo.typeName << " " << toNode << FN;
+        // qDebug() << "Link " << linkName << " of " << metaInfo.typeName << " link NOT added for ID = " << fromNode << " to "
+        //         << toType.metaInfo.typeName << " " << toNode << FN;
 
         return -1;
     }
@@ -468,7 +468,35 @@ int EgDataNodesType::StoreData()
     return  ret_val;
 }
 
-int EgDataNodesType::LoadData()
+int EgDataNodesType::LoadData(QString a_FieldName, int an_oper, QVariant a_value)
+{
+    EgIndexCondition indexCondition(a_FieldName, an_oper, a_value);
+    int res = 0;
+
+       // clear lists
+    deletedDataNodes.clear();
+    addedDataNodes.clear();
+    updatedDataNodes.clear();
+
+        // clear objects data
+    dataNodes.clear();
+
+    index_tree-> CalcTreeSet(indexCondition.iTreeNode, IndexOffsets, LocalFiles);
+
+    // qDebug() << FN << "IndexOffsets.count() = " << IndexOffsets.count();
+
+    if (! IndexOffsets.isEmpty())
+        res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
+
+    entryNodesInst.LoadEntryNodes(*this);
+
+    index_tree-> RecursiveClear(indexCondition.iTreeNode);
+
+    return res;
+}
+
+
+int EgDataNodesType::LoadData(const EgIndexCondition &indexCondition)
 {
     int res = 0;
        // clear lists
@@ -479,7 +507,7 @@ int EgDataNodesType::LoadData()
         // clear objects data
     dataNodes.clear();
 
-    index_tree-> CalcTreeSet(IndexOffsets, LocalFiles);
+    index_tree-> CalcTreeSet(indexCondition.iTreeNode, IndexOffsets, LocalFiles);
 
     // qDebug() << FN << "IndexOffsets.count() = " << IndexOffsets.count();
 
@@ -488,12 +516,10 @@ int EgDataNodesType::LoadData()
 
     entryNodesInst.LoadEntryNodes(*this);
 
-    index_tree-> clear();
+    index_tree-> RecursiveClear(indexCondition.iTreeNode);
 
     return res;
 }
-
-
 
 int EgDataNodesType::PrintObjData() // debug print
 {
