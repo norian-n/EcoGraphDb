@@ -32,12 +32,6 @@ class ProjectsForm : public QWidget
 public:
     ProjectsForm(QWidget* parent = 0);
     ~ProjectsForm();
-/*
-    DataObjects Projects;
-    DataObjects Statuses;
-    DataObjects Owners;
-    DataObjects Funcblocks;
-*/
 
     EgGraphDatabase graphDB;
 

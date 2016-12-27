@@ -36,6 +36,8 @@ template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToUpdate()
     return res;
 }
 
+
+
 template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToRead()
 {
     // qDebug() << "In OpenIndexFilesToRead()" << FN;
@@ -104,9 +106,56 @@ template <typename KeyType> void EgIndexFiles<KeyType>::AddObjToIndex()
     }
 }
 
+template <typename KeyType> int EgIndexFiles<KeyType>::UpdateIndex(bool isChanged)
+{
+    indexChunks.theKey = theIndex;
+    indexChunks.oldDataOffset = dataOffset;
+    indexChunks.newDataOffset = newOffset;
+
+    if (fingersTree.FindIndexChunkFirst(true))
+    {
+        qDebug() << "IndexChunk not found " << FN;
+        return -1;
+    }
+
+    if (! isChanged)
+        indexChunks.UpdateIndex();
+    else // FIXME : check if last index
+    {
+        indexChunks.DeleteIndex();
+
+        indexChunks.theKey = newIndex;
+        indexChunks.oldDataOffset = newOffset;
+
+        fingersTree.FindIndexChunkToInsert();   // FIXME check result
+
+        // qDebug() << "nextOffset: " << hex << (int) indexChunks. << FN;
+
+        indexChunks.InsertToIndexChunk();
+    }
+
+    return 0;
+}
+
+template <typename KeyType> int EgIndexFiles<KeyType>::DeleteIndex()
+{
+
+    indexChunks.theKey = theIndex;
+    indexChunks.oldDataOffset = dataOffset;
+
+    if (fingersTree.FindIndexChunkFirst(true))
+    {
+        qDebug() << "IndexChunk not found " << FN;
+        return -1;
+    }
+
+    indexChunks.DeleteIndex();
+
+    return 0;
+}
+
 template <typename KeyType> int EgIndexFiles<KeyType>::LoadAllDataOffsets(QSet<quint64>& index_offsets)
 {
-    int res = 0;
 
     if (! dir.setCurrent("egdb"))
     {
@@ -114,16 +163,21 @@ template <typename KeyType> int EgIndexFiles<KeyType>::LoadAllDataOffsets(QSet<q
         return -1;
     }
 
-    res = OpenIndexFilesToRead();
-
-    dir.setCurrent("..");
+    int res = indexChunks.OpenIndexFilesToRead(IndexFileName);
 
     if (res)
+    {
+        dir.setCurrent("..");
         return res;
+    }
+
+    fingersTree.IndexFileName = IndexFileName;  // debug info
 
     indexChunks.LoadAllData(index_offsets);
 
-    CloseIndexFiles();
+    indexChunks.CloseIndexFiles();
+
+    dir.setCurrent("..");
 
     return res;
 }
@@ -180,10 +234,11 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GE(QSet<quint64>& in
 
     res = OpenIndexFilesToRead();
 
-    dir.setCurrent("..");
-
     if (res)
+    {
+        dir.setCurrent("..");
         return res;
+    }
 
     indexChunks.theKey   = Key;
 
@@ -198,12 +253,16 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GE(QSet<quint64>& in
 
     CloseIndexFiles();
 
+    dir.setCurrent("..");
+
     return res;
 }
 
 template <typename KeyType> int EgIndexFiles<KeyType>::Load_GT(QSet<quint64>& index_offsets, KeyType Key)
 {
     int res = 0;
+
+    index_offsets.clear();
 
     if (! dir.setCurrent("egdb"))
     {
@@ -213,21 +272,25 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GT(QSet<quint64>& in
 
     res = OpenIndexFilesToRead();
 
-    dir.setCurrent("..");
-
-
     if (res)
+    {
+        dir.setCurrent("..");
         return res;
+    }
 
     indexChunks.theKey = Key;
 
-    if (fingersTree.FindIndexChunkFirst(false) < 0) // FIXME - process borders
+    if (fingersTree.FindIndexChunkLast(false) < 0) // FIXME - process borders
         res = -1;
 
     if (! res)
         indexChunks.LoadDataByChunkUp(index_offsets, EgIndexes<KeyType>::CompareGT);
 
+    // qDebug()  << "res = " << res << "index_offsets count = " << index_offsets.count() << FN;
+
     CloseIndexFiles();
+
+    dir.setCurrent("..");
 
     return res;
 }
@@ -244,10 +307,11 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LE(QSet<quint64>& in
 
     res = OpenIndexFilesToRead();
 
-    dir.setCurrent("..");
-
     if (res)
+    {
+        dir.setCurrent("..");
         return res;
+    }
 
     indexChunks.theKey   = Key;
 
@@ -259,12 +323,16 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LE(QSet<quint64>& in
 
     CloseIndexFiles();
 
+    dir.setCurrent("..");
+
     return res;
 }
 
 template <typename KeyType> int EgIndexFiles<KeyType>::Load_LT(QSet<quint64>& index_offsets, KeyType Key)
 {
     int res = 0;
+
+    index_offsets.clear();
 
     if (! dir.setCurrent("egdb"))
     {
@@ -274,70 +342,29 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LT(QSet<quint64>& in
 
     res = OpenIndexFilesToRead();
 
-    dir.setCurrent("..");
-
     if (res)
+    {
+        dir.setCurrent("..");
         return res;
+    }
 
     indexChunks.theKey = Key;
 
-    if (fingersTree.FindIndexChunkLast(false) < 0) // FIXME - process borders
+    if (fingersTree.FindIndexChunkFirst(false) < 0) // FIXME - process borders
         res = -1;
 
     if (! res)
         indexChunks.LoadDataByChunkDown(index_offsets, EgIndexes<KeyType>::CompareLT);
 
+    // qDebug()  << "res = " << res << "index_offsets count = " << index_offsets.count() << FN;
+
     CloseIndexFiles();
+
+    dir.setCurrent("..");
 
     return res;
 }
 
-template <typename KeyType> int EgIndexFiles<KeyType>::UpdateIndex(bool isChanged)
-{
-    indexChunks.theKey = theIndex;
-    indexChunks.oldDataOffset = dataOffset;
-    indexChunks.newDataOffset = newOffset;
-
-    if (fingersTree.FindIndexChunkFirst(true))
-    {
-        qDebug() << "IndexChunk not found " << FN;
-        return -1;
-    }
-
-    if (! isChanged)
-        indexChunks.UpdateIndex();
-    else
-    {
-        indexChunks.DeleteIndex();
-
-        indexChunks.oldDataOffset = newOffset;
-
-        fingersTree.FindIndexChunkToInsert();
-
-        // qDebug() << "nextOffset: " << hex << (int) indexChunks. << FN;
-
-        indexChunks.InsertToIndexChunk();
-    }
-
-    return 0;
-}
-
-template <typename KeyType> int EgIndexFiles<KeyType>::DeleteIndex()
-{
-
-    indexChunks.theKey = theIndex;
-    indexChunks.oldDataOffset = dataOffset;
-
-    if (fingersTree.FindIndexChunkFirst(true))
-    {
-        qDebug() << "IndexChunk not found " << FN;
-        return -1;
-    }
-
-    indexChunks.DeleteIndex();
-
-    return 0;
-}
 
 // template class EgIndexesComparator<qint32>;
 

@@ -54,6 +54,8 @@ public:
     quint64 parentFingerOffset;
     quint64 currentFingerOffset;
 
+    quint64 fingersChunkOffset;
+
     keysCountType currentKeysCount;
 
     egFinger<KeyType> currentFinger;
@@ -117,11 +119,12 @@ public:
     int FindIndexChunkToInsert();
 
     int UpdateFingerAfterInsert();
+
     int UpdateFingersChainAfterInsert();    
     int UpdateFingersChainAfterSplit();
-
-    int UpdateFingerAfterDelete();
     int UpdateFingersChainAfterDelete();
+
+    int UpdateFingerCountAfterDelete();
 
     int UpdateMinValueUp();
     int UpdateMaxValueUp();
@@ -143,7 +146,7 @@ public:
 
     int SplitFingersChunk2(QDataStream &localFingersStream);
     int InsertNewFinger2(QDataStream &localFingersStream, char* theChunk, int posToInsert, int itemsCount);
-    int UpdateParentsOffsets2(QDataStream &localFingersStream, char* theChunk, quint64 myChunkOffset,  int posToInsert, int itemsCount);
+    int UpdateParentsOffsets2(QDataStream &localFingersStream, char* theChunk, quint64 myChunkOffset,  int posToInsert, int itemsCount, fingersLevelType myLocalLevel);
 
     void UpdateMinMax(QDataStream& localFingersStream, egFinger<KeyType>& theFinger, char* theChunk);
 

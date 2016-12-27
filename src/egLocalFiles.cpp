@@ -298,6 +298,13 @@ int EgDataFiles::LocalLoadData(QSet<quint64>& dataOffsets, QMap<EgDataNodeIDtype
 
         // qDebug() << FN <<  "tmpNode2.dataNodeID =" << tmpNode2.dataNodeID;
 
+        // TODO FIXME : implement local filter here
+
+
+        if (FilterCallback)
+            if (! FilterCallback(tmpNode2, filter_values))
+                continue;
+
         dataNodesMap.insert(tmpNode2.dataNodeID, tmpNode2);
     }
 
@@ -414,6 +421,8 @@ inline void EgDataFiles::LocalDeleteObjects(QMap<EgDataNodeIDtype, EgDataNode>& 
 {
     for (QMap<EgDataNodeIDtype, EgDataNode>::iterator delIter = deletedDataNodes.begin(); delIter != deletedDataNodes.end(); ++delIter)
     {
+        // qDebug() << FN << "Del object ID = " << (int) delIter.value().dataNodeID << " with offset" << hex << (int) delIter.value().dataFileOffset;
+
             // del primary index
         primIndexFiles-> theIndex = delIter.value().dataNodeID;
         primIndexFiles-> dataOffset = delIter.value().dataFileOffset;
@@ -439,14 +448,15 @@ inline int EgDataFiles::LocalModifyObjects(QDataStream& dat, QMap<EgDataNodeIDty
 {
     EgDataNode tmpNode;
 
-    dat.device()-> seek(dat.device()-> size());
-
         // walk add list
     for (QMap<EgDataNodeIDtype, EgDataNode*>::iterator addIter = updatedDataNodes.begin(); addIter != updatedDataNodes.end(); ++addIter)
     {
+        dat.device()-> seek(dat.device()-> size());
+
         primIndexFiles-> newOffset = dat.device()-> pos();
 
-        // qDebug() << FN << "Update object" << addIter.value()-> dataNodeID << " on offset" << hex << (int) primIndexFiles-> newOffset;
+        // qDebug()  << "Update object" << addIter.value()-> dataNodeID << " old offset" << hex << addIter.value()-> dataFileOffset
+        //           << " new offset " << hex << primIndexFiles-> newOffset << FN; // (int) primIndexFiles-> newOffset;
 
         dat << addIter.value()-> dataNodeID;
         dat << *(addIter.value());
@@ -455,56 +465,68 @@ inline int EgDataFiles::LocalModifyObjects(QDataStream& dat, QMap<EgDataNodeIDty
 
         primIndexFiles-> theIndex = addIter.value()-> dataNodeID;
         primIndexFiles-> dataOffset = addIter.value()-> dataFileOffset;
-        primIndexFiles-> UpdateIndex(true);
+        primIndexFiles-> UpdateIndex(false); // false means primary ID is not changed
 
         addIter.value()-> dataFileOffset = primIndexFiles-> newOffset;
 
         // qDebug() << FN << "data offset" << hex << (int) primIndexFiles-> dataOffset;
 
-                // save old field values
-        if (! dat.device()-> seek(primIndexFiles-> dataOffset))
+        if (! metaInfo-> indexedToOrder.isEmpty())
         {
-            qDebug() << FN << "can't seek to data offset" << hex << (int) primIndexFiles-> dataOffset;
-            return -1;
-        }
+            // save old field values
+            if (! dat.device()-> seek(primIndexFiles-> dataOffset))
+            {
+                qDebug() << FN << "can't seek to data offset" << hex << (int) primIndexFiles-> dataOffset;
+                return -1;
+            }
 
-        // tmpNode.clear();
+            // tmpNode.clear();
 
-        dat >> tmpNode.dataNodeID;
-        dat >> tmpNode;
+            dat >> tmpNode.dataNodeID;
+            dat >> tmpNode.dataFields;
 
             // process other indexes
-        for (QHash<QString, int> ::iterator indIter = metaInfo-> indexedToOrder.begin(); indIter != metaInfo-> indexedToOrder.end(); ++indIter)
-        {
-            if (indexFiles.contains(indIter.key()))
+            for (QHash<QString, int> ::iterator indIter = metaInfo-> indexedToOrder.begin(); indIter != metaInfo-> indexedToOrder.end(); ++indIter)
             {
-                // qDebug() << FN << "Update index from " << tmpNode.dataFields[indIter.value()].toInt() << " to "
-                //              << addIter.value()-> dataFields[indIter.value()].toInt();
-
-                indexFiles[indIter.key()]-> theIndex   = tmpNode.dataFields[indIter.value()].toInt(); // TODO - calc index of QVariant
-                indexFiles[indIter.key()]-> dataOffset = primIndexFiles-> dataOffset;
-
-                if (tmpNode.dataFields[indIter.value()].toInt() != addIter.value()-> dataFields[indIter.value()].toInt())
+                if (indexFiles.contains(indIter.key()))
                 {
-                        // delete/add index
-                    indexFiles[indIter.key()]-> DeleteIndex();
+                    // qDebug()  << "Update index from " << tmpNode.dataFields  // << tmpNode.dataFields[indIter.value()].toInt()
+                    //          << " to " << addIter.value()-> dataFields[indIter.value()].toInt() << FN;
 
-                    indexFiles[indIter.key()]-> theIndex   = addIter.value()-> dataFields[indIter.value()].toInt();
-                    indexFiles[indIter.key()]-> dataOffset = primIndexFiles-> newOffset;
-                    indexFiles[indIter.key()]-> AddObjToIndex();
+                    indexFiles[indIter.key()]-> theIndex   = tmpNode.dataFields[indIter.value()].toInt(); // TODO - calc index of QVariant
+                    indexFiles[indIter.key()]-> dataOffset = primIndexFiles-> dataOffset;
+
+
+                    bool isUpdated = tmpNode.dataFields[indIter.value()].toInt() != addIter.value()-> dataFields[indIter.value()].toInt();
+
+                    indexFiles[indIter.key()]-> newOffset = primIndexFiles-> newOffset;
+                    indexFiles[indIter.key()]-> newIndex  = addIter.value()-> dataFields[indIter.value()].toInt();
+                    indexFiles[indIter.key()]-> UpdateIndex(isUpdated);
+
+                    /*
+                    if (tmpNode.dataFields[indIter.value()].toInt() != addIter.value()-> dataFields[indIter.value()].toInt())
+                    {
+                        // delete/add index
+                        indexFiles[indIter.key()]-> DeleteIndex();
+
+                        indexFiles[indIter.key()]-> theIndex   = addIter.value()-> dataFields[indIter.value()].toInt();
+                        indexFiles[indIter.key()]-> dataOffset = primIndexFiles-> newOffset;
+                        indexFiles[indIter.key()]-> AddObjToIndex();
+                    }
+                    else
+                    {
+                        // update
+                        indexFiles[indIter.key()]-> newOffset = primIndexFiles-> newOffset;
+                        indexFiles[indIter.key()]-> UpdateIndex(false);
+                    }
+                    */
+
+                    // indexFiles[indIter.key()]-> UpdateIndex(false);
                 }
                 else
-                {
-                        // update
-                    indexFiles[indIter.key()]-> newOffset = primIndexFiles-> newOffset;
-                    indexFiles[indIter.key()]-> UpdateIndex(true);
-                }
+                    qDebug() << "Error: Index not found: " << indIter.key() << FN;
 
-                // indexFiles[indIter.key()]-> UpdateIndex(false);
             }
-            else
-                qDebug() << FN << "Index not found: " << indIter.key();
-
         }
     }
 

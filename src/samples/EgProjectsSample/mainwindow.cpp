@@ -123,9 +123,9 @@ void MainWindow::FillTestData()
     graphDB.CreateNodeType("projects");
 
     graphDB.AddDataField("name");
-    graphDB.AddDataField("status", IsIndexed);
+    graphDB.AddDataField("status", isIndexed);
     graphDB.AddDataField("description");
-    graphDB.AddDataField("owner", IsIndexed);
+    graphDB.AddDataField("owner", isIndexed);
     graphDB.AddDataField("launch_date");
     graphDB.AddDataField("end_date");
 

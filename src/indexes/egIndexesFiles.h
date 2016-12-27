@@ -44,6 +44,8 @@ public:
     // FIXME STUB
     KeyType theIndex;      // current index key
     quint64 dataOffset;    // current index value - offset in data file
+
+    KeyType newIndex;      // index key to update
     quint64 newOffset;     // offset in data file for updated objects
 
     int OpenIndexFilesToUpdate();

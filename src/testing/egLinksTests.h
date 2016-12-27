@@ -12,11 +12,17 @@ public:
     EgGraphDatabase graphDB;
     EgDataNodesType testDataNodes;
 
-    bool testFuncblocksCase();
+    bool testLinksTree();
 
     void testCreateNodes();
 
     void testCreateLinks();
+
+    void testAddIndexedNodes();
+
+    void testUpdateIndexedNodes();
+
+    // void testDeleteIndexedNodes();
 
     void testShowResult(bool res, const QString &theMessage)
     {

@@ -6,20 +6,6 @@
 
 class FuncBlocksForm;
 
-/*
-class CustomFuncBlock
-{
-public:
-
-    QString name;
-    int status;
-    QString owner;
-    QDate launch_date;
-    QDate end_date;
-    QString description;
-};
-*/
-
 class FuncblockForm :  public QWidget
 {
     Q_OBJECT

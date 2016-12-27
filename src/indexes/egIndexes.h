@@ -98,11 +98,12 @@ public:
     void LoadRootHeader();
     void StoreRootHeader();
 
-    int StoreFingerOffset(quint64 fingerOffset);
+    // int StoreFingerOffset(quint64 fingerOffset);
     int StoreFingerOffset(quint64 chunkOffset, quint64 fingerOffset);
 
     void LoadIndexChunk(char *chunkPtr);
     int StoreIndexChunk(char* chunkPtr);
+    int StoreIndexChunk(quint64 chunkOffset, char* chunkPtr);
 
     int FindIndexPosition(QDataStream &localIndexesStream); // FIXME obsolete
     int InsertToIndexChunk();

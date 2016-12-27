@@ -39,8 +39,10 @@ public:
     EgIndexFiles<qint32>* primIndexFiles;                // primary index files
     QHash<QString, EgIndexFiles<qint32>*> indexFiles;   // other indexes files
 
-    FilterCallbackType FilterCallback;
-    QList<QVariant> filter_values;              // filter callback parameters
+    FilterFunctionType FilterCallback;
+
+        // filter callback support
+    QList <QVariant> filter_values;        // values for filter callback parameters
 
     // EgDataNode tmpNode;                        // for data load and indexes update
 

@@ -13,19 +13,14 @@
 #include <QMessageBox>
 #include <QTextCodec>
 
-/*
-int FilterTest (QList<QVariant>& obj_fields_values, QList<QVariant>& filter_values, QMap<QString, int>& obj_field_indexes)
-{
-      // qDebug() << "FilterTest(): callback called";
 
-      if ((obj_fields_values.count() > obj_field_indexes["owner"]) && filter_values.count()) // filter value set assert
-      {
-          if (obj_fields_values[ obj_field_indexes["owner"] ] == filter_values[0])  // where Projects.owner == 1
-              return 1; // good data
-      }
-      return 0; // bad data
+bool FilterTest (EgDataNode& data_object, QList<QVariant>& filter_values)
+{
+    qDebug() << "FilterTest(): callback called";
+
+    return (data_object["owner"] == filter_values[0]);  // where Projects.owner == 1
 }
-*/
+
 
 ProjectsForm::ProjectsForm(QWidget *parent) :
     QWidget(parent),
@@ -100,6 +95,17 @@ ProjectsForm::ProjectsForm(QWidget *parent) :
 
     // Projects.LoadData(IC("owner", EQ, 2) &&  IC("status", EQ, 3));
 
+    /*
+
+    QList<QVariant> filterParams;
+
+    filterParams << 2;
+
+    Projects.SetLocalFilter(&FilterTest);
+    Projects.SetFilterParams(filterParams);
+
+    */
+
     Projects.LoadAllData();
 
     refreshView();
@@ -124,10 +130,13 @@ void ProjectsForm::closeEvent(QCloseEvent* event)
 inline void ProjectsForm::InitProjectForm()   // project details form setup
 {
     project_form = new ProjectForm;
-    project_form->main_callee = this;
-    project_form->Projects = &Projects;
-    project_form->Statuses = &Statuses;
-    project_form->Owners = &Owners;
+
+    project_form-> main_callee = this;
+
+    project_form-> Projects = &Projects;
+    project_form-> Statuses = &Statuses;
+    project_form-> Owners = &Owners;
+
     project_form->initProject();
 }
 
@@ -136,7 +145,8 @@ void ProjectsForm::on_addProjectButton_clicked()
     if (! project_form)
         InitProjectForm();
 
-    project_form-> project_id = 0;
+    project_form-> formMode = formModeAdd;
+    project_form-> projectID = 0;
 
     project_form-> openProject();
 
@@ -150,7 +160,8 @@ void ProjectsForm::on_editProjectButton_clicked()
     if (! project_form)
         InitProjectForm();
 
-    project_form->project_id = model->item(Projects.GUI.model_current_row,0)->data(data_id).toInt();
+    project_form-> formMode = formModeEdit;
+    project_form-> projectID = model->item(Projects.GUI.model_current_row,0)->data(data_id).toInt();
 
     project_form-> openProject();
 
@@ -246,7 +257,18 @@ void ProjectsForm::on_addButton_clicked()
 void ProjectsForm::on_deleteButton_clicked()
 {
         // delete row in dataclass and model
-    Projects.GUI.DeleteRowOfModel(model);
+    // Projects.GUI.DeleteRowOfModel(model);
+    if (! project_form)
+        InitProjectForm();
+
+    project_form-> formMode = formModeDelete;
+    project_form-> projectID = model->item(Projects.GUI.model_current_row,0)->data(data_id).toInt();
+
+    project_form-> openProject();
+
+    project_form-> hide();
+    project_form-> setWindowModality(Qt::WindowModal);
+    project_form-> show();
 }
 
 void ProjectsForm::on_tableView_clicked(QModelIndex index)

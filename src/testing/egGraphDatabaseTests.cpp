@@ -211,7 +211,7 @@ bool EgGraphDatabaseTests::testEgLinksBasics(EgDataNodesType& testDataNodes)
 
     bool res = (testDataNodes.metaInfo.myECoGraphDB-> linkTypes["testTree"].loadedLinks.count() == 3); // (graphDB.metaInfo->dataFields.count() == 2) // && (testDataNodes.dataNodes.count() == 8))
 
-    qDebug() <<  "dataNodes count = " << testDataNodes.dataNodes.count() << FN;
+    // qDebug() <<  "dataNodes count = " << testDataNodes.dataNodes.count() << FN;
 
     testShowResult(res, FNS);
 

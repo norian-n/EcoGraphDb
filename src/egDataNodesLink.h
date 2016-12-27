@@ -61,6 +61,8 @@ public:
     int AddLink (EgDataNodeIDtype leftNodeID, EgDataNodeIDtype rightNodeID);
     int UpdateLinkIndex (EgDataNodeIDtype ID, quint64 oldDataOffset, quint64 newDataOffset);
 
+    int DeleteLink (EgDataNodeIDtype leftNodeID, EgDataNodeIDtype rightNodeID);  // FIXME TODO
+
     // int PrintLinks();        // debug dump
 
     int LoadLinks();            // load data links from file or server

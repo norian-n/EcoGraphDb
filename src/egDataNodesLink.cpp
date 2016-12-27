@@ -31,6 +31,15 @@ int EgDataNodesLinkType::AddLink (EgDataNodeIDtype leftNodeID, EgDataNodeIDtype 
 }
 
 
+int EgDataNodesLinkType::DeleteLink (EgDataNodeIDtype leftNodeID, EgDataNodeIDtype rightNodeID)
+{
+    // addedLinks.insert(leftNodeID, rightNodeID);
+
+    // qDebug() << linkName << ": link added " << leftNodeID << "to" <<  rightNodeID << FN;
+
+    return 0;
+}
+
 int EgDataNodesLinkType::UpdateLinkIndex(EgDataNodeIDtype ID, quint64 oldDataOffset, quint64 newDataOffset)
 {
     if (! dir.exists("egdb"))
@@ -45,10 +54,11 @@ int EgDataNodesLinkType::UpdateLinkIndex(EgDataNodeIDtype ID, quint64 oldDataOff
     fwdIndexFiles-> OpenIndexFilesToUpdate();
 
 
-    // add to index first ID and second offset
+        // add to index first ID and second offset
     fwdIndexFiles-> theIndex = ID;
     fwdIndexFiles-> dataOffset = oldDataOffset;
     fwdIndexFiles-> newOffset = newDataOffset;
+
     fwdIndexFiles->UpdateIndex(false);
 
 

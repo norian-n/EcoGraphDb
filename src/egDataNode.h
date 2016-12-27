@@ -65,8 +65,8 @@ public:
 
 };
 
-QDataStream& operator << (QDataStream& d_stream, EgDataNode& d_object);    // transfer and file operations
-QDataStream& operator >> (QDataStream& d_stream, EgDataNode& d_object);    // transfer and file operations
+QDataStream& operator << (QDataStream& d_stream, EgDataNode& d_node);    // transfer and file operations
+QDataStream& operator >> (QDataStream& d_stream, EgDataNode& d_node);    // transfer and file operations
 
 
 #endif // EG_DATANODE_H

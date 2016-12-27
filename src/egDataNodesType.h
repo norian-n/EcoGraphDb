@@ -53,9 +53,6 @@ public:
 
   QSet <quint64> IndexOffsets;           // offsets returned by index tree, for index-based operations (AND, OR)
 
-    // filter callback support
-  QList <QVariant> filter_values;        // values for filter callback parameters
-
   EgDataNodesType();
   // EgDataNodesType(const QString& dclass_name); // : DClassName(dclass_name) {};
   ~EgDataNodesType();
@@ -88,7 +85,8 @@ public:
   EgDataNode &operator [](EgDataNodeIDtype objID); // {return GetObjByID(obj_id);}
 
         // set custom data filter
-  void SetLocalFilter(FilterCallbackType f_callback);                           // set predefined local files filter callback
+  void SetLocalFilter(FilterFunctionType theFunction);                           // set predefined local files filter callback
+  void SetFilterParams(QList<QVariant>& values);
 
         // service
   int CompressData();           // FIXME delete records marked as deleted
@@ -97,7 +95,7 @@ public:
 
   EgFieldIDtype FieldsCount()       { return metaInfo.dataFields.count(); }
   EgFieldIDtype ModelFieldsCount()  { return GUI.basicControlDescs.count(); }
-  EgDataNodeIDtype ObjectsCount()   { return dataNodes.count(); }
+  EgDataNodeIDtype DataNodesCount()   { return dataNodes.count(); }
 
   int AddArrowLink(QString linkName, EgDataNodeIDtype fromNode, EgDataNodesType& toType, EgDataNodeIDtype toNode);
 

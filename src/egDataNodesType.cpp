@@ -106,9 +106,15 @@ int EgDataNodesType::getMyLinkTypes()
 }
 
 
-void EgDataNodesType::SetLocalFilter(FilterCallbackType f_callback) // set filter callback - local data only
+void EgDataNodesType::SetLocalFilter(FilterFunctionType theFunction) // set filter callback - local data only
 {
-    LocalFiles -> FilterCallback = f_callback;
+    LocalFiles-> FilterCallback = theFunction;
+}
+
+void EgDataNodesType::SetFilterParams(QList<QVariant>& values)
+{
+    LocalFiles-> filter_values.clear();
+    LocalFiles-> filter_values = values;
 }
 
 
@@ -363,7 +369,7 @@ int EgDataNodesType::MarkDeletedData(EgDataNodeIDtype nodeID)
     dataNodesIter = dataNodes.find(nodeID);
     if (dataNodesIter == dataNodes.end())
     {
-        qDebug() << FN << "Not found data node by ID to modify: " << nodeID;
+        qDebug()  << "Not found data node by ID to modify: " << nodeID << FN;
         return -1;
     }
 
@@ -383,6 +389,8 @@ int EgDataNodesType::MarkDeletedData(EgDataNodeIDtype nodeID)
 
         deletedDataNodes.insert(dataNodesIter.key(), dataNodesIter.value());
         dataNodes.erase(dataNodesIter);
+
+        // qDebug()  << "deletedDataNodes count " << deletedDataNodes.count() << FN;
     }
 
     return 0;
@@ -471,6 +479,10 @@ int EgDataNodesType::StoreData()
 int EgDataNodesType::LoadData(QString a_FieldName, int an_oper, QVariant a_value)
 {
     EgIndexCondition indexCondition(a_FieldName, an_oper, a_value);
+
+    return LoadData(indexCondition);
+
+    /*
     int res = 0;
 
        // clear lists
@@ -493,6 +505,7 @@ int EgDataNodesType::LoadData(QString a_FieldName, int an_oper, QVariant a_value
     index_tree-> RecursiveClear(indexCondition.iTreeNode);
 
     return res;
+    */
 }
 
 

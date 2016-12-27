@@ -21,7 +21,7 @@
 #define LOCAL NULL          // alias : use local files, not server link
 
     // indexed flag alias
-const bool IsIndexed = true;
+const bool isIndexed = true;
 
     // ID and other types
 typedef quint32 EgDataNodesTypeID;    // data object class ID type
@@ -31,11 +31,7 @@ typedef quint16 EgFieldIDtype;      // data field ID type
 class EgDataNode;
 
 // filter callback type (remote filter could be set via Qt plugins)
-typedef int (*FilterCallbackType) (QList<QVariant>& obj_fields_values, QList<QVariant>& class_filter_values, QHash<QString, int>& obj_field_indexes);
-// sample: int FilterTest (QList<QVariant>& obj_fields_values, QList<QVariant>& class_filter_values)
-
-// filter callback type (remote filter could be set via Qt plugins)
-typedef int (*FilterCallbackType2) (EgDataNode& data_object, QList<QVariant>& filter_values);
+typedef bool (*FilterFunctionType) (EgDataNode& data_object, QList<QVariant>& filter_values);
 // sample: int FilterTest (DataObj& data_object, QList<QVariant>& filter_values)
 
     // index-based filter type
@@ -65,13 +61,19 @@ enum DataStatusType // data status type
     is_deleted
 };
 
+enum formMode   // Qt form for data node operations mode
+{
+    formModeAdd,
+    formModeEdit,
+    formModeDelete
+};
+
     // Qt data model related constants - service fields location
 
-const int data_status = Qt::UserRole + 1;   // data_status_type
+const int data_status = Qt::UserRole + 1;   // DataStatusType equivalent
 const int data_id     = Qt::UserRole + 2;   // egDb data node ID
 
-
-struct NamedAttribute
+struct NamedAttribute   // data node add-on
 {
     QString  name;
     QVariant value;

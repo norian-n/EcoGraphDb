@@ -1,9 +1,7 @@
 #include "project_form.h"
-#include "mainwindow.h"
-// #include "subProject.h"
+#include "projects.h"
 
 #include <QtDebug>
-// #include <QList>
 
 ProjectForm::ProjectForm(QWidget *parent): QWidget(parent)
   , ui(new Ui::ProjectForm)
@@ -17,8 +15,7 @@ ProjectForm::ProjectForm(QWidget *parent): QWidget(parent)
 
 void ProjectForm::initProject()
 {
-        // set field descriptors
-    // theProject.field_descs = &(Projects->FD);
+    theProject.metaInfo = &(Projects-> metaInfo);
         // init combos
     Owners->  GUI.FillComboBox(ui->ownerBox);
     Statuses-> GUI.FillComboBox(ui->statusBox);
@@ -27,20 +24,20 @@ void ProjectForm::initProject()
 void ProjectForm::openProject()
 {
         // check mode
-    if (project_id != 0)    // edit data object
+    if (formMode != formModeAdd) // (projectID != 0)    // edit data object
     {
-        theProject = (*Projects)[project_id];
+        // theProject = (*Projects)[projectID];
 
-        ui->nameEdit->setText(theProject["name"].toString());
-        ui->descEdit->setText(theProject["description"].toString());
+        ui->nameEdit->setText((*Projects)[projectID]["name"].toString());
+        ui->descEdit->setText((*Projects)[projectID]["description"].toString());
 
-        Owners-> GUI.SetComboBox(ui->ownerBox, theProject["owner"]);
-        Statuses-> GUI.SetComboBox(ui->statusBox, theProject["status"]);
+        Owners-> GUI.SetComboBox(ui->ownerBox, (*Projects)[projectID]["owner"]);
+        Statuses-> GUI.SetComboBox(ui->statusBox, (*Projects)[projectID]["status"]);
 
-        ui->startDateEdit->setDate(theProject["launch_date"].toDate());
-        ui->completeDateEdit->setDate(theProject["end_date"].toDate());
+        ui->startDateEdit->setDate((*Projects)[projectID]["launch_date"].toDate());
+        ui->completeDateEdit->setDate((*Projects)[projectID]["end_date"].toDate());
 
-        ui->idLabel->setText(QVariant(theProject.dataNodeID).toString());
+        ui->idLabel->setText(QVariant((*Projects)[projectID].dataNodeID).toString());
     }
     else    // add new
     {
@@ -69,7 +66,7 @@ void ProjectForm::okExit()
     // theProject = new DataObj();
 
 
-    if (project_id) // edit project
+    if (formMode == formModeEdit) // edit project
     {
         theProject.dataFields.clear();
         for (int k = 0; k < Projects->FieldsCount(); k++)
@@ -93,17 +90,17 @@ void ProjectForm::okExit()
             theProject["end_date"] = QDate();
 
             // check for modified fields
-        if (theProject.dataFields != (*Projects)[project_id].dataFields)
+        if (theProject.dataFields != (*Projects)[projectID].dataFields)
         {
-            Projects->SetModifiedData(theProject.dataFields, project_id);
+            Projects->SetModifiedData(theProject.dataFields, projectID);
                 // save data
             Projects->StoreData();
-                // update parent view  FIXME
-            // if (main_callee)
-            //    main_callee->refreshView();
+                // update parent view
+            if (main_callee)
+                main_callee->refreshView();
         }
     }
-    else // insert project
+    else if (formMode == formModeAdd) // insert project
     {
         theProject.dataFields.clear();
         for (int k = 0; k < Projects->FieldsCount(); k++)
@@ -126,12 +123,21 @@ void ProjectForm::okExit()
         else
             theProject["end_date"] = QDate();
 
-        Projects->AddNewData(theProject.dataFields);
+        Projects-> AddNewData(theProject.dataFields);
             // save data
         Projects->StoreData();
-            // update parent view  FIXME
-        // if (main_callee)
-        //    main_callee->refreshView();
+            // update parent view
+        if (main_callee)
+            main_callee->refreshView();
+    }
+    else if (formMode == formModeDelete) // delete project
+    {
+        Projects-> MarkDeletedData(projectID);
+
+        Projects->StoreData();
+            // update parent view
+        if (main_callee)
+            main_callee->refreshView();
     }
         // clean up
     theProject.dataFields.clear();
@@ -164,7 +170,7 @@ qDebug() << FN << cp.name << cp.owner << cp.status << cp.description;
 // #undef FIELD
 
 // qDebug() << FN << theProject->data_fields;
-// qDebug() << FN << (*Projects)[project_id].data_fields;
+// qDebug() << FN << (*Projects)[projectID].data_fields;
 // qDebug() << FN << "not equal";
 
 /*
@@ -174,5 +180,5 @@ qDebug() << FN << cp.name << cp.owner << cp.status << cp.description;
         */
 
 // Projects->AddNewData(new_fields);
-// #define FIELD(f_name) (*Projects)[project_id][f_name]
+// #define FIELD(f_name) (*Projects)[projectID][f_name]
 

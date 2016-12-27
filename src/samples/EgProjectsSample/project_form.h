@@ -4,21 +4,7 @@
 #include "ui_project_form.h"
 #include "../../egDataNodesType.h"
 
-class MainWindow;
-
-/*
-class CustomProject
-{
-public:
-
-    QString name;
-    int status;
-    QString owner;
-    QDate launch_date;
-    QDate end_date;
-    QString description;
-};
-*/
+class ProjectsForm;
 
 class ProjectForm :  public QWidget
 {
@@ -27,21 +13,14 @@ class ProjectForm :  public QWidget
 public:
     ProjectForm(QWidget *parent = 0);
 
-    QWidget * main_callee;
-//    SubProjectsForm * sub_callee;
-    int project_id;
+    ProjectsForm* main_callee;
+
+    int projectID;
+    int formMode;
 
     void initProject();
     void openProject();
-        // primary table
-    /*
 
-    DataObjects* Projects;
-    DataObj TheProject; // local ptr, move to
-        // references
-    DataObjects* Statuses;
-    DataObjects* Owners;
-    */
     EgDataNode newProject;
 
     EgDataNodesType* Projects;
@@ -51,15 +30,8 @@ public:
     EgDataNodesType* Statuses;
     EgDataNodesType* Owners;
 
-    // CustomProject cp;
-
-    // QList<QVariant> new_fields;
-
 private slots:
-    // void on_inputSpinBox1_valueChanged(int value);
-    // void on_inputSpinBox2_valueChanged(int value);
-    // void addProject();
-    // void deleteSubProject();
+
     void okExit();
     void cancelExit();
 

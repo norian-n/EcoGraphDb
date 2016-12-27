@@ -215,6 +215,20 @@ int  EgGraphDatabase::CommitControlDesc()
 
 int EgGraphDatabase::CreateLinksMetaInfo()
 {
+    // check if metainfo exists
+
+    EgDataNodesType linksMetaInfo;
+
+    linksMetaInfo.metaInfo.myECoGraphDB = this;
+    linksMetaInfo.metaInfo.typeName = EgDataNodesLinkNamespace::egLinkTypesFileName;
+    // connection = server;
+
+    if (linksMetaInfo.LocalFiles-> CheckMetaInfoFile(linksMetaInfo.metaInfo))  // FIXME server
+    {
+        // qDebug()  << "linksMetaInfo already exists: " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
+        return 1;
+    }
+
     CreateNodeType(EgDataNodesLinkNamespace::egLinkTypesFileName);
 
     AddDataField("name");

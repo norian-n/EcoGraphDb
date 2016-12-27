@@ -64,12 +64,8 @@ int main() // int argc, char *argv[])
 
         // indexes standalone
 
-    EgIndexFiles<qint32> testIndexFiles("IndexesTests");
-    EgIndexesTests<qint32> indexTests;
-
-    // EgLinksTests linksTests;
-
-    // linksTests.testFuncblocksCase();
+    // EgIndexFiles<qint32> testIndexFiles("IndexesTests");
+    // EgIndexesTests<qint32> indexTests;
 
     // return 0; // FIXME STUB
 
@@ -127,6 +123,9 @@ int main() // int argc, char *argv[])
 
     res = res && egDbTests.testEgEntryNodes(testEgDataNodesType);
 
+    EgLinksTests linksTests;
+
+    res = res && linksTests.testLinksTree();
 
     if (res)
         qDebug() << "\nAll tests PASSED\n";
