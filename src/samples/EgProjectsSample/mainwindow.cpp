@@ -84,7 +84,7 @@ void MainWindow::FillTestData()
     */
 
 
-#define ADD_RECORD(values,dataNodesType) ins_values.clear(); ins_values << values; dataNodesType.AddNewData(ins_values);
+#define ADD_RECORD(values,dataNodesType) ins_values.clear(); ins_values << values; dataNodesType.AddDataNode(ins_values);
 
     QList<QVariant> ins_values;
 
@@ -154,7 +154,7 @@ void MainWindow::FillTestData()
     ins_values[Projects.FIELD("launch_date")] = QDate(2011,11,2);
     ins_values[Projects.FIELD("end_date")]    = QDate(2015,10,30);
 
-    Projects.AddNewData(ins_values);
+    Projects.AddDataNode(ins_values);
 
     ins_values[Projects.FIELD("name")]        = "Test Project 1";
     ins_values[Projects.FIELD("description")] = "Test Project Description";
@@ -163,7 +163,7 @@ void MainWindow::FillTestData()
     ins_values[Projects.FIELD("launch_date")] = QDate(2011,11,2);
     ins_values[Projects.FIELD("end_date")]    = QVariant();
 
-    Projects.AddNewData(ins_values);
+    Projects.AddDataNode(ins_values);
 
     ins_values[Projects.FIELD("name")]        = "Test Project 2";
     ins_values[Projects.FIELD("description")] = "Test Project Description";
@@ -172,7 +172,7 @@ void MainWindow::FillTestData()
     ins_values[Projects.FIELD("launch_date")] = QDate(2011,11,2);
     ins_values[Projects.FIELD("end_date")]    = QVariant();
 
-    Projects.AddNewData(ins_values);
+    Projects.AddDataNode(ins_values);
 
     ins_values[Projects.FIELD("name")]        = "Test Project 3";
     ins_values[Projects.FIELD("description")] = "Test Project Description";
@@ -181,7 +181,7 @@ void MainWindow::FillTestData()
     ins_values[Projects.FIELD("launch_date")] = QDate(2011,11,2);
     ins_values[Projects.FIELD("end_date")]    = QVariant();
 
-    Projects.AddNewData(ins_values);
+    Projects.AddDataNode(ins_values);
 
     ins_values[Projects.FIELD("name")]        = "Test Project 4";
     ins_values[Projects.FIELD("description")] = "Test Project Description";
@@ -190,7 +190,7 @@ void MainWindow::FillTestData()
     ins_values[Projects.FIELD("launch_date")] = QDate(2011,11,2);
     ins_values[Projects.FIELD("end_date")]    = QVariant();
 
-    Projects.AddNewData(ins_values);
+    Projects.AddDataNode(ins_values);
 
     // **************************************
 
@@ -302,7 +302,7 @@ void MainWindow::FillTestData()
     ins_values[Funcblocks.metaInfo.nameToOrder["launch_date"]] = QDate(2010,10,1);
     ins_values[Funcblocks.metaInfo.nameToOrder["end_date"]]    = QVariant();
 
-    Funcblocks.AddNewData(ins_values);
+    Funcblocks.AddDataNode(ins_values);
 
     ins_values[Funcblocks.metaInfo.nameToOrder["project"]]     = 1;
     ins_values[Funcblocks.metaInfo.nameToOrder["parent"]]      = 1;
@@ -313,7 +313,7 @@ void MainWindow::FillTestData()
     ins_values[Funcblocks.metaInfo.nameToOrder["launch_date"]] = QDate(2011,11,2);
     ins_values[Funcblocks.metaInfo.nameToOrder["end_date"]]    = QVariant();
 
-    Funcblocks.AddNewData(ins_values);
+    Funcblocks.AddDataNode(ins_values);
 
     Funcblocks.StoreData();
 

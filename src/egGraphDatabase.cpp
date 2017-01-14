@@ -24,13 +24,17 @@ int EgGraphDatabase::Connect()
 
 int EgGraphDatabase::Attach(EgDataNodesType* nType)
 {
+    /*
     if (! isConnected)
     {
+        qDebug()  << "egGraphDatabase is not connected, connect it prior data nodes types" << FN;
+
         return -1;
     }
+    */
 
-    if (! connNodeTypes.contains(nType->metaInfo.typeName)) // FIXME multi instances
-        connNodeTypes.insert(nType->metaInfo.typeName, nType);
+    if (! connNodeTypes.contains(nType-> metaInfo.typeName)) // FIXME multi instances
+        connNodeTypes.insert(nType-> metaInfo.typeName, nType);
 
     return 0;
 }
@@ -122,7 +126,7 @@ int EgGraphDatabase::LoadLinksMetaInfo()
     return 0;
 }
 
-int EgGraphDatabase::CreateNodeType(QString typeName)
+int EgGraphDatabase::CreateNodeType(QString typeName, bool addLocation)
 {
     // FIXME check if node type exists
 
@@ -130,6 +134,17 @@ int EgGraphDatabase::CreateNodeType(QString typeName)
         delete metaInfo;
 
     metaInfo = new EgDataNodeTypeMetaInfo(typeName);
+
+    metaInfo-> useLocationsNodes = addLocation;
+
+    if (locationMetaInfo)
+    {
+        delete locationMetaInfo;
+        locationMetaInfo = NULL;
+    }
+
+    if (addLocation)
+        locationMetaInfo = new EgDataNodeTypeMetaInfo(typeName + EgDataNodesNamespace::egLocationFileName);
 
     return 0;
 }
@@ -147,6 +162,18 @@ int EgGraphDatabase::AddDataField(QString fieldName, bool indexed)
     return 0;
 }
 
+int EgGraphDatabase::AddLocationField(QString fieldName, bool indexed)
+{
+    if (! locationMetaInfo)
+    {
+        qDebug()  << "CreateNodeType wasn't called for node location, call it properly" << FN;
+        return -1;
+    }
+
+    locationMetaInfo-> AddDataField(fieldName, indexed);
+
+    return 0;
+}
 
 int EgGraphDatabase::CommitNodeType()
 {
@@ -157,6 +184,15 @@ int EgGraphDatabase::CommitNodeType()
     }
 
     metaInfo-> LocalStoreMetaInfo();
+
+    if (locationMetaInfo)
+    {
+            // add default fields: x,y
+        locationMetaInfo-> AddDataField("x");
+        locationMetaInfo-> AddDataField("y");
+
+        locationMetaInfo-> LocalStoreMetaInfo();
+    }
 
     return 0;
 }
@@ -200,7 +236,7 @@ int  EgGraphDatabase::AddSimpleControlDesc(QString fieldName, QString fieldLabel
 
     addValues << fieldName << fieldLabel << fieldWidth;
 
-    controlDescs.AddNewData(addValues);
+    controlDescs.AddDataNode(addValues);
     // controlDescs.StoreData();
 
     return 0;
@@ -251,7 +287,7 @@ int  EgGraphDatabase::AddLinkType(QString linkName, QString firstDataNodeType, Q
         return -1;
     }
 
-    if (linksTypes.Connect(*(metaInfo-> myECoGraphDB), EgDataNodesLinkNamespace::egLinkTypesFileName))
+    if (linksTypes.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName))
     {
         qDebug()  << "CreateLinksMetaInfo wasn't called, aborting" << FN;
         return -1;
@@ -259,7 +295,7 @@ int  EgGraphDatabase::AddLinkType(QString linkName, QString firstDataNodeType, Q
 
     addValues << linkName << firstDataNodeType << secondDataNodeType;
 
-    linksTypes.AddNewData(addValues);
+    linksTypes.AddDataNode(addValues);
     linksTypes.StoreData();
 
     return 0;

@@ -92,9 +92,9 @@ void ProjectForm::okExit()
             // check for modified fields
         if (theProject.dataFields != (*Projects)[projectID].dataFields)
         {
-            Projects->SetModifiedData(theProject.dataFields, projectID);
+            Projects-> UpdateDataNode(theProject.dataFields, projectID);
                 // save data
-            Projects->StoreData();
+            Projects-> StoreData();
                 // update parent view
             if (main_callee)
                 main_callee->refreshView();
@@ -123,7 +123,7 @@ void ProjectForm::okExit()
         else
             theProject["end_date"] = QDate();
 
-        Projects-> AddNewData(theProject.dataFields);
+        Projects-> AddDataNode(theProject.dataFields);
             // save data
         Projects->StoreData();
             // update parent view
@@ -132,7 +132,7 @@ void ProjectForm::okExit()
     }
     else if (formMode == formModeDelete) // delete project
     {
-        Projects-> MarkDeletedData(projectID);
+        Projects-> DeleteDataNode(projectID);
 
         Projects->StoreData();
             // update parent view
@@ -179,6 +179,6 @@ qDebug() << FN << cp.name << cp.owner << cp.status << cp.description;
         new_fields << QVariant();
         */
 
-// Projects->AddNewData(new_fields);
+// Projects->AddDataNode(new_fields);
 // #define FIELD(f_name) (*Projects)[projectID][f_name]
 

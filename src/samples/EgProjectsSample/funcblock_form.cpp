@@ -107,15 +107,15 @@ void FuncblockForm::okExit()
             // check for modified fields
         if (theFuncBlock.dataFields != (*FuncBlocks)[FuncBlockID].dataFields)
         {
-            FuncBlocks-> SetModifiedData(theFuncBlock.dataFields, FuncBlockID);
+            FuncBlocks-> UpdateDataNode(theFuncBlock.dataFields, FuncBlockID);
                 // save old offset
 
                 // save data
-            FuncBlocks->StoreData();            
+            FuncBlocks-> StoreData();
 
                 // update parent view
             if (main_callee)
-                main_callee->refreshView2();
+                main_callee-> refreshView2();
         }
     }
     else // insert FuncBlock
@@ -151,7 +151,7 @@ void FuncblockForm::okExit()
             theFuncBlock["end_date"] = QDate();
             */
 
-        FuncBlocks-> AddNewData(theFuncBlock);
+        FuncBlocks-> AddDataNode(theFuncBlock);
 
         FuncBlockID = theFuncBlock.dataNodeID; // show to funcblocks form
 
@@ -201,6 +201,6 @@ qDebug() << FN << cp.name << cp.owner << cp.status << cp.description;
         new_fields << QVariant();
         */
 
-// FuncBlocks->AddNewData(new_fields);
+// FuncBlocks->AddDataNode(new_fields);
 // #define FIELD(f_name) (*FuncBlocks)[FuncBlock_id][f_name]
 

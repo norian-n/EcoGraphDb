@@ -37,11 +37,11 @@ public:
     {
         if (res)
         {
-            qDebug() << "PASSED" << theMessage;
+            qDebug().noquote() << "PASS" << theMessage;
         }
         else
         {
-            qDebug() << "FAILED" << theMessage;
+            qDebug().noquote() << "FAILED" << theMessage;
         }
     }
 

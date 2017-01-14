@@ -33,9 +33,9 @@ int EgDataNodesLinkType::AddLink (EgDataNodeIDtype leftNodeID, EgDataNodeIDtype 
 
 int EgDataNodesLinkType::DeleteLink (EgDataNodeIDtype leftNodeID, EgDataNodeIDtype rightNodeID)
 {
-    // addedLinks.insert(leftNodeID, rightNodeID);
+    // deletedLinks.insert(leftNodeID, rightNodeID);
 
-    // qDebug() << linkName << ": link added " << leftNodeID << "to" <<  rightNodeID << FN;
+    // qDebug() << linkName << ": link deleted " << leftNodeID << "to" <<  rightNodeID << FN;
 
     return 0;
 }

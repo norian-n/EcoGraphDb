@@ -19,25 +19,28 @@ class EgGraphDatabase;
 class EgDataNodeTypeMetaInfo
 {
 public:
-    EgDataNodeIDtype typeID;            // data class ID
+    // EgDataNodeIDtype typeID;            // data class ID
     QString typeName;
 
-    EgDataNodeIDtype objCount;          // data objects count
+    EgDataNodeIDtype nodesCount;          // data objects count
     EgDataNodeIDtype nextObjID;         // next available data object ID
 
-    EgGraphDatabase* myECoGraphDB;
+    bool useLocationsNodes;             // locations info in separate nodes type, hardlinked by ID
+    bool useNamedAttributes;
+
+    EgGraphDatabase* myECoGraphDB;      // peer database
 
     QList<QString> dataFields;          // fields of DataNodeType
 
     QHash<QString, int> nameToOrder;    // map field names to data list order (dont mesh up with data index)
     QHash<QString, int> indexedToOrder; // map indexed fields names to data list order (dont mesh up with data index)
 
-    EgDataNodeTypeMetaInfo(): typeName("Error_no_type_name"), objCount(0), nextObjID(1), myECoGraphDB(NULL) {}
-    EgDataNodeTypeMetaInfo(QString a_typeName) : typeName(a_typeName), objCount(0), nextObjID(1), myECoGraphDB(NULL)  {}
+    EgDataNodeTypeMetaInfo(): typeName("Error_no_type_name"), nodesCount(0), nextObjID(1), useLocationsNodes(false), useNamedAttributes(false), myECoGraphDB(NULL) {}
+    EgDataNodeTypeMetaInfo(QString a_typeName) : typeName(a_typeName), nodesCount(0), nextObjID(1), useLocationsNodes(false), useNamedAttributes(false), myECoGraphDB(NULL)  {}
 
     ~EgDataNodeTypeMetaInfo() {}
 
-    void Clear() {objCount = 0; nextObjID = 1; dataFields.clear(); /*indexedFields.clear();*/ nameToOrder.clear(); indexedToOrder.clear();}
+    void Clear() {nodesCount = 0; nextObjID = 1; dataFields.clear(); /*indexedFields.clear();*/ nameToOrder.clear(); indexedToOrder.clear();}
 
     void AddDataField(QString fieldName, bool indexed = false);    // add field descriptor, no GUI control data
 

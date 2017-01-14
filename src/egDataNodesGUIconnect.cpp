@@ -12,7 +12,7 @@
 
 #include <QFile>
 
-using namespace EgDataNodesGUInamespace;
+using namespace EgDataNodesNamespace;
 
 EgBasicControlDesc::EgBasicControlDesc(EgDataNode &dataNode):
     AutoSubstClass(NULL)
@@ -135,7 +135,7 @@ int EgDataNodesGUIconnect::AddSimpleControlDesc(QString fieldName, QString field
 
     addValues << fieldName << fieldLabel << fieldWidth;
 
-    controlDescs-> AddNewData(addValues);
+    controlDescs-> AddDataNode(addValues);
     controlDescs-> StoreData();
 
     return 0;
@@ -166,7 +166,7 @@ int EgDataNodesGUIconnect::AddRowOfModel(QStandardItemModel* model, QList<QStand
 
 int EgDataNodesGUIconnect::DeleteRowOfModel(QStandardItemModel* model)
 {
-    dataNodesType-> MarkDeletedData(model->item(model_current_row,0)-> data(data_id).toInt());
+    dataNodesType-> DeleteDataNode(model->item(model_current_row,0)-> data(data_id).toInt());
 
     model->removeRow(model_current_row);
 
@@ -416,7 +416,7 @@ int EgDataNodesGUIconnect::DataFromModel(QStandardItemModel* model) // get from 
             for (int column = 0; column < model-> columnCount(); ++column)
                 tmpDataNode.dataFields[basicControlDescs[column].fieldIndex] = model->item(row,column)->text();
 
-            dataNodesType-> AddNewData(tmpDataNode);
+            dataNodesType-> AddDataNode(tmpDataNode);
         }
         else if (model->item(row,0)->data(data_status).toInt() == is_modified) // updated data row
         {
@@ -424,7 +424,7 @@ int EgDataNodesGUIconnect::DataFromModel(QStandardItemModel* model) // get from 
             for (int column = 0; column < model-> columnCount(); ++column)
                 (*dataNodesType)[model->item(row,0)->data(data_id).toInt()].dataFields[basicControlDescs[column].fieldIndex] = model->item(row,column)->text();
 
-            dataNodesType-> SetModifiedData(model->item(row,0)->data(data_id).toInt());
+            dataNodesType-> UpdateDataNode(model->item(row,0)->data(data_id).toInt());
         }
     }
 

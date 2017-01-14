@@ -37,6 +37,7 @@ int EgDataNodeTypeMetaInfo::LocalStoreMetaInfo()
         // open file
     QFile ddt_file("egdb/" + typeName + ".ddt");
     QDataStream dStream(&ddt_file);
+
     if (!ddt_file.open(QIODevice::WriteOnly | QIODevice::Truncate))
     {
         qDebug() << FN << "can't open " << typeName + ".ddt" << " file";        
@@ -44,8 +45,11 @@ int EgDataNodeTypeMetaInfo::LocalStoreMetaInfo()
         return -1;
     }
 
-    dStream << objCount;  // data objects (NOT field descriptors) count
-    dStream << nextObjID; // next_obj_id
+    dStream << nodesCount;  // data nodes (NOT field descriptors) count
+    dStream << nextObjID;
+
+    dStream << useLocationsNodes;
+    dStream << useNamedAttributes;
 
     dStream << dataFields;
     dStream << indexedToOrder.keys();
@@ -75,15 +79,18 @@ int EgDataNodeTypeMetaInfo::LocalLoadMetaInfo()
 
     if (!ddt_file.open(QIODevice::ReadOnly))
     {
-        if (! typeName.contains(EgDataNodesGUInamespace::egGUIfileName))
+        if (! typeName.contains(EgDataNodesNamespace::egGUIfileName))
             qDebug() << FN << "can't open " << typeName + ".ddt" << " file";
         return -1;
     }
 
     Clear();
 
-    dStream >> objCount;  // data objects (NOT field descriptors) count
+    dStream >> nodesCount;  // data objects (NOT field descriptors) count
     dStream >> nextObjID; // next_obj_id
+
+    dStream >> useLocationsNodes;
+    dStream >> useNamedAttributes;
 
     dStream  >> dataFields;
     dStream  >> indexedFields;
@@ -102,7 +109,7 @@ int EgDataNodeTypeMetaInfo::LocalLoadMetaInfo()
 
 void EgDataNodeTypeMetaInfo::PrintMetaInfo()
 {
-     qDebug() << FN << "\nType name:" << typeName << " Obj Count:" << objCount << " Next ID:" << nextObjID;
+     qDebug() << FN << "\nType name:" << typeName << " Obj Count:" << nodesCount << " Next ID:" << nextObjID;
 
      qDebug() << "Fields:";
      qDebug() << dataFields;

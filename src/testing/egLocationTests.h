@@ -1,28 +1,20 @@
-#ifndef EGLINKSTESTS_H
-#define EGLINKSTESTS_H
+#ifndef EGLOCATIONTESTS_H
+#define EGLOCATIONTESTS_H
 
 #include <QtDebug>
 
 #include "egGraphDatabase.h"
 
-class EgLinksTests
+class EgLocationTests
 {
 public:
 
     EgGraphDatabase graphDB;
     EgDataNodesType testDataNodes;
 
-    bool testLinksTree();
+    bool testCreateLocations();
 
-    void testCreateNodes();
-
-    void testCreateLinks();
-
-    void testAddIndexedNodes();
-
-    void testUpdateIndexedNodes();
-
-    // void testDeleteIndexedNodes();
+    bool testAddLocations();
 
     void testShowResult(bool res, const QString &theMessage)
     {
@@ -35,8 +27,6 @@ public:
             qDebug().noquote() << "FAILED" << theMessage;
         }
     }
-
 };
 
-
-#endif // EGLINKSTESTS_H
+#endif // EGLOCATIONTESTS_H

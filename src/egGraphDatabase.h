@@ -20,6 +20,7 @@ public:
     bool isConnected;
 
     EgDataNodeTypeMetaInfo* metaInfo;
+    EgDataNodeTypeMetaInfo* locationMetaInfo;
     EgRemoteConnect*  connection;     // connection data (NULL means local files)
 
     EgDataNodesType controlDescs;
@@ -27,17 +28,18 @@ public:
     QMap<QString, EgDataNodesLinkType>  linkTypes;
     QMap<QString, EgDataNodesType*>  connNodeTypes;
 
-    EgGraphDatabase(): isConnected(false), metaInfo(NULL), connection(NULL) {}
+    EgGraphDatabase(): isConnected(false), metaInfo(NULL), locationMetaInfo(NULL), connection(NULL) {}
 
-    ~EgGraphDatabase() { if (metaInfo) delete metaInfo; }
+    ~EgGraphDatabase() { if (metaInfo) delete metaInfo; if (locationMetaInfo) delete locationMetaInfo; }
 
     int Connect();
     int Attach(EgDataNodesType* nType);
 
     int LoadLinksMetaInfo();
 
-    int CreateNodeType(QString typeName);
+    int CreateNodeType(QString typeName, bool addLocation = false);
     int AddDataField(QString fieldName, bool indexed = false);    // add field descriptor, no GUI control data
+    int AddLocationField(QString fieldName, bool indexed = false);
     int CommitNodeType();
 
     int CreateLinksMetaInfo();

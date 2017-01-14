@@ -17,9 +17,10 @@
 
 #include "egDataNode.h"
 
-namespace EgDataNodesGUInamespace
+namespace EgDataNodesNamespace
 {
     const char* const egGUIfileName("_egGUIcontrolDescriptors");
+    const char* const egLocationFileName("_egLocationNodes");
 }
 
 class EgDataNodesType;

@@ -36,7 +36,7 @@ void EgLinksTests::testCreateNodes()
     {
         addValues.clear();
         addValues << QVariant("linksTestName_" + QVariant(i+1).toString()) << QVariant(2);
-        testDataNodes.AddNewData(addValues);
+        testDataNodes.AddDataNode(addValues);
     }
 
     testDataNodes.StoreData();
@@ -92,7 +92,7 @@ void EgLinksTests::testAddIndexedNodes()
     {
         addValues.clear();
         addValues << QVariant("testIndexed_" + QVariant(i+1).toString()) << QVariant(i);
-        testDataNodes.AddNewData(addValues);
+        testDataNodes.AddDataNode(addValues);
     }
 
     testDataNodes.StoreData();
@@ -113,7 +113,7 @@ void EgLinksTests::testUpdateIndexedNodes()
         // update node index
 
         testDataNodes[i+1]["status"] = 2;
-        testDataNodes.SetModifiedData(i+1);
+        testDataNodes.UpdateDataNode(i+1);
     }
 
     testDataNodes.StoreData();
@@ -149,7 +149,7 @@ void EgLinksTests::testUpdateIndexedNodes()
 
     addValues.clear();
     addValues << QVariant("testIndexed_" + QVariant(17).toString()) << QVariant(2);
-    testDataNodes.AddNewData(addValues);
+    testDataNodes.AddDataNode(addValues);
 
     testDataNodes.StoreData();
     */

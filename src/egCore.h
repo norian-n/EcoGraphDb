@@ -16,12 +16,13 @@
 #include <QString>
 
     // debug info definition
-#define FN " [" << __FUNCTION__  << ", " << __FILE__ << "] "
-#define FNS QString(" [") + __FUNCTION__ + ", " + __FILE__ + "] "
+#define FN "[" << __FUNCTION__  << ", " << __FILE__ << "]"
+#define FNS QString("[") + __FUNCTION__ + ", " + __FILE__ + "]"
 #define LOCAL NULL          // alias : use local files, not server link
 
-    // indexed flag alias
+    // flags aliases
 const bool isIndexed = true;
+const bool useLocations = true;
 
     // ID and other types
 typedef quint32 EgDataNodesTypeID;    // data object class ID type

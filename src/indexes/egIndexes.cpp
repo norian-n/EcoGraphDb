@@ -58,7 +58,7 @@ template <typename KeyType> int EgIndexes<KeyType>::OpenIndexFilesToRead(const Q
 
     if (!indexFile.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
     {
-        if (! IndexFileName.contains(EgDataNodesGUInamespace::egGUIfileName))
+        if (! IndexFileName.contains(EgDataNodesNamespace::egGUIfileName))
             qDebug() << FN << "can't open index file " << indexFile.fileName();
         return -2;
     }

@@ -32,11 +32,13 @@ SOURCES += \
     indexes/egFingers.cpp \
     indexes/egIndexes.cpp \
     egEntryNodes.cpp \
-    testing/egLinksTests.cpp
+    testing/egLinksTests.cpp \
+    testing/egLocationTests.cpp
 
 HEADERS += \
     testing/egIndexesTests.h \
     testing/egGraphDatabaseTests.h \
     indexes/egIndexesFiles.h \
     egEntryNodes.h \
-    testing/egLinksTests.h
+    testing/egLinksTests.h \
+    testing/egLocationTests.h

@@ -14,8 +14,9 @@
 
 EgDataNodesType::EgDataNodesType():
     LocalFiles(new EgDataFiles()),
-    ConnectonClient(new EgDataClient(this)), // FIXME
+    ConnectonClient(NULL),
     connection(NULL),
+    locationNodesType(NULL),
     index_tree(NULL)
 {
     GUI.dataNodesType = this;
@@ -34,6 +35,13 @@ EgDataNodesType::~EgDataNodesType()
     if (connection)
         delete connection;
 
+    if (locationNodesType)
+    {
+        // qDebug()  << "Delete location info " << metaInfo.typeName + EgDataNodesNamespace::egLocationFileName << FN;
+
+        delete locationNodesType;
+    }
+
     if (index_tree)
         delete index_tree;
 }
@@ -50,32 +58,46 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
     {
         if (metaInfo.LocalLoadMetaInfo())
         {
-            if (! nodeTypeName.contains(EgDataNodesGUInamespace::egGUIfileName))
+            if (! nodeTypeName.contains(EgDataNodesNamespace::egGUIfileName))
                 qDebug()  << "Can't load meta info of data nodes type " << nodeTypeName << FN;
             res = -1;
         }
-        /*
-        else
-            if (! nodeTypeName.contains(EgDataNodesGUInamespace::egGUIfileName))
-                GUI.LoadSimpleControlDesc();
-                */
 
         LocalFiles-> Init(metaInfo);
         index_tree = new EgIndexConditionsTree();
+
+        if (metaInfo.useLocationsNodes)
+        {
+            // qDebug()  << "Create location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
+
+            locationNodesType = new EgDataNodesType();
+
+            int locres = locationNodesType-> Connect(myDB, nodeTypeName + EgDataNodesNamespace::egLocationFileName);
+
+            if (locres)
+                qDebug()  << "Can't load location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
+        }
+    }
+    else
+    {
+        ConnectonClient= new EgDataClient(this);
+
+        // FIXME process server based version
     }
 
         // init special data node
-    notFound.metaInfo = &metaInfo;
+    notFound.metaInfo = &metaInfo;    
+    notFound.dataFields.clear();
 
     for (int i = 0; i < metaInfo.dataFields.count(); i++)
         notFound.dataFields << QVariant("<Not found>");
 
-    if (! res && &myDB)
+        // connect to peer database controller
+    if (! res)
         res = myDB.Attach(this);
 
-    getMyLinkTypes(); // extract nodetype-specific link types from all link types
-
-        // FIXME process server based version
+    if (! res)
+        getMyLinkTypes(); // extract nodetype-specific link types from all link types
 
     return res;
 }
@@ -303,7 +325,7 @@ int EgDataNodesType::CompressData()
         return LocalFiles->LocalCompressData();
 }
 
-int EgDataNodesType::AddNewData(EgDataNode& tmpObj)
+int EgDataNodesType::AddDataNode(EgDataNode& tmpObj)
 {
     QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodesIter;
 
@@ -323,7 +345,7 @@ int EgDataNodesType::AddNewData(EgDataNode& tmpObj)
     return 0;
 }
 
-int EgDataNodesType::AddNewData(QList<QVariant>& myData)
+int EgDataNodesType::AddDataNode(QList<QVariant>& myData)
 {
     QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodesIter;
     EgDataNode tmpObj;
@@ -341,7 +363,7 @@ int EgDataNodesType::AddNewData(QList<QVariant>& myData)
     return 0;
 }
 
-int EgDataNodesType::AddNewData(QList<QVariant>& myData, EgDataNodeIDtype& newID)
+int EgDataNodesType::AddDataNode(QList<QVariant>& myData, EgDataNodeIDtype& newID)
 {
     QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodesIter;
     EgDataNode tmpObj;
@@ -361,7 +383,42 @@ int EgDataNodesType::AddNewData(QList<QVariant>& myData, EgDataNodeIDtype& newID
     return 0;
 }
 
-int EgDataNodesType::MarkDeletedData(EgDataNodeIDtype nodeID)
+
+int EgDataNodesType::AddHardLinked(QList<QVariant>& myData, EgDataNodeIDtype nodeID)
+{
+    QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodesIter;
+    EgDataNode tmpObj;
+
+        // set next available ID FIXME : thread safe
+    tmpObj.dataNodeID = nodeID;
+    metaInfo.nextObjID = (metaInfo.nextObjID >= nodeID) ?  metaInfo.nextObjID+1 : nodeID;
+
+    tmpObj.dataFields = myData;
+    tmpObj.isAdded = true;
+    tmpObj.metaInfo = &metaInfo;
+
+        // copy to map and then add to pointers list
+    dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, tmpObj);
+    addedDataNodes.insert(tmpObj.dataNodeID, &(dataNodesIter.value()));
+
+    return 0;
+}
+
+int EgDataNodesType::AddLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype nodeID)
+{
+    if (locationNodesType)
+    {
+        return locationNodesType->AddHardLinked(myData, nodeID);
+    }
+    else
+    {
+        qDebug()  << "Can't add location, location type does not exist for " << metaInfo.typeName << FN;
+
+        return -1;
+    }
+}
+
+int EgDataNodesType::DeleteDataNode(EgDataNodeIDtype nodeID)
 {
     QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodesIter;
     QMap<EgDataNodeIDtype, EgDataNode*>::iterator auxIter;
@@ -396,7 +453,7 @@ int EgDataNodesType::MarkDeletedData(EgDataNodeIDtype nodeID)
     return 0;
 }
 
-int EgDataNodesType::SetModifiedData(QList<QVariant>& myData, EgDataNodeIDtype nodeID)
+int EgDataNodesType::UpdateDataNode(QList<QVariant>& myData, EgDataNodeIDtype nodeID)
 {
     QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodesIter;
     QMap<EgDataNodeIDtype, EgDataNode*>::iterator auxIter;
@@ -424,7 +481,7 @@ int EgDataNodesType::SetModifiedData(QList<QVariant>& myData, EgDataNodeIDtype n
     return 0;
 }
 
-int EgDataNodesType::SetModifiedData(EgDataNodeIDtype nodeID)
+int EgDataNodesType::UpdateDataNode(EgDataNodeIDtype nodeID)
 {
     QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodesIter;
     QMap<EgDataNodeIDtype, EgDataNode*>::iterator auxIter;
@@ -469,6 +526,9 @@ int EgDataNodesType::StoreData()
     deletedDataNodes.clear();
     addedDataNodes.clear();
     updatedDataNodes.clear();
+
+    if (locationNodesType)
+        locationNodesType-> StoreData();
 
     if (ret_val)
        qDebug()  << "ERROR: got non-zero error code from callee" << FN;

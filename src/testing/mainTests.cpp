@@ -16,6 +16,7 @@
 #include "egGraphDatabaseTests.h"
 #include "egIndexesTests.h"
 #include "egLinksTests.h"
+#include "egLocationTests.h"
 
 void cleanUpFiles()
 {
@@ -52,6 +53,7 @@ void cleanUpFiles()
 int main() // int argc, char *argv[])
 {
     bool res = true;
+    bool tmpRes;
 
     EgGraphDatabaseTests egDbTests;
 
@@ -95,9 +97,11 @@ int main() // int argc, char *argv[])
 
         // baisc functionality
 
-    res = res && egDbTests.testEgGraphDatabaseCreate();
+    tmpRes = egDbTests.testEgGraphDatabaseCreate();
+    res = res && tmpRes;
 
-    res = res && egDbTests.testEgLinksCreate();
+    tmpRes = egDbTests.testEgLinksCreate();
+    res = res && tmpRes;
 
     graphDB.Connect();
 
@@ -107,25 +111,40 @@ int main() // int argc, char *argv[])
 
     // return 0; // FIXME STUB
 
-    res = res && egDbTests.testEgDataNodesTypeBasicNodeOps(testEgDataNodesType);
+    tmpRes = egDbTests.testEgDataNodesTypeBasicNodeOps(testEgDataNodesType);
+    res = res && tmpRes;
 
-    res = res && egDbTests.testEgDataNodesTypeBasicLoadStore(testEgDataNodesType);
+    tmpRes = egDbTests.testEgDataNodesTypeBasicLoadStore(testEgDataNodesType);
+    res = res && tmpRes;
 
-    res = res && egDbTests.testEgDataNodesTypeDelNode(testEgDataNodesType);
+    tmpRes = egDbTests.testEgDataNodesTypeDelNode(testEgDataNodesType);
+    res = res && tmpRes;
 
-    res = res && egDbTests.testEgDataNodesTypeUpdateNode(testEgDataNodesType);
+    tmpRes = egDbTests.testEgDataNodesTypeUpdateNode(testEgDataNodesType);
+    res = res && tmpRes;
 
     // res = res && egDbTests.testEgDataNodesTypeGUIDescriptors(testEgDataNodesType);
 
     // return 0; // FIXME STUB
 
-    res = res && egDbTests.testEgLinksBasics(testEgDataNodesType);
+    tmpRes = egDbTests.testEgLinksBasics(testEgDataNodesType);
+    res = res && tmpRes;
 
-    res = res && egDbTests.testEgEntryNodes(testEgDataNodesType);
+    tmpRes = egDbTests.testEgEntryNodes(testEgDataNodesType);
+    res = res && tmpRes;
 
     EgLinksTests linksTests;
 
-    res = res && linksTests.testLinksTree();
+    tmpRes = linksTests.testLinksTree();
+    res = res && tmpRes;
+
+    EgLocationTests locTests;
+
+    tmpRes = locTests.testCreateLocations();
+    res = res && tmpRes;
+
+    tmpRes = locTests.testAddLocations();
+    res = res && tmpRes;
 
     if (res)
         qDebug() << "\nAll tests PASSED\n";

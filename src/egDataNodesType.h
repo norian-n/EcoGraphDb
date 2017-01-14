@@ -33,6 +33,8 @@ public:
   EgDataClient* ConnectonClient;    // server connection client
   EgRemoteConnect*  connection;     // connection data (NULL means local files)
 
+  EgDataNodesType* locationNodesType;
+
   EgIndexConditionsTree* index_tree;
 
   EgDataNodeTypeMetaInfo metaInfo;
@@ -67,20 +69,24 @@ public:
 
   int StoreData();
 
-  int LoadData(QString a_FieldName, int an_oper, QVariant a_value);
-  int LoadData(const EgIndexCondition &indexCondition);
+  int LoadData(QString a_FieldName, int an_oper, QVariant a_value); // single index condition ("odb_pit", EQ, projectID);
+  int LoadData(const EgIndexCondition &indexCondition);             // any index condition IC("owner", EQ, 2) &&  IC("status", EQ, 3)
 
   int LoadAllData();            // select *
   int LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeID);
 
-  int AddNewData(QList<QVariant>& myData);
-  int AddNewData(QList<QVariant>& myData, EgDataNodeIDtype &newID);
-  int AddNewData(EgDataNode& tmpObj);
+  int AddDataNode(QList<QVariant>& myData);
+  int AddDataNode(QList<QVariant>& myData, EgDataNodeIDtype &newID); // return ID
+  int AddDataNode(EgDataNode& tmpObj);
 
-  int MarkDeletedData(EgDataNodeIDtype nodeID);
+  int AddHardLinked(QList<QVariant>& myData, EgDataNodeIDtype nodeID);
 
-  int SetModifiedData(QList<QVariant>& my_data, EgDataNodeIDtype nodeID);
-  int SetModifiedData(EgDataNodeIDtype nodeID);
+  int AddLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype nodeID);
+
+  int DeleteDataNode(EgDataNodeIDtype nodeID);
+
+  int UpdateDataNode(QList<QVariant>& my_data, EgDataNodeIDtype nodeID);
+  int UpdateDataNode(EgDataNodeIDtype nodeID);
 
   EgDataNode &operator [](EgDataNodeIDtype objID); // {return GetObjByID(obj_id);}
 

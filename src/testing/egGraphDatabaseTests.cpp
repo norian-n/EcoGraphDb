@@ -63,26 +63,26 @@ bool EgGraphDatabaseTests::testEgDataNodesTypeBasicNodeOps(EgDataNodesType& test
 
     addValues << QVariant("testName") << QVariant(7);
 
-    testDataNodes.AddNewData(addValues);
-    testDataNodes.AddNewData(addValues);
-    testDataNodes.AddNewData(addValues);
-    testDataNodes.AddNewData(addValues);
-    testDataNodes.AddNewData(addValues);
-    testDataNodes.AddNewData(addValues);
-    testDataNodes.AddNewData(addValues);
-    testDataNodes.AddNewData(addValues);
-    testDataNodes.AddNewData(addValues);
+    testDataNodes.AddDataNode(addValues);
+    testDataNodes.AddDataNode(addValues);
+    testDataNodes.AddDataNode(addValues);
+    testDataNodes.AddDataNode(addValues);
+    testDataNodes.AddDataNode(addValues);
+    testDataNodes.AddDataNode(addValues);
+    testDataNodes.AddDataNode(addValues);
+    testDataNodes.AddDataNode(addValues);
+    testDataNodes.AddDataNode(addValues);
 
     // qDebug() << "Added" << FN ;
 
-    testDataNodes.MarkDeletedData(2);
+    testDataNodes.DeleteDataNode(2);
 
     // qDebug() << "Deleted" << FN ;
 
     addValues.clear();
     addValues << QVariant("newName") << QVariant(8);
 
-    testDataNodes.SetModifiedData(addValues, 1);
+    testDataNodes.UpdateDataNode(addValues, 1);
 
     // TestNodesType.Connect("AddNodeTest");
 
@@ -100,7 +100,7 @@ bool EgGraphDatabaseTests::testEgDataNodesTypeBasicNodeOps(EgDataNodesType& test
 bool EgGraphDatabaseTests::testEgDataNodesTypeDelNode(EgDataNodesType& testDataNodes)
 {
 
-    testDataNodes.MarkDeletedData(5);
+    testDataNodes.DeleteDataNode(5);
 
     testDataNodes.StoreData();
     testDataNodes.LoadAllData();
@@ -118,7 +118,7 @@ bool EgGraphDatabaseTests::testEgDataNodesTypeUpdateNode(EgDataNodesType& testDa
 
     updValues << QVariant("updatedName") << QVariant(9);
 
-    testDataNodes.SetModifiedData(updValues, 3);
+    testDataNodes.UpdateDataNode(updValues, 3);
 
     testDataNodes.StoreData();
     testDataNodes.LoadAllData();
@@ -167,11 +167,19 @@ bool EgGraphDatabaseTests::testEgGraphDatabaseCreate()
     graphDB.CreateNodeType("test");
 
     graphDB.AddDataField("name");
-    graphDB.AddDataField("status", true); // true for index
+    graphDB.AddDataField("status", isIndexed); // true for index
 
     graphDB.CommitNodeType();
+/*
+    graphDB.CreateNodeType("locations", useLocations);
 
-    bool res = (graphDB.metaInfo->dataFields.count() == 2); // && (testDataNodes.dataNodes.count() == 8))
+    graphDB.AddDataField("name");
+    graphDB.AddLocationField("imageType");
+
+    graphDB.CommitNodeType();
+    */
+
+    bool res = ((graphDB.metaInfo-> dataFields.count() == 1)); //  && (graphDB.locationMetaInfo-> dataFields.count() == 3));
 
     testShowResult(res, FNS);
 
