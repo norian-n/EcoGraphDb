@@ -21,6 +21,8 @@ public:
 
     EgDataNodeTypeMetaInfo* metaInfo;
     EgDataNodeTypeMetaInfo* locationMetaInfo;
+    EgDataNodeTypeMetaInfo* attributesMetaInfo;
+
     EgRemoteConnect*  connection;     // connection data (NULL means local files)
 
     EgDataNodesType controlDescs;
@@ -28,25 +30,25 @@ public:
     QMap<QString, EgDataNodesLinkType>  linkTypes;
     QMap<QString, EgDataNodesType*>  connNodeTypes;
 
-    EgGraphDatabase(): isConnected(false), metaInfo(NULL), locationMetaInfo(NULL), connection(NULL) {}
+    EgGraphDatabase(): isConnected(false), metaInfo(NULL), locationMetaInfo(NULL), attributesMetaInfo(NULL), connection(NULL) {}
 
-    ~EgGraphDatabase() { if (metaInfo) delete metaInfo; if (locationMetaInfo) delete locationMetaInfo; }
+    ~EgGraphDatabase() { if (metaInfo) delete metaInfo; if (locationMetaInfo) delete locationMetaInfo; if (attributesMetaInfo) delete attributesMetaInfo; }
 
     int Connect();
     int Attach(EgDataNodesType* nType);
 
     int LoadLinksMetaInfo();
 
-    int CreateNodeType(QString typeName, bool addLocation = false);
+    int CreateNodeType(QString typeName, bool addLocation = false, bool addAttributes = false);
     int AddDataField(QString fieldName, bool indexed = false);    // add field descriptor, no GUI control data
     int AddLocationField(QString fieldName, bool indexed = false);
     int CommitNodeType();
 
-    int CreateLinksMetaInfo();
+    int CreateEgDb();
     int AddLinkType(QString linkName, QString firstDataNodeType, QString secondDataNodeType);
 
-    int StoreAllLinks();
-    int LoadAllLinks(); // load all links to memory - debug use only
+    // int StoreAllLinks();
+    // int LoadAllLinks(); // load all links to memory - debug use only
 
 };
 

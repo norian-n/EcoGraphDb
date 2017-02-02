@@ -7,7 +7,7 @@
  *
  */
 
-#include "egDataNodesGUIconnect.h"
+#include "egGUIconnect.h"
 #include "egDataNodesType.h"
 
 #include <QFile>

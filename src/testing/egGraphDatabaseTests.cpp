@@ -179,7 +179,7 @@ bool EgGraphDatabaseTests::testEgGraphDatabaseCreate()
     graphDB.CommitNodeType();
     */
 
-    bool res = ((graphDB.metaInfo-> dataFields.count() == 1)); //  && (graphDB.locationMetaInfo-> dataFields.count() == 3));
+    bool res = ((graphDB.metaInfo-> dataFields.count() == 2)); //  && (graphDB.locationMetaInfo-> dataFields.count() == 3));
 
     testShowResult(res, FNS);
 
@@ -190,7 +190,7 @@ bool EgGraphDatabaseTests::testEgLinksCreate()
 {
     EgGraphDatabase graphDB;
 
-    graphDB.CreateLinksMetaInfo();
+    graphDB.CreateEgDb();
 
     graphDB.AddLinkType("testLinkType", "nodeType1", "nodeType2");
     graphDB.AddLinkType("testTree", "test", "test");

@@ -16,7 +16,7 @@ SOURCES += main.cpp \
     project_form.cpp \
     funcblocks.cpp \
     ../../egDataNodesType.cpp \
-    ../../egDataNodesGUIconnect.cpp \
+    ../../egGUIconnect.cpp \
     ../../egGraphDatabase.cpp \
     ../../indexes/egIndexConditions.cpp \
     ../../egDataNode.cpp \
@@ -30,7 +30,9 @@ SOURCES += main.cpp \
     ../../egEntryNodes.cpp \
     funcblock_form.cpp \
     projects.cpp \
-    references.cpp
+    references.cpp \
+    ../../egNodesLocation.cpp \
+    ../../egNamedAttributes.cpp
 
 
 HEADERS += mainwindow.h \

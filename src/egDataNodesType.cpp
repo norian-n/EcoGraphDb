@@ -16,7 +16,9 @@ EgDataNodesType::EgDataNodesType():
     LocalFiles(new EgDataFiles()),
     ConnectonClient(NULL),
     connection(NULL),
-    locationNodesType(NULL),
+    locations(NULL),
+    // locationNodesType(NULL),
+    namedAttributesType(NULL),
     index_tree(NULL)
 {
     GUI.dataNodesType = this;
@@ -35,11 +37,21 @@ EgDataNodesType::~EgDataNodesType()
     if (connection)
         delete connection;
 
+    if (locations)
+        delete locations;
+    /*
     if (locationNodesType)
     {
         // qDebug()  << "Delete location info " << metaInfo.typeName + EgDataNodesNamespace::egLocationFileName << FN;
 
         delete locationNodesType;
+    }
+    */
+
+    if (namedAttributesType)
+    {
+
+        delete namedAttributesType;
     }
 
     if (index_tree)
@@ -49,6 +61,10 @@ EgDataNodesType::~EgDataNodesType()
 int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName, EgRemoteConnect* server) // connect to server
 {
     int res = 0;
+
+        // check if already connected
+    if (isConnected)
+        return 1;
 
     metaInfo.myECoGraphDB = &myDB;
     metaInfo.typeName = nodeTypeName;
@@ -60,6 +76,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
         {
             if (! nodeTypeName.contains(EgDataNodesNamespace::egGUIfileName))
                 qDebug()  << "Can't load meta info of data nodes type " << nodeTypeName << FN;
+
             res = -1;
         }
 
@@ -70,9 +87,14 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
         {
             // qDebug()  << "Create location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
 
+            locations = new EgDataNodesLocation(this);
+
+            int locres = locations->locationNodesType-> Connect(myDB, nodeTypeName + EgDataNodesNamespace::egLocationFileName);
+            /*
             locationNodesType = new EgDataNodesType();
 
             int locres = locationNodesType-> Connect(myDB, nodeTypeName + EgDataNodesNamespace::egLocationFileName);
+            */
 
             if (locres)
                 qDebug()  << "Can't load location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
@@ -98,6 +120,9 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
 
     if (! res)
         getMyLinkTypes(); // extract nodetype-specific link types from all link types
+
+    if (! res)
+        isConnected = true;
 
     return res;
 }
@@ -206,8 +231,6 @@ int EgDataNodesType::AddArrowLink(QString linkName, EgDataNodeIDtype fromNode, E
 
         myLinkTypes[linkName] -> AddLink(fromNode, toNode);
 
-
-
         // qDebug() << "Link " << linkName << " added " << metaInfo.typeName << " " << fromNode << " to "
         //         << toType.metaInfo.typeName << " " <<  toNode << FN;
 
@@ -248,33 +271,46 @@ int EgDataNodesType::RemoveLocalFiles()
     return LocalFiles->RemoveLocalFiles();
 }
 
-
-int EgDataNodesType::LoadAllData()
+void EgDataNodesType::ClearData()
 {
-    // index_tree-> clear();
-    // index_tree-> AddNode(NULL, true, false, GE, "odb_pit", 1);  // all nodes, ID >= 1
-
-
-    int res = 0;
-
-       // clear lists
+        // clear changes lists
     deletedDataNodes.clear();
     addedDataNodes.clear();
     updatedDataNodes.clear();
 
-        // clear objects data
+        // clear data
     dataNodes.clear();
+
+    entryNodesInst.entryNodes.clear();
+}
+
+int EgDataNodesType::LoadAllData()
+{
+    int res = 0;
+
+    ClearData();
+
+    if (locations)
+        locations->locationNodesType-> ClearData();
 
     IndexOffsets.clear();
 
     LocalFiles-> primIndexFiles -> LoadAllDataOffsets(IndexOffsets);
 
-    // qDebug() << FN << "IndexOffsets) = " << IndexOffsets;
+    // qDebug() << "IndexOffsets = " << IndexOffsets << FN;
 
     if (! IndexOffsets.isEmpty())
+    {
         res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
 
-    entryNodesInst.LoadEntryNodes(*this);
+
+        if (locations && ! res)
+            locations->locationNodesType-> LoadAllData();
+
+        if (! res)
+            res = entryNodesInst.LoadEntryNodes(*this);
+
+    }
 
     return res;
 
@@ -285,13 +321,8 @@ int EgDataNodesType::LoadAllData()
 int EgDataNodesType::LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeID)
 {
     int res = 0;
-       // clear lists
-    deletedDataNodes.clear();
-    addedDataNodes.clear();
-    updatedDataNodes.clear();
 
-        // clear objects data
-    dataNodes.clear();
+    ClearData();
 
         // find link
     if (! myLinkTypes.contains(linkName))
@@ -301,10 +332,18 @@ int EgDataNodesType::LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeI
     }
 
         // load linked offsets
-    res = myLinkTypes[linkName]-> LoadLinkedNodes(IndexOffsets, fromNodeID);
+    // res = myLinkTypes[linkName]-> LoadLinkedNodes(IndexOffsets, fromNodeID); // FIXME
 
-    if (res)
-        return res;
+    res = myLinkTypes[linkName]-> LoadLinkedNodes(fromNodeID);
+
+    // if (res)
+    //    return res;
+
+    IndexOffsets.clear();
+
+        // iterate loaded links
+    for (auto Iter = myLinkTypes[linkName]->linksStorage-> dataNodes.begin(); Iter != myLinkTypes[linkName]->linksStorage-> dataNodes.end(); ++Iter)
+        LocalFiles->primIndexFiles-> Load_EQ(IndexOffsets, Iter.value()["to_node_id"].toInt());
 
     // qDebug() << "IndexOffsets.count() = " << IndexOffsets.count() << FN;
 
@@ -316,6 +355,32 @@ int EgDataNodesType::LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeI
 
     return res;
 }
+
+/*
+int EgDataNodesType::LoadLocationsData()
+{
+    int res = 0;
+
+    // EgDataNodeIDtype dataNodeID;
+
+    if (locationNodesType)
+    {
+        locationNodesType-> ClearData();
+
+        locationNodesType-> IndexOffsets.clear();
+
+        for (QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodeIter = dataNodes.begin(); dataNodeIter != dataNodes.end(); ++dataNodeIter)
+            locationNodesType-> LocalFiles-> primIndexFiles-> Load_EQ(locationNodesType->IndexOffsets, dataNodeIter.key());
+
+
+        if (! locationNodesType-> IndexOffsets.isEmpty())
+            res = locationNodesType-> LocalFiles-> LocalLoadData(locationNodesType-> IndexOffsets, locationNodesType-> dataNodes);
+
+    }
+
+    return res;
+}
+*/
 
 int EgDataNodesType::CompressData()
 {
@@ -403,7 +468,7 @@ int EgDataNodesType::AddHardLinked(QList<QVariant>& myData, EgDataNodeIDtype nod
 
     return 0;
 }
-
+/*
 int EgDataNodesType::AddLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype nodeID)
 {
     if (locationNodesType)
@@ -417,7 +482,7 @@ int EgDataNodesType::AddLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype
         return -1;
     }
 }
-
+*/
 int EgDataNodesType::DeleteDataNode(EgDataNodeIDtype nodeID)
 {
     QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodesIter;
@@ -527,8 +592,8 @@ int EgDataNodesType::StoreData()
     addedDataNodes.clear();
     updatedDataNodes.clear();
 
-    if (locationNodesType)
-        locationNodesType-> StoreData();
+    if (locations)
+        locations->locationNodesType-> StoreData();
 
     if (ret_val)
        qDebug()  << "ERROR: got non-zero error code from callee" << FN;
@@ -541,53 +606,28 @@ int EgDataNodesType::LoadData(QString a_FieldName, int an_oper, QVariant a_value
     EgIndexCondition indexCondition(a_FieldName, an_oper, a_value);
 
     return LoadData(indexCondition);
-
-    /*
-    int res = 0;
-
-       // clear lists
-    deletedDataNodes.clear();
-    addedDataNodes.clear();
-    updatedDataNodes.clear();
-
-        // clear objects data
-    dataNodes.clear();
-
-    index_tree-> CalcTreeSet(indexCondition.iTreeNode, IndexOffsets, LocalFiles);
-
-    // qDebug() << FN << "IndexOffsets.count() = " << IndexOffsets.count();
-
-    if (! IndexOffsets.isEmpty())
-        res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
-
-    entryNodesInst.LoadEntryNodes(*this);
-
-    index_tree-> RecursiveClear(indexCondition.iTreeNode);
-
-    return res;
-    */
 }
 
 
 int EgDataNodesType::LoadData(const EgIndexCondition &indexCondition)
 {
     int res = 0;
-       // clear lists
-    deletedDataNodes.clear();
-    addedDataNodes.clear();
-    updatedDataNodes.clear();
 
-        // clear objects data
-    dataNodes.clear();
+    ClearData();
 
     index_tree-> CalcTreeSet(indexCondition.iTreeNode, IndexOffsets, LocalFiles);
 
     // qDebug() << FN << "IndexOffsets.count() = " << IndexOffsets.count();
 
     if (! IndexOffsets.isEmpty())
+    {
         res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
 
-    entryNodesInst.LoadEntryNodes(*this);
+        if (locations)
+            locations-> LoadLocationsData();
+
+        entryNodesInst.LoadEntryNodes(*this);
+    }
 
     index_tree-> RecursiveClear(indexCondition.iTreeNode);
 

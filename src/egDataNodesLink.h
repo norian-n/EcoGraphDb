@@ -19,15 +19,14 @@
 #include "egCore.h"
 #include "indexes/egIndexesFiles.h"
 
-class EgGraphDatabase;
-class EgDataNodesType;
-
 namespace EgDataNodesLinkNamespace
 {
     const char* const egLinkTypesFileName("egLinkTypesMetaInfo");
+    const char* const egLinkFileNamePostfix("_egLinkType");
 }
 
-// class EgDataNodesType;
+class EgGraphDatabase;
+class EgDataNodesType;
 
 class EgDataNodesLinkType
 {
@@ -36,9 +35,13 @@ public:
     // EgDataNodesType* firstNodesType;
     // EgDataNodesType* secondNodesType;
 
+    bool isConnected = false;
+
     EgGraphDatabase* egDatabase;            // backlink to db
 
-    EgIndexFiles<EgDataNodeIDtype>* fwdIndexFiles;    // forward links index
+    EgIndexFiles<EgDataNodeIDtype>* fwdIndexFiles = nullptr;    // forward links index
+
+    EgDataNodesType* linksStorage;
 
     QDir dir;
 
@@ -52,24 +55,19 @@ public:
 
     QMultiMap<EgDataNodeIDtype, EgDataNodeIDtype>  loadedLinks;
 
-    EgDataNodesLinkType(): egDatabase(NULL), fwdIndexFiles(NULL) {}
+    EgDataNodesLinkType(): egDatabase(nullptr), linksStorage(nullptr) {} // new EgDataNodesType()
+
+    EgDataNodesLinkType(EgGraphDatabase* theDatabase);
     ~EgDataNodesLinkType() { if (fwdIndexFiles) delete fwdIndexFiles; }
 
-
-
-    // int AddLink (EgDataNode& left_obj, EgDataNode& right_obj); // link objects
     int AddLink (EgDataNodeIDtype leftNodeID, EgDataNodeIDtype rightNodeID);
-    int UpdateLinkIndex (EgDataNodeIDtype ID, quint64 oldDataOffset, quint64 newDataOffset);
-
-    int DeleteLink (EgDataNodeIDtype leftNodeID, EgDataNodeIDtype rightNodeID);  // FIXME TODO
-
-    // int PrintLinks();        // debug dump
+    int DeleteLink (EgDataNodeIDtype linkNodeID);
 
     int LoadLinks();            // load data links from file or server
     int StoreLinks();           // save data links to file or server
     int ResolveLinks(EgDataNodesType& firstType, EgDataNodesType& secondType);         // move loaded links to data nodes if loaded
 
-    int LoadLinkedNodes(QSet<quint64>& IndexOffsets, EgDataNodeIDtype fromNodeID);
+    int LoadLinkedNodes(EgDataNodeIDtype fromNodeID);
 
 };
 

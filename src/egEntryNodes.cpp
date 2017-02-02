@@ -106,8 +106,6 @@ int EgEntryNodes::LoadEntryNodes(EgDataNodesType& egType)
 
      EgDataNodeIDtype entryNodeID;
 
-     entryNodes.clear();
-
      if (! dir.exists("egdb"))
      {
          qDebug()  << "can't find the egdb dir " << FN;

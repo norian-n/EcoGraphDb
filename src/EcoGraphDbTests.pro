@@ -21,7 +21,6 @@ SOURCES += \
     egDataNodesType.cpp \
     egDataClient.cpp \
     egLocalFiles.cpp \
-    egDataNodesGUIconnect.cpp \
     egGraphDatabase.cpp \
     egDataNodesLink.cpp \
     testing/mainTests.cpp \
@@ -33,7 +32,11 @@ SOURCES += \
     indexes/egIndexes.cpp \
     egEntryNodes.cpp \
     testing/egLinksTests.cpp \
-    testing/egLocationTests.cpp
+    testing/egLocationTests.cpp \
+    egNamedAttributes.cpp \
+    egNodesLocation.cpp \
+    egGUIconnect.cpp \
+    testing/egNamedAttributesTests.cpp
 
 HEADERS += \
     testing/egIndexesTests.h \
@@ -41,4 +44,7 @@ HEADERS += \
     indexes/egIndexesFiles.h \
     egEntryNodes.h \
     testing/egLinksTests.h \
-    testing/egLocationTests.h
+    testing/egLocationTests.h \
+    egNamedAttributes.h \
+    egNodesLocation.h \
+    testing/egNamedAttributesTests.h

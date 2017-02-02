@@ -14,9 +14,10 @@
 #include "egMetaInfo.h"
 #include "egLocalFiles.h"
 #include "indexes/egIndexConditions.h"
-#include "egDataNodesGUIconnect.h"
+#include "egGUIconnect.h"
 #include "egDataNodesLink.h"
 #include "egEntryNodes.h"
+#include "egNodesLocation.h"
 
 class EgDataClient;     // server connection functionality
 
@@ -29,93 +30,104 @@ class EgDataNodesType   // Data Objects head API
 {
 public:
 
-  EgDataFiles*  LocalFiles;         // data files support functionality
-  EgDataClient* ConnectonClient;    // server connection client
-  EgRemoteConnect*  connection;     // connection data (NULL means local files)
+    bool isConnected = false;
 
-  EgDataNodesType* locationNodesType;
+    EgDataFiles*  LocalFiles;         // data files support functionality
+    EgDataClient* ConnectonClient;    // server connection client
+    EgRemoteConnect*  connection;     // connection data (NULL means local files)
 
-  EgIndexConditionsTree* index_tree;
+    EgDataNodesLocation* locations;
 
-  EgDataNodeTypeMetaInfo metaInfo;
+    // EgDataNodesType* locationNodesType;
+    EgDataNodesType* namedAttributesType;
 
-  EgEntryNodes entryNodesInst;
+    EgIndexConditionsTree* index_tree;
 
-  EgDataNodesGUIconnect GUI;
+    EgDataNodeTypeMetaInfo metaInfo;
 
-  EgDataNode notFound;             // dummy node
+    EgEntryNodes entryNodesInst;
 
-  QMap <QString, EgDataNodesLinkType*>  myLinkTypes;
+    EgDataNodesGUIconnect GUI;
 
-  QMap <EgDataNodeIDtype, EgDataNode>   dataNodes;
+    EgDataNode notFound;             // dummy node
 
-  QMap <EgDataNodeIDtype, EgDataNode>   deletedDataNodes; // TODO process entryNodes on delete
-  QMap <EgDataNodeIDtype, EgDataNode*>  addedDataNodes;
-  QMap <EgDataNodeIDtype, EgDataNode*>  updatedDataNodes;
+    QMap <QString, EgDataNodesLinkType*>  myLinkTypes;
 
-  QSet <quint64> IndexOffsets;           // offsets returned by index tree, for index-based operations (AND, OR)
+    QMap <EgDataNodeIDtype, EgDataNode>   dataNodes;
 
-  EgDataNodesType();
-  // EgDataNodesType(const QString& dclass_name); // : DClassName(dclass_name) {};
-  ~EgDataNodesType();
+    QMap <EgDataNodeIDtype, EgDataNode>   deletedDataNodes; // TODO process entryNodes on delete
+    QMap <EgDataNodeIDtype, EgDataNode*>  addedDataNodes;
+    QMap <EgDataNodeIDtype, EgDataNode*>  updatedDataNodes;
+
+    QSet <quint64> IndexOffsets;           // offsets returned by index tree, for index-based operations (AND, OR)
+
+    EgDataNodesType();
+    // EgDataNodesType(const QString& dclass_name); // : DClassName(dclass_name) {};
+    ~EgDataNodesType();
 
         // basic operations
 
         // connect to local connection or server, load fields and controls descriptions
-  int Connect(EgGraphDatabase& myDB,const QString& nodeTypeName, EgRemoteConnect* server = NULL);
-  int getGUIinfo();
+    int Connect(EgGraphDatabase& myDB,const QString& nodeTypeName, EgRemoteConnect* server = NULL);
 
-  int getMyLinkTypes(); // from myDB TODO
+    void ClearData();      // before load
 
-  int StoreData();
+    int LoadData(QString a_FieldName, int an_oper, QVariant a_value); // single index condition ("odb_pit", EQ, projectID);
+    int LoadData(const EgIndexCondition &indexCondition);             // any index condition IC("owner", EQ, 2) &&  IC("status", EQ, 3)
 
-  int LoadData(QString a_FieldName, int an_oper, QVariant a_value); // single index condition ("odb_pit", EQ, projectID);
-  int LoadData(const EgIndexCondition &indexCondition);             // any index condition IC("owner", EQ, 2) &&  IC("status", EQ, 3)
+    int LoadAllData();            // select *
+    int LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeID); // only linked nodes from spec node
+    // int LoadLocationsData();      // FIXME private, if not load all
 
-  int LoadAllData();            // select *
-  int LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeID);
+    int StoreData();
 
-  int AddDataNode(QList<QVariant>& myData);
-  int AddDataNode(QList<QVariant>& myData, EgDataNodeIDtype &newID); // return ID
-  int AddDataNode(EgDataNode& tmpObj);
+    int AddDataNode(QList<QVariant>& myData);
+    int AddDataNode(QList<QVariant>& myData, EgDataNodeIDtype &newID); // return ID
+    int AddDataNode(EgDataNode& tmpObj);
 
-  int AddHardLinked(QList<QVariant>& myData, EgDataNodeIDtype nodeID);
+    int AddHardLinked(QList<QVariant>& myData, EgDataNodeIDtype nodeID);
 
-  int AddLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype nodeID);
+    // int AddLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype nodeID);
 
-  int DeleteDataNode(EgDataNodeIDtype nodeID);
+    int DeleteDataNode(EgDataNodeIDtype nodeID);
 
-  int UpdateDataNode(QList<QVariant>& my_data, EgDataNodeIDtype nodeID);
-  int UpdateDataNode(EgDataNodeIDtype nodeID);
+    int UpdateDataNode(QList<QVariant>& my_data, EgDataNodeIDtype nodeID);
+    int UpdateDataNode(EgDataNodeIDtype nodeID);
 
-  EgDataNode &operator [](EgDataNodeIDtype objID); // {return GetObjByID(obj_id);}
+    EgDataNode &operator [](EgDataNodeIDtype objID); // {return GetObjByID(obj_id);}
 
         // set custom data filter
-  void SetLocalFilter(FilterFunctionType theFunction);                           // set predefined local files filter callback
-  void SetFilterParams(QList<QVariant>& values);
+    void SetLocalFilter(FilterFunctionType theFunction);                           // set predefined local files filter callback
+    void SetFilterParams(QList<QVariant>& values);
 
         // service
-  int CompressData();           // FIXME delete records marked as deleted
-  int PrintObjData();           // debug dump to qDebug()
-  int RemoveLocalFiles();       // total destruction
+    int CompressData();           // FIXME delete records marked as deleted
+    int PrintObjData();           // FIXME debug dump
 
-  EgFieldIDtype FieldsCount()       { return metaInfo.dataFields.count(); }
-  EgFieldIDtype ModelFieldsCount()  { return GUI.basicControlDescs.count(); }
-  EgDataNodeIDtype DataNodesCount()   { return dataNodes.count(); }
+    int RemoveLocalFiles();       // total destruction
 
-  int AddArrowLink(QString linkName, EgDataNodeIDtype fromNode, EgDataNodesType& toType, EgDataNodeIDtype toNode);
+    EgFieldIDtype FieldsCount()       { return metaInfo.dataFields.count(); }
+    EgFieldIDtype ModelFieldsCount()  { return GUI.basicControlDescs.count(); }
+    EgDataNodeIDtype DataNodesCount()   { return dataNodes.count(); }
 
-  int StoreLinks();
-  int LoadLinks();
+    int getGUIinfo();
 
-  int StoreLink(QString linkName);
-  int LoadLink(QString linkName);
+        // links
+    int AddArrowLink(QString linkName, EgDataNodeIDtype fromNode, EgDataNodesType& toType, EgDataNodeIDtype toNode);
 
-  int AddEntryNode(EgDataNodeIDtype entryNodeID);
+    int StoreLinks();
+    int LoadLinks();
+
+    int StoreLink(QString linkName);
+    int LoadLink(QString linkName);
+
+    int getMyLinkTypes();         // from myDB TODO
+
+    int AddEntryNode(EgDataNodeIDtype entryNodeID);
 
 private:    // no copy constructors
-  EgDataNodesType(const EgDataNodesType&);
-  EgDataNodesType& operator=(const EgDataNodesType&);
+    EgDataNodesType(const EgDataNodesType&);
+    EgDataNodesType& operator=(const EgDataNodesType&);
 
 };
 

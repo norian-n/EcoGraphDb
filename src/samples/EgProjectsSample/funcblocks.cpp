@@ -250,6 +250,7 @@ void FuncBlocksForm::refreshView()
 
 void FuncBlocksForm::refreshView2()
 {
+    /*
         // update link
     Projects.myLinkTypes["projects_funcblocks"]-> UpdateLinkIndex(projectID, oldOffset, Funcblocks[funcBlockForm-> FuncBlockID].dataFileOffset);
 
@@ -262,7 +263,7 @@ void FuncBlocksForm::refreshView2()
         Funcblocks.myLinkTypes["funcblocksTree"]-> UpdateLinkIndex(Funcblocks.GUI.model_current_item-> parent()-> data(data_id).toInt(),
                                                                    oldOffset, Funcblocks[funcBlockForm-> FuncBlockID].dataFileOffset);
 
-
+*/
     Funcblocks.GUI.model_current_item->setText(Funcblocks[funcBlockForm-> FuncBlockID]["name"].toString());
 
     // Funcblocks.GUI.DataToModelTree(model, "funcblocksTree");

@@ -146,6 +146,9 @@ int main() // int argc, char *argv[])
     tmpRes = locTests.testAddLocations();
     res = res && tmpRes;
 
+    tmpRes = locTests.testLoadLocationsData();
+    res = res && tmpRes;
+
     if (res)
         qDebug() << "\nAll tests PASSED\n";
     else

@@ -24,7 +24,7 @@ void EgLinksTests::testCreateNodes()
     graphDB.CommitNodeType();
 
         // create links type
-    graphDB.CreateLinksMetaInfo();
+    graphDB.CreateEgDb();
 
     graphDB.AddLinkType("linksTestTree", "linksTest", "linksTest");
 

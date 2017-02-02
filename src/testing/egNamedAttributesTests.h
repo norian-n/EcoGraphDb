@@ -1,22 +1,22 @@
-#ifndef EGLOCATIONTESTS_H
-#define EGLOCATIONTESTS_H
+#ifndef EG_ATTRIBUTES_TESTS_H
+#define EG_ATTRIBUTES_TESTS_H
 
 #include <QtDebug>
 
 #include "egGraphDatabase.h"
 
-class EgLocationTests
+class EgNamedAttributesTests
 {
 public:
 
     EgGraphDatabase graphDB;
     EgDataNodesType testDataNodes;
 
-    bool testCreateLocations();
+    bool testCreateAttributes();
 
-    bool testAddLocations();
+    bool testAddAttributes();
 
-    bool testLoadLocationsData();
+    bool testLoadAttributes();
 
     void testShowResult(bool res, const QString &theMessage)
     {
@@ -31,4 +31,4 @@ public:
     }
 };
 
-#endif // EGLOCATIONTESTS_H
+#endif // EG_ATTRIBUTES_TESTS_H

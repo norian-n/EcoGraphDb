@@ -7,16 +7,16 @@
  *
  */
 
-#include "egLocationTests.h"
+#include "egNamedAttributesTests.h"
 
-bool EgLocationTests::testCreateLocations()
+bool EgNamedAttributesTests::testCreateAttributes()
 {
     graphDB.CreateNodeType("locations", useLocations);
 
     graphDB.AddDataField("name");
     graphDB.AddDataField("status", isIndexed); // create index
 
-    graphDB.AddLocationField("imageType"); // x,y are default fields
+    graphDB.AddLocationField("imageType");
 
     graphDB.CommitNodeType();
 
@@ -27,7 +27,7 @@ bool EgLocationTests::testCreateLocations()
     return res;
 }
 
-bool EgLocationTests::testAddLocations()
+bool EgNamedAttributesTests::testAddAttributes()
 {
     EgDataNodeIDtype newID;
     QList<QVariant> addValues;
@@ -61,7 +61,7 @@ bool EgLocationTests::testAddLocations()
     return res;
 }
 
-bool EgLocationTests::testLoadLocationsData()
+bool EgNamedAttributesTests::testLoadAttributes()
 {
     graphDB.Connect();
 

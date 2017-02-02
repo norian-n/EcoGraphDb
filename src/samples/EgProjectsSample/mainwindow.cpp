@@ -64,29 +64,34 @@ void MainWindow::on_projectsButton_clicked()
 
 void MainWindow::FillTestData()
 {
-   /* Funcblocks.Connect(graphDB, "funcblocks");
+    QDir dir("");
 
-    Funcblocks.LoadAllData();
+    QStringList nameFilters;
 
-    Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 2);
-    Funcblocks.AddArrowLink("funcblocksTree", 2, Funcblocks, 3);
-    Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 4);
+    nameFilters  << "*.odf" << "*.odx" << "*.dat" << "*.ddt" << "*.dln" << "*.ent";
 
-    Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 1);
-    Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 2);
-    Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 3);
+    if (dir.exists("egdb"))
+    {
+        dir.setCurrent("egdb");
 
-    Funcblocks.StoreLinks();
+            // get filtered filenames
+        QStringList ent = dir.entryList(nameFilters);
+        // qDebug() << dir.entryList();
 
-    Projects.StoreLinks();
+            // remove files
+        foreach (const QString& str, ent)
+            dir.remove(str);
 
-    return;
-    */
+        dir.setCurrent("..");
+    }
 
+    // return; // FIXME STUB
 
 #define ADD_RECORD(values,dataNodesType) ins_values.clear(); ins_values << values; dataNodesType.AddDataNode(ins_values);
 
     QList<QVariant> ins_values;
+
+    graphDB.CreateEgDb();
 
     graphDB.CreateNodeType("statuses");
 
@@ -213,15 +218,13 @@ void MainWindow::FillTestData()
     graphDB.CommitNodeType();
 
         // add link type
-
-    graphDB.CreateLinksMetaInfo();
     graphDB.AddLinkType("funcblocksTree", "funcblocks", "funcblocks");
     graphDB.AddLinkType("projects_funcblocks", "projects", "funcblocks");
 
     graphDB.Connect();
 
     Funcblocks.Connect(graphDB, "funcblocks");
-    Projects.Connect(graphDB, "projects");
+    Projects.getMyLinkTypes(); // why explicitly (?)
 
     Funcblocks.GUI.AddSimpleControlDesc("name",          "Project name",   120);
     /*
@@ -243,13 +246,11 @@ void MainWindow::FillTestData()
 
     Funcblocks.StoreData();
 
-    Funcblocks.Connect(graphDB, "funcblocks");
-
-    Funcblocks.LoadAllData();
-
     Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 2);
     Funcblocks.AddArrowLink("funcblocksTree", 2, Funcblocks, 3);
     // Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 4);
+
+    // Projects.LoadAllData();
 
     Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 1);
     Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 2);
@@ -258,7 +259,7 @@ void MainWindow::FillTestData()
 
     Funcblocks.StoreLinks();
 
-    Projects.StoreLinks();
+    // Projects.StoreLinks();
 
 }
 
