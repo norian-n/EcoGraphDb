@@ -73,7 +73,7 @@ bool EgLinksTests::testLinksTree()
 
     testCreateLinks();
 
-    bool res = (graphDB.linkTypes["linksTestTree"].loadedLinks.count() == 3);
+    bool res = (graphDB.linkTypes["linksTestTree"].linksStorage-> dataNodes.count() == 3);
 
     testShowResult(res, FNS);
 

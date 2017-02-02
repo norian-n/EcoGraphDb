@@ -106,7 +106,7 @@ int EgGraphDatabase::LoadLinksMetaInfo()
     // linksMetaInfo.index_tree = new EgIndexConditions(EgDataNodesLinkNamespace::egLinkTypesFileName);
     */
 
-    linksMetaInfo.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName);
+    linksMetaInfo.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName); // FIXME check
 
     linksMetaInfo.LoadAllData();
 

@@ -10,12 +10,6 @@
 #ifndef EGDATANODESLINK_H
 #define EGDATANODESLINK_H
 
-#include <QString>
-#include <QMap>
-#include <QVariant>
-#include <QFile>
-#include <QDir>
-
 #include "egCore.h"
 #include "indexes/egIndexesFiles.h"
 
@@ -31,41 +25,27 @@ class EgDataNodesType;
 class EgDataNodesLinkType
 {
 public:
-
-    // EgDataNodesType* firstNodesType;
-    // EgDataNodesType* secondNodesType;
-
     bool isConnected = false;
 
-    EgGraphDatabase* egDatabase;            // backlink to db
+    EgGraphDatabase* egDatabase;        // backlink to db
+    EgDataNodesType* linksStorage;      // data nodes for links info
 
-    EgIndexFiles<EgDataNodeIDtype>* fwdIndexFiles = nullptr;    // forward links index
-
-    EgDataNodesType* linksStorage;
-
-    QDir dir;
-
-    QString linkName;           // link file name
+    QString linkName;
 
     QString firstTypeName;
     QString secondTypeName;
 
-    QMultiMap<EgDataNodeIDtype, EgDataNodeIDtype>  addedLinks;
-    QMultiMap<EgDataNodeIDtype, EgDataNodeIDtype>  deletedLinks;
-
-    QMultiMap<EgDataNodeIDtype, EgDataNodeIDtype>  loadedLinks;
-
-    EgDataNodesLinkType(): egDatabase(nullptr), linksStorage(nullptr) {} // new EgDataNodesType()
+    EgDataNodesLinkType(): egDatabase(nullptr), linksStorage(nullptr) {}        // required by debug, don't use it
 
     EgDataNodesLinkType(EgGraphDatabase* theDatabase);
-    ~EgDataNodesLinkType() { if (fwdIndexFiles) delete fwdIndexFiles; }
+    ~EgDataNodesLinkType();
 
     int AddLink (EgDataNodeIDtype leftNodeID, EgDataNodeIDtype rightNodeID);
-    int DeleteLink (EgDataNodeIDtype linkNodeID);
+    int DeleteLink (EgDataNodeIDtype linkNodeID); // FIXME store linkNodeID or search
 
-    int LoadLinks();            // load data links from file or server
-    int StoreLinks();           // save data links to file or server
-    int ResolveLinks(EgDataNodesType& firstType, EgDataNodesType& secondType);         // move loaded links to data nodes if loaded
+    int LoadLinks();
+    int StoreLinks();
+    int ResolveLinks(EgDataNodesType& firstType, EgDataNodesType& secondType);  // move loaded links to data nodes if loaded
 
     int LoadLinkedNodes(EgDataNodeIDtype fromNodeID);
 

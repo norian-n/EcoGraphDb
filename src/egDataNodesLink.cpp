@@ -20,16 +20,11 @@ EgDataNodesLinkType::EgDataNodesLinkType(EgGraphDatabase *theDatabase):
 
 }
 
-/*
-int EgDataNodesLinkType::AddLink (EgDataNodeIDtype leftNodeID, EgDataNodeIDtype rightNodeID)
+EgDataNodesLinkType::~EgDataNodesLinkType()
 {
-    addedLinks.insert(leftNodeID, rightNodeID);
-
-    // qDebug() << linkName << ": link added " << leftNodeID << "to" <<  rightNodeID << FN;
-
-    return 0;
+    if (linksStorage)
+        delete linksStorage;
 }
-*/
 
 int EgDataNodesLinkType::AddLink (EgDataNodeIDtype leftNodeID, EgDataNodeIDtype rightNodeID)
 {
@@ -44,22 +39,6 @@ int EgDataNodesLinkType::AddLink (EgDataNodeIDtype leftNodeID, EgDataNodeIDtype 
     return 0;
 }
 
-/*
-int EgDataNodesLinkType::DeleteLink (EgDataNodeIDtype leftNodeID, EgDataNodeIDtype rightNodeID)
-{
-    // FIXME check
-
-    if (addedLinks.contains(leftNodeID, rightNodeID))
-        addedLinks.remove(leftNodeID, rightNodeID);
-    else
-        deletedLinks.insert(leftNodeID, rightNodeID);
-
-    // qDebug() << linkName << ": link deleted " << leftNodeID << "to" <<  rightNodeID << FN;
-
-    return 0;
-}
-*/
-
 int EgDataNodesLinkType::DeleteLink (EgDataNodeIDtype linkNodeID)
 {
         // FIXME check
@@ -68,131 +47,6 @@ int EgDataNodesLinkType::DeleteLink (EgDataNodeIDtype linkNodeID)
 
     return 0;
 }
-
-/*
-int EgDataNodesLinkType::UpdateLinkIndex(EgDataNodeIDtype ID, quint64 oldDataOffset, quint64 newDataOffset)
-{
-    if (! dir.exists("egdb"))
-        dir.mkdir("egdb");
-
-    dir.setCurrent("egdb");
-
-    // create index
-    if (! fwdIndexFiles)
-        fwdIndexFiles = new EgIndexFiles<EgDataNodeIDtype>(linkName + "_fwd");
-
-    fwdIndexFiles-> OpenIndexFilesToUpdate();
-
-
-        // add to index first ID and second offset
-    fwdIndexFiles-> theIndex = ID;
-    fwdIndexFiles-> dataOffset = oldDataOffset;
-    fwdIndexFiles-> newOffset = newDataOffset;
-
-    fwdIndexFiles->UpdateIndex(false);
-
-
-    fwdIndexFiles-> CloseIndexFiles();
-
-    dir.setCurrent("..");
-
-    return 0;
-}
-*/
-/*
-int EgDataNodesLinkType::StoreLinks()
-{
-        // FIXME delete links - refactor to data node type
-
-    EgDataNodesType*  secondType; // firstType, *
-    QFile dat_file;             // data file
-    QDataStream dat;
-
-    quint64 secondDataOffset;
-
-    if (addedLinks.isEmpty())
-        return 1;
-
-    if (! egDatabase-> connNodeTypes.contains(secondTypeName))
-    {
-        qDebug() << "NodeType not found: " << secondTypeName << FN;
-
-        return -1;
-    }
-
-    if (! dir.exists("egdb"))
-        dir.mkdir("egdb");
-
-    dir.setCurrent("egdb");
-
-    secondType = egDatabase-> connNodeTypes[secondTypeName];
-
-    dat_file.setFileName(linkName + ".dln");
-
-    if (!dat_file.open(QIODevice::ReadWrite)) // WriteOnly Append | QIODevice::Truncate
-    {
-        qDebug() << "can't open file " << linkName + ".dln" << FN;
-
-        dir.setCurrent("..");
-
-        return -1;
-    }
-        // create index
-    if (! fwdIndexFiles)
-        fwdIndexFiles = new EgIndexFiles<EgDataNodeIDtype>(linkName + "_fwd");
-
-    fwdIndexFiles-> OpenIndexFilesToUpdate();
-
-    dat.setDevice(&dat_file);
-
-    dat.device()-> seek(dat.device()-> size());
-
-        // walk add list
-    for (QMultiMap<EgDataNodeIDtype, EgDataNodeIDtype>::iterator addIter = addedLinks.begin(); addIter != addedLinks.end(); ++addIter)
-    {
-        // qDebug() << "Adding link" << (int) addIter.key() << (int) addIter.value() << " on offset" << hex << (int) dat.device()-> pos() << FN;
-
-        // primIndexFiles.data_offset = dat.device()-> pos();
-
-        dat << addIter.key();
-        dat << addIter.value();
-
-            // add forward index
-        if (secondType-> dataNodes.contains(addIter.value()))
-        {
-                // get second type data offset
-            secondDataOffset =   secondType-> dataNodes[addIter.value()].dataFileOffset;
-
-            // qDebug() << "theIndex = " << addIter.key() << " secondDataOffset = " << hex << (int) secondDataOffset << FN;
-
-                // add to index first ID and second offset
-            fwdIndexFiles-> theIndex = addIter.key();
-            fwdIndexFiles-> dataOffset = secondDataOffset;
-            fwdIndexFiles-> AddObjToIndex();
-        }
-        else
-        {
-            qDebug() << "Cant find secondType-> dataNodes of " << secondType-> metaInfo.typeName << " ID = " << addIter.value() << FN;
-            qDebug() << secondType-> dataNodes.keys() << FN;
-
-            dir.setCurrent("..");
-
-            return -1;
-        }
-
-    }
-
-    addedLinks.clear();
-
-    dat_file.close();
-
-    fwdIndexFiles-> CloseIndexFiles();
-
-    dir.setCurrent("..");
-
-    return 0;
-}
-*/
 
 int EgDataNodesLinkType::StoreLinks()
 {
@@ -224,147 +78,8 @@ int EgDataNodesLinkType::LoadLinks()
     return 0;
 }
 
-/*
-int EgDataNodesLinkType::LoadLinks()
-{
-     QFile dat_file;             // data file
-     QDataStream dat;
-
-     EgDataNodeIDtype leftNodeID;
-     EgDataNodeIDtype rightNodeID;
-
-     loadedLinks.clear();
-
-     dat_file.setFileName("egdb/" + linkName + ".dln");
-
-     if (!dat_file.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
-     {
-         // qDebug() << "can't open file " << linkName + ".dln" << FN;
-         return 1;
-     }
-
-     dat.setDevice(&dat_file);
-
-     while(! dat.atEnd())
-     {
-         dat >> leftNodeID;
-         dat >> rightNodeID;
-
-         loadedLinks.insert(leftNodeID, rightNodeID);
-     }
-
-     dat_file.close();
-
-     // qDebug() << "Link name: " << linkName << " , loadedLinks.count = " << loadedLinks.count() << FN;
-
-     // ResolveLinks(); // FIXME STUB
-
-     return 0;
-}
-
 int EgDataNodesLinkType::ResolveLinks(EgDataNodesType& firstType, EgDataNodesType& secondType)
 {
-    // EgDataNodesType* firstType, * secondType;
-    EgDataNodeIDtype fromNode, toNode;
-    EgExtendedLinkType fwdLink, backLink;
-    QList<EgExtendedLinkType> newLinks;
-    */
-
-/*
-        // find node types to resolve
-    if (! egDatabase-> connNodeTypes.contains(firstTypeName))
-    {
-        qDebug() << "NodeType not found: " << firstTypeName << FN;
-
-        return -1;
-    }
-
-    firstType = egDatabase-> connNodeTypes[firstTypeName];
-
-    if (! egDatabase-> connNodeTypes.contains(secondTypeName))
-    {
-        qDebug() << "NodeType not found: " << secondTypeName << FN;
-
-        return -1;
-    }
-
-    secondType = egDatabase-> connNodeTypes[secondTypeName];
-    */
-
-/*        // iterate loaded links
-    for (QMultiMap<EgDataNodeIDtype, EgDataNodeIDtype>::iterator Iter = loadedLinks.begin(); Iter != loadedLinks.end(); ++Iter)
-    {
-        // find first node
-
-        fromNode = Iter.key();
-        toNode = Iter.value();
-
-        // qDebug() << "From Node ID = " << fromNode << " To Node ID = " << toNode << FN;
-*/
-        /*if (firstType-> dataNodes.contains(Iter.key()))
-            qDebug() << "Node ID found: " << (int) Iter.key() << FN;
-
-        // find second node
-        if (secondType-> dataNodes.contains(Iter.value()))
-            qDebug() << "Node ID found: " << (int) Iter.value() << FN;*/
-
-                    // firstType-> dataNodes[Iter.key()]-> nodeLinks.outLinks.insert(linkName, newLinks);
-/*
-        if (firstType.dataNodes.contains(fromNode) && secondType.dataNodes.contains(toNode))
-        {
-                // fill new links info
-            fwdLink.dataNodeID = toNode;
-            fwdLink.dataNodePtr = &(secondType.dataNodes[toNode]);
-
-            backLink.dataNodeID = fromNode;
-            backLink.dataNodePtr = &(firstType.dataNodes[fromNode]);
-
-                // check/create links
-            if (! firstType.dataNodes[fromNode].nodeLinks)
-              firstType.dataNodes[fromNode].nodeLinks = new EgDataNodeLinks();
-
-            if (! secondType.dataNodes[toNode].nodeLinks)
-              secondType.dataNodes[toNode].nodeLinks = new EgDataNodeLinks();
-
-                // write fwd link to outLinks
-            if (! firstType.dataNodes[fromNode].nodeLinks-> outLinks.contains(linkName))
-                firstType.dataNodes[fromNode].nodeLinks-> outLinks[linkName].append(fwdLink);
-            else
-            {
-                newLinks.clear();
-                newLinks.append(fwdLink);
-
-                firstType.dataNodes[fromNode].nodeLinks-> outLinks.insert(linkName, newLinks);
-            }
-
-                // write back link to inLinks
-            if (secondType.dataNodes[toNode].nodeLinks-> inLinks.contains(linkName))
-                secondType.dataNodes[toNode].nodeLinks-> inLinks[linkName].append(backLink);
-            else
-            {
-                newLinks.clear();
-                newLinks.append(backLink);
-
-                secondType.dataNodes[toNode].nodeLinks-> inLinks.insert(linkName, newLinks);
-            }
-
-            // qDebug() << "Link " << linkName << " added " << firstType.metaInfo.typeName << " " << fromNode << " to "
-            //         << secondType.metaInfo.typeName << " " <<  toNode << FN;
-        }
-        else
-        {
-            // qDebug() << "Link " << linkName << " of " << firstType.metaInfo.typeName << " link NOT added for ID = " << fromNode << " to "
-            //         << secondType.metaInfo.typeName << " " << toNode << FN;
-        }
-
-
-    }
-    return 0;
-}
-*/
-int EgDataNodesLinkType::ResolveLinks(EgDataNodesType& firstType, EgDataNodesType& secondType)
-{
-    // EgDataNodesType* firstType, * secondType;
     EgDataNodeIDtype fromNode, toNode;
     EgExtendedLinkType fwdLink, backLink;
     QList<EgExtendedLinkType> newLinks;
@@ -378,15 +93,6 @@ int EgDataNodesLinkType::ResolveLinks(EgDataNodesType& firstType, EgDataNodesTyp
         toNode = Iter.value()["to_node_id"].toInt();
 
         // qDebug() << "From Node ID = " << fromNode << " To Node ID = " << toNode << FN;
-
-        /*if (firstType-> dataNodes.contains(Iter.key()))
-        qDebug() << "Node ID found: " << (int) Iter.key() << FN;
-
-    // find second node
-    if (secondType-> dataNodes.contains(Iter.value()))
-        qDebug() << "Node ID found: " << (int) Iter.value() << FN;*/
-
-        // firstType-> dataNodes[Iter.key()]-> nodeLinks.outLinks.insert(linkName, newLinks);
 
         if (firstType.dataNodes.contains(fromNode) && secondType.dataNodes.contains(toNode))
         {
@@ -439,18 +145,6 @@ int EgDataNodesLinkType::ResolveLinks(EgDataNodesType& firstType, EgDataNodesTyp
     }
     return 0;
 }
-
-/*
-int EgDataNodesLinkType::LoadLinkedNodes(QSet <quint64>& IndexOffsets, EgDataNodeIDtype fromNodeID)
-{
-    if (! fwdIndexFiles)
-        fwdIndexFiles = new EgIndexFiles<EgDataNodeIDtype>(linkName + "_fwd");
-
-    IndexOffsets.clear();
-
-    return fwdIndexFiles-> Load_EQ(IndexOffsets, fromNodeID);
-}
-*/
 
 int EgDataNodesLinkType::LoadLinkedNodes(EgDataNodeIDtype fromNodeID)
 {
