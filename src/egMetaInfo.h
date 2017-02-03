@@ -26,7 +26,7 @@ public:
     EgDataNodeIDtype nextObjID;         // next available data object ID
 
     bool useLocationsNodes;             // locations info in separate nodes type, hardlinked by ID
-    bool useNamedAttributes;
+    bool useNamedAttributes;            // named attributes/properties in separate nodes type
 
     EgGraphDatabase* myECoGraphDB;      // peer database
 

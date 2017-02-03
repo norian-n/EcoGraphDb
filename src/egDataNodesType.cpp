@@ -20,6 +20,7 @@ EgDataNodesType::EgDataNodesType():
     // locationNodesType(NULL),
     namedAttributesType(NULL),
     index_tree(NULL)
+    // entryNodesInst(new EgEntryNodes(this))
 {
     GUI.dataNodesType = this;
 }
@@ -74,7 +75,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
     {
         if (metaInfo.LocalLoadMetaInfo())
         {
-            if (! nodeTypeName.contains(EgDataNodesNamespace::egGUIfileName))
+            // if (! nodeTypeName.contains(EgDataNodesNamespace::egGUIfileName))
                 qDebug()  << "Can't load meta info of data nodes type " << nodeTypeName << FN;
 
             res = -1;
@@ -115,11 +116,11 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
         notFound.dataFields << QVariant("<Not found>");
 
         // connect to peer database controller
-    if (! res)
-        res = myDB.Attach(this);
+    // if (! res)
+    //    res = myDB.Attach(this);  // FIXME implement double-check files
 
     if (! res)
-        getMyLinkTypes(); // extract nodetype-specific link types from all link types
+        res = getMyLinkTypes(); // extract nodetype-specific link types from all link types
 
     if (! res)
         isConnected = true;

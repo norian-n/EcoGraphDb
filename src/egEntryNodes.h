@@ -20,14 +20,29 @@ class EgEntryNodes   // Data Objects head API
 {
 public:
 
-      QMap <EgDataNodeIDtype, EgDataNode*> entryNodes;   // aka "root" nodes
+    EgDataNodesType* nodesType = nullptr;           // entry nodes (aka "root" nodes) of this type
+    EgDataNodesType* entryStorage = nullptr;        // entry nodes info storage
 
-      QDir dir;
+    QMap <EgDataNodeIDtype, EgDataNode*> entryNodes;   // ??
 
-      int AddEntryNode(EgDataNodesType &egType, EgDataNode& entryNode);
+    QDir dir;
 
-      // int StoreEntryNodes(EgDataNodesType &egType);
-      int LoadEntryNodes(EgDataNodesType& egType);
+    EgEntryNodes() {}   // FIXME delete
+
+    EgEntryNodes(EgDataNodesType* theNodesType);
+    ~EgEntryNodes();
+
+    int AddEntryNode (EgDataNodeIDtype nodeID);
+    int DeleteEntryNode (EgDataNodeIDtype nodeID);
+
+    int LoadEntryNodes();
+    int StoreEntryNodes();
+
+
+    int AddEntryNode(EgDataNodesType &egType, EgDataNode& entryNode);
+
+    // int StoreEntryNodes(EgDataNodesType &egType);
+    int LoadEntryNodes(EgDataNodesType& egType);
 };
 
 

@@ -20,7 +20,7 @@ bool EgLocationTests::testCreateLocations()
 
     graphDB.CommitNodeType();
 
-    bool res = (graphDB.locationMetaInfo-> dataFields.count() == 3); // x,y,imageType
+    bool res = (graphDB.locationFieldsCreated == 3); // x,y,imageType
 
     testShowResult(res, FNS);
 

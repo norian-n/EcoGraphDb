@@ -23,9 +23,16 @@ EgDataFiles::~EgDataFiles()
 
 }
 
-bool EgDataFiles::CheckMetaInfoFile(EgDataNodeTypeMetaInfo& a_metaInfo)
+bool EgDataFiles::CheckMetaInfoFile()
 {
-    if (! dir.exists("egdb/" + a_metaInfo.typeName + ".ddt"))
+    if (! metaInfo)
+    {
+        qDebug()  << "metaInfo is not set properly " << FN;
+
+        return false;
+    }
+
+    if (! dir.exists("egdb/" + metaInfo-> typeName + ".ddt"))
     {
         // qDebug()  << "can't find the egdb dir " << FN;
         return false;

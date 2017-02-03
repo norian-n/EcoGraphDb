@@ -10,6 +10,8 @@
 #ifndef EG_GRAPH_DATABASE_H
 #define EG_GRAPH_DATABASE_H
 
+#include <QDir>
+
 #include "egMetaInfo.h"
 #include "egDataNodesType.h"
 
@@ -17,20 +19,25 @@ class EgGraphDatabase
 {
 public:
 
-    bool isConnected;
+    bool isConnected = false;
 
-    EgDataNodeTypeMetaInfo* metaInfo;
-    EgDataNodeTypeMetaInfo* locationMetaInfo;
-    EgDataNodeTypeMetaInfo* attributesMetaInfo;
+    int fieldsCreated = 0; // info for testing
+    int locationFieldsCreated = 0;
 
-    EgRemoteConnect*  connection;     // connection data (NULL means local files)
+    EgDataNodeTypeMetaInfo* metaInfo = nullptr;
+    EgDataNodeTypeMetaInfo* locationMetaInfo = nullptr;
+    EgDataNodeTypeMetaInfo* attributesMetaInfo = nullptr;
 
-    EgDataNodesType controlDescs;
+    EgRemoteConnect*  connection = nullptr;     // connection data (NULL means local files)
+
+    QDir dir;
+
+    // EgDataNodesType controlDescs;
 
     QMap<QString, EgDataNodesLinkType>  linkTypes;
     QMap<QString, EgDataNodesType*>  connNodeTypes;
 
-    EgGraphDatabase(): isConnected(false), metaInfo(NULL), locationMetaInfo(NULL), attributesMetaInfo(NULL), connection(NULL) {}
+    EgGraphDatabase() {} // : isConnected(false), metaInfo(nullptr), locationMetaInfo(nullptr), attributesMetaInfo(nullptr), connection(nullptr) {}
 
     ~EgGraphDatabase() { if (metaInfo) delete metaInfo; if (locationMetaInfo) delete locationMetaInfo; if (attributesMetaInfo) delete attributesMetaInfo; }
 

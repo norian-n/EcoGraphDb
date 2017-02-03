@@ -12,6 +12,41 @@
 
 #include <QFile>
 
+EgEntryNodes::EgEntryNodes(EgDataNodesType* theNodesType):
+    nodesType(theNodesType)
+  , entryStorage(new EgDataNodesType())
+{
+    //  metaInfo.myECoGraphDB
+}
+
+EgEntryNodes::~EgEntryNodes()
+{
+    if (entryStorage)
+        delete entryStorage;
+}
+
+int EgEntryNodes::AddEntryNode (EgDataNodeIDtype nodeID)
+{
+    QList<QVariant> myData;
+
+    myData << nodeID;
+
+    entryStorage-> AddHardLinked(myData, nodeID);
+
+    // qDebug() << "nodeID added " << nodeID << FN;
+
+    return 0;
+}
+
+int EgEntryNodes::DeleteEntryNode (EgDataNodeIDtype nodeID)
+{
+    entryStorage-> DeleteDataNode(nodeID);
+
+    return 0;
+}
+
+
+
 int EgEntryNodes::AddEntryNode(EgDataNodesType& egType, EgDataNode& entryNode)
 {
     QFile dat_file;             // data file

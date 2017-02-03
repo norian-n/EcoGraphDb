@@ -46,14 +46,14 @@ public:
 
     // EgDataNode tmpNode;                        // for data load and indexes update
 
-    EgDataFiles() : /*indexes(new EgIndex()),*/ FilterCallback(NULL) { /*indexes->LocalFiles = this;*/ }
+    EgDataFiles() : /*indexes(new EgIndex()),*/ FilterCallback(nullptr) { /*indexes->LocalFiles = this;*/ }
     // EgDataFiles(const EgDataNodesType* my_class);
 
     ~EgDataFiles();
 
     // void Init(QString& FileNameBase, EgFieldDescriptors* a_FD);
 
-    bool CheckMetaInfoFile(EgDataNodeTypeMetaInfo& a_metaInfo); // check if files exists and not empty
+    bool CheckMetaInfoFile(); // check if files exists and not empty
 
     int Init(EgDataNodeTypeMetaInfo& a_metaInfo); // set names and indexes control
 

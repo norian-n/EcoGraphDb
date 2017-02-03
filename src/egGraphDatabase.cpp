@@ -10,6 +10,187 @@
 #include "egGraphDatabase.h"
 #include "egDataNodesLink.h"
 
+int EgGraphDatabase::CreateEgDb()
+{
+        // check if metainfo exists
+    if (dir.exists(QString("egdb/") + EgDataNodesLinkNamespace::egLinkTypesFileName + ".ddt"))
+    {
+        return 1;
+    }
+
+    CreateNodeType(EgDataNodesLinkNamespace::egLinkTypesFileName);
+
+    AddDataField("name");
+    AddDataField("firstNodeType");
+    AddDataField("secondNodeType");
+
+    CommitNodeType();
+
+    return 0;
+}
+
+int EgGraphDatabase::CreateNodeType(QString typeName, bool addLocation, bool addAttributes)
+{
+        // check if node type exists
+    if (dir.exists("egdb/" + typeName + ".ddt"))
+    {
+        qDebug()  << "Data node type already exists: " << typeName << FN;
+
+        return 1;
+    }
+
+        // init all
+    if (metaInfo)
+    {
+        qDebug()  << "Warning: node type metainfo exists, CommitNodeType() wasn't called properly " << typeName << FN;
+        delete metaInfo;
+    }
+
+    fieldsCreated = 0;
+    locationFieldsCreated = 0;
+
+    metaInfo = new EgDataNodeTypeMetaInfo(typeName);
+
+    metaInfo-> useLocationsNodes = addLocation;
+    metaInfo-> useNamedAttributes = addAttributes;
+
+    if (locationMetaInfo)
+    {
+        delete locationMetaInfo;
+        locationMetaInfo = nullptr;
+    }
+
+    if (attributesMetaInfo)
+    {
+        delete attributesMetaInfo;
+        attributesMetaInfo = nullptr;
+    }
+
+    if (addLocation)
+        locationMetaInfo = new EgDataNodeTypeMetaInfo(typeName + EgDataNodesNamespace::egLocationFileName);
+
+    if (addAttributes)
+        attributesMetaInfo = new EgDataNodeTypeMetaInfo(typeName + EgDataNodesNamespace::egAttributesFileName);
+
+    return 0;
+}
+
+int EgGraphDatabase::AddDataField(QString fieldName, bool indexed)
+{
+    if (! metaInfo)
+    {
+        qDebug()  << "CreateNodeType() wasn't called, field not added " << fieldName << FN;
+        return -1;
+    }
+
+    metaInfo-> AddDataField(fieldName, indexed);
+
+    return 0;
+}
+
+int EgGraphDatabase::AddLocationField(QString fieldName, bool indexed)
+{
+    if (! locationMetaInfo)
+    {
+        qDebug()  << "CreateNodeType() wasn't called for node location field, it was not added " << fieldName << FN;
+        return -1;
+    }
+
+    locationMetaInfo-> AddDataField(fieldName, indexed);
+
+    return 0;
+}
+
+int EgGraphDatabase::CommitNodeType()
+{
+    if (! metaInfo)
+    {
+        qDebug()  << "CreateNodeType wasn't called" << FN;
+        return -1;
+    }
+
+    fieldsCreated = metaInfo->dataFields.count();
+
+    metaInfo-> LocalStoreMetaInfo();
+
+    if (locationMetaInfo)
+    {
+            // add default fields: x,y
+        locationMetaInfo-> AddDataField("x");
+        locationMetaInfo-> AddDataField("y");
+
+        locationFieldsCreated = locationMetaInfo->dataFields.count();
+
+        locationMetaInfo-> LocalStoreMetaInfo();
+
+        delete locationMetaInfo;
+        locationMetaInfo = nullptr;
+    }
+
+    if (attributesMetaInfo)
+    {
+            // add named attributes fields
+        attributesMetaInfo-> AddDataField("nodeid", isIndexed);
+        attributesMetaInfo-> AddDataField("key");
+        attributesMetaInfo-> AddDataField("value");
+
+        attributesMetaInfo-> LocalStoreMetaInfo();
+
+        delete attributesMetaInfo;
+        attributesMetaInfo = nullptr;
+    }
+
+    if (metaInfo)
+    {
+        delete metaInfo;
+        metaInfo = nullptr;
+    }
+
+    return 0;
+}
+
+int  EgGraphDatabase::AddLinkType(QString linkName, QString firstDataNodeType, QString secondDataNodeType)
+{
+    QList<QVariant> addValues;
+    EgDataNodesType linksMetaInfo; // == LinkTypes
+
+    if (linksMetaInfo.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName))
+    {
+        qDebug()  << "CreateEgDb wasn't called, aborting" << FN;
+        return -1;
+    }
+
+        // FIXME - check if link name exists
+
+    linksMetaInfo.LoadAllData();
+
+    linkTypes.clear();
+
+    for (QMap<EgDataNodeIDtype, EgDataNode>::iterator nodesIter = linksMetaInfo.dataNodes.begin(); nodesIter != linksMetaInfo.dataNodes.end(); ++nodesIter)
+    {
+        if(nodesIter.value()["name"].toString() == linkName)
+        {
+            qDebug()  << "Link name alredy exists: " << linkName << FN;
+            return 1;
+        }
+    }
+
+    CreateNodeType(linkName + EgDataNodesLinkNamespace::egLinkFileNamePostfix);
+
+    AddDataField("from_node_id", isIndexed);
+    AddDataField("to_node_id");                 // FIXME check if index required
+
+    CommitNodeType();
+
+    addValues << linkName << firstDataNodeType << secondDataNodeType;
+
+    linksMetaInfo.AddDataNode(addValues);
+    linksMetaInfo.StoreData();
+
+    return 0;
+
+}
+
 int EgGraphDatabase::Connect()
 {
     if (! isConnected)
@@ -33,7 +214,7 @@ int EgGraphDatabase::Attach(EgDataNodesType* nType)
     }
     */
 
-    if (! connNodeTypes.contains(nType-> metaInfo.typeName)) // FIXME multi instances
+    if (! connNodeTypes.contains(nType-> metaInfo.typeName)) // FIXME check multi instances
         connNodeTypes.insert(nType-> metaInfo.typeName, nType);
 
     return 0;
@@ -42,69 +223,7 @@ int EgGraphDatabase::Attach(EgDataNodesType* nType)
 int EgGraphDatabase::LoadLinksMetaInfo()
 {
     EgDataNodesLinkType* newLink;
-
-/*
-        // check if GUI descriptors exists - FIXME for server
-    QFile dat_file;
-    dat_file.setFileName(dataNodesType-> metaInfo.typeName + egGUIfileName + ".dat");
-
-    if (!dat_file.exists())
-    {
-        // qDebug() << FN << "file  doesn't exist" << dataNodesType-> metaInfo.typeName + egGUIfileName + ".dat";
-        return -1;
-    }
-*/
-
     EgDataNodesType linksMetaInfo;
-
-    /*
-    CreateNodeType(EgDataNodesLinkNamespace::egLinkTypesFileName);
-
-    AddDataField("name");
-    AddDataField("firstNodeType");
-    AddDataField("secondNodeType");
-
-    linksMetaInfo.metaInfo = *metaInfo;
-
-    if (! linksMetaInfo.LocalFiles-> CheckMetaInfoFile(*metaInfo))  // FIXME server
-        return -1; // no data found
-
-    linksMetaInfo.LocalFiles-> Init(*metaInfo);
-
-    linksMetaInfo.index_tree = new EgIndexConditions(EgDataNodesLinkNamespace::egLinkTypesFileName);
-
-
-
-    if (linksMetaInfo.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName))
-    {
-        qDebug()  << "No links found " << linksMetaInfo.metaInfo.typeName << FN;
-        return 1;
-    }
-
-        */
-
-    // int res = 0;
-
-    /*
-    linksMetaInfo.metaInfo.myECoGraphDB = this;
-    linksMetaInfo.metaInfo.typeName = EgDataNodesLinkNamespace::egLinkTypesFileName;
-    // connection = server;
-
-    if (! linksMetaInfo.LocalFiles-> CheckMetaInfoFile(linksMetaInfo.metaInfo))  // FIXME server
-    {
-        qDebug()  << "Can't load linksMetaInfo " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
-        return -1;
-    }
-
-    if (linksMetaInfo.metaInfo.LocalLoadMetaInfo())
-    {
-        qDebug()  << "Can't load linksMetaInfo " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
-        return -1;
-    }
-
-    linksMetaInfo.LocalFiles-> Init(linksMetaInfo.metaInfo);
-    // linksMetaInfo.index_tree = new EgIndexConditions(EgDataNodesLinkNamespace::egLinkTypesFileName);
-    */
 
     linksMetaInfo.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName); // FIXME check
 
@@ -128,212 +247,6 @@ int EgGraphDatabase::LoadLinksMetaInfo()
     }
 
     return 0;
-}
-
-int EgGraphDatabase::CreateNodeType(QString typeName, bool addLocation, bool addAttributes)
-{
-    // FIXME check if node type exists
-
-    if (metaInfo)
-        delete metaInfo;
-
-    metaInfo = new EgDataNodeTypeMetaInfo(typeName);
-
-    metaInfo-> useLocationsNodes = addLocation;
-
-    if (locationMetaInfo)
-    {
-        delete locationMetaInfo;
-        locationMetaInfo = NULL;
-    }
-
-    if (attributesMetaInfo)
-    {
-        delete attributesMetaInfo;
-        attributesMetaInfo = NULL;
-    }
-
-    if (addLocation)
-        locationMetaInfo = new EgDataNodeTypeMetaInfo(typeName + EgDataNodesNamespace::egLocationFileName);
-
-    if (addAttributes)
-        attributesMetaInfo = new EgDataNodeTypeMetaInfo(typeName + EgDataNodesNamespace::egAttributesFileName);
-
-    return 0;
-}
-
-int EgGraphDatabase::AddDataField(QString fieldName, bool indexed)
-{
-    if (! metaInfo)
-    {
-        qDebug()  << "CreateNodeType wasn't called" << FN;
-        return -1;
-    }
-
-    metaInfo-> AddDataField(fieldName, indexed);
-
-    return 0;
-}
-
-int EgGraphDatabase::AddLocationField(QString fieldName, bool indexed)
-{
-    if (! locationMetaInfo)
-    {
-        qDebug()  << "CreateNodeType wasn't called for node location, call it properly" << FN;
-        return -1;
-    }
-
-    locationMetaInfo-> AddDataField(fieldName, indexed);
-
-    return 0;
-}
-
-int EgGraphDatabase::CommitNodeType()
-{
-    if (! metaInfo)
-    {
-        qDebug()  << "CreateNodeType wasn't called" << FN;
-        return -1;
-    }
-
-    metaInfo-> LocalStoreMetaInfo();
-
-    if (locationMetaInfo)
-    {
-            // add default fields: x,y
-        locationMetaInfo-> AddDataField("x");
-        locationMetaInfo-> AddDataField("y");
-
-        locationMetaInfo-> LocalStoreMetaInfo();
-    }
-
-    if (attributesMetaInfo)
-    {
-            // add named attributes fields
-        attributesMetaInfo-> AddDataField("nodeid", isIndexed);
-        attributesMetaInfo-> AddDataField("key");
-        attributesMetaInfo-> AddDataField("value");
-
-        attributesMetaInfo-> LocalStoreMetaInfo();
-    }
-
-    return 0;
-}
-
-/*
-int EgGraphDatabase::CreateControlDescs()
-{
-    if (! metaInfo)
-    {
-        qDebug()  << "CreateNodeType wasn't called" << FN;
-        return -1;
-    }
-
-    EgDataNodeTypeMetaInfo controlDescMetaInfo(metaInfo-> typeName + EgDataNodesGUInamespace::egGUIfileName);
-
-    controlDescMetaInfo.AddDataField("name");
-    controlDescMetaInfo.AddDataField("label");
-    controlDescMetaInfo.AddDataField("width");
-
-        // store meta-info
-    controlDescMetaInfo.LocalStoreMetaInfo();
-
-    return 0;
-}
-
-int  EgGraphDatabase::AddSimpleControlDesc(QString fieldName, QString fieldLabel, int fieldWidth)
-{
-    QList<QVariant> addValues;
-
-    if (! metaInfo)
-    {
-        qDebug()  << "CreateNodeType wasn't called, aborting" << FN;
-        return -1;
-    }
-
-    if (controlDescs.Connect(*(metaInfo-> myECoGraphDB), metaInfo-> typeName + EgDataNodesGUInamespace::egGUIfileName))
-    {
-        qDebug()  << "CreateControlDescs wasn't called, aborting" << FN;
-        return -2;
-    }
-
-    addValues << fieldName << fieldLabel << fieldWidth;
-
-    controlDescs.AddDataNode(addValues);
-    // controlDescs.StoreData();
-
-    return 0;
-
-}
-
-int  EgGraphDatabase::CommitControlDesc()
-{
-    return controlDescs.StoreData();
-}
-*/
-
-int EgGraphDatabase::CreateEgDb()
-{
-    // check if metainfo exists
-
-    EgDataNodesType linksMetaInfo;
-
-    linksMetaInfo.metaInfo.myECoGraphDB = this;
-    linksMetaInfo.metaInfo.typeName = EgDataNodesLinkNamespace::egLinkTypesFileName;
-    // connection = server;
-
-    if (linksMetaInfo.LocalFiles-> CheckMetaInfoFile(linksMetaInfo.metaInfo))  // FIXME server
-    {
-        // qDebug()  << "linksMetaInfo already exists: " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
-        return 1;
-    }
-
-    CreateNodeType(EgDataNodesLinkNamespace::egLinkTypesFileName);
-
-    AddDataField("name");
-    AddDataField("firstNodeType");
-    AddDataField("secondNodeType");
-
-    CommitNodeType();
-
-    return 0;
-}
-
-int  EgGraphDatabase::AddLinkType(QString linkName, QString firstDataNodeType, QString secondDataNodeType)
-{
-    QList<QVariant> addValues;
-    EgDataNodesType linksTypes;
-
-    /*
-    if (! metaInfo)
-    {
-        qDebug()  << "CreateLinksMetaInfo wasn't called, aborting" << FN;
-        return -1;
-    }
-    */
-
-    if (linksTypes.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName))
-    {
-        qDebug()  << "CreateLinksMetaInfo wasn't called, aborting" << FN;
-        return -1;
-    }
-
-        // FIXME - check if link name exists
-
-    CreateNodeType(linkName + EgDataNodesLinkNamespace::egLinkFileNamePostfix);
-
-    AddDataField("from_node_id", isIndexed);
-    AddDataField("to_node_id");                 // FIXME check if index required
-
-    CommitNodeType();
-
-    addValues << linkName << firstDataNodeType << secondDataNodeType;
-
-    linksTypes.AddDataNode(addValues);
-    linksTypes.StoreData();
-
-    return 0;
-
 }
 
 /*
