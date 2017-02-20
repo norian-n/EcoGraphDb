@@ -17,6 +17,14 @@
 
 #include "egCore.h"
 
+namespace EgDataNodesNamespace
+{
+    const char* const egGUIfileName("_egGUIcontrolDescriptors");
+    const char* const egLocationFileName("_egLocationNodes");
+    const char* const egAttributesFileName("_egNamedAttributes");
+    const char* const egEntryNodesFileName("_egEntryNodes");
+}
+
 static QVariant egNotFound("<Not found>");
 
 class EgDataNodeTypeMetaInfo;

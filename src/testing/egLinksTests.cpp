@@ -15,8 +15,17 @@ void EgLinksTests::testCreateNodes()
     // EgDataNodesType testDataNodes;
     QList<QVariant> addValues;
 
+    EgNodeTypeSettings typeSettings;
+
+    typeSettings.useLinks = true;
+
+
+    // graphDB.CreateNodeType("test");
+
+    graphDB.CreateNodeType("linksTest", typeSettings);
+
         // create nodes type
-    graphDB.CreateNodeType("linksTest");
+    // graphDB.CreateNodeType("linksTest");
 
     graphDB.AddDataField("name");
     graphDB.AddDataField("status", isIndexed); // create index
@@ -57,8 +66,8 @@ void EgLinksTests::testCreateLinks()
     testDataNodes.AddArrowLink("linksTestTree", 1, testDataNodes, 6);
     testDataNodes.AddArrowLink("linksTestTree", 4, testDataNodes, 7);
 
-    testDataNodes.StoreLinks();
-    testDataNodes.LoadLinks();
+    testDataNodes.StoreAllLinks();
+    testDataNodes.LoadAllLinks();
 }
 
 

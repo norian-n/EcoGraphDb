@@ -10,6 +10,21 @@
 #include "egGraphDatabase.h"
 #include "egDataNodesLink.h"
 
+EgGraphDatabase::~EgGraphDatabase()
+{
+    if (metaInfo)
+        delete metaInfo;
+    if (locationMetaInfo)
+        delete locationMetaInfo;
+    if (attributesMetaInfo)
+        delete attributesMetaInfo;
+    if (GUIcontrolsMetaInfo)
+        delete GUIcontrolsMetaInfo;
+    if (entryNodesMetaInfo)
+        delete entryNodesMetaInfo;
+}
+
+
 int EgGraphDatabase::CreateEgDb()
 {
         // check if metainfo exists
@@ -18,7 +33,9 @@ int EgGraphDatabase::CreateEgDb()
         return 1;
     }
 
-    CreateNodeType(EgDataNodesLinkNamespace::egLinkTypesFileName);
+    EgNodeTypeSettings typeSettings;
+
+    CreateNodeType(EgDataNodesLinkNamespace::egLinkTypesFileName, typeSettings);
 
     AddDataField("name");
     AddDataField("firstNodeType");
@@ -29,6 +46,65 @@ int EgGraphDatabase::CreateEgDb()
     return 0;
 }
 
+inline void EgGraphDatabase::ClearMetaInfo(EgDataNodeTypeMetaInfo* metaInfo)
+{
+    if (metaInfo)
+    {
+        delete metaInfo;
+        metaInfo = nullptr;
+    }
+}
+
+int EgGraphDatabase::CreateNodeType(QString typeName,  EgNodeTypeSettings& typeSettings)
+{
+        // check if node type exists
+    if (dir.exists("egdb/" + typeName + ".ddt"))
+    {
+        qDebug()  << "Data node type already exists: " << typeName << FN;
+
+        return 1;
+    }
+
+        // init all
+    if (metaInfo)
+    {
+        qDebug()  << "Warning: node type metainfo exists, CommitNodeType() wasn't called properly " << typeName << FN;
+        delete metaInfo;
+    }
+
+    fieldsCreated = 0;
+    locationFieldsCreated = 0;
+
+    metaInfo = new EgDataNodeTypeMetaInfo(typeName);
+
+        // store settings
+    metaInfo-> useEntryNodes = typeSettings.useEntryNodes;
+    metaInfo-> useLocation = typeSettings.useLocation;
+    metaInfo-> useNamedAttributes = typeSettings.useNamedAttributes;
+    metaInfo-> useLinks = typeSettings.useLinks;
+    metaInfo-> useGUIsettings = typeSettings.useGUIsettings;
+
+    ClearMetaInfo(GUIcontrolsMetaInfo);
+    ClearMetaInfo(entryNodesMetaInfo);
+    ClearMetaInfo(locationMetaInfo);
+    ClearMetaInfo(attributesMetaInfo);
+
+    if (typeSettings.useGUIsettings)
+        GUIcontrolsMetaInfo = new EgDataNodeTypeMetaInfo(typeName + EgDataNodesNamespace::egGUIfileName);
+
+    if (typeSettings.useEntryNodes)
+        entryNodesMetaInfo = new EgDataNodeTypeMetaInfo(typeName + EgDataNodesNamespace::egEntryNodesFileName);
+
+    if (typeSettings.useLocation)
+        locationMetaInfo = new EgDataNodeTypeMetaInfo(typeName + EgDataNodesNamespace::egLocationFileName);
+
+    if (typeSettings.useNamedAttributes)
+        attributesMetaInfo = new EgDataNodeTypeMetaInfo(typeName + EgDataNodesNamespace::egAttributesFileName);
+
+    return 0;
+}
+
+/*
 int EgGraphDatabase::CreateNodeType(QString typeName, bool addLocation, bool addAttributes)
 {
         // check if node type exists
@@ -51,7 +127,7 @@ int EgGraphDatabase::CreateNodeType(QString typeName, bool addLocation, bool add
 
     metaInfo = new EgDataNodeTypeMetaInfo(typeName);
 
-    metaInfo-> useLocationsNodes = addLocation;
+    metaInfo-> useLocation        = addLocation;
     metaInfo-> useNamedAttributes = addAttributes;
 
     if (locationMetaInfo)
@@ -74,6 +150,7 @@ int EgGraphDatabase::CreateNodeType(QString typeName, bool addLocation, bool add
 
     return 0;
 }
+*/
 
 int EgGraphDatabase::AddDataField(QString fieldName, bool indexed)
 {
@@ -112,6 +189,28 @@ int EgGraphDatabase::CommitNodeType()
     fieldsCreated = metaInfo->dataFields.count();
 
     metaInfo-> LocalStoreMetaInfo();
+
+    if (GUIcontrolsMetaInfo)
+    {
+        GUIcontrolsMetaInfo-> AddDataField("name");
+        GUIcontrolsMetaInfo-> AddDataField("label");
+        GUIcontrolsMetaInfo-> AddDataField("width");
+
+        GUIcontrolsMetaInfo-> LocalStoreMetaInfo();
+
+        delete GUIcontrolsMetaInfo;
+        GUIcontrolsMetaInfo = nullptr;
+    }
+
+    if (entryNodesMetaInfo)
+    {
+        entryNodesMetaInfo-> AddDataField("subgraphid");    // hard linked by node id, field is optional
+
+        entryNodesMetaInfo-> LocalStoreMetaInfo();
+
+        delete entryNodesMetaInfo;
+        entryNodesMetaInfo = nullptr;
+    }
 
     if (locationMetaInfo)
     {
@@ -160,12 +259,11 @@ int  EgGraphDatabase::AddLinkType(QString linkName, QString firstDataNodeType, Q
         return -1;
     }
 
-        // FIXME - check if link name exists
+    linkTypes.clear();
 
     linksMetaInfo.LoadAllData();
 
-    linkTypes.clear();
-
+            // check if link name exists
     for (QMap<EgDataNodeIDtype, EgDataNode>::iterator nodesIter = linksMetaInfo.dataNodes.begin(); nodesIter != linksMetaInfo.dataNodes.end(); ++nodesIter)
     {
         if(nodesIter.value()["name"].toString() == linkName)
@@ -175,7 +273,10 @@ int  EgGraphDatabase::AddLinkType(QString linkName, QString firstDataNodeType, Q
         }
     }
 
-    CreateNodeType(linkName + EgDataNodesLinkNamespace::egLinkFileNamePostfix);
+        // add new link type
+    EgNodeTypeSettings typeSettings;
+
+    CreateNodeType(linkName + EgDataNodesLinkNamespace::egLinkFileNamePostfix, typeSettings);
 
     AddDataField("from_node_id", isIndexed);
     AddDataField("to_node_id");                 // FIXME check if index required
@@ -193,14 +294,19 @@ int  EgGraphDatabase::AddLinkType(QString linkName, QString firstDataNodeType, Q
 
 int EgGraphDatabase::Connect()
 {
+    int res = 0;
+
     if (! isConnected)
     {
-       LoadLinksMetaInfo();
+        res = LoadLinksMetaInfo();   // 1 means empty meta, negative is error
+
+
+        // res could be error id reference, so no simple bool conversion
+        if (! res)
+            isConnected = true;
     }
 
-    isConnected = true;
-
-    return 0;
+    return res;
 }
 
 int EgGraphDatabase::Attach(EgDataNodesType* nType)
@@ -224,6 +330,13 @@ int EgGraphDatabase::LoadLinksMetaInfo()
 {
     EgDataNodesLinkType* newLink;
     EgDataNodesType linksMetaInfo;
+
+    if (! dir.exists("egdb/" + QString(EgDataNodesLinkNamespace::egLinkTypesFileName) + ".dat"))
+    {
+        qDebug()  << "Links meta info doesn't exist: " << EgDataNodesLinkNamespace::egLinkTypesFileName << ".dat" << FN;
+
+        return 1;
+    }
 
     linksMetaInfo.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName); // FIXME check
 

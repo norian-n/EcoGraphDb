@@ -46,12 +46,15 @@ int EgDataNodeTypeMetaInfo::LocalStoreMetaInfo()
     }
 
     dStream << nodesCount;  // data nodes (NOT field descriptors) count
-    dStream << nextObjID;
+    dStream << nextObjID;   // incremental counter
 
-    dStream << useLocationsNodes;
+    dStream << useEntryNodes;
+    dStream << useLocation;
     dStream << useNamedAttributes;
+    dStream << useLinks;
+    dStream << useGUIsettings;
 
-    dStream << dataFields;
+    dStream << dataFields;  // field descriptors
     dStream << indexedToOrder.keys();
 
     ddt_file.close();    
@@ -86,13 +89,16 @@ int EgDataNodeTypeMetaInfo::LocalLoadMetaInfo()
 
     Clear();
 
-    dStream >> nodesCount;  // data objects (NOT field descriptors) count
-    dStream >> nextObjID; // next_obj_id
+    dStream >> nodesCount;  // data nodes (NOT field descriptors) count
+    dStream >> nextObjID;   // incremental counter
 
-    dStream >> useLocationsNodes;
+    dStream >> useEntryNodes;
+    dStream >> useLocation;
     dStream >> useNamedAttributes;
+    dStream >> useLinks;
+    dStream >> useGUIsettings;
 
-    dStream  >> dataFields;
+    dStream  >> dataFields;  // field descriptors
     dStream  >> indexedFields;
 
     for (stringListIter = dataFields.begin(); stringListIter != dataFields.end(); stringListIter++)

@@ -23,7 +23,7 @@ public:
     EgDataNodesType* nodesType = nullptr;           // entry nodes (aka "root" nodes) of this type
     EgDataNodesType* entryStorage = nullptr;        // entry nodes info storage
 
-    QMap <EgDataNodeIDtype, EgDataNode*> entryNodes;   // ??
+    QMap <EgDataNodeIDtype, EgDataNode*> entryNodesMap;   // ??
 
     QDir dir;
 

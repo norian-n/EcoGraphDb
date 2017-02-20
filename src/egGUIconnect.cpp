@@ -21,13 +21,12 @@ EgBasicControlDesc::EgBasicControlDesc(EgDataNode &dataNode):
     controlDefWidth = dataNode["width"].toInt();
 }
 
-EgDataNodesGUIconnect::EgDataNodesGUIconnect():
-      dataNodesType(NULL)
-    , controlDescs(NULL)
-    , model_current_item(NULL)
-{ }
+EgDataNodesGUIsupport::EgDataNodesGUIsupport()
+{
 
-EgDataNodesGUIconnect::~EgDataNodesGUIconnect()
+}
+
+EgDataNodesGUIsupport::~EgDataNodesGUIsupport()
 {
     if (controlDescs)
         delete controlDescs;
@@ -40,7 +39,7 @@ void EgDataNodesGUIconnect::Init()
 }
 */
 
-int EgDataNodesGUIconnect::CreateDataNodesForControlDescs()
+int EgDataNodesGUIsupport::CreateDataNodesForControlDescs()
 {
     EgDataNodeTypeMetaInfo metaInfo(dataNodesType-> metaInfo.typeName + egGUIfileName);
 
@@ -54,7 +53,7 @@ int EgDataNodesGUIconnect::CreateDataNodesForControlDescs()
     return 0;
 }
 
-int EgDataNodesGUIconnect::LoadSimpleControlDesc()
+int EgDataNodesGUIsupport::LoadSimpleControlDesc()
 {
     EgBasicControlDesc newDesc;
 
@@ -106,7 +105,7 @@ int EgDataNodesGUIconnect::LoadSimpleControlDesc()
     return 0;
 }
 
-bool EgDataNodesGUIconnect::CheckLocalGUIFile()
+bool EgDataNodesGUIsupport::CheckLocalGUIFile()
 {
     QFile ddt_file;
 
@@ -121,7 +120,7 @@ bool EgDataNodesGUIconnect::CheckLocalGUIFile()
     return true;
 }
 
-int EgDataNodesGUIconnect::AddSimpleControlDesc(QString fieldName, QString fieldLabel, int fieldWidth)
+int EgDataNodesGUIsupport::AddSimpleControlDesc(QString fieldName, QString fieldLabel, int fieldWidth)
 {
     QList<QVariant> addValues;
 
@@ -141,7 +140,7 @@ int EgDataNodesGUIconnect::AddSimpleControlDesc(QString fieldName, QString field
     return 0;
 }
 
-int EgDataNodesGUIconnect::AddRowOfModel(QStandardItemModel* model, QList<QStandardItem *>& items) // add items to model
+int EgDataNodesGUIsupport::AddRowOfModel(QStandardItemModel* model, QList<QStandardItem *>& items) // add items to model
 {
      QStandardItem *item;
      QStandardItem *parentItem = model->invisibleRootItem();
@@ -164,7 +163,7 @@ int EgDataNodesGUIconnect::AddRowOfModel(QStandardItemModel* model, QList<QStand
     return 0;
 }
 
-int EgDataNodesGUIconnect::DeleteRowOfModel(QStandardItemModel* model)
+int EgDataNodesGUIsupport::DeleteRowOfModel(QStandardItemModel* model)
 {
     dataNodesType-> DeleteDataNode(model->item(model_current_row,0)-> data(data_id).toInt());
 
@@ -174,7 +173,7 @@ int EgDataNodesGUIconnect::DeleteRowOfModel(QStandardItemModel* model)
 }
 
 
-int EgDataNodesGUIconnect::ModifyRowOfModel(QStandardItemModel* model)
+int EgDataNodesGUIsupport::ModifyRowOfModel(QStandardItemModel* model)
 {
     if (model->item(model_current_row,0)-> data(data_status).toInt() == is_unchanged) // not added or already modified
         model->item(model_current_row,0)-> setData(QVariant(is_modified), data_status); // mark as modified
@@ -185,7 +184,7 @@ int EgDataNodesGUIconnect::ModifyRowOfModel(QStandardItemModel* model)
 }
 
 
-EgDataNodeIDtype EgDataNodesGUIconnect::GetIDByModel(QStandardItemModel* model)
+EgDataNodeIDtype EgDataNodesGUIsupport::GetIDByModel(QStandardItemModel* model)
 {
     if (! model->item(model_current_row,0))
         return 0;
@@ -193,7 +192,7 @@ EgDataNodeIDtype EgDataNodesGUIconnect::GetIDByModel(QStandardItemModel* model)
     return model->item(model_current_row,0)->data(data_id).toInt();
 }
 
-void EgDataNodesGUIconnect::SetModelHeaders(QStandardItemModel* model)
+void EgDataNodesGUIsupport::SetModelHeaders(QStandardItemModel* model)
 {
     int i = 0;
 
@@ -204,7 +203,7 @@ void EgDataNodesGUIconnect::SetModelHeaders(QStandardItemModel* model)
     }
 }
 
-void EgDataNodesGUIconnect::SetViewWidths(QTableView* tableView)
+void EgDataNodesGUIsupport::SetViewWidths(QTableView* tableView)
 {
     int i = 0;
 
@@ -215,7 +214,7 @@ void EgDataNodesGUIconnect::SetViewWidths(QTableView* tableView)
     }
 }
 
-void EgDataNodesGUIconnect::SetViewWidths(QTreeView* treeView)
+void EgDataNodesGUIsupport::SetViewWidths(QTreeView* treeView)
 {
     int i = 0;
 
@@ -226,7 +225,7 @@ void EgDataNodesGUIconnect::SetViewWidths(QTreeView* treeView)
     }
 }
 
-void EgDataNodesGUIconnect::DataToModel(QStandardItemModel* model)
+void EgDataNodesGUIsupport::DataToModel(QStandardItemModel* model)
 {
     QList<QStandardItem*> items;
     // QStandardItem *parentItem = model-> invisibleRootItem();
@@ -261,7 +260,7 @@ void EgDataNodesGUIconnect::DataToModel(QStandardItemModel* model)
     }
 }
 
-inline QStandardItem* EgDataNodesGUIconnect::AddNodeToModelTree(QStandardItem* parentItem, EgDataNode* dataNode)
+inline QStandardItem* EgDataNodesGUIsupport::AddNodeToModelTree(QStandardItem* parentItem, EgDataNode* dataNode)
 {
     QList<QStandardItem*> items;
 
@@ -292,7 +291,7 @@ inline QStandardItem* EgDataNodesGUIconnect::AddNodeToModelTree(QStandardItem* p
     return items[0];
 }
 
-int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model, QString linkName)
+int EgDataNodesGUIsupport::DataToModelTree(QStandardItemModel* model, QString linkName)
 {
     // QList<QStandardItem*> items;
     TreeBuildNodeType buildNode, buildNode2;
@@ -306,8 +305,14 @@ int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model, QString li
     QStandardItem* parentItem = NULL;
     QStandardItem* newItem = NULL;
 
+    if (! dataNodesType-> entryNodes)   // no entry nodes option
+    {
+        qDebug()  << "Entry nodes not enabled for type: " << dataNodesType->metaInfo.typeName << FN;
+        return -1;
+    }
+
         // iterate entry nodes
-    for (QMap<EgDataNodeIDtype, EgDataNode*>::iterator Iter = dataNodesType-> entryNodesInst.entryNodes.begin(); Iter != dataNodesType-> entryNodesInst.entryNodes.end(); ++Iter)
+    for (QMap<EgDataNodeIDtype, EgDataNode*>::iterator Iter = dataNodesType->entryNodes-> entryNodesMap.begin(); Iter != dataNodesType->entryNodes-> entryNodesMap.end(); ++Iter)
     {
         // qDebug()  << "Entry node ID = " << Iter.key() << FN;
 
@@ -394,7 +399,7 @@ int EgDataNodesGUIconnect::DataToModelTree(QStandardItemModel* model, QString li
     return 0;
 }
 
-int EgDataNodesGUIconnect::DataFromModel(QStandardItemModel* model) // get from model
+int EgDataNodesGUIsupport::DataFromModel(QStandardItemModel* model) // get from model
 {
     EgDataNode tmpDataNode;
 
@@ -431,7 +436,7 @@ int EgDataNodesGUIconnect::DataFromModel(QStandardItemModel* model) // get from 
     return 0;
 }
 
-void EgDataNodesGUIconnect::FillComboBox(QComboBox* my_box)
+void EgDataNodesGUIsupport::FillComboBox(QComboBox* my_box)
 {
     my_box->clear();
     my_box->addItem(QString("<Not found>"), 0); // <Not found>
@@ -440,7 +445,7 @@ void EgDataNodesGUIconnect::FillComboBox(QComboBox* my_box)
            my_box->addItem(dataNodeIter.value().dataFields[0].toString(), QVariant(dataNodeIter.key())); // FIXME - field name
 }
 
-void EgDataNodesGUIconnect::SetComboBox(QComboBox* my_box, QVariant dobj_id)
+void EgDataNodesGUIsupport::SetComboBox(QComboBox* my_box, QVariant dobj_id)
 {
         // search object id in box data
     for (int index =0; index < my_box->count(); index++)
@@ -455,13 +460,13 @@ void EgDataNodesGUIconnect::SetComboBox(QComboBox* my_box, QVariant dobj_id)
     my_box->setCurrentIndex(0);
 }
 
-QVariant EgDataNodesGUIconnect::GetComboBoxID(QComboBox* my_box)
+QVariant EgDataNodesGUIsupport::GetComboBoxID(QComboBox* my_box)
 {
     return my_box->itemData(my_box->currentIndex());
 }
 
 
-int EgDataNodesGUIconnect::AddAutoSubstitute(const char* my_field, EgDataNodesType& ref_class, const char* ref_field)
+int EgDataNodesGUIsupport::AddAutoSubstitute(const char* my_field, EgDataNodesType& ref_class, const char* ref_field)
 {
     if (basicControlDescsOrder.contains(my_field) && ref_class.metaInfo.nameToOrder.contains(ref_field))
     {

@@ -14,47 +14,47 @@
 
 EgDataNodesLocation::EgDataNodesLocation(EgDataNodesType* thePrimaryNodesType):
     primaryNodesType(thePrimaryNodesType)
-  , locationNodesType(new EgDataNodesType())
+  , locationStorage(new EgDataNodesType())
 {}
 
 
 EgDataNodesLocation::~EgDataNodesLocation()
 {
-    if (locationNodesType)
-        delete locationNodesType;
+    if (locationStorage)
+        delete locationStorage;
 }
 
 int EgDataNodesLocation::AddLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype nodeID)
 {
-        return locationNodesType-> AddHardLinked(myData, nodeID);
+        return locationStorage-> AddHardLinked(myData, nodeID);
 }
 
 
 int EgDataNodesLocation::UpdateLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype nodeID)
 {
-        return locationNodesType-> UpdateDataNode(myData, nodeID);
+        return locationStorage-> UpdateDataNode(myData, nodeID);
 }
 
 int EgDataNodesLocation::DeleteLocationOfNode(EgDataNodeIDtype nodeID)
 {
-        return locationNodesType->DeleteDataNode(nodeID);
+        return locationStorage->DeleteDataNode(nodeID);
 }
 
 int EgDataNodesLocation::LoadLocationsData()
 {
     int res = 0;
 
-    locationNodesType-> ClearData();
+    locationStorage-> ClearData();
 
-    locationNodesType-> IndexOffsets.clear();
+    locationStorage-> IndexOffsets.clear();
 
     // for (QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodeIter = primaryNodesType-> dataNodes.begin(); dataNodeIter != primaryNodesType-> dataNodes.end(); ++dataNodeIter)
     for (auto dataNodeIter = primaryNodesType-> dataNodes.begin(); dataNodeIter != primaryNodesType-> dataNodes.end(); ++dataNodeIter)
-        locationNodesType-> LocalFiles-> primIndexFiles-> Load_EQ(locationNodesType->IndexOffsets, dataNodeIter.key());
+        locationStorage-> LocalFiles-> primIndexFiles-> Load_EQ(locationStorage->IndexOffsets, dataNodeIter.key());
 
 
-    if (! locationNodesType-> IndexOffsets.isEmpty())
-        res = locationNodesType-> LocalFiles-> LocalLoadData(locationNodesType-> IndexOffsets, locationNodesType-> dataNodes);
+    if (! locationStorage-> IndexOffsets.isEmpty())
+        res = locationStorage-> LocalFiles-> LocalLoadData(locationStorage-> IndexOffsets, locationStorage-> dataNodes);
 
 
     return res;

@@ -11,7 +11,23 @@
 
 bool EgNamedAttributesTests::testCreateAttributes()
 {
-    graphDB.CreateNodeType("locations", useLocations);
+    EgNodeTypeSettings typeSettings;
+
+    graphDB.CreateEgDb();
+
+        // test all options
+
+    /*
+    typeSettings.useLinks = true;
+    typeSettings.useGUIsettings = true;
+    typeSettings.useEntryNodes = true;
+    typeSettings.useLocation = true;
+    typeSettings.useNamedAttributes = true;
+    */
+
+    typeSettings.useLocation = true;
+
+    graphDB.CreateNodeType("locations", typeSettings);
 
     graphDB.AddDataField("name");
     graphDB.AddDataField("status", isIndexed); // create index
@@ -54,7 +70,7 @@ bool EgNamedAttributesTests::testAddAttributes()
 
     testDataNodes.LoadAllData();
 
-    bool res = (testDataNodes.locations->locationNodesType-> DataNodesCount() == 100);
+    bool res = (testDataNodes.locations->locationStorage-> DataNodesCount() == 100);
 
     testShowResult(res, FNS);
 
@@ -71,7 +87,7 @@ bool EgNamedAttributesTests::testLoadAttributes()
 
     // testDataNodes.LoadLocationsData();
 
-    bool res = (testDataNodes.locations->locationNodesType-> DataNodesCount() == 1);
+    bool res = (testDataNodes.locations->locationStorage-> DataNodesCount() == 1);
 
     testShowResult(res, FNS);
 

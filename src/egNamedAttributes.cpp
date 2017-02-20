@@ -8,19 +8,20 @@
  */
 
 #include "egNamedAttributes.h"
+#include "egDataNodesType.h"
 
 #include <QtDebug>
 
 EgNamedAttributes::EgNamedAttributes(EgDataNodesType* thePrimaryNodesType):
     primaryNodesType(thePrimaryNodesType)
-  , namedAttributesType(new EgDataNodesType())
+  , namedAttributesStorage(new EgDataNodesType())
 {}
 
 
 EgNamedAttributes::~EgNamedAttributes()
 {
-    if (namedAttributesType)
-        delete namedAttributesType;
+    if (namedAttributesStorage)
+        delete namedAttributesStorage;
 }
 
 int EgNamedAttributes::AddNamedAttribute(EgDataNodeIDtype nodeID, QString &name, QVariant &value)
@@ -29,7 +30,7 @@ int EgNamedAttributes::AddNamedAttribute(EgDataNodeIDtype nodeID, QString &name,
 
     myData << nodeID << name << value;
 
-    namedAttributesType-> AddDataNode(myData); // AddDataNode(EgDataNode& tmpObj)
+    namedAttributesStorage-> AddDataNode(myData); // AddDataNode(EgDataNode& tmpObj)
 
     return 0;
 }
@@ -41,14 +42,14 @@ int EgNamedAttributes::UpdateNamedAttribute(EgDataNodeIDtype nodeID, QString &na
 
     myData << nodeID << name << value;
 
-    namedAttributesType-> UpdateDataNode(myData, nodeID);
+    namedAttributesStorage-> UpdateDataNode(myData, nodeID);
 
     return 0;
 }
 
 int EgNamedAttributes::DeleteNamedAttribute(EgDataNodeIDtype nodeID)
 {
-    namedAttributesType->DeleteDataNode(nodeID);
+    namedAttributesStorage->DeleteDataNode(nodeID);
 
     return 0;
 }
@@ -57,19 +58,19 @@ int EgNamedAttributes::LoadNamedAttributes()
 {
     int res = 0;
 
-    namedAttributesType-> ClearData();
+    namedAttributesStorage-> ClearData();
 
-    namedAttributesType-> IndexOffsets.clear();
+    namedAttributesStorage-> IndexOffsets.clear();
 
     // for (QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodeIter = primaryNodesType-> dataNodes.begin(); dataNodeIter != primaryNodesType-> dataNodes.end(); ++dataNodeIter)
     for (auto dataNodeIter = primaryNodesType-> dataNodes.begin(); dataNodeIter != primaryNodesType-> dataNodes.end(); ++dataNodeIter)
         // namedAttributesType-> LocalFiles-> primIndexFiles-> Load_EQ(namedAttributesType->IndexOffsets, dataNodeIter.key()); // FIXME wrong index
 
-        namedAttributesType-> LocalFiles-> indexFiles["nodeid"]-> Load_EQ(namedAttributesType->IndexOffsets, dataNodeIter.key());
+        namedAttributesStorage-> LocalFiles-> indexFiles["nodeid"]-> Load_EQ(namedAttributesStorage->IndexOffsets, dataNodeIter.key());
 
 
-    if (! namedAttributesType-> IndexOffsets.isEmpty())
-        res = namedAttributesType-> LocalFiles-> LocalLoadData(namedAttributesType-> IndexOffsets, namedAttributesType-> dataNodes);
+    if (! namedAttributesStorage-> IndexOffsets.isEmpty())
+        res = namedAttributesStorage-> LocalFiles-> LocalLoadData(namedAttributesStorage-> IndexOffsets, namedAttributesStorage-> dataNodes);
 
 
     return res;

@@ -17,6 +17,8 @@ EgEntryNodes::EgEntryNodes(EgDataNodesType* theNodesType):
   , entryStorage(new EgDataNodesType())
 {
     //  metaInfo.myECoGraphDB
+
+    entryStorage-> metaInfo.useEntryNodes = false; // no recursion
 }
 
 EgEntryNodes::~EgEntryNodes()
@@ -33,6 +35,8 @@ int EgEntryNodes::AddEntryNode (EgDataNodeIDtype nodeID)
 
     entryStorage-> AddHardLinked(myData, nodeID);
 
+    entryStorage-> StoreData();
+
     // qDebug() << "nodeID added " << nodeID << FN;
 
     return 0;
@@ -42,19 +46,43 @@ int EgEntryNodes::DeleteEntryNode (EgDataNodeIDtype nodeID)
 {
     entryStorage-> DeleteDataNode(nodeID);
 
+    entryStorage-> StoreData();
+
     return 0;
 }
 
+int EgEntryNodes::LoadEntryNodes()
+{
+        // FIXME check if connected
 
+    entryStorage-> LoadAllData();
+
+    for (auto dataNodeIter = entryStorage-> dataNodes.begin(); dataNodeIter != entryStorage-> dataNodes.end(); ++dataNodeIter)
+    {
+        if (nodesType->dataNodes.contains(dataNodeIter.key()))
+            entryNodesMap.insert(dataNodeIter.key(), &(nodesType->dataNodes[dataNodeIter.key()]));
+        else
+            qDebug()  << "Can't find the data node ID of entry: " << dataNodeIter.key() << FN;
+    }
+
+    return 0;
+}
+
+int EgEntryNodes::StoreEntryNodes()
+{
+    entryStorage-> StoreData();
+
+    return 0;
+}
 
 int EgEntryNodes::AddEntryNode(EgDataNodesType& egType, EgDataNode& entryNode)
 {
     QFile dat_file;             // data file
     QDataStream dat;
 
-    if (! entryNodes.contains(entryNode.dataNodeID))
+    if (! entryNodesMap.contains(entryNode.dataNodeID))
     {
-        entryNodes.insert(entryNode.dataNodeID, &entryNode);
+        entryNodesMap.insert(entryNode.dataNodeID, &entryNode);
 
         if (! dir.exists("egdb"))
         {
@@ -168,7 +196,7 @@ int EgEntryNodes::LoadEntryNodes(EgDataNodesType& egType)
          dat >> entryNodeID;
 
          if (egType.dataNodes.contains(entryNodeID))
-             entryNodes.insert(entryNodeID, &(egType.dataNodes[entryNodeID]));
+             entryNodesMap.insert(entryNodeID, &(egType.dataNodes[entryNodeID]));
          else
          {
              // qDebug()  << "Entry node ID not found in egType.dataNodes " << entryNodeID << FN;

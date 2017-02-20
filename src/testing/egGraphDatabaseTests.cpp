@@ -163,8 +163,25 @@ bool EgGraphDatabaseTests::testEgDataNodesTypeGUIDescriptors(EgDataNodesType& te
 bool EgGraphDatabaseTests::testEgGraphDatabaseCreate()
 {
     EgGraphDatabase graphDB;
+    EgNodeTypeSettings typeSettings;
 
-    graphDB.CreateNodeType("test");
+    graphDB.CreateEgDb();
+
+        // test all options
+
+    /*
+    typeSettings.useLinks = true;
+    typeSettings.useGUIsettings = true;
+    typeSettings.useEntryNodes = true;
+    typeSettings.useLocation = true;
+    typeSettings.useNamedAttributes = true;
+    */
+
+    // graphDB.CreateNodeType("test");
+
+    typeSettings.useEntryNodes = true;
+
+    graphDB.CreateNodeType("test", typeSettings);
 
     graphDB.AddDataField("name");
     graphDB.AddDataField("status", isIndexed); // true for index
@@ -211,8 +228,8 @@ bool EgGraphDatabaseTests::testEgLinksBasics(EgDataNodesType& testDataNodes)
     testDataNodes.AddArrowLink("testTree", 1, testDataNodes, 6);
     testDataNodes.AddArrowLink("testTree", 4, testDataNodes, 7);
 
-    testDataNodes.StoreLinks();
-    testDataNodes.LoadLinks();
+    testDataNodes.StoreAllLinks();
+    testDataNodes.LoadAllLinks();
 
     // testDataNodes.metaInfo.myECoGraphDB-> StoreAllLinks();
     // testDataNodes.metaInfo.myECoGraphDB-> LoadAllLinks();
@@ -235,9 +252,12 @@ bool EgGraphDatabaseTests::testEgEntryNodes(EgDataNodesType& testDataNodes)
     testDataNodes.AddEntryNode(4);
 
     // testDataNodes.entryNodesInst.StoreEntryNodes(testDataNodes);
-    testDataNodes.entryNodesInst.LoadEntryNodes(testDataNodes);
+    // testDataNodes.entryNodesInst.LoadEntryNodes(testDataNodes);
+    testDataNodes.entryNodes-> LoadEntryNodes();
 
-    bool res = (testDataNodes.entryNodesInst.entryNodes.count() == 2); // (graphDB.metaInfo->dataFields.count() == 2) // && (testDataNodes.dataNodes.count() == 8))
+    // bool res = (testDataNodes.entryNodesInst.entryNodes.count() == 2); // (graphDB.metaInfo->dataFields.count() == 2) // && (testDataNodes.dataNodes.count() == 8))
+
+    bool res = (testDataNodes.entryNodes-> entryNodesMap.count() == 2);
 
     testShowResult(res, FNS);
 

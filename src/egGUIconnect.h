@@ -17,13 +17,6 @@
 
 #include "egDataNode.h"
 
-namespace EgDataNodesNamespace
-{
-    const char* const egGUIfileName("_egGUIcontrolDescriptors");
-    const char* const egLocationFileName("_egLocationNodes");
-    const char* const egAttributesFileName("_egNamedAttributes");
-}
-
 class EgDataNodesType;
 
 struct TreeBuildNodeType
@@ -50,22 +43,22 @@ public:
     ~EgBasicControlDesc() {}
 };
 
-class EgDataNodesGUIconnect   // Data Nodes GUI functionality
+class EgDataNodesGUIsupport   // Data Nodes GUI functionality
 {
 public:
 
-  EgDataNodesType* dataNodesType;   // external
+  EgDataNodesType* dataNodesType = nullptr;   // external
 
-  EgDataNodesType* controlDescs;    // my, new-delete
+  EgDataNodesType* controlDescs = nullptr;    // my, new-delete
 
-  qint32 model_current_row;         // current row of model savepoint
-  QStandardItem* model_current_item;
+  QStandardItem* model_current_item = nullptr;
+  qint32 model_current_row = 0;         // current row of model savepoint
 
   QList <EgBasicControlDesc> basicControlDescs;
   QHash <QString, EgBasicControlDesc*> basicControlDescsOrder;
 
-  EgDataNodesGUIconnect();
-  ~EgDataNodesGUIconnect();
+  EgDataNodesGUIsupport();
+  ~EgDataNodesGUIsupport();
 
   // void Init();
 

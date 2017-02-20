@@ -19,7 +19,7 @@ class EgDataNodesLocation
 public:
 
     EgDataNodesType* primaryNodesType;      // backlink
-    EgDataNodesType* locationNodesType;
+    EgDataNodesType* locationStorage;
 
     int AddLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype nodeID);
     int UpdateLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype nodeID);

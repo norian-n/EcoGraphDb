@@ -117,9 +117,9 @@ void FuncBlocksForm::loadFuncblocks()
     // Projects.LoadLinks();
 
     Funcblocks.LoadLinkedData("projects_funcblocks", projectID);
-    Funcblocks.LoadLink("funcblocksTree");
+    Funcblocks.LoadLinkType("funcblocksTree");
 
-    Projects.LoadLink("projects_funcblocks");
+    Projects.LoadLinkType("projects_funcblocks");
     Projects.myLinkTypes["projects_funcblocks"]-> ResolveLinks(Projects, Funcblocks);
 
     Funcblocks.myLinkTypes["funcblocksTree"]-> ResolveLinks(Funcblocks, Funcblocks);
@@ -226,7 +226,7 @@ void FuncBlocksForm::refreshView()
 
         }
 
-        Funcblocks.StoreLinks();
+        Funcblocks.StoreAllLinks();
 
             // show new item
         if (isTop)

@@ -10,7 +10,9 @@
 #ifndef NAMED_ATTRIBUTES_H
 #define NAMED_ATTRIBUTES_H
 
-#include "egDataNodesType.h"
+#include "egCore.h"
+
+class EgDataNodesType;
 
 class EgNamedAttributes
 {
@@ -19,7 +21,7 @@ public:
     // FIXME TODO not implemented some functionality
 
     EgDataNodesType* primaryNodesType;      // backlink
-    EgDataNodesType* namedAttributesType;
+    EgDataNodesType* namedAttributesStorage;
 
     EgDataNodeIDtype currentNodeId = 0;                     // last for GetNamedAttributes
     QMultiMap <QString, QVariant>  namedAttributesOfNode;   // temporary for GetNamedAttributes

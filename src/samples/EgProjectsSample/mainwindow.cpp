@@ -90,10 +90,11 @@ void MainWindow::FillTestData()
 #define ADD_RECORD(values,dataNodesType) ins_values.clear(); ins_values << values; dataNodesType.AddDataNode(ins_values);
 
     QList<QVariant> ins_values;
+    EgNodeTypeSettings typeSettings;
 
     graphDB.CreateEgDb();
 
-    graphDB.CreateNodeType("statuses");
+    graphDB.CreateNodeType("statuses", typeSettings);
 
     graphDB.AddDataField("status");
 
@@ -109,7 +110,7 @@ void MainWindow::FillTestData()
 
     Statuses.StoreData();
 
-    graphDB.CreateNodeType("owners");
+    graphDB.CreateNodeType("owners", typeSettings);
 
     graphDB.AddDataField("login");
     graphDB.AddDataField("name");
@@ -124,8 +125,12 @@ void MainWindow::FillTestData()
 
     Owners.StoreData();
 
+    typeSettings.useLinks = true;
+    typeSettings.useGUIsettings = true;
+    // typeSettings.useEntryNodes = true;
+
         // projects
-    graphDB.CreateNodeType("projects");
+    graphDB.CreateNodeType("projects", typeSettings);
 
     graphDB.AddDataField("name");
     graphDB.AddDataField("status", isIndexed);
@@ -204,7 +209,11 @@ void MainWindow::FillTestData()
 
         // funcblocks
 
-    graphDB.CreateNodeType("funcblocks");
+    typeSettings.useLinks = true;
+    typeSettings.useGUIsettings = true;
+    typeSettings.useEntryNodes = true;
+
+    graphDB.CreateNodeType("funcblocks", typeSettings);
 
     graphDB.AddDataField("name");
 /*
@@ -257,7 +266,7 @@ void MainWindow::FillTestData()
     Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 3);
     Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 4);
 
-    Funcblocks.StoreLinks();
+    Funcblocks.StoreAllLinks();
 
     // Projects.StoreLinks();
 

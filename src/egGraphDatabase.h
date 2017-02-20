@@ -25,10 +25,12 @@ public:
     int locationFieldsCreated = 0;
 
     EgDataNodeTypeMetaInfo* metaInfo = nullptr;
+    EgDataNodeTypeMetaInfo* GUIcontrolsMetaInfo  = nullptr;
+    EgDataNodeTypeMetaInfo* entryNodesMetaInfo  = nullptr;
     EgDataNodeTypeMetaInfo* locationMetaInfo = nullptr;
     EgDataNodeTypeMetaInfo* attributesMetaInfo = nullptr;
 
-    EgRemoteConnect*  connection = nullptr;     // connection data (NULL means local files)
+    EgRemoteConnect*  connection = nullptr;     // connection data (nullptr means local files)
 
     QDir dir;
 
@@ -39,14 +41,19 @@ public:
 
     EgGraphDatabase() {} // : isConnected(false), metaInfo(nullptr), locationMetaInfo(nullptr), attributesMetaInfo(nullptr), connection(nullptr) {}
 
-    ~EgGraphDatabase() { if (metaInfo) delete metaInfo; if (locationMetaInfo) delete locationMetaInfo; if (attributesMetaInfo) delete attributesMetaInfo; }
+    ~EgGraphDatabase(); //  { if (metaInfo) delete metaInfo; if (locationMetaInfo) delete locationMetaInfo; if (attributesMetaInfo) delete attributesMetaInfo; }
 
     int Connect();
     int Attach(EgDataNodesType* nType);
 
     int LoadLinksMetaInfo();
 
-    int CreateNodeType(QString typeName, bool addLocation = false, bool addAttributes = false);
+    inline void ClearMetaInfo(EgDataNodeTypeMetaInfo* metaInfo);
+
+    int CreateNodeType(QString typeName, EgNodeTypeSettings& typeSettings);
+
+    // int CreateNodeType(QString typeName, bool addLocation = false, bool addAttributes = false); // FIXME delete
+
     int AddDataField(QString fieldName, bool indexed = false);    // add field descriptor, no GUI control data
     int AddLocationField(QString fieldName, bool indexed = false);
     int CommitNodeType();

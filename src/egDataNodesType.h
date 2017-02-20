@@ -18,6 +18,7 @@
 #include "egDataNodesLink.h"
 #include "egEntryNodes.h"
 #include "egNodesLocation.h"
+#include "egNamedAttributes.h"
 
 class EgDataClient;     // server connection functionality
 
@@ -32,22 +33,25 @@ public:
 
     bool isConnected = false;
 
-    EgDataFiles*  LocalFiles;         // data files support functionality
-    EgDataClient* ConnectonClient;    // server connection client
-    EgRemoteConnect*  connection;     // connection data (NULL means local files)
+    EgRemoteConnect*  connection = nullptr;     // connection data (NULL means local files)
 
-    EgDataNodesLocation* locations;
+    EgDataFiles*  LocalFiles = nullptr;         // data files support functionality
+    EgDataClient* ConnectonClient = nullptr;    // server connection client
 
-    // EgDataNodesType* locationNodesType;
-    EgDataNodesType* namedAttributesType;
+
+    EgDataNodesLocation* locations = nullptr;
+    EgEntryNodes* entryNodes = nullptr;
+    EgDataNodesGUIsupport* GUIsupport = nullptr;
+    EgNamedAttributes* namedAttributes = nullptr;
+
+    EgDataNodesType* namedAttributesType; // FIXME remove
 
     EgIndexConditionsTree* index_tree;
 
     EgDataNodeTypeMetaInfo metaInfo;
 
-    EgEntryNodes entryNodesInst;
-
-    EgDataNodesGUIconnect GUI;
+    // EgEntryNodes entryNodesInst;    // FIXME remove
+    EgDataNodesGUIsupport GUI; // FIXME remove
 
     EgDataNode notFound;             // dummy node
 
@@ -78,6 +82,8 @@ public:
     int LoadAllData();            // select *
     int LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeID); // only linked nodes from spec node
     // int LoadLocationsData();      // FIXME private, if not load all
+
+    int AutoLoadAll();            // all existing info - locations, links, entry, GUI, etc.
 
     int StoreData();
 
@@ -115,11 +121,11 @@ public:
         // links
     int AddArrowLink(QString linkName, EgDataNodeIDtype fromNode, EgDataNodesType& toType, EgDataNodeIDtype toNode);
 
-    int StoreLinks();
-    int LoadLinks();
+    int StoreAllLinks();
+    int LoadAllLinks();
 
-    int StoreLink(QString linkName);
-    int LoadLink(QString linkName);
+    int StoreLinkType(QString linkName);
+    int LoadLinkType(QString linkName);
 
     int getMyLinkTypes();         // from myDB TODO
 

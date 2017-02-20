@@ -11,7 +11,13 @@
 
 bool EgLocationTests::testCreateLocations()
 {
-    graphDB.CreateNodeType("locations", useLocations);
+    EgNodeTypeSettings typeSettings;
+
+    typeSettings.useLocation = true;
+
+    graphDB.CreateNodeType("locations", typeSettings);
+
+    // graphDB.CreateNodeType("locations", useLocations);
 
     graphDB.AddDataField("name");
     graphDB.AddDataField("status", isIndexed); // create index
@@ -54,7 +60,7 @@ bool EgLocationTests::testAddLocations()
 
     testDataNodes.LoadAllData();
 
-    bool res = (testDataNodes.locations->locationNodesType-> DataNodesCount() == 100);
+    bool res = (testDataNodes.locations->locationStorage-> DataNodesCount() == 100);
 
     testShowResult(res, FNS);
 
@@ -71,7 +77,7 @@ bool EgLocationTests::testLoadLocationsData()
 
     // testDataNodes.LoadLocationsData();
 
-    bool res = (testDataNodes.locations->locationNodesType-> DataNodesCount() == 1);
+    bool res = (testDataNodes.locations->locationStorage-> DataNodesCount() == 1);
 
     testShowResult(res, FNS);
 

@@ -100,12 +100,10 @@ int main() // int argc, char *argv[])
     tmpRes = egDbTests.testEgGraphDatabaseCreate();
     res = res && tmpRes;
 
-    tmpRes = egDbTests.testEgLinksCreate();
-    res = res && tmpRes;
+    // tmpRes = egDbTests.testEgLinksCreate(); // special links module created
+    // res = res && tmpRes;
 
     graphDB.Connect();
-
-
 
     testEgDataNodesType.Connect(graphDB, "test");
 
@@ -127,11 +125,13 @@ int main() // int argc, char *argv[])
 
     // return 0; // FIXME STUB
 
-    tmpRes = egDbTests.testEgLinksBasics(testEgDataNodesType);
-    res = res && tmpRes;
+    // tmpRes = egDbTests.testEgLinksBasics(testEgDataNodesType);
+    // res = res && tmpRes;
 
     tmpRes = egDbTests.testEgEntryNodes(testEgDataNodesType);
     res = res && tmpRes;
+
+    // return 0; // FIXME STUB
 
     EgLinksTests linksTests;
 

@@ -13,14 +13,14 @@
 #include "egGraphDatabase.h"
 
 EgDataNodesType::EgDataNodesType():
+    connection(nullptr),
     LocalFiles(new EgDataFiles()),
-    ConnectonClient(NULL),
-    connection(NULL),
-    locations(NULL),
-    // locationNodesType(NULL),
-    namedAttributesType(NULL),
-    index_tree(NULL)
-    // entryNodesInst(new EgEntryNodes(this))
+    ConnectonClient(nullptr),
+    locations(nullptr),
+    entryNodes(nullptr),
+    // locationNodesType(nullptr),
+    // namedAttributesType(nullptr),
+    index_tree(nullptr)
 {
     GUI.dataNodesType = this;
 }
@@ -49,11 +49,13 @@ EgDataNodesType::~EgDataNodesType()
     }
     */
 
+    /*
     if (namedAttributesType)
     {
 
         delete namedAttributesType;
     }
+    */
 
     if (index_tree)
         delete index_tree;
@@ -63,9 +65,13 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
 {
     int res = 0;
 
-        // check if already connected
+        // check if already connected FIXME implement reconnect
     if (isConnected)
+    {
+        qDebug()  << "Warning: attempt to connect again data nodes type: " << nodeTypeName << FN;
+
         return 1;
+    }
 
     metaInfo.myECoGraphDB = &myDB;
     metaInfo.typeName = nodeTypeName;
@@ -84,21 +90,28 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
         LocalFiles-> Init(metaInfo);
         index_tree = new EgIndexConditionsTree();
 
-        if (metaInfo.useLocationsNodes)
+        if (metaInfo.useLocation)
         {
-            // qDebug()  << "Create location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
+            // qDebug()  << "Connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
 
             locations = new EgDataNodesLocation(this);
 
-            int locres = locations->locationNodesType-> Connect(myDB, nodeTypeName + EgDataNodesNamespace::egLocationFileName);
-            /*
-            locationNodesType = new EgDataNodesType();
-
-            int locres = locationNodesType-> Connect(myDB, nodeTypeName + EgDataNodesNamespace::egLocationFileName);
-            */
+            int locres = locations->locationStorage-> Connect(myDB, nodeTypeName + EgDataNodesNamespace::egLocationFileName);
 
             if (locres)
                 qDebug()  << "Can't load location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
+        }
+
+        if (metaInfo.useEntryNodes)
+        {
+            // qDebug()  << "Connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
+
+            entryNodes = new EgEntryNodes(this);
+
+            int entres = entryNodes->entryStorage-> Connect(myDB, nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName);
+
+            if (entres)
+                qDebug()  << "Can't connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
         }
     }
     else
@@ -282,7 +295,13 @@ void EgDataNodesType::ClearData()
         // clear data
     dataNodes.clear();
 
-    entryNodesInst.entryNodes.clear();
+        // FIXME - clear all support data
+
+    if (entryNodes)
+    {
+        entryNodes->entryStorage->ClearData();
+        entryNodes->entryNodesMap.clear();
+    }
 }
 
 int EgDataNodesType::LoadAllData()
@@ -292,7 +311,7 @@ int EgDataNodesType::LoadAllData()
     ClearData();
 
     if (locations)
-        locations->locationNodesType-> ClearData();
+        locations->locationStorage-> ClearData();
 
     IndexOffsets.clear();
 
@@ -304,12 +323,52 @@ int EgDataNodesType::LoadAllData()
     {
         res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
 
-
+        /*
         if (locations && ! res)
-            locations->locationNodesType-> LoadAllData();
+            locations->locationStorage-> LoadAllData();
 
         if (! res)
             res = entryNodesInst.LoadEntryNodes(*this);
+            */
+
+    }
+
+    return res;
+
+
+    // return LoadData();
+}
+
+int EgDataNodesType::AutoLoadAll()
+{
+    int res = 0;
+
+    ClearData();
+
+    if (locations)
+        locations->locationStorage-> ClearData();
+
+    IndexOffsets.clear();
+
+    LocalFiles-> primIndexFiles -> LoadAllDataOffsets(IndexOffsets);
+
+    // qDebug() << "IndexOffsets = " << IndexOffsets << FN;
+
+    if (! IndexOffsets.isEmpty())
+    {
+        res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
+
+            // load secondary info
+
+
+        if (locations && ! res)
+            locations->locationStorage-> LoadAllData();
+
+        if (entryNodes && ! res)
+            entryNodes->entryStorage-> LoadAllData();
+
+        if (namedAttributes && ! res)
+            namedAttributes->namedAttributesStorage-> LoadAllData();
 
     }
 
@@ -351,8 +410,9 @@ int EgDataNodesType::LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeI
     if (! IndexOffsets.isEmpty())
         res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
 
-    if (! res)
-        res = entryNodesInst.LoadEntryNodes(*this);
+    if (! res && entryNodes)
+        res = entryNodes->LoadEntryNodes();
+        // res = entryNodesInst.LoadEntryNodes(*this);
 
     return res;
 }
@@ -594,7 +654,7 @@ int EgDataNodesType::StoreData()
     updatedDataNodes.clear();
 
     if (locations)
-        locations->locationNodesType-> StoreData();
+        locations->locationStorage-> StoreData();
 
     if (ret_val)
        qDebug()  << "ERROR: got non-zero error code from callee" << FN;
@@ -624,10 +684,15 @@ int EgDataNodesType::LoadData(const EgIndexCondition &indexCondition)
     {
         res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
 
+            // FIXME special auto load
+
         if (locations)
             locations-> LoadLocationsData();
 
-        entryNodesInst.LoadEntryNodes(*this);
+        if (! res && entryNodes)
+            res = entryNodes->LoadEntryNodes();
+
+        // entryNodesInst.LoadEntryNodes(*this);
     }
 
     index_tree-> RecursiveClear(indexCondition.iTreeNode);
@@ -674,7 +739,7 @@ int EgDataNodesType::PrintObjData() // debug print
     return 0;
 }
 
-int EgDataNodesType::StoreLinks()
+int EgDataNodesType::StoreAllLinks()
 {
     for (QMap <QString, EgDataNodesLinkType*>::iterator linksIter = myLinkTypes.begin(); linksIter != myLinkTypes.end(); ++linksIter)
         linksIter.value()-> StoreLinks();
@@ -682,7 +747,7 @@ int EgDataNodesType::StoreLinks()
     return 0;
 }
 
-int EgDataNodesType::LoadLinks()
+int EgDataNodesType::LoadAllLinks()
 {
     for (QMap <QString, EgDataNodesLinkType*>::iterator linksIter = myLinkTypes.begin(); linksIter != myLinkTypes.end(); ++linksIter)
         linksIter.value()-> LoadLinks();
@@ -690,7 +755,7 @@ int EgDataNodesType::LoadLinks()
     return 0;
 }
 
-int EgDataNodesType::StoreLink(QString linkName)
+int EgDataNodesType::StoreLinkType(QString linkName)
 {
     if (! myLinkTypes.contains(linkName))
     {
@@ -704,7 +769,7 @@ int EgDataNodesType::StoreLink(QString linkName)
 }
 
 
-int EgDataNodesType::LoadLink(QString linkName)
+int EgDataNodesType::LoadLinkType(QString linkName)
 {
     if (! myLinkTypes.contains(linkName))
     {
@@ -721,8 +786,10 @@ int EgDataNodesType::AddEntryNode(EgDataNodeIDtype entryNodeID)
 {
     if (dataNodes.contains(entryNodeID))
     {
-        entryNodesInst.AddEntryNode(*this, dataNodes[entryNodeID]);
+        // entryNodesInst.AddEntryNode(*this, dataNodes[entryNodeID]);
         // entryNodesInst.StoreEntryNodes(*this);
+
+        entryNodes->AddEntryNode(entryNodeID);
 
         return 0;
     }

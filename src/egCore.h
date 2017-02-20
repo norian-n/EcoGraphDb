@@ -80,5 +80,18 @@ struct NamedAttribute   // data node add-on
     QVariant value;
 };
 
+class EgRemoteConnect;
+
+struct EgNodeTypeSettings
+{
+    bool useEntryNodes = false;         // start points for graph operations
+    bool useLocation = false;           // locations info in separate nodes type, hardlinked by ID
+    bool useNamedAttributes = false;    // named attributes/properties in separate nodes type
+    bool useLinks = false;
+    bool useGUIsettings = false;
+
+    EgRemoteConnect*  connection = nullptr;     // connection data (nullptr means local files)
+};
+
 
 #endif // EG_CORE_H
