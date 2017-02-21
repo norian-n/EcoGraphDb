@@ -261,7 +261,7 @@ int  EgGraphDatabase::AddLinkType(QString linkName, QString firstDataNodeType, Q
 
     linkTypes.clear();
 
-    linksMetaInfo.LoadAllData();
+    linksMetaInfo.LoadAllNodes();
 
             // check if link name exists
     for (QMap<EgDataNodeIDtype, EgDataNode>::iterator nodesIter = linksMetaInfo.dataNodes.begin(); nodesIter != linksMetaInfo.dataNodes.end(); ++nodesIter)
@@ -340,7 +340,7 @@ int EgGraphDatabase::LoadLinksMetaInfo()
 
     linksMetaInfo.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName); // FIXME check
 
-    linksMetaInfo.LoadAllData();
+    linksMetaInfo.LoadAllNodes();
 
     linkTypes.clear();
 

@@ -68,7 +68,7 @@ bool EgNamedAttributesTests::testAddAttributes()
 
     testDataNodes.StoreData();
 
-    testDataNodes.LoadAllData();
+    testDataNodes.LoadAllNodes();
 
     bool res = (testDataNodes.locations->locationStorage-> DataNodesCount() == 100);
 

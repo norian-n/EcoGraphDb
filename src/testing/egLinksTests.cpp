@@ -60,7 +60,7 @@ void EgLinksTests::testCreateLinks()
 
     testDataNodes.Connect(graphDB, "linksTest");
 
-    testDataNodes.LoadAllData();
+    testDataNodes.LoadAllNodes();
 
     testDataNodes.AddArrowLink("linksTestTree", 1, testDataNodes, 4);
     testDataNodes.AddArrowLink("linksTestTree", 1, testDataNodes, 6);
@@ -115,7 +115,7 @@ void EgLinksTests::testUpdateIndexedNodes()
 
     testDataNodes.Connect(graphDB, "linksTest");
 
-    testDataNodes.LoadAllData();
+    testDataNodes.LoadAllNodes();
 
     for (int i = 0; i < 200; i++)
     {

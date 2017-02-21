@@ -23,11 +23,9 @@ public:
     EgDataNodesType* nodesType = nullptr;           // entry nodes (aka "root" nodes) of this type
     EgDataNodesType* entryStorage = nullptr;        // entry nodes info storage
 
-    QMap <EgDataNodeIDtype, EgDataNode*> entryNodesMap;   // ??
+    QList <EgDataNodeIDtype> entryNodesList;   // fast search by ID ??
 
-    QDir dir;
-
-    EgEntryNodes() {}   // FIXME delete
+    EgEntryNodes() = delete;                        //  only bound to node type
 
     EgEntryNodes(EgDataNodesType* theNodesType);
     ~EgEntryNodes();
@@ -38,11 +36,6 @@ public:
     int LoadEntryNodes();
     int StoreEntryNodes();
 
-
-    int AddEntryNode(EgDataNodesType &egType, EgDataNode& entryNode);
-
-    // int StoreEntryNodes(EgDataNodesType &egType);
-    int LoadEntryNodes(EgDataNodesType& egType);
 };
 
 

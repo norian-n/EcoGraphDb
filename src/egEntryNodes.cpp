@@ -55,14 +55,14 @@ int EgEntryNodes::LoadEntryNodes()
 {
         // FIXME check if connected
 
-    entryStorage-> LoadAllData();
+    entryStorage-> LoadAllNodes();
 
     for (auto dataNodeIter = entryStorage-> dataNodes.begin(); dataNodeIter != entryStorage-> dataNodes.end(); ++dataNodeIter)
     {
         if (nodesType->dataNodes.contains(dataNodeIter.key()))
-            entryNodesMap.insert(dataNodeIter.key(), &(nodesType->dataNodes[dataNodeIter.key()]));
-        else
-            qDebug()  << "Can't find the data node ID of entry: " << dataNodeIter.key() << FN;
+            entryNodesList.append(dataNodeIter.key());
+        // else
+        //    qDebug()  << "Can't find the data node ID of entry: " << dataNodeIter.key() << FN;
     }
 
     return 0;
@@ -74,7 +74,7 @@ int EgEntryNodes::StoreEntryNodes()
 
     return 0;
 }
-
+/*
 int EgEntryNodes::AddEntryNode(EgDataNodesType& egType, EgDataNode& entryNode)
 {
     QFile dat_file;             // data file
@@ -118,6 +118,7 @@ int EgEntryNodes::AddEntryNode(EgDataNodesType& egType, EgDataNode& entryNode)
 
     return 0;
 }
+*/
 
 /*
 
@@ -161,6 +162,8 @@ int EgEntryNodes::StoreEntryNodes(EgDataNodesType& egType)
     return 0;
 }
 */
+
+/*
 
 int EgEntryNodes::LoadEntryNodes(EgDataNodesType& egType)
 {
@@ -210,4 +213,4 @@ int EgEntryNodes::LoadEntryNodes(EgDataNodesType& egType)
 
      return 0;
 }
-
+*/

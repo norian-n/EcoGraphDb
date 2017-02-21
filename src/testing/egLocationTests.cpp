@@ -58,7 +58,7 @@ bool EgLocationTests::testAddLocations()
 
     testDataNodes.StoreData();
 
-    testDataNodes.LoadAllData();
+    testDataNodes.AutoLoadAll();
 
     bool res = (testDataNodes.locations->locationStorage-> DataNodesCount() == 100);
 

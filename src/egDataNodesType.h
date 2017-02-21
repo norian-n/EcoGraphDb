@@ -69,6 +69,10 @@ public:
     // EgDataNodesType(const QString& dclass_name); // : DClassName(dclass_name) {};
     ~EgDataNodesType();
 
+        // no copy constructors
+    EgDataNodesType(const EgDataNodesType&) = delete;
+    EgDataNodesType& operator=(const EgDataNodesType&) = delete;
+
         // basic operations
 
         // connect to local connection or server, load fields and controls descriptions
@@ -79,7 +83,7 @@ public:
     int LoadData(QString a_FieldName, int an_oper, QVariant a_value); // single index condition ("odb_pit", EQ, projectID);
     int LoadData(const EgIndexCondition &indexCondition);             // any index condition IC("owner", EQ, 2) &&  IC("status", EQ, 3)
 
-    int LoadAllData();            // select *
+    int LoadAllNodes();            // no locations, links, entry, GUI, etc.
     int LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeID); // only linked nodes from spec node
     // int LoadLocationsData();      // FIXME private, if not load all
 
@@ -130,10 +134,6 @@ public:
     int getMyLinkTypes();         // from myDB TODO
 
     int AddEntryNode(EgDataNodeIDtype entryNodeID);
-
-private:    // no copy constructors
-    EgDataNodesType(const EgDataNodesType&);
-    EgDataNodesType& operator=(const EgDataNodesType&);
 
 };
 

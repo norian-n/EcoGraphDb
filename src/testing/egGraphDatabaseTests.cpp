@@ -103,7 +103,7 @@ bool EgGraphDatabaseTests::testEgDataNodesTypeDelNode(EgDataNodesType& testDataN
     testDataNodes.DeleteDataNode(5);
 
     testDataNodes.StoreData();
-    testDataNodes.LoadAllData();
+    testDataNodes.LoadAllNodes();
 
     bool res = ((testDataNodes.deletedDataNodes.count() == 0) && (testDataNodes.dataNodes.count() == 7));
 
@@ -121,7 +121,7 @@ bool EgGraphDatabaseTests::testEgDataNodesTypeUpdateNode(EgDataNodesType& testDa
     testDataNodes.UpdateDataNode(updValues, 3);
 
     testDataNodes.StoreData();
-    testDataNodes.LoadAllData();
+    testDataNodes.LoadAllNodes();
 
     bool res = ((testDataNodes.updatedDataNodes.count() == 0) && (testDataNodes.dataNodes.count() == 7));
 
@@ -133,7 +133,7 @@ bool EgGraphDatabaseTests::testEgDataNodesTypeUpdateNode(EgDataNodesType& testDa
 bool EgGraphDatabaseTests::testEgDataNodesTypeBasicLoadStore(EgDataNodesType& testDataNodes)
 {
     testDataNodes.StoreData();
-    testDataNodes.LoadAllData();
+    testDataNodes.LoadAllNodes();
 
     // qDebug() <<  "dataNodes count = " << testDataNodes.dataNodes.count() << FN;
 
@@ -257,7 +257,7 @@ bool EgGraphDatabaseTests::testEgEntryNodes(EgDataNodesType& testDataNodes)
 
     // bool res = (testDataNodes.entryNodesInst.entryNodes.count() == 2); // (graphDB.metaInfo->dataFields.count() == 2) // && (testDataNodes.dataNodes.count() == 8))
 
-    bool res = (testDataNodes.entryNodes-> entryNodesMap.count() == 2);
+    bool res = (testDataNodes.entryNodes-> entryNodesList.count() == 2);
 
     testShowResult(res, FNS);
 

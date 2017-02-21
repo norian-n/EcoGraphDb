@@ -57,14 +57,14 @@ ProjectsForm::ProjectsForm(QWidget *parent) :
     // Statuses.PrintFieldDesc();
 
     Statuses.Connect(graphDB, "statuses");
-    Statuses.LoadAllData();
+    Statuses.LoadAllNodes();
     // Statuses.PrintObjData();
 
     // Owners.Connect("owners", &test_server);
     //Owners.PrintFieldDesc();
 
     Owners.Connect(graphDB, "owners");
-    Owners.LoadAllData();
+    Owners.LoadAllNodes();
 
     // Owners.PrintObjData();
 
@@ -106,7 +106,7 @@ ProjectsForm::ProjectsForm(QWidget *parent) :
 
     */
 
-    Projects.LoadAllData();
+    Projects.LoadAllNodes();
 
     refreshView();
 

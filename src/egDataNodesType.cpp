@@ -68,7 +68,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
         // check if already connected FIXME implement reconnect
     if (isConnected)
     {
-        qDebug()  << "Warning: attempt to connect again data nodes type: " << nodeTypeName << FN;
+        // qDebug()  << "Warning: attempt to connect again data nodes type: " << nodeTypeName << FN;
 
         return 1;
     }
@@ -300,18 +300,21 @@ void EgDataNodesType::ClearData()
     if (entryNodes)
     {
         entryNodes->entryStorage->ClearData();
-        entryNodes->entryNodesMap.clear();
+        entryNodes->entryNodesList.clear();
     }
+
+    if (locations)
+        locations->locationStorage-> ClearData();
+
+    // if (namedAttributes)
+    //    namedAttributes->namedAttributesStorage-> ClearData();
 }
 
-int EgDataNodesType::LoadAllData()
+int EgDataNodesType::LoadAllNodes()
 {
     int res = 0;
 
     ClearData();
-
-    if (locations)
-        locations->locationStorage-> ClearData();
 
     IndexOffsets.clear();
 
@@ -322,21 +325,9 @@ int EgDataNodesType::LoadAllData()
     if (! IndexOffsets.isEmpty())
     {
         res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
-
-        /*
-        if (locations && ! res)
-            locations->locationStorage-> LoadAllData();
-
-        if (! res)
-            res = entryNodesInst.LoadEntryNodes(*this);
-            */
-
     }
 
     return res;
-
-
-    // return LoadData();
 }
 
 int EgDataNodesType::AutoLoadAll()
@@ -359,23 +350,18 @@ int EgDataNodesType::AutoLoadAll()
         res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
 
             // load secondary info
-
-
         if (locations && ! res)
-            locations->locationStorage-> LoadAllData();
+            locations->locationStorage-> LoadAllNodes();
 
         if (entryNodes && ! res)
-            entryNodes->entryStorage-> LoadAllData();
+            entryNodes->entryStorage-> LoadAllNodes();
 
         if (namedAttributes && ! res)
-            namedAttributes->namedAttributesStorage-> LoadAllData();
+            namedAttributes->namedAttributesStorage-> LoadAllNodes();
 
     }
 
     return res;
-
-
-    // return LoadData();
 }
 
 int EgDataNodesType::LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeID)

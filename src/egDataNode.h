@@ -49,19 +49,19 @@ class EgDataNode           // Data Object Instance 1
 {
 public:
 
-    EgDataNodeIDtype dataNodeID;
+    EgDataNodeIDtype dataNodeID = 0;
 
-    quint64 dataFileOffset;
+    quint64 dataFileOffset = 0;
 
-    bool isAdded;                         // new data node
+    bool isAdded = false;                         // new data node
 
-    EgDataNodeTypeMetaInfo* metaInfo;     // data type metainfo backlink
+    EgDataNodeTypeMetaInfo* metaInfo = nullptr;     // data type metainfo backlink
 
-    EgDataNodeLinks* nodeLinks;           // links to other nodes if required
+    EgDataNodeLinks* nodeLinks = nullptr;           // links to other nodes if required
 
     QList<QVariant> dataFields;           // data itself
 
-    EgDataNode(): dataNodeID(0), dataFileOffset(0), isAdded(false), metaInfo(NULL), nodeLinks(NULL) {}
+    EgDataNode() {}
     EgDataNode(EgDataNodeTypeMetaInfo& a_metaInfo);
 
     ~EgDataNode();

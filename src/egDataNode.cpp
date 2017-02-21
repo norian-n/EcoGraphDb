@@ -11,11 +11,7 @@
 #include "egMetaInfo.h"
 
 EgDataNode::EgDataNode(EgDataNodeTypeMetaInfo& a_metaInfo):
-    dataNodeID(0)
-  , dataFileOffset(0)
-  , isAdded(false)
-  , metaInfo(&a_metaInfo)
-  , nodeLinks(NULL)
+    metaInfo(&a_metaInfo)
 {
     for (int i = 0; i < a_metaInfo.dataFields.count(); i++)
         dataFields << QVariant();

@@ -73,7 +73,9 @@ int EgDataNodesLinkType::LoadLinks()
         isConnected = true;
     }
 
-    linksStorage-> LoadAllData();
+    linksStorage-> LoadAllNodes();
+
+    // qDebug() << linkName << " Links count: " << linksStorage-> dataNodes.count() << FN;
 
     return 0;
 }
@@ -87,8 +89,7 @@ int EgDataNodesLinkType::ResolveLinks(EgDataNodesType& firstType, EgDataNodesTyp
         // iterate loaded links
     for (auto Iter = linksStorage-> dataNodes.begin(); Iter != linksStorage-> dataNodes.end(); ++Iter)
     {
-        // find first node
-
+            // find first node
         fromNode = Iter.value()["from_node_id"].toInt();
         toNode = Iter.value()["to_node_id"].toInt();
 
@@ -96,44 +97,54 @@ int EgDataNodesLinkType::ResolveLinks(EgDataNodesType& firstType, EgDataNodesTyp
 
         if (firstType.dataNodes.contains(fromNode) && secondType.dataNodes.contains(toNode))
         {
-            // fill new links info
+                // fill new links info
             fwdLink.dataNodeID = toNode;
             fwdLink.dataNodePtr = &(secondType.dataNodes[toNode]);
+
+            if (! fwdLink.dataNodePtr-> nodeLinks)
+                fwdLink.dataNodePtr-> nodeLinks = new EgDataNodeLinks();
 
             backLink.dataNodeID = fromNode;
             backLink.dataNodePtr = &(firstType.dataNodes[fromNode]);
 
-            // check/create links
-            if (! firstType.dataNodes[fromNode].nodeLinks)
-                firstType.dataNodes[fromNode].nodeLinks = new EgDataNodeLinks();
+            if (! backLink.dataNodePtr-> nodeLinks)
+                backLink.dataNodePtr-> nodeLinks = new EgDataNodeLinks();
 
-            if (! secondType.dataNodes[toNode].nodeLinks)
-                secondType.dataNodes[toNode].nodeLinks = new EgDataNodeLinks();
+                // write fwd link to outLinks
+            if (backLink.dataNodePtr->nodeLinks-> outLinks.contains(linkName))
+            {
+                backLink.dataNodePtr->nodeLinks-> outLinks[linkName].append(fwdLink);
 
-            // write fwd link to outLinks
-            if (! firstType.dataNodes[fromNode].nodeLinks-> outLinks.contains(linkName))
-                firstType.dataNodes[fromNode].nodeLinks-> outLinks[linkName].append(fwdLink);
+                // qDebug() << "Out links added " << backLink.dataNodePtr->nodeLinks-> outLinks[linkName].count() << FN;
+            }
             else
             {
                 newLinks.clear();
                 newLinks.append(fwdLink);
 
-                firstType.dataNodes[fromNode].nodeLinks-> outLinks.insert(linkName, newLinks);
+                backLink.dataNodePtr->nodeLinks-> outLinks.insert(linkName, newLinks);
+
+                // qDebug() << "Out links created " << backLink.dataNodePtr->nodeLinks-> outLinks[linkName].count() << FN;
             }
 
-            // write back link to inLinks
-            if (secondType.dataNodes[toNode].nodeLinks-> inLinks.contains(linkName))
-                secondType.dataNodes[toNode].nodeLinks-> inLinks[linkName].append(backLink);
+                // write back link to inLinks
+            if (fwdLink.dataNodePtr->nodeLinks-> inLinks.contains(linkName))
+            {
+                fwdLink.dataNodePtr->nodeLinks-> inLinks[linkName].append(backLink);
+            }
             else
             {
                 newLinks.clear();
                 newLinks.append(backLink);
 
-                secondType.dataNodes[toNode].nodeLinks-> inLinks.insert(linkName, newLinks);
+                fwdLink.dataNodePtr->nodeLinks-> inLinks.insert(linkName, newLinks);
             }
 
             // qDebug() << "Link " << linkName << " added " << firstType.metaInfo.typeName << " " << fromNode << " to "
-            //         << secondType.metaInfo.typeName << " " <<  toNode << FN;
+            //          << secondType.metaInfo.typeName << " " <<  toNode << FN;
+
+            // qDebug() << "Nodes Type " << firstType.metaInfo.typeName << " out links count = " << backLink.dataNodePtr->nodeLinks-> outLinks[linkName].count() << FN;
+
         }
         else
         {
