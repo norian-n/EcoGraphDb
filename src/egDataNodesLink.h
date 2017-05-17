@@ -22,7 +22,19 @@ namespace EgDataNodesLinkNamespace
 class EgGraphDatabase;
 class EgDataNodesType;
 
+#ifdef EG_LIB_BUILD     // library build switch, define it in project or egCore.h
+
+#include "ecographdb_global.h"
+
+class ECOGRAPHDBSHARED_EXPORT EgDataNodesLinkType
+
+#else                   // not a library build
+
 class EgDataNodesLinkType
+
+#endif
+
+// class EgDataNodesLinkType
 {
 public:
     bool isConnected = false;

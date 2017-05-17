@@ -15,13 +15,15 @@
 using namespace EgDataNodesNamespace;
 
 EgBasicControlDesc::EgBasicControlDesc(EgDataNode &dataNode):
-    AutoSubstClass(NULL)
+    controlLabel(dataNode["label"].toString()),
+    controlDefWidth(dataNode["width"].toInt())
 {
-    controlLabel    = dataNode["label"].toString();
-    controlDefWidth = dataNode["width"].toInt();
+
 }
 
-EgDataNodesGUIsupport::EgDataNodesGUIsupport()
+EgDataNodesGUIsupport::EgDataNodesGUIsupport(EgDataNodesType* thePrimaryNodesType):
+    primaryNodesType(thePrimaryNodesType),
+    controlDescs (new EgDataNodesType())
 {
 
 }
@@ -38,7 +40,7 @@ void EgDataNodesGUIconnect::Init()
     LoadSimpleControlDesc();
 }
 */
-
+/*
 int EgDataNodesGUIsupport::CreateDataNodesForControlDescs()
 {
     EgDataNodeTypeMetaInfo metaInfo(dataNodesType-> metaInfo.typeName + egGUIfileName);
@@ -52,12 +54,11 @@ int EgDataNodesGUIsupport::CreateDataNodesForControlDescs()
 
     return 0;
 }
+*/
 
 int EgDataNodesGUIsupport::LoadSimpleControlDesc()
 {
     EgBasicControlDesc newDesc;
-
-    basicControlDescs.clear();
 
 /*
         // check if GUI descriptors exists - FIXME for server
@@ -70,14 +71,16 @@ int EgDataNodesGUIsupport::LoadSimpleControlDesc()
         return -1;
     }
 */
-    if (! controlDescs)
-        controlDescs = new EgDataNodesType();
+    // if (! controlDescs)
+    //    controlDescs = new EgDataNodesType();
 
-    if (controlDescs-> Connect(*(dataNodesType-> metaInfo.myECoGraphDB), dataNodesType-> metaInfo.typeName + egGUIfileName))
+    if (controlDescs-> Connect(*(primaryNodesType-> metaInfo.myECoGraphDB), primaryNodesType-> metaInfo.typeName + egGUIfileName))
     {
-            // qDebug()  << "No control descs for dataNodeType " << dataNodesType-> metaInfo.typeName << FN;
+            // qDebug()  << "No control descs for dataNodeType " << primaryNodesType-> metaInfo.typeName + egGUIfileName << FN;
             return 1;
     }
+
+    basicControlDescs.clear();
 
     controlDescs-> LoadAllNodes();
 
@@ -85,10 +88,10 @@ int EgDataNodesGUIsupport::LoadSimpleControlDesc()
 
     for (QMap<EgDataNodeIDtype, EgDataNode>::iterator nodesIter = controlDescs-> dataNodes.begin(); nodesIter != controlDescs-> dataNodes.end(); ++nodesIter)
     {
-        if (dataNodesType-> metaInfo.nameToOrder.contains(nodesIter.value()["name"].toString()))
+        if (primaryNodesType-> metaInfo.nameToOrder.contains(nodesIter.value()["name"].toString()))
         {
             newDesc = EgBasicControlDesc(nodesIter.value());
-            newDesc.fieldIndex = dataNodesType-> metaInfo.nameToOrder[nodesIter.value()["name"].toString()];
+            newDesc.fieldIndex = primaryNodesType-> metaInfo.nameToOrder[nodesIter.value()["name"].toString()];
             // newDesc.controlLabel = nodesIter.value()["label"].toString();
             // newDesc.controlDefWidth = nodesIter.value()["width"].toInt();
 
@@ -104,7 +107,7 @@ int EgDataNodesGUIsupport::LoadSimpleControlDesc()
 
     return 0;
 }
-
+/*
 bool EgDataNodesGUIsupport::CheckLocalGUIFile()
 {
     QFile ddt_file;
@@ -119,18 +122,19 @@ bool EgDataNodesGUIsupport::CheckLocalGUIFile()
 
     return true;
 }
+*/
 
 int EgDataNodesGUIsupport::AddSimpleControlDesc(QString fieldName, QString fieldLabel, int fieldWidth)
 {
     QList<QVariant> addValues;
 
-    if (! controlDescs)
-        controlDescs = new EgDataNodesType();
+    // if (! controlDescs)
+    //    controlDescs = new EgDataNodesType(); // FIXME constructor
 
-    if (! CheckLocalGUIFile())      // FIXME server
-        CreateDataNodesForControlDescs();
+    // if (! CheckLocalGUIFile())      // FIXME server
+    //    CreateDataNodesForControlDescs();
 
-    controlDescs-> Connect(*(dataNodesType-> metaInfo.myECoGraphDB), dataNodesType-> metaInfo.typeName + egGUIfileName);
+    controlDescs-> Connect(*(primaryNodesType-> metaInfo.myECoGraphDB), primaryNodesType-> metaInfo.typeName + egGUIfileName);
 
     addValues << fieldName << fieldLabel << fieldWidth;
 
@@ -165,7 +169,7 @@ int EgDataNodesGUIsupport::AddRowOfModel(QStandardItemModel* model, QList<QStand
 
 int EgDataNodesGUIsupport::DeleteRowOfModel(QStandardItemModel* model)
 {
-    dataNodesType-> DeleteDataNode(model->item(model_current_row,0)-> data(data_id).toInt());
+    primaryNodesType-> DeleteDataNode(model->item(model_current_row,0)-> data(data_id).toInt());
 
     model->removeRow(model_current_row);
 
@@ -234,7 +238,7 @@ void EgDataNodesGUIsupport::DataToModel(QStandardItemModel* model)
     model->clear();
     SetModelHeaders(model);  // fill headers
 
-    for (QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodeIter = dataNodesType-> dataNodes.begin(); dataNodeIter != dataNodesType-> dataNodes.end(); ++dataNodeIter)
+    for (QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodeIter = primaryNodesType-> dataNodes.begin(); dataNodeIter != primaryNodesType-> dataNodes.end(); ++dataNodeIter)
     {
         items.clear();
         for (QList<EgBasicControlDesc>::iterator curDesc = basicControlDescs.begin(); curDesc != basicControlDescs.end(); ++curDesc)
@@ -307,19 +311,19 @@ int EgDataNodesGUIsupport::DataToModelTree(QStandardItemModel* model, QString li
     QStandardItem* parentItem = NULL;
     QStandardItem* newItem = NULL;
 
-    if (! dataNodesType-> entryNodes)   // no entry nodes option
+    if (! primaryNodesType-> entryNodes)   // no entry nodes option
     {
-        qDebug()  << "Entry nodes not enabled for type: " << dataNodesType->metaInfo.typeName << FN;
+        qDebug()  << "Entry nodes not enabled for type: " << primaryNodesType->metaInfo.typeName << FN;
         return -1;
     }
 
         // iterate entry nodes
-    for (auto Iter = dataNodesType->entryNodes-> entryNodesList.begin(); Iter != dataNodesType->entryNodes-> entryNodesList.end(); ++Iter)
+    for (auto Iter = primaryNodesType->entryNodes-> entryNodesList.begin(); Iter != primaryNodesType->entryNodes-> entryNodesList.end(); ++Iter)
     {
         // qDebug()  << "Entry node ID = " << Iter.key() << FN;
 
             // check if node loaded
-        if (! dataNodesType-> dataNodes.contains(*Iter))
+        if (! primaryNodesType-> dataNodes.contains(*Iter))
         {
             // qDebug()  << "Entry node ID not found in dataNodesType-> dataNodes " << Iter.key() << FN;
             // qDebug()  << dataNodesType-> dataNodes.keys() << FN;
@@ -329,7 +333,7 @@ int EgDataNodesGUIsupport::DataToModelTree(QStandardItemModel* model, QString li
 
             // add entry node
         parentItem = topItem;
-        entryNodePtr = &((*dataNodesType)[*Iter]);
+        entryNodePtr = &((*primaryNodesType)[*Iter]);
         newItem = AddNodeToModelTree(parentItem, entryNodePtr); // Iter.value()); // dataNodesType[Iter.key()]
 
         if (! newItem)
@@ -424,15 +428,15 @@ int EgDataNodesGUIsupport::DataFromModel(QStandardItemModel* model) // get from 
             for (int column = 0; column < model-> columnCount(); ++column)
                 tmpDataNode.dataFields[basicControlDescs[column].fieldIndex] = model->item(row,column)->text();
 
-            dataNodesType-> AddDataNode(tmpDataNode);
+            primaryNodesType-> AddDataNode(tmpDataNode);
         }
         else if (model->item(row,0)->data(data_status).toInt() == is_modified) // updated data row
         {
                 // update object
             for (int column = 0; column < model-> columnCount(); ++column)
-                (*dataNodesType)[model->item(row,0)->data(data_id).toInt()].dataFields[basicControlDescs[column].fieldIndex] = model->item(row,column)->text();
+                (*primaryNodesType)[model->item(row,0)->data(data_id).toInt()].dataFields[basicControlDescs[column].fieldIndex] = model->item(row,column)->text();
 
-            dataNodesType-> UpdateDataNode(model->item(row,0)->data(data_id).toInt());
+            primaryNodesType-> UpdateDataNode(model->item(row,0)->data(data_id).toInt());
         }
     }
 
@@ -444,7 +448,7 @@ void EgDataNodesGUIsupport::FillComboBox(QComboBox* my_box)
     my_box->clear();
     my_box->addItem(QString("<Not found>"), 0); // <Not found>
 
-    for (QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodeIter = dataNodesType-> dataNodes.begin(); dataNodeIter != dataNodesType-> dataNodes.end(); ++dataNodeIter)
+    for (QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodeIter = primaryNodesType-> dataNodes.begin(); dataNodeIter != primaryNodesType-> dataNodes.end(); ++dataNodeIter)
            my_box->addItem(dataNodeIter.value().dataFields[0].toString(), QVariant(dataNodeIter.key())); // FIXME - field name
 }
 
@@ -479,7 +483,7 @@ int EgDataNodesGUIsupport::AddAutoSubstitute(const char* my_field, EgDataNodesTy
         return 0;
     }
 
-    qDebug() << "Bad field name, descs follow" << FN;
+    qDebug() << "Bad field name, descriptors follow" << FN;
     qDebug() << basicControlDescsOrder << FN;
     qDebug() << ref_class.metaInfo.nameToOrder << FN;
 

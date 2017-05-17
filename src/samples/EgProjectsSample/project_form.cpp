@@ -17,8 +17,8 @@ void ProjectForm::initProject()
 {
     theProject.metaInfo = &(Projects-> metaInfo);
         // init combos
-    Owners->  GUI.FillComboBox(ui->ownerBox);
-    Statuses-> GUI.FillComboBox(ui->statusBox);
+    Owners->  GUI-> FillComboBox(ui->ownerBox);
+    Statuses-> GUI-> FillComboBox(ui->statusBox);
 }
 
 void ProjectForm::openProject()
@@ -31,8 +31,8 @@ void ProjectForm::openProject()
         ui->nameEdit->setText((*Projects)[projectID]["name"].toString());
         ui->descEdit->setText((*Projects)[projectID]["description"].toString());
 
-        Owners-> GUI.SetComboBox(ui->ownerBox, (*Projects)[projectID]["owner"]);
-        Statuses-> GUI.SetComboBox(ui->statusBox, (*Projects)[projectID]["status"]);
+        Owners-> GUI-> SetComboBox(ui->ownerBox, (*Projects)[projectID]["owner"]);
+        Statuses-> GUI-> SetComboBox(ui->statusBox, (*Projects)[projectID]["status"]);
 
         ui->startDateEdit->setDate((*Projects)[projectID]["launch_date"].toDate());
         ui->completeDateEdit->setDate((*Projects)[projectID]["end_date"].toDate());
@@ -76,8 +76,8 @@ void ProjectForm::okExit()
         theProject["name"]        = ui->nameEdit->text();
         theProject["description"] = ui->descEdit->text();
 
-        theProject["status"]      = Statuses-> GUI.GetComboBoxID(ui->statusBox);
-        theProject["owner"]       = Owners-> GUI.GetComboBoxID(ui->ownerBox);
+        theProject["status"]      = Statuses-> GUI-> GetComboBoxID(ui->statusBox);
+        theProject["owner"]       = Owners-> GUI-> GetComboBoxID(ui->ownerBox);
 
         if (ui->startDateEdit->date() != QDate(2000,01,01))
             theProject["launch_date"] = ui->startDateEdit->date();
@@ -110,8 +110,8 @@ void ProjectForm::okExit()
         theProject["name"]        = ui->nameEdit->text();
         theProject["description"] = ui->descEdit->text();
 
-        theProject["status"]      = Statuses-> GUI.GetComboBoxID(ui->statusBox);
-        theProject["owner"]       = Owners-> GUI.GetComboBoxID(ui->ownerBox);
+        theProject["status"]      = Statuses-> GUI-> GetComboBoxID(ui->statusBox);
+        theProject["owner"]       = Owners-> GUI-> GetComboBoxID(ui->ownerBox);
 
         if (ui->startDateEdit->date() != QDate(2000,01,01))
             theProject["launch_date"] = ui->startDateEdit->date();

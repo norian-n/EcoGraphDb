@@ -34,10 +34,10 @@ public:
     int                 controlDefWidth;        // GUI control default width
     EgFieldIDtype       fieldIndex;             // index of corresponding field at
 
-    EgDataNodesType*    AutoSubstClass;         // auto/substitute link class
+    EgDataNodesType*    AutoSubstClass = nullptr;         // auto/substitute link class
     EgFieldIDtype       AutoSubstFieldIndex;    // auto/substitute link index
 
-    EgBasicControlDesc(): AutoSubstClass(NULL) {}
+    EgBasicControlDesc() {}
 
     EgBasicControlDesc(EgDataNode &dataNode);
     ~EgBasicControlDesc() {}
@@ -47,27 +47,25 @@ class EgDataNodesGUIsupport   // Data Nodes GUI functionality
 {
 public:
 
-  EgDataNodesType* dataNodesType = nullptr;   // external
+  EgDataNodesType* primaryNodesType = nullptr;  // peer nodes type
+  EgDataNodesType* controlDescs = nullptr;      // simple control descriptors storage
 
-  EgDataNodesType* controlDescs = nullptr;    // my, new-delete
-
-  QStandardItem* model_current_item = nullptr;
-  qint32 model_current_row = 0;         // current row of model savepoint
+  QStandardItem* model_current_item = nullptr;  // model item ptr
+  qint32 model_current_row = 0;                 // current row of model savepoint
 
   QList <EgBasicControlDesc> basicControlDescs;
-  QHash <QString, EgBasicControlDesc*> basicControlDescsOrder;
+  QMap <QString, EgBasicControlDesc*> basicControlDescsOrder;
 
-  EgDataNodesGUIsupport();
+  EgDataNodesGUIsupport() = delete;             // peer type required
+
+  EgDataNodesGUIsupport(EgDataNodesType *thePrimaryNodesType);
   ~EgDataNodesGUIsupport();
 
-  // void Init();
-
-
-  bool CheckLocalGUIFile();
-  int CreateDataNodesForControlDescs();
+  // bool CheckLocalGUIFile();
+  // int CreateDataNodesForControlDescs();
 
   int AddSimpleControlDesc(QString fieldName, QString fieldLabel, int fieldWidth);   // add default control to field descriptor
-  // int DeleteControlDesc(QString fieldName, QString fieldLabel, int fieldWidth);
+  // int DeleteControlDesc(QString fieldName);  // FIXME TODO
   // int UpdateControlDesc(QString fieldName, QString fieldLabel, int fieldWidth);
 
   int LoadSimpleControlDesc();

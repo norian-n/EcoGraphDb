@@ -13,16 +13,9 @@
 #include "egGraphDatabase.h"
 
 EgDataNodesType::EgDataNodesType():
-    connection(nullptr),
-    LocalFiles(new EgDataFiles()),
-    ConnectonClient(nullptr),
-    locations(nullptr),
-    entryNodes(nullptr),
-    // locationNodesType(nullptr),
-    // namedAttributesType(nullptr),
-    index_tree(nullptr)
+    LocalFiles (new EgDataFiles())
 {
-    GUI.dataNodesType = this;
+    // GUI.primaryNodesType = this;
 }
 
 EgDataNodesType::~EgDataNodesType()
@@ -102,6 +95,18 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
                 qDebug()  << "Can't load location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
         }
 
+        if (metaInfo.useNamedAttributes)
+        {
+            // qDebug()  << "Connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
+
+            namedAttributes = new EgNamedAttributes(this);
+
+            int attrres = namedAttributes->namedAttributesStorage-> Connect(myDB, nodeTypeName + EgDataNodesNamespace::egAttributesFileName);
+
+            if (attrres)
+                qDebug()  << "Can't load named attributes info " << nodeTypeName + EgDataNodesNamespace::egAttributesFileName << FN;
+        }
+
         if (metaInfo.useEntryNodes)
         {
             // qDebug()  << "Connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
@@ -113,12 +118,22 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
             if (entres)
                 qDebug()  << "Can't connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
         }
+
+        if (metaInfo.useGUIsettings)
+        {
+            GUI = new EgDataNodesGUIsupport(this);
+
+            int guires = GUI-> LoadSimpleControlDesc();
+
+            if (guires)
+                qDebug()  << "Can't load GUI settings of " << nodeTypeName << FN;
+        }
     }
     else
     {
         ConnectonClient= new EgDataClient(this);
 
-        // FIXME process server based version
+        // FIXME TODO process server based version
     }
 
         // init special data node
@@ -139,11 +154,6 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
         isConnected = true;
 
     return res;
-}
-
-int EgDataNodesType::getGUIinfo()
-{
-    return GUI.LoadSimpleControlDesc();
 }
 
 int EgDataNodesType::getMyLinkTypes()
@@ -192,7 +202,7 @@ EgDataNode& EgDataNodesType::operator [](EgDataNodeIDtype objID)
     }
 }
 
-int EgDataNodesType::AddArrowLink(QString linkName, EgDataNodeIDtype fromNode, EgDataNodesType &toType, EgDataNodeIDtype toNode)
+int EgDataNodesType::AddArrowLink(const QString& linkName, EgDataNodeIDtype fromNode, EgDataNodesType &toType, EgDataNodeIDtype toNode)
 {
 
     EgExtendedLinkType fwdLink, backLink;
@@ -330,7 +340,7 @@ int EgDataNodesType::LoadAllNodes()
     return res;
 }
 
-int EgDataNodesType::AutoLoadAll()
+int EgDataNodesType::AutoLoadAllData()
 {
     int res = 0;
 
@@ -515,6 +525,19 @@ int EgDataNodesType::AddHardLinked(QList<QVariant>& myData, EgDataNodeIDtype nod
 
     return 0;
 }
+
+int EgDataNodesType::AddLocation(QList<QVariant>& locationData, EgDataNodeIDtype nodeID)
+{
+    return locations-> AddLocation(locationData, nodeID);
+}
+
+
+int EgDataNodesType::GetLocation(QList<QVariant>& locationData, EgDataNodeIDtype nodeID)
+{
+    return locations-> GetLocation(locationData, nodeID);
+}
+
+
 /*
 int EgDataNodesType::AddLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype nodeID)
 {
@@ -642,6 +665,9 @@ int EgDataNodesType::StoreData()
     if (locations)
         locations->locationStorage-> StoreData();
 
+    if (namedAttributes)
+        namedAttributes->namedAttributesStorage-> StoreData();
+
     if (ret_val)
        qDebug()  << "ERROR: got non-zero error code from callee" << FN;
 
@@ -672,8 +698,11 @@ int EgDataNodesType::LoadData(const EgIndexCondition &indexCondition)
 
             // FIXME special auto load
 
-        if (locations)
-            locations-> LoadLocationsData();
+        if (! res && locations)
+            res = locations-> LoadLocationsData();
+
+        if (! res && namedAttributes)
+            res = namedAttributes-> LoadNamedAttributes();
 
         if (! res && entryNodes)
             res = entryNodes->LoadEntryNodes();

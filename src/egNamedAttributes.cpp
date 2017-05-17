@@ -24,7 +24,7 @@ EgNamedAttributes::~EgNamedAttributes()
         delete namedAttributesStorage;
 }
 
-int EgNamedAttributes::AddNamedAttribute(EgDataNodeIDtype nodeID, QString &name, QVariant &value)
+int EgNamedAttributes::AddNamedAttribute(EgDataNodeIDtype nodeID, const QString &name, const QVariant &value)
 {
     QList<QVariant> myData;
 
@@ -36,20 +36,24 @@ int EgNamedAttributes::AddNamedAttribute(EgDataNodeIDtype nodeID, QString &name,
 }
 
 
-int EgNamedAttributes::UpdateNamedAttribute(EgDataNodeIDtype nodeID, QString &name, QVariant &value)
+int EgNamedAttributes::UpdateNamedAttribute(EgDataNodeIDtype nodeID, const QString &name, QVariant &value)
 {
     QList<QVariant> myData;
 
     myData << nodeID << name << value;
+
+        // FIXME find attribute
 
     namedAttributesStorage-> UpdateDataNode(myData, nodeID);
 
     return 0;
 }
 
-int EgNamedAttributes::DeleteNamedAttribute(EgDataNodeIDtype nodeID)
+int EgNamedAttributes::DeleteNamedAttribute(EgDataNodeIDtype nodeID, const QString &name)
 {
-    namedAttributesStorage->DeleteDataNode(nodeID);
+    // FIXME find attribute
+
+    // namedAttributesStorage->DeleteDataNode(nodeID);
 
     return 0;
 }
@@ -74,4 +78,37 @@ int EgNamedAttributes::LoadNamedAttributes()
 
 
     return res;
+}
+
+
+/*
+    attributesMetaInfo-> AddDataField("nodeid", isIndexed);
+    attributesMetaInfo-> AddDataField("key");
+    attributesMetaInfo-> AddDataField("value");
+*/
+
+int EgNamedAttributes::ResolveNamedAttributes()
+{
+    attributesById.clear();
+
+        // QMap <EgDataNodeIDtype, EgDataNode>
+    for (auto dataNodeIter = namedAttributesStorage-> dataNodes.begin(); dataNodeIter != namedAttributesStorage-> dataNodes.end(); ++dataNodeIter)
+        attributesById.insert(dataNodeIter.key(), &(dataNodeIter.value()));
+
+    return 0;
+}
+
+int EgNamedAttributes::GetNamedAttributes(EgDataNodeIDtype nodeID)
+{
+    namedAttributesOfNode.clear();
+
+        // QMultiMap <EgDataNodeIDtype, EgDataNode*>
+    auto attributeIter = attributesById.find(nodeID);
+    while (attributeIter != attributesById.end() && attributeIter.key() == nodeID)
+    {
+        namedAttributesOfNode.insert((*(attributeIter.value()))["key"].toString(), (*(attributeIter.value()))["value"]);
+        ++attributeIter;
+    }
+
+    return 0;
 }

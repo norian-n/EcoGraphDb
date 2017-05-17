@@ -24,19 +24,19 @@ public:
     EgDataNodesType* namedAttributesStorage;
 
     EgDataNodeIDtype currentNodeId = 0;                     // last for GetNamedAttributes
-    QMultiMap <QString, QVariant>  namedAttributesOfNode;   // temporary for GetNamedAttributes
+    QMap <QString, QVariant>  namedAttributesOfNode;   // temporary for GetNamedAttributes
 
     QMultiMap <EgDataNodeIDtype, EgDataNode*>  attributesById;
 
-    int AddNamedAttribute(EgDataNodeIDtype nodeID, QString& name, QVariant& value);
-    int UpdateNamedAttribute(EgDataNodeIDtype nodeID, QString &name, QVariant &value);
-    int DeleteNamedAttribute(EgDataNodeIDtype nodeID);
+    int AddNamedAttribute(EgDataNodeIDtype nodeID, const QString &name, const QVariant &value);
+    int UpdateNamedAttribute(EgDataNodeIDtype nodeID, const QString &name, QVariant &value);
+    int DeleteNamedAttribute(EgDataNodeIDtype nodeID, const QString &name);
 
     int LoadNamedAttributes();
 
-    int ResolveNamedAttributes();                       // TODO fill attributesById
+    int ResolveNamedAttributes();                       // fill attributesById
 
-    int GetNamedAttributes(EgDataNodeIDtype nodeID);    // TODO fill namedAttributesOfNode
+    int GetNamedAttributes(EgDataNodeIDtype nodeID);    // fill namedAttributesOfNode
 
     EgNamedAttributes() = delete;
     EgNamedAttributes(EgDataNodesType* thePrimaryNodesType);

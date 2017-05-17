@@ -10,6 +10,8 @@
 #ifndef EG_CORE_H
 #define EG_CORE_H
 
+// #define EG_LIB_BUILD
+
 // egCore - basic types and constants
 
 #include <QtDebug>
@@ -80,7 +82,11 @@ struct NamedAttribute   // data node add-on
     QVariant value;
 };
 
-class EgRemoteConnect;
+struct EgRemoteConnect    // server connection info
+{
+    QString server_address;
+};
+
 
 struct EgNodeTypeSettings
 {

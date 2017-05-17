@@ -70,10 +70,8 @@ ProjectsForm::ProjectsForm(QWidget *parent) :
 
     Projects.Connect(graphDB, "projects");
 
-    Projects.getGUIinfo();
-
-    Projects.GUI.AddAutoSubstitute("status", Statuses, "status");
-    Projects.GUI.AddAutoSubstitute("owner",  Owners,   "login");
+    Projects.GUI-> AddAutoSubstitute("status", Statuses, "status");
+    Projects.GUI-> AddAutoSubstitute("owner",  Owners,   "login");
 
 
     /*
@@ -161,7 +159,7 @@ void ProjectsForm::on_editProjectButton_clicked()
         InitProjectForm();
 
     project_form-> formMode = formModeEdit;
-    project_form-> projectID = model->item(Projects.GUI.model_current_row,0)->data(data_id).toInt();
+    project_form-> projectID = model->item(Projects.GUI-> model_current_row,0)->data(data_id).toInt();
 
     project_form-> openProject();
 
@@ -174,7 +172,7 @@ void ProjectsForm::on_editProjectButton_clicked()
 void ProjectsForm::on_saveButton_clicked()
 {
         // get data from model
-    Projects.GUI.DataFromModel(model);
+    Projects.GUI-> DataFromModel(model);
         // save data
     Projects.StoreData();
 }
@@ -214,10 +212,10 @@ void ProjectsForm::refreshView()
         // detach model
     ui->tableView->setModel(NULL);
         // move data to model
-    Projects.GUI.DataToModel(model);
+    Projects.GUI-> DataToModel(model);
         // attach model
     ui->tableView->setModel(model);
-    Projects.GUI.SetViewWidths(ui->tableView);
+    Projects.GUI-> SetViewWidths(ui->tableView);
 }
 
 void ProjectsForm::on_addButton_clicked()
@@ -236,16 +234,16 @@ void ProjectsForm::on_addButton_clicked()
     refreshView();
     */
 
-    // Projects.GUI.AddRowOfModel(model, items);
+    // Projects.GUI-> AddRowOfModel(model, items);
 
     if (! funcblocks_form)
     {
         funcblocks_form = new FuncBlocksForm();
     }
 
-    if (model-> item(Projects.GUI.model_current_row,0))
+    if (model-> item(Projects.GUI-> model_current_row,0))
     {
-        funcblocks_form-> projectID = model-> item(Projects.GUI.model_current_row,0)-> data(data_id).toInt();;
+        funcblocks_form-> projectID = model-> item(Projects.GUI-> model_current_row,0)-> data(data_id).toInt();;
         funcblocks_form-> loadFuncblocks();
         funcblocks_form-> hide();
         funcblocks_form-> setWindowModality(Qt::WindowModal);
@@ -257,12 +255,12 @@ void ProjectsForm::on_addButton_clicked()
 void ProjectsForm::on_deleteButton_clicked()
 {
         // delete row in dataclass and model
-    // Projects.GUI.DeleteRowOfModel(model);
+    // Projects.GUI-> DeleteRowOfModel(model);
     if (! project_form)
         InitProjectForm();
 
     project_form-> formMode = formModeDelete;
-    project_form-> projectID = model->item(Projects.GUI.model_current_row,0)->data(data_id).toInt();
+    project_form-> projectID = model->item(Projects.GUI-> model_current_row,0)->data(data_id).toInt();
 
     project_form-> openProject();
 
@@ -274,16 +272,16 @@ void ProjectsForm::on_deleteButton_clicked()
 void ProjectsForm::on_tableView_clicked(QModelIndex index)
 {
         // set current data row index
-    Projects.GUI.model_current_row = index.row();
+    Projects.GUI-> model_current_row = index.row();
 }
 
 // const QModelIndex & topLeft, const QModelIndex & bottomRight
 void ProjectsForm::model_data_changed(const QModelIndex & topLeft, const QModelIndex & bottomRight)
 {
         // update current index
-    Projects.GUI.model_current_row = topLeft.row();
+    Projects.GUI-> model_current_row = topLeft.row();
         // modify row in dataclass and model
-    Projects.GUI.ModifyRowOfModel(model);
+    Projects.GUI-> ModifyRowOfModel(model);
 }
 
 

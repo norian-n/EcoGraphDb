@@ -21,9 +21,11 @@ public:
     EgDataNodesType* primaryNodesType;      // backlink
     EgDataNodesType* locationStorage;
 
-    int AddLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype nodeID);
-    int UpdateLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype nodeID);
-    int DeleteLocationOfNode(EgDataNodeIDtype nodeID);
+    int AddLocation(QList<QVariant>& locationData, EgDataNodeIDtype nodeID);
+    int UpdateLocation(QList<QVariant>& locationData, EgDataNodeIDtype nodeID);
+    int DeleteLocation(EgDataNodeIDtype nodeID);
+
+    int GetLocation(QList<QVariant>& locationData, EgDataNodeIDtype nodeID);
 
     int LoadLocationsData();
 

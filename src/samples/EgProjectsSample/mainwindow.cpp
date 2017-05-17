@@ -143,12 +143,12 @@ void MainWindow::FillTestData()
 
     Projects.Connect(graphDB, "projects");
 
-    Projects.GUI.AddSimpleControlDesc("name",          "Project name",   120);
-    Projects.GUI.AddSimpleControlDesc("status",        "Status",         90);
-    Projects.GUI.AddSimpleControlDesc("owner",         "Owner",          90);
-    Projects.GUI.AddSimpleControlDesc("launch_date",   "Launched",       90);
-    Projects.GUI.AddSimpleControlDesc("end_date",      "Finished",       90);
-    Projects.GUI.AddSimpleControlDesc("description",   "Description",    150);
+    Projects.GUI-> AddSimpleControlDesc("name",          "Project name",   120);
+    Projects.GUI-> AddSimpleControlDesc("status",        "Status",         90);
+    Projects.GUI-> AddSimpleControlDesc("owner",         "Owner",          90);
+    Projects.GUI-> AddSimpleControlDesc("launch_date",   "Launched",       90);
+    Projects.GUI-> AddSimpleControlDesc("end_date",      "Finished",       90);
+    Projects.GUI-> AddSimpleControlDesc("description",   "Description",    150);
 
         // add reordered fields by name
     ins_values.clear();
@@ -208,7 +208,6 @@ void MainWindow::FillTestData()
 
 
         // funcblocks
-
     typeSettings.useLinks = true;
     typeSettings.useGUIsettings = true;
     typeSettings.useEntryNodes = true;
@@ -226,22 +225,21 @@ void MainWindow::FillTestData()
 
     graphDB.CommitNodeType();
 
-        // add link type
+        // add link types
     graphDB.AddLinkType("funcblocksTree", "funcblocks", "funcblocks");
     graphDB.AddLinkType("projects_funcblocks", "projects", "funcblocks");
 
     graphDB.Connect();
 
     Funcblocks.Connect(graphDB, "funcblocks");
-    Projects.getMyLinkTypes(); // why explicitly (?)
 
-    Funcblocks.GUI.AddSimpleControlDesc("name",          "Project name",   120);
+    Funcblocks.GUI-> AddSimpleControlDesc("name",          "Func block name",   120);
     /*
-    Funcblocks.GUI.AddSimpleControlDesc("status",        "Status",         90);
-    Funcblocks.GUI.AddSimpleControlDesc("owner",         "Owner",          90);
-    Funcblocks.GUI.AddSimpleControlDesc("launch_date",   "Launched",       90);
-    Funcblocks.GUI.AddSimpleControlDesc("end_date",      "Finished",       90);
-    Funcblocks.GUI.AddSimpleControlDesc("description",   "Description",    150);
+    Funcblocks.GUI-> AddSimpleControlDesc("status",        "Status",         90);
+    Funcblocks.GUI-> AddSimpleControlDesc("owner",         "Owner",          90);
+    Funcblocks.GUI-> AddSimpleControlDesc("launch_date",   "Launched",       90);
+    Funcblocks.GUI-> AddSimpleControlDesc("end_date",      "Finished",       90);
+    Funcblocks.GUI-> AddSimpleControlDesc("description",   "Description",    150);
     */
 
     ADD_RECORD("Test Root Funcblock 1", Funcblocks);
@@ -255,11 +253,14 @@ void MainWindow::FillTestData()
 
     Funcblocks.StoreData();
 
+        // set links
     Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 2);
     Funcblocks.AddArrowLink("funcblocksTree", 2, Funcblocks, 3);
     // Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 4);
 
     // Projects.LoadAllData();
+
+    Projects.getMyLinkTypes();
 
     Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 1);
     Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 2);

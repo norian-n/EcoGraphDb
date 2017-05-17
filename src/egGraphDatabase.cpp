@@ -25,8 +25,92 @@ EgGraphDatabase::~EgGraphDatabase()
 }
 
 
+bool EgGraphDatabase::CheckLinksMetaInfo()
+{
+    // EgDataNodesType linksMetaInfo;
+
+        // check folder and ddt file
+    if (! dir.exists(QString("egdb/") + EgDataNodesLinkNamespace::egLinkTypesFileName + ".ddt"))
+    {
+        // qDebug()  << "No egDb meta info found: " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
+
+        return false;   // no db/metainfo
+    }
+
+        // check folder and dat file
+    if (! dir.exists(QString("egdb/") + EgDataNodesLinkNamespace::egLinkTypesFileName + ".dat"))
+    {
+        // qDebug()  << "No egDb meta info found: " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
+
+        return false;   // no db/metainfo
+    }
+
+    /*
+        // try to connect
+    if (linksMetaInfo.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName))
+    {
+        // qDebug()  << "No egDb meta info connected: " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
+
+        return false;   // no db/metainfo
+    }
+    */
+
+    return true;
+}
+
+
+int EgGraphDatabase::CreateLinksMetaInfo()
+{
+    // EgNodeTypeSettings typeSettings;
+
+        // init links meta-info
+    if (metaInfo)
+    {
+        delete metaInfo;
+    }
+
+    fieldsCreated = 0;
+    locationFieldsCreated = 0;
+
+    metaInfo = new EgDataNodeTypeMetaInfo(EgDataNodesLinkNamespace::egLinkTypesFileName);
+
+        // init settings
+    metaInfo-> useEntryNodes = false;
+    metaInfo-> useLocation = false;
+    metaInfo-> useNamedAttributes = false;
+    metaInfo-> useLinks = false;
+    metaInfo-> useGUIsettings = false;
+
+    ClearMetaInfo(GUIcontrolsMetaInfo);
+    ClearMetaInfo(entryNodesMetaInfo);
+    ClearMetaInfo(locationMetaInfo);
+    ClearMetaInfo(attributesMetaInfo);
+
+        // add fields
+    AddDataField("name");
+    AddDataField("firstNodeType");
+    AddDataField("secondNodeType");
+
+    CommitNodeType();
+
+    QList<QVariant> addValues;
+    EgDataNodesType linksMetaInfo;
+
+    linksMetaInfo.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName);
+
+    addValues << QString(EgDataNodesNamespace::egDummyLinkType)
+              << QString(EgDataNodesNamespace::egDummyNodesType)
+              << QString(EgDataNodesNamespace::egDummyNodesType);
+
+    linksMetaInfo.AddDataNode(addValues);
+    linksMetaInfo.StoreData();
+
+    return 0;
+}
+
 int EgGraphDatabase::CreateEgDb()
 {
+    /*
         // check if metainfo exists
     if (dir.exists(QString("egdb/") + EgDataNodesLinkNamespace::egLinkTypesFileName + ".ddt"))
     {
@@ -35,6 +119,7 @@ int EgGraphDatabase::CreateEgDb()
 
     EgNodeTypeSettings typeSettings;
 
+        // links meta-info
     CreateNodeType(EgDataNodesLinkNamespace::egLinkTypesFileName, typeSettings);
 
     AddDataField("name");
@@ -42,6 +127,7 @@ int EgGraphDatabase::CreateEgDb()
     AddDataField("secondNodeType");
 
     CommitNodeType();
+    */
 
     return 0;
 }
@@ -57,6 +143,11 @@ inline void EgGraphDatabase::ClearMetaInfo(EgDataNodeTypeMetaInfo* metaInfo)
 
 int EgGraphDatabase::CreateNodeType(QString typeName,  EgNodeTypeSettings& typeSettings)
 {
+    // check/create DB metainfo
+
+    if(! CheckLinksMetaInfo())
+        CreateLinksMetaInfo();
+
         // check if node type exists
     if (dir.exists("egdb/" + typeName + ".ddt"))
     {
@@ -253,9 +344,12 @@ int  EgGraphDatabase::AddLinkType(QString linkName, QString firstDataNodeType, Q
     QList<QVariant> addValues;
     EgDataNodesType linksMetaInfo; // == LinkTypes
 
+    if(! CheckLinksMetaInfo())
+        CreateLinksMetaInfo();
+
     if (linksMetaInfo.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName))
     {
-        qDebug()  << "CreateEgDb wasn't called, aborting" << FN;
+        qDebug()  << "Can't connect links meta-info, aborting" << FN;
         return -1;
     }
 
@@ -333,9 +427,9 @@ int EgGraphDatabase::LoadLinksMetaInfo()
 
     if (! dir.exists("egdb/" + QString(EgDataNodesLinkNamespace::egLinkTypesFileName) + ".dat"))
     {
-        qDebug()  << "Links meta info doesn't exist: " << EgDataNodesLinkNamespace::egLinkTypesFileName << ".dat" << FN;
+        qDebug()  << "EgDB connect error: Links meta info doesn't exist: " << EgDataNodesLinkNamespace::egLinkTypesFileName << ".dat" << FN;
 
-        return 1;
+        return -1;
     }
 
     linksMetaInfo.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName); // FIXME check
@@ -354,7 +448,8 @@ int EgGraphDatabase::LoadLinksMetaInfo()
         newLink-> firstTypeName = nodesIter.value()["firstNodeType"].toString();
         newLink-> secondTypeName = nodesIter.value()["secondNodeType"].toString();
 
-        linkTypes.insert(newLink-> linkName, *newLink);
+        if (newLink-> linkName != QString(EgDataNodesNamespace::egDummyLinkType))
+            linkTypes.insert(newLink-> linkName, *newLink);
 
         // qDebug()  << "Link added to EgGraphDatabase: " << newLink.linkName << FN;
     }

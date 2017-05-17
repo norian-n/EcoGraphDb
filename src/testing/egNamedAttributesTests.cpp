@@ -25,52 +25,48 @@ bool EgNamedAttributesTests::testCreateAttributes()
     typeSettings.useNamedAttributes = true;
     */
 
-    typeSettings.useLocation = true;
+    typeSettings.useNamedAttributes = true;
 
-    graphDB.CreateNodeType("locations", typeSettings);
+    graphDB.CreateNodeType("attributes", typeSettings);
 
     graphDB.AddDataField("name");
-    graphDB.AddDataField("status", isIndexed); // create index
-
-    graphDB.AddLocationField("imageType");
+    graphDB.AddDataField("status", isIndexed);
 
     graphDB.CommitNodeType();
 
-    bool res = (graphDB.locationMetaInfo-> dataFields.count() == 3); // x,y,imageType
+    // bool res = (graphDB.attributesMetaInfo-> dataFields.count() == 3); // x,y,imageType
 
-    testShowResult(res, FNS);
+    // testShowResult(res, FNS);
 
-    return res;
+    return 0;
 }
 
 bool EgNamedAttributesTests::testAddAttributes()
 {
     EgDataNodeIDtype newID;
     QList<QVariant> addValues;
-    QList<QVariant> locValues;
+    QString nameString;
 
     graphDB.Connect();
 
-    testDataNodes.Connect(graphDB, "locations");
+    testDataNodes.Connect(graphDB, "attributes");
 
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 10; i++)
     {
         addValues.clear();
-        addValues << QVariant("locationsTestName_" + QVariant(i+1).toString()) << i;
+        addValues << QVariant("testAddAttributes_" + QVariant(i+1).toString()) << i;
 
         testDataNodes.AddDataNode(addValues, newID);
 
-        locValues.clear();
-        locValues << i << i+1 << 1;
-
-        testDataNodes.locations-> AddLocationOfNode(locValues, newID);
+        nameString = "test_" + QVariant(i+1).toString();
+        testDataNodes.namedAttributes-> AddNamedAttribute(newID, nameString, QVariant(i));
     }
 
     testDataNodes.StoreData();
 
-    testDataNodes.LoadAllNodes();
+    testDataNodes.AutoLoadAllData();
 
-    bool res = (testDataNodes.locations->locationStorage-> DataNodesCount() == 100);
+    bool res = (testDataNodes.namedAttributes->namedAttributesStorage-> DataNodesCount() == 10);
 
     testShowResult(res, FNS);
 
@@ -81,13 +77,13 @@ bool EgNamedAttributesTests::testLoadAttributes()
 {
     graphDB.Connect();
 
-    testDataNodes.Connect(graphDB, "locations");
+    testDataNodes.Connect(graphDB, "attributes");
 
     testDataNodes.LoadData("status", EQ, 2);
 
     // testDataNodes.LoadLocationsData();
 
-    bool res = (testDataNodes.locations->locationStorage-> DataNodesCount() == 1);
+    bool res = (testDataNodes.namedAttributes->namedAttributesStorage-> DataNodesCount() == 1);
 
     testShowResult(res, FNS);
 

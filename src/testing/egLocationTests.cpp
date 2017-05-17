@@ -17,8 +17,6 @@ bool EgLocationTests::testCreateLocations()
 
     graphDB.CreateNodeType("locations", typeSettings);
 
-    // graphDB.CreateNodeType("locations", useLocations);
-
     graphDB.AddDataField("name");
     graphDB.AddDataField("status", isIndexed); // create index
 
@@ -53,14 +51,18 @@ bool EgLocationTests::testAddLocations()
         locValues.clear();
         locValues << i << i+1 << 1;
 
-        testDataNodes.locations-> AddLocationOfNode(locValues, newID);
+        testDataNodes.locations-> AddLocation(locValues, newID);
     }
 
     testDataNodes.StoreData();
 
-    testDataNodes.AutoLoadAll();
+    testDataNodes.AutoLoadAllData();
 
-    bool res = (testDataNodes.locations->locationStorage-> DataNodesCount() == 100);
+    testDataNodes.locations-> GetLocation(locValues, 77);
+
+    // qDebug()  << "GetLocation() of node 77 returned " << locValues << FN;
+
+    bool res = ((testDataNodes.locations->locationStorage-> DataNodesCount() == 100) && (locValues[1].toInt() == 77));
 
     testShowResult(res, FNS);
 

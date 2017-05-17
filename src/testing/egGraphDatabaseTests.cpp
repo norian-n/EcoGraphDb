@@ -146,14 +146,14 @@ bool EgGraphDatabaseTests::testEgDataNodesTypeBasicLoadStore(EgDataNodesType& te
 
 bool EgGraphDatabaseTests::testEgDataNodesTypeGUIDescriptors(EgDataNodesType& testDataNodes)
 {
-    testDataNodes.GUI.CreateDataNodesForControlDescs();
+    // testDataNodes.GUI.CreateDataNodesForControlDescs();
 
-    testDataNodes.GUI.AddSimpleControlDesc("name", "Name", 100);
-    testDataNodes.GUI.AddSimpleControlDesc("status", "Status", 50);
+    testDataNodes.GUI-> AddSimpleControlDesc("name", "Name", 100);
+    testDataNodes.GUI-> AddSimpleControlDesc("status", "Status", 50);
 
-    testDataNodes.GUI.LoadSimpleControlDesc();
+    testDataNodes.GUI-> LoadSimpleControlDesc();
 
-    bool res = (testDataNodes.GUI.basicControlDescs.count() == 2); // (testDataNodes.addedDataNodes.count() == 0) && (testDataNodes.dataNodes.count() == 8))
+    bool res = (testDataNodes.ModelFieldsCount() == 2); // (testDataNodes.addedDataNodes.count() == 0) && (testDataNodes.dataNodes.count() == 8))
 
     testShowResult(res, FNS);
 

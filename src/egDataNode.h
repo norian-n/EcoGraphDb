@@ -19,6 +19,9 @@
 
 namespace EgDataNodesNamespace
 {
+    const char* const egDummyNodesType("egdummynodestype");
+    const char* const egDummyLinkType("egdummylinktype");
+
     const char* const egGUIfileName("_egGUIcontrolDescriptors");
     const char* const egLocationFileName("_egLocationNodes");
     const char* const egAttributesFileName("_egNamedAttributes");
@@ -45,7 +48,18 @@ public:
   QMap <QString, QList<EgExtendedLinkType> > outLinks;
 };
 
-class EgDataNode           // Data Object Instance 1
+#ifdef EG_LIB_BUILD     // library build switch, define it in project or egCore.h
+
+#include "ecographdb_global.h"
+
+class ECOGRAPHDBSHARED_EXPORT EgDataNode
+
+#else                   // not a library build
+
+class EgDataNode
+
+#endif
+
 {
 public:
 

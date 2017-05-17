@@ -70,8 +70,8 @@ FuncBlocksForm::FuncBlocksForm(QWidget *parent)
     autolinks_list << FuncblockStatusLink << FuncblockOwnerLink;
     */
     /*
-    Funcblocks.GUI.AddAutoSubstitute("status", Statuses, "status");
-    Funcblocks.GUI.AddAutoSubstitute("owner",  Owners,   "login");
+    Funcblocks.GUI-> AddAutoSubstitute("status", Statuses, "status");
+    Funcblocks.GUI-> AddAutoSubstitute("owner",  Owners,   "login");
 
 
     */
@@ -79,11 +79,11 @@ FuncBlocksForm::FuncBlocksForm(QWidget *parent)
     /*
     model = new QStandardItemModel(0, Funcblocks.ModelFieldsCount());
 
-    Funcblocks.GUI.DataToModelTree(model, "funcblocksTree");
+    Funcblocks.GUI-> DataToModelTree(model, "funcblocksTree");
         // attach model
     ui->treeView->setModel(model);
 
-    // Funcblocks.GUI.SetViewWidths(ui->treeView);
+    // Funcblocks.GUI-> SetViewWidths(ui->treeView);
 
     ui->treeView->expandAll();
     */
@@ -91,7 +91,7 @@ FuncBlocksForm::FuncBlocksForm(QWidget *parent)
     graphDB.Connect();
 
     Funcblocks.Connect(graphDB, "funcblocks");
-    Funcblocks.getGUIinfo();
+    // Funcblocks.getGUIinfo();
 
     Projects.Connect(graphDB, "projects");
 
@@ -132,23 +132,23 @@ void FuncBlocksForm::loadFuncblocks()
 
 
 
-    Funcblocks.GUI.DataToModelTree(model, "funcblocksTree");
+    Funcblocks.GUI-> DataToModelTree(model, "funcblocksTree");
 
         // attach model
     ui->treeView->setModel(model);
 
-    // Funcblocks.GUI.SetViewWidths(ui->treeView);
+    // Funcblocks.GUI-> SetViewWidths(ui->treeView);
 
     ui->treeView->expandAll();
 }
 
 void FuncBlocksForm::on_treeView_clicked(const QModelIndex &index)
 {
-        Funcblocks.GUI.model_current_row = index.row();
+        Funcblocks.GUI-> model_current_row = index.row();
 
-        Funcblocks.GUI.model_current_item = model-> itemFromIndex(index);
+        Funcblocks.GUI-> model_current_item = model-> itemFromIndex(index);
 
-        // qDebug() << "model_current_item->column() = " << Funcblocks.GUI.model_current_item->column() << FN;
+        // qDebug() << "model_current_item->column() = " << Funcblocks.GUI-> model_current_item->column() << FN;
 }
 
 inline void FuncBlocksForm::InitFuncblockForm()   // project details form setup
@@ -164,7 +164,7 @@ inline void FuncBlocksForm::InitFuncblockForm()   // project details form setup
 
 void FuncBlocksForm::addSubBlock()
 {
-    if (! Funcblocks.GUI.model_current_item)
+    if (! Funcblocks.GUI-> model_current_item)
         return;
 
     isTop = false;
@@ -221,7 +221,7 @@ void FuncBlocksForm::refreshView()
         }
         else
         {
-            Funcblocks.AddArrowLink("funcblocksTree", Funcblocks.GUI.model_current_item-> data(data_id).toInt(),
+            Funcblocks.AddArrowLink("funcblocksTree", Funcblocks.GUI-> model_current_item-> data(data_id).toInt(),
                                     Funcblocks, funcBlockForm-> FuncBlockID);
 
         }
@@ -232,7 +232,7 @@ void FuncBlocksForm::refreshView()
         if (isTop)
             parentItem = model-> invisibleRootItem();
         else
-            parentItem = Funcblocks.GUI.model_current_item;
+            parentItem = Funcblocks.GUI-> model_current_item;
 
         QList<QStandardItem*> items;
 
@@ -254,24 +254,24 @@ void FuncBlocksForm::refreshView2()
         // update link
     Projects.myLinkTypes["projects_funcblocks"]-> UpdateLinkIndex(projectID, oldOffset, Funcblocks[funcBlockForm-> FuncBlockID].dataFileOffset);
 
-    // if (Funcblocks.GUI.model_current_item-> parent())
+    // if (Funcblocks.GUI-> model_current_item-> parent())
     //    qDebug() << "Not top item, " << FN;
 
     // qDebug() << "oldOffset = " << oldOffset << ", link name = " << Projects.myLinkTypes["projects_funcblocks"]-> linkName << FN;
 
-    if (Funcblocks.GUI.model_current_item-> parent())
-        Funcblocks.myLinkTypes["funcblocksTree"]-> UpdateLinkIndex(Funcblocks.GUI.model_current_item-> parent()-> data(data_id).toInt(),
+    if (Funcblocks.GUI-> model_current_item-> parent())
+        Funcblocks.myLinkTypes["funcblocksTree"]-> UpdateLinkIndex(Funcblocks.GUI-> model_current_item-> parent()-> data(data_id).toInt(),
                                                                    oldOffset, Funcblocks[funcBlockForm-> FuncBlockID].dataFileOffset);
 
 */
-    Funcblocks.GUI.model_current_item->setText(Funcblocks[funcBlockForm-> FuncBlockID]["name"].toString());
+    Funcblocks.GUI-> model_current_item->setText(Funcblocks[funcBlockForm-> FuncBlockID]["name"].toString());
 
-    // Funcblocks.GUI.DataToModelTree(model, "funcblocksTree");
+    // Funcblocks.GUI-> DataToModelTree(model, "funcblocksTree");
 
         // attach model
     // ui->treeView->setModel(model);
 
-    // Funcblocks.GUI.SetViewWidths(ui->treeView);
+    // Funcblocks.GUI-> SetViewWidths(ui->treeView);
 
     // ui->treeView->expandAll();
 }
@@ -294,13 +294,13 @@ void FuncBlocksForm::cancelExit()
 
 void FuncBlocksForm::on_editButton_clicked()
 {
-    if (! Funcblocks.GUI.model_current_item)
+    if (! Funcblocks.GUI-> model_current_item)
         return;
 
     if (! funcBlockForm)
         InitFuncblockForm();
 
-    funcBlockForm-> FuncBlockID = Funcblocks.GUI.model_current_item-> data(data_id).toInt();
+    funcBlockForm-> FuncBlockID = Funcblocks.GUI-> model_current_item-> data(data_id).toInt();
 
     oldOffset = Funcblocks[funcBlockForm-> FuncBlockID].dataFileOffset;
 

@@ -17,6 +17,8 @@
 #include "egIndexesTests.h"
 #include "egLinksTests.h"
 #include "egLocationTests.h"
+#include "egNamedAttributesTests.h"
+
 
 void cleanUpFiles()
 {
@@ -147,6 +149,16 @@ int main() // int argc, char *argv[])
     res = res && tmpRes;
 
     tmpRes = locTests.testLoadLocationsData();
+    res = res && tmpRes;
+
+    EgNamedAttributesTests attrTests;
+
+    attrTests.testCreateAttributes();
+
+    tmpRes = attrTests.testAddAttributes();
+    res = res && tmpRes;
+
+    tmpRes = attrTests.testLoadAttributes();
     res = res && tmpRes;
 
     if (res)

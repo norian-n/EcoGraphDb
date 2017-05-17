@@ -24,20 +24,33 @@ EgDataNodesLocation::~EgDataNodesLocation()
         delete locationStorage;
 }
 
-int EgDataNodesLocation::AddLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype nodeID)
+int EgDataNodesLocation::AddLocation(QList<QVariant>& locationData, EgDataNodeIDtype nodeID)
 {
-        return locationStorage-> AddHardLinked(myData, nodeID);
+        return locationStorage-> AddHardLinked(locationData, nodeID);
 }
 
 
-int EgDataNodesLocation::UpdateLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype nodeID)
+int EgDataNodesLocation::UpdateLocation(QList<QVariant>& locationData, EgDataNodeIDtype nodeID)
 {
-        return locationStorage-> UpdateDataNode(myData, nodeID);
+        return locationStorage-> UpdateDataNode(locationData, nodeID);
 }
 
-int EgDataNodesLocation::DeleteLocationOfNode(EgDataNodeIDtype nodeID)
+int EgDataNodesLocation::DeleteLocation(EgDataNodeIDtype nodeID)
 {
         return locationStorage->DeleteDataNode(nodeID);
+}
+
+int EgDataNodesLocation::GetLocation(QList<QVariant>& locationData, EgDataNodeIDtype nodeID)
+{
+    locationData.clear();
+
+        // check if node exists
+    if(! locationStorage-> dataNodes.contains(nodeID))
+        return 1;
+
+    locationData = locationStorage-> dataNodes[nodeID].dataFields;
+
+    return 0;
 }
 
 int EgDataNodesLocation::LoadLocationsData()

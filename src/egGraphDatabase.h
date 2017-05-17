@@ -15,7 +15,18 @@
 #include "egMetaInfo.h"
 #include "egDataNodesType.h"
 
+#ifdef EG_LIB_BUILD   // library build switch, define it in project or egCore.h
+
+#include "ecographdb_global.h"
+
+class ECOGRAPHDBSHARED_EXPORT EgGraphDatabase
+
+#else   // no library build
+
 class EgGraphDatabase
+
+#endif
+
 {
 public:
 
@@ -24,6 +35,7 @@ public:
     int fieldsCreated = 0; // info for testing
     int locationFieldsCreated = 0;
 
+        // node type creation-time temporary info
     EgDataNodeTypeMetaInfo* metaInfo = nullptr;
     EgDataNodeTypeMetaInfo* GUIcontrolsMetaInfo  = nullptr;
     EgDataNodeTypeMetaInfo* entryNodesMetaInfo  = nullptr;
@@ -46,7 +58,9 @@ public:
     int Connect();
     int Attach(EgDataNodesType* nType);
 
-    int LoadLinksMetaInfo();
+    bool CheckLinksMetaInfo();
+    int  CreateLinksMetaInfo();
+    int  LoadLinksMetaInfo();
 
     inline void ClearMetaInfo(EgDataNodeTypeMetaInfo* metaInfo);
 
@@ -68,14 +82,4 @@ public:
 
 #endif // EG_GRAPH_DATABASE_H
 
-// EgGraphDatabase(QString a_typeName) : typeName(a_typeName) {}
-
-// int GetDescsToUpdate(QString typeName);     // get metainfo to update control descriptions
-// int DeleteNodeType(QString typeName);   // TODO : password to delete
-
-/*
-    int CreateControlDescs();
-    int AddSimpleControlDesc(QString fieldName, QString fieldLabel, int fieldWidth);
-    int CommitControlDesc();
-    */
 
