@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
  *
- * License: propietary open source, free for non-commercial applications
+ * License: defined in license.txt file located in the root sources dir
  *
  */
 
@@ -13,9 +13,9 @@
 EgDataFiles::~EgDataFiles()
 {
         // clean up index files control
-    QHash<QString, EgIndexFiles<qint32>*>::iterator indexesIter;
+    // QHash<QString, EgIndexFiles<qint32>*>::iterator indexesIter;
 
-    for (indexesIter = indexFiles.begin(); indexesIter != indexFiles.end(); ++indexesIter)
+    for (auto indexesIter = indexFiles.begin(); indexesIter != indexFiles.end(); ++indexesIter)
         if (indexesIter.value())
             delete indexesIter.value();
 
@@ -38,6 +38,8 @@ bool EgDataFiles::CheckMetaInfoFile()
         return false;
     }
 
+    // FIXME TODO validate content
+
     return true;
 }
 
@@ -45,10 +47,10 @@ int EgDataFiles::Init(EgDataNodeTypeMetaInfo& a_metaInfo)
 {
     metaInfo = &a_metaInfo;
 
-    primIndexFiles = new EgIndexFiles<qint32>(a_metaInfo.typeName + "_odb_pit");
+    primIndexFiles = new EgIndexFiles<qint32>(a_metaInfo.typeName + "_odb_pit"); // FIXME no literal
 
-        // clean up
-    for (QHash<QString, EgIndexFiles<qint32>*>::iterator indexesIter = indexFiles.begin(); indexesIter != indexFiles.end(); ++indexesIter)
+        // clean up QHash<QString, EgIndexFilesBase*>::iterator
+    for (auto indexesIter = indexFiles.begin(); indexesIter != indexFiles.end(); ++indexesIter)
         if (indexesIter.value())
             delete indexesIter.value();
 
@@ -56,14 +58,49 @@ int EgDataFiles::Init(EgDataNodeTypeMetaInfo& a_metaInfo)
 
     // qDebug() << FN << "metaInfo-> indexedToOrder.count() =" << metaInfo-> indexedToOrder.count();
 
-        // add indexes files classes
-    for (QHash<QString, int> ::iterator metaInfoIter = metaInfo-> indexedToOrder.begin(); metaInfoIter != metaInfo-> indexedToOrder.end(); ++metaInfoIter)
+        // add indexes files classes QHash<QString, EgIndexSettings> ::iterator
+    // for (auto metaInfoIter = metaInfo-> indexedToOrder.begin(); metaInfoIter != metaInfo-> indexedToOrder.end(); ++metaInfoIter)
+    EgIndexFilesBase* newIndexFiles = nullptr;
+
+    for (auto metaInfoIter = metaInfo-> indexedFields.begin(); metaInfoIter != metaInfo-> indexedFields.end(); ++metaInfoIter)
     {
-        EgIndexFiles<qint32>* newIndexFiles = new EgIndexFiles<qint32>(a_metaInfo.typeName + "_" + metaInfoIter.key()); // FIXME qint32
+
+        switch (metaInfoIter.value().indexSize) {
+
+        case 1:
+                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<float>(a_metaInfo.typeName + "_" + metaInfoIter.key()));
+            break;
+
+        case 2:
+                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<double>(a_metaInfo.typeName + "_" + metaInfoIter.key()));
+            break;
+
+        case 32:
+            if (metaInfoIter.value().isSigned)
+                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<qint32>(a_metaInfo.typeName + "_" + metaInfoIter.key()));
+            else
+                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<quint32>(a_metaInfo.typeName + "_" + metaInfoIter.key()));
+            break;
+
+        case 64:
+            if (metaInfoIter.value().isSigned)
+                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<qint64>(a_metaInfo.typeName + "_" + metaInfoIter.key()));
+            else
+                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<quint64>(a_metaInfo.typeName + "_" + metaInfoIter.key()));
+            break;
+
+        default:
+                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<qint32>(a_metaInfo.typeName + "_" + metaInfoIter.key()));
+            break;
+        }
+
 
         // qDebug() << FN << indIter.key() << newIndexFiles;
 
-        indexFiles.insert(metaInfoIter.key(), newIndexFiles);
+        // newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<qint32>(a_metaInfo.typeName + "_" + metaInfoIter.key()));
+
+        if (newIndexFiles)
+            indexFiles.insert(metaInfoIter.key(),  newIndexFiles);
     }
 
         // check if files exists
@@ -136,8 +173,8 @@ inline int EgDataFiles::LocalOpenFilesToRead()
     // QString IndexFileName = metaInfo-> typeName + "_odb_pit"; // FIXME const
     primIndexFiles-> OpenIndexFilesToRead();
 
-        // other indexes files
-    for (QHash<QString, EgIndexFiles<qint32>*>::iterator indexesIter = indexFiles.begin(); indexesIter != indexFiles.end(); ++indexesIter)
+        // other indexes files QHash<QString, EgIndexFiles<qint32>*>::iterator
+    for (auto indexesIter = indexFiles.begin(); indexesIter != indexFiles.end(); ++indexesIter)
     {
         // IndexFileName = metaInfo-> typeName + "_" + indexesIter.key();
         indexesIter.value()-> OpenIndexFilesToRead();
@@ -180,8 +217,8 @@ inline int EgDataFiles::LocalOpenFilesToUpdate()
     // QString IndexFileName = metaInfo-> typeName + "_odb_pit"; // FIXME const
     primIndexFiles-> OpenIndexFilesToUpdate();
 
-        // other indexes files
-    for (QHash<QString, EgIndexFiles<qint32>*>::iterator indexesIter = indexFiles.begin(); indexesIter != indexFiles.end(); ++indexesIter)
+        // other indexes files QHash<QString, EgIndexFiles<qint32>*>::iterator
+    for (auto indexesIter = indexFiles.begin(); indexesIter != indexFiles.end(); ++indexesIter)
     {
         // IndexFileName = metaInfo-> typeName + "_" + indexesIter.key();
         indexesIter.value()-> OpenIndexFilesToUpdate();
@@ -197,8 +234,8 @@ inline void EgDataFiles::LocalCloseFiles()
 
     primIndexFiles-> CloseIndexFiles();
 
-        // other indexes files
-    for (QHash<QString, EgIndexFiles<qint32>*>::iterator indexesIter = indexFiles.begin(); indexesIter != indexFiles.end(); ++indexesIter)
+        // other indexes files QHash<QString, EgIndexFiles<qint32>*>::iterator
+    for (auto indexesIter = indexFiles.begin(); indexesIter != indexFiles.end(); ++indexesIter)
         indexesIter.value()-> CloseIndexFiles();
 
     dir.setCurrent("..");
@@ -309,7 +346,7 @@ int EgDataFiles::LocalLoadData(QSet<quint64>& dataOffsets, QMap<EgDataNodeIDtype
 
 
         if (FilterCallback)
-            if (! FilterCallback(tmpNode2, filter_values))
+            if (! FilterCallback(tmpNode2, filterValues))
                 continue;
 
         dataNodesMap.insert(tmpNode2.dataNodeID, tmpNode2);
@@ -405,16 +442,17 @@ inline void EgDataFiles::LocalAddObjects(QDataStream& dat, QMap<EgDataNodeIDtype
             // add primary index
 
         primIndexFiles-> theIndex = addIter.value()-> dataNodeID;
-        primIndexFiles-> AddObjToIndex();
+        primIndexFiles-> AddIndex();
 
             // add other indexes
-        for (QHash<QString, int> ::iterator indIter = metaInfo-> indexedToOrder.begin(); indIter != metaInfo-> indexedToOrder.end(); ++indIter)
+        // for (QHash<QString, int> ::iterator indIter = metaInfo-> indexedToOrder.begin(); indIter != metaInfo-> indexedToOrder.end(); ++indIter)
+        for (auto indIter = metaInfo-> indexedFields.begin(); indIter != metaInfo-> indexedFields.end(); ++indIter)
         {
             if (indexFiles.contains(indIter.key()))
             {
-                indexFiles[indIter.key()]-> theIndex = addIter.value()-> dataFields[indIter.value()].toInt(); // TODO - calc index of QVariant
-                indexFiles[indIter.key()]-> dataOffset = primIndexFiles-> dataOffset;
-                indexFiles[indIter.key()]-> AddObjToIndex();
+                indexFiles[indIter.key()]-> setIndex(addIter.value()-> dataFields[indIter.value().fieldNum]); // TODO - calc index of QVariant
+                indexFiles[indIter.key()]-> setDataOffset(primIndexFiles-> dataOffset);
+                indexFiles[indIter.key()]-> AddIndex();
             }
             else
                 qDebug() << FN << "Index not found: " << indIter.key();
@@ -436,12 +474,13 @@ inline void EgDataFiles::LocalDeleteObjects(QMap<EgDataNodeIDtype, EgDataNode>& 
         primIndexFiles-> DeleteIndex();   // SIDE estimate old offset stored here
 
             // del other indexes
-        for (QHash<QString, int> ::iterator indIter = metaInfo-> indexedToOrder.begin(); indIter != metaInfo-> indexedToOrder.end(); ++indIter)
+        // for (QHash<QString, int> ::iterator indIter = metaInfo-> indexedToOrder.begin(); indIter != metaInfo-> indexedToOrder.end(); ++indIter)
+        for (auto indIter = metaInfo-> indexedFields.begin(); indIter != metaInfo-> indexedFields.end(); ++indIter)
         {
             if (indexFiles.contains(indIter.key()))
             {
-                indexFiles[indIter.key()]-> theIndex = delIter.value().dataFields[indIter.value()].toInt(); // TODO - calc index of QVariant
-                indexFiles[indIter.key()]-> dataOffset = primIndexFiles-> dataOffset;
+                indexFiles[indIter.key()]-> setIndex(delIter.value().dataFields[indIter.value().fieldNum]); // TODO - calc index of QVariant
+                indexFiles[indIter.key()]-> setDataOffset(primIndexFiles-> dataOffset);
                 indexFiles[indIter.key()]-> DeleteIndex();
             }
             else
@@ -455,32 +494,30 @@ inline int EgDataFiles::LocalModifyObjects(QDataStream& dat, QMap<EgDataNodeIDty
 {
     EgDataNode tmpNode;
 
-        // walk add list
-    for (QMap<EgDataNodeIDtype, EgDataNode*>::iterator addIter = updatedDataNodes.begin(); addIter != updatedDataNodes.end(); ++addIter)
+        // walk updated nodes list    QMap<EgDataNodeIDtype, EgDataNode*>::iterator
+    for (auto addIter = updatedDataNodes.begin(); addIter != updatedDataNodes.end(); ++addIter)
     {
         dat.device()-> seek(dat.device()-> size());
 
+            // primary index data offset
         primIndexFiles-> newOffset = dat.device()-> pos();
 
         // qDebug()  << "Update object" << addIter.value()-> dataNodeID << " old offset" << hex << addIter.value()-> dataFileOffset
-        //           << " new offset " << hex << primIndexFiles-> newOffset << FN; // (int) primIndexFiles-> newOffset;
+        //           << " new offset " << hex << primIndexFiles-> newOffset << FN;
 
         dat << addIter.value()-> dataNodeID;
         dat << *(addIter.value());
 
             // add primary index
-
         primIndexFiles-> theIndex = addIter.value()-> dataNodeID;
         primIndexFiles-> dataOffset = addIter.value()-> dataFileOffset;
         primIndexFiles-> UpdateIndex(false); // false means primary ID is not changed
 
         addIter.value()-> dataFileOffset = primIndexFiles-> newOffset;
 
-        // qDebug() << FN << "data offset" << hex << (int) primIndexFiles-> dataOffset;
-
-        if (! metaInfo-> indexedToOrder.isEmpty())
+        if (! metaInfo-> indexedFields.isEmpty())
         {
-            // save old field values
+                // save old field values
             if (! dat.device()-> seek(primIndexFiles-> dataOffset))
             {
                 qDebug() << FN << "can't seek to data offset" << hex << (int) primIndexFiles-> dataOffset;
@@ -492,22 +529,23 @@ inline int EgDataFiles::LocalModifyObjects(QDataStream& dat, QMap<EgDataNodeIDty
             dat >> tmpNode.dataNodeID;
             dat >> tmpNode.dataFields;
 
-            // process other indexes
-            for (QHash<QString, int> ::iterator indIter = metaInfo-> indexedToOrder.begin(); indIter != metaInfo-> indexedToOrder.end(); ++indIter)
+                // process other indexes QHash<QString, int> ::iterator
+            // for (auto indIter = metaInfo-> indexedToOrder.begin(); indIter != metaInfo-> indexedToOrder.end(); ++indIter)
+            for (auto indIter = metaInfo-> indexedFields.begin(); indIter != metaInfo-> indexedFields.end(); ++indIter)
             {
                 if (indexFiles.contains(indIter.key()))
                 {
                     // qDebug()  << "Update index from " << tmpNode.dataFields  // << tmpNode.dataFields[indIter.value()].toInt()
                     //          << " to " << addIter.value()-> dataFields[indIter.value()].toInt() << FN;
 
-                    indexFiles[indIter.key()]-> theIndex   = tmpNode.dataFields[indIter.value()].toInt(); // TODO - calc index of QVariant
-                    indexFiles[indIter.key()]-> dataOffset = primIndexFiles-> dataOffset;
+                    indexFiles[indIter.key()]-> setIndex(tmpNode.dataFields[indIter.value().fieldNum]); // TODO - calc index of QVariant
+                    indexFiles[indIter.key()]-> setDataOffset(primIndexFiles-> dataOffset);
 
 
-                    bool isUpdated = tmpNode.dataFields[indIter.value()].toInt() != addIter.value()-> dataFields[indIter.value()].toInt();
+                    bool isUpdated = tmpNode.dataFields[indIter.value().fieldNum] != addIter.value()-> dataFields[indIter.value().fieldNum];
 
-                    indexFiles[indIter.key()]-> newOffset = primIndexFiles-> newOffset;
-                    indexFiles[indIter.key()]-> newIndex  = addIter.value()-> dataFields[indIter.value()].toInt();
+                    indexFiles[indIter.key()]-> setNewOffset(primIndexFiles-> newOffset);
+                    indexFiles[indIter.key()]-> setNewIndex(addIter.value()-> dataFields[indIter.value().fieldNum]);
                     indexFiles[indIter.key()]-> UpdateIndex(isUpdated);
 
                     /*

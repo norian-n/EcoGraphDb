@@ -32,6 +32,9 @@ private:
 
     EgGraphDatabase graphDB;
     EgDataNodesType nodes;
+    EgDataNodesType images;
+
+    void AddImages();
 
 };
 

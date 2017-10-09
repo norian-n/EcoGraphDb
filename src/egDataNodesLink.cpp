@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
  *
- * License: propietary open source, free for non-commercial applications
+ * License: defined in license.txt file located in the root sources dir
  *
  */
 
@@ -173,7 +173,9 @@ int EgDataNodesLinkType::LoadLinkedNodes(EgDataNodeIDtype fromNodeID)
 
     linksStorage-> IndexOffsets.clear();
 
-    linksStorage-> LocalFiles-> indexFiles["from_node_id"]-> Load_EQ(linksStorage->IndexOffsets, fromNodeID);
+    QVariant variantID = fromNodeID;
+
+    linksStorage-> LocalFiles-> indexFiles["from_node_id"]-> Load_EQ(linksStorage->IndexOffsets, variantID);
 
 
     if (! linksStorage-> IndexOffsets.isEmpty())

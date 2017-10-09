@@ -35,7 +35,7 @@ bool EgGraphDatabaseTests::testEgDataNodeTypeMetaInfo(EgDataNodeTypeMetaInfo& eg
 
     bool res = ((egDataNodeTypeMetaInfo.dataFields.count() == 2)
                 && (egDataNodeTypeMetaInfo.nameToOrder.count() == 2)
-                && (egDataNodeTypeMetaInfo.indexedToOrder.count() == 1));
+                && (egDataNodeTypeMetaInfo.indexedFields.count() == 1));
 
     testShowResult(res, FNS);
 
@@ -165,7 +165,7 @@ bool EgGraphDatabaseTests::testEgGraphDatabaseCreate()
     EgGraphDatabase graphDB;
     EgNodeTypeSettings typeSettings;
 
-    graphDB.CreateEgDb();
+    // graphDB.CreateEgDb();
 
         // test all options
 
@@ -207,7 +207,7 @@ bool EgGraphDatabaseTests::testEgLinksCreate()
 {
     EgGraphDatabase graphDB;
 
-    graphDB.CreateEgDb();
+    // graphDB.CreateEgDb();
 
     graphDB.AddLinkType("testLinkType", "nodeType1", "nodeType2");
     graphDB.AddLinkType("testTree", "test", "test");

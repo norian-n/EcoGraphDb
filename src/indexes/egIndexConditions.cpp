@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
  *
- * License: propietary open source, free for non-commercial applications
+ * License: defined in license.txt file located in the root sources dir
  *
  */
 
@@ -127,7 +127,7 @@ void EgIndexConditionsTree::RecursiveCalc(EgIndexNode* branch,   EgDataFiles*  L
     if (! branch)
         return;
 
-    EgIndexFiles<qint32>* theIndexPtr;
+    EgIndexFilesBase* theIndexPtr;
 
     // FIXME find index
 
@@ -148,19 +148,19 @@ void EgIndexConditionsTree::RecursiveCalc(EgIndexNode* branch,   EgDataFiles*  L
         switch (branch-> oper)
         {
         case EQ:
-            theIndexPtr-> Load_EQ(branch->my_set, branch->value.toInt());
+            theIndexPtr-> Load_EQ(branch->my_set, branch->value);
             break;
         case GE:
-            theIndexPtr-> Load_GE(branch->my_set, branch->value.toInt());
+            theIndexPtr-> Load_GE(branch->my_set, branch->value);
             break;
         case LE:
-            theIndexPtr-> Load_LE(branch->my_set, branch->value.toInt());
+            theIndexPtr-> Load_LE(branch->my_set, branch->value);
             break;
         case GT:
-            theIndexPtr-> Load_GT(branch->my_set, branch->value.toInt());
+            theIndexPtr-> Load_GT(branch->my_set, branch->value);
             break;
         case LT:
-            theIndexPtr-> Load_LT(branch->my_set, branch->value.toInt());
+            theIndexPtr-> Load_LT(branch->my_set, branch->value);
             break;
         }
     }

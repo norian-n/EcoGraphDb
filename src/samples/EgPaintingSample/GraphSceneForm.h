@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
+#include <QMimeData>
+#include <QDrag>
 // #include <QGraphicsSceneMouseEvent>
 
 #include "../../egDataNodesType.h"
@@ -26,6 +28,10 @@ public:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent);
 
+    virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *event);
+    virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event);
+    virtual void dropEvent(QGraphicsSceneDragDropEvent *event);
+
     GraphSceneForm* myForm = nullptr;
 signals:
 
@@ -41,6 +47,46 @@ private:
     int saveX = 0;
     int saveY = 0;
 
+    QTransform deviceTransform;
+    QGraphicsItem* theItem = nullptr;
+};
+
+class ItemsMenuGraphicsScene : public QGraphicsScene
+{
+    Q_OBJECT
+public:
+
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent);
+
+    virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event);
+    virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent *event);
+
+    /*
+    virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * mouseEvent);
+    virtual void wheelEvent(QGraphicsSceneWheelEvent *wheelEvent);
+    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent);
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent);
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent);
+    */
+
+
+
+    GraphSceneForm* myForm = nullptr;
+signals:
+
+public slots:
+
+private:
+    // QList <QPointF> m_points;
+
+    /*bool isPressed = false;
+
+    bool isMoved = false;
+
+    int saveX = 0;
+    int saveY = 0;
+    */
+    QTransform deviceTransform;
     QGraphicsItem* theItem = nullptr;
 };
 
@@ -52,6 +98,7 @@ public:
     Ui::GraphSceneForm *ui;
 
     EgDataNodesType nodes;
+    EgDataNodesType images;
 
     bool firstNodeStored = false;
     QGraphicsItem* firstNode = nullptr;
@@ -67,7 +114,10 @@ private slots:
 private:
 
     MyGraphicsScene scene;
+    ItemsMenuGraphicsScene iconsScene;
     EgGraphDatabase graphDB;
+
+    void LoadImages();
 
     void LoadGraph();
     void SaveGraph();

@@ -33,7 +33,7 @@ void EgLinksTests::testCreateNodes()
     graphDB.CommitNodeType();
 
         // create links type
-    graphDB.CreateEgDb();
+    // graphDB.CreateEgDb();
 
     graphDB.AddLinkType("linksTestTree", "linksTest", "linksTest");
 

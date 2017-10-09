@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
  *
- * License: propietary open source, free for non-commercial applications
+ * License: defined in license.txt file located in the root sources dir
  *
  */
 
@@ -67,7 +67,7 @@ template <typename KeyType> void EgIndexFiles<KeyType>::CloseIndexFiles()
 }
 
 
-template <typename KeyType> void EgIndexFiles<KeyType>::AddObjToIndex()
+template <typename KeyType> void EgIndexFiles<KeyType>::AddIndex()
 {
 
     indexChunks.theKey = theIndex;
@@ -154,7 +154,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::DeleteIndex()
     return 0;
 }
 
-template <typename KeyType> int EgIndexFiles<KeyType>::LoadAllDataOffsets(QSet<quint64>& index_offsets)
+template <typename KeyType> int EgIndexFiles<KeyType>::LoadAllDataOffsets(QSet<quint64>& dataOffsets)
 {
 
     if (! dir.setCurrent("egdb"))
@@ -173,7 +173,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::LoadAllDataOffsets(QSet<q
 
     fingersTree.IndexFileName = IndexFileName;  // debug info
 
-    indexChunks.LoadAllData(index_offsets);
+    indexChunks.LoadAllData(dataOffsets);
 
     indexChunks.CloseIndexFiles();
 
@@ -366,6 +366,3 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LT(QSet<quint64>& in
 }
 
 
-// template class EgIndexesComparator<qint32>;
-
-template class EgIndexFiles<qint32>; // for unit tests

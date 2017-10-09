@@ -1,0 +1,12 @@
+#ifndef ECOGRAPHDB_GLOBAL_H
+#define ECOGRAPHDB_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(ECOGRAPHDB_LIBRARY)
+#  define ECOGRAPHDBSHARED_EXPORT Q_DECL_EXPORT
+#else
+#  define ECOGRAPHDBSHARED_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // ECOGRAPHDB_GLOBAL_H

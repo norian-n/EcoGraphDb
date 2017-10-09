@@ -76,6 +76,7 @@ public:
     }
 
     ~EgIndexes() { if (zero_chunk) delete[] zero_chunk; if (chunk) delete[] chunk; if (new_chunk) delete[] new_chunk;}
+                 // qDebug()  << "EgIndexes destructor called ";}
 
     typedef bool (*CompareFunctionType) (KeyType&, KeyType&);
     static bool CompareEQ (KeyType& currentIndex, KeyType& theKey) {return (currentIndex == theKey);}

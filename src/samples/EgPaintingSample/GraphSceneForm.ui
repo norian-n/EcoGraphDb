@@ -6,14 +6,24 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>821</width>
-    <height>508</height>
+    <width>825</width>
+    <height>627</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Graph Scene</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGraphicsView" name="iconsPanel">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>70</height>
+      </size>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QGraphicsView" name="graphicsView"/>
    </item>

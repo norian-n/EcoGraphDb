@@ -121,6 +121,7 @@ public:
 
     int StoreLinkType(QString linkName);
     int LoadLinkType(QString linkName);
+    // int LoadLinkedIDsOnly(QString linkName); // TODO need connected type names map in the database
 
     int getMyLinkTypes();         // load from myDB on connect
 

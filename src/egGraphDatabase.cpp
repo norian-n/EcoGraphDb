@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
  *
- * License: propietary open source, free for non-commercial applications
+ * License: defined in license.txt file located in the root sources dir
  *
  */
 
@@ -104,30 +104,6 @@ int EgGraphDatabase::CreateLinksMetaInfo()
 
     linksMetaInfo.AddDataNode(addValues);
     linksMetaInfo.StoreData();
-
-    return 0;
-}
-
-int EgGraphDatabase::CreateEgDb()
-{
-    /*
-        // check if metainfo exists
-    if (dir.exists(QString("egdb/") + EgDataNodesLinkNamespace::egLinkTypesFileName + ".ddt"))
-    {
-        return 1;
-    }
-
-    EgNodeTypeSettings typeSettings;
-
-        // links meta-info
-    CreateNodeType(EgDataNodesLinkNamespace::egLinkTypesFileName, typeSettings);
-
-    AddDataField("name");
-    AddDataField("firstNodeType");
-    AddDataField("secondNodeType");
-
-    CommitNodeType();
-    */
 
     return 0;
 }
@@ -243,7 +219,7 @@ int EgGraphDatabase::CreateNodeType(QString typeName, bool addLocation, bool add
 }
 */
 
-int EgGraphDatabase::AddDataField(QString fieldName, bool indexed)
+int EgGraphDatabase::AddDataField(QString fieldName, bool uint32index)
 {
     if (! metaInfo)
     {
@@ -251,12 +227,12 @@ int EgGraphDatabase::AddDataField(QString fieldName, bool indexed)
         return -1;
     }
 
-    metaInfo-> AddDataField(fieldName, indexed);
+    metaInfo-> AddDataField(fieldName, uint32index);
 
     return 0;
 }
 
-int EgGraphDatabase::AddLocationField(QString fieldName, bool indexed)
+int EgGraphDatabase::AddLocationField(QString fieldName, bool uint32index)
 {
     if (! locationMetaInfo)
     {
@@ -264,7 +240,34 @@ int EgGraphDatabase::AddLocationField(QString fieldName, bool indexed)
         return -1;
     }
 
-    locationMetaInfo-> AddDataField(fieldName, indexed);
+    locationMetaInfo-> AddDataField(fieldName, uint32index);
+
+    return 0;
+}
+
+
+int EgGraphDatabase::AddDataField(QString fieldName, EgIndexSettings indexSettings)
+{
+    if (! metaInfo)
+    {
+        qDebug()  << "CreateNodeType() wasn't called, field not added " << fieldName << FN;
+        return -1;
+    }
+
+    metaInfo-> AddDataField(fieldName, indexSettings);
+
+    return 0;
+}
+
+int EgGraphDatabase::AddLocationField(QString fieldName, EgIndexSettings indexSettings)
+{
+    if (! locationMetaInfo)
+    {
+        qDebug()  << "CreateNodeType() wasn't called for node location field, it was not added " << fieldName << FN;
+        return -1;
+    }
+
+    locationMetaInfo-> AddDataField(fieldName, indexSettings);
 
     return 0;
 }
@@ -353,7 +356,7 @@ int  EgGraphDatabase::AddLinkType(QString linkName, QString firstDataNodeType, Q
         return -1;
     }
 
-    linkTypes.clear();
+    // linkTypes.clear();
 
     linksMetaInfo.LoadAllNodes();
 
@@ -382,6 +385,14 @@ int  EgGraphDatabase::AddLinkType(QString linkName, QString firstDataNodeType, Q
     linksMetaInfo.AddDataNode(addValues);
     linksMetaInfo.StoreData();
 
+    EgDataNodesLinkType* newLink = new EgDataNodesLinkType(this);
+
+    newLink-> linkName = linkName;
+    newLink-> firstTypeName = firstDataNodeType;
+    newLink-> secondTypeName = secondDataNodeType;
+
+    linkTypes.insert(newLink-> linkName, *newLink);
+
     return 0;
 
 }
@@ -403,8 +414,36 @@ int EgGraphDatabase::Connect()
     return res;
 }
 
-int EgGraphDatabase::Attach(EgDataNodesType* nType)
+    /*
+
+int EgGraphDatabase::CreateEgDb()
 {
+
+        // check if metainfo exists
+    if (dir.exists(QString("egdb/") + EgDataNodesLinkNamespace::egLinkTypesFileName + ".ddt"))
+    {
+        return 1;
+    }
+
+    EgNodeTypeSettings typeSettings;
+
+        // links meta-info
+    CreateNodeType(EgDataNodesLinkNamespace::egLinkTypesFileName, typeSettings);
+
+    AddDataField("name");
+    AddDataField("firstNodeType");
+    AddDataField("secondNodeType");
+
+    CommitNodeType();
+
+
+    return 0;
+}
+
+    */
+
+// int EgGraphDatabase::Attach(EgDataNodesType* nType)
+// {
     /*
     if (! isConnected)
     {
@@ -414,11 +453,11 @@ int EgGraphDatabase::Attach(EgDataNodesType* nType)
     }
     */
 
-    if (! connNodeTypes.contains(nType-> metaInfo.typeName)) // FIXME check multi instances
-        connNodeTypes.insert(nType-> metaInfo.typeName, nType);
+//    if (! connNodeTypes.contains(nType-> metaInfo.typeName)) // FIXME check multi instances
+//        connNodeTypes.insert(nType-> metaInfo.typeName, nType);
 
-    return 0;
-}
+//     return 0;
+// }
 
 int EgGraphDatabase::LoadLinksMetaInfo()
 {
@@ -432,13 +471,19 @@ int EgGraphDatabase::LoadLinksMetaInfo()
         return -1;
     }
 
-    linksMetaInfo.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName); // FIXME check
+    if (linksMetaInfo.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName) < 0)
+    {
+        // qDebug()  << "EgDB connect error: Links meta info doesn't exist: " << EgDataNodesLinkNamespace::egLinkTypesFileName << ".dat" << FN;
+
+        return -1;
+    }
 
     linksMetaInfo.LoadAllNodes();
 
     linkTypes.clear();
 
-    for (QMap<EgDataNodeIDtype, EgDataNode>::iterator nodesIter = linksMetaInfo.dataNodes.begin(); nodesIter != linksMetaInfo.dataNodes.end(); ++nodesIter)
+        // QMap<EgDataNodeIDtype, EgDataNode>::iterator
+    for (auto nodesIter = linksMetaInfo.dataNodes.begin(); nodesIter != linksMetaInfo.dataNodes.end(); ++nodesIter)
     {
         // qDebug()  << "nodesIter.value().dataFields = " << nodesIter.value().dataFields << FN;
 
@@ -449,9 +494,11 @@ int EgGraphDatabase::LoadLinksMetaInfo()
         newLink-> secondTypeName = nodesIter.value()["secondNodeType"].toString();
 
         if (newLink-> linkName != QString(EgDataNodesNamespace::egDummyLinkType))
+        {
             linkTypes.insert(newLink-> linkName, *newLink);
 
-        // qDebug()  << "Link added to EgGraphDatabase: " << newLink.linkName << FN;
+            // qDebug()  << "Link added to EgGraphDatabase: " << newLink-> linkName << FN;
+        }
     }
 
     return 0;

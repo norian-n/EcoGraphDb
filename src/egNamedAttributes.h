@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
  *
- * License: propietary open source, free for non-commercial applications
+ * License: defined in license.txt file located in the root sources dir
  *
  */
 
@@ -18,13 +18,14 @@ class EgNamedAttributes
 {
 public:
 
-    // FIXME TODO not implemented some functionality
+    // FIXME TODO check if all functionality implemented, write coverage tests
 
     EgDataNodesType* primaryNodesType;      // backlink
     EgDataNodesType* namedAttributesStorage;
 
-    EgDataNodeIDtype currentNodeId = 0;                     // last for GetNamedAttributes
+    // EgDataNodeIDtype currentNodeId = 0;                     // last for GetNamedAttributes
     QMap <QString, QVariant>  namedAttributesOfNode;   // temporary for GetNamedAttributes
+    QMap <QString, EgDataNodeIDtype>  namedAttributesOfNodeIDs;   // IDs in the namedAttributesStorage
 
     QMultiMap <EgDataNodeIDtype, EgDataNode*>  attributesById;
 
@@ -37,6 +38,7 @@ public:
     int ResolveNamedAttributes();                       // fill attributesById
 
     int GetNamedAttributes(EgDataNodeIDtype nodeID);    // fill namedAttributesOfNode
+    int GetNamedAttributesIDs(EgDataNodeIDtype nodeID);
 
     EgNamedAttributes() = delete;
     EgNamedAttributes(EgDataNodesType* thePrimaryNodesType);

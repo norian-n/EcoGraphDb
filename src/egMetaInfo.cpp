@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
  *
- * License: propietary open source, free for non-commercial applications
+ * License: defined in license.txt file located in the root sources dir
  *
  */
 
@@ -22,9 +22,29 @@ void EgDataNodeTypeMetaInfo::AddDataField(QString fieldName, bool indexed)
 
     if (indexed)
     {
-        // indexedFields.append(fieldName);
-        indexedToOrder.insert(fieldName, order);
+        // indexedToOrder.insert(fieldName, order);
+
+        EgIndexSettings indexSettings;
+
+        indexSettings.fieldNum = order;
+        indexSettings.indexSize = 32;
+        indexSettings.isSigned = 0;
+        indexSettings.functionID = 0;
+
+        indexedFields.insert(fieldName, indexSettings);
     }
+}
+
+void EgDataNodeTypeMetaInfo::AddDataField(QString fieldName, EgIndexSettings indexSettings)
+{
+    int order = dataFields.count();
+
+    dataFields.append(fieldName);
+
+    nameToOrder.insert(fieldName, order);
+
+    indexSettings.fieldNum = order;
+    indexedFields.insert(fieldName, indexSettings);
 }
 
 int EgDataNodeTypeMetaInfo::LocalStoreMetaInfo()
@@ -55,7 +75,20 @@ int EgDataNodeTypeMetaInfo::LocalStoreMetaInfo()
     dStream << useGUIsettings;
 
     dStream << dataFields;  // field descriptors
-    dStream << indexedToOrder.keys();
+    // dStream << indexedToOrder.keys();
+
+    dStream << (quint32) indexedFields.size();
+
+    for (auto indIter = indexedFields.begin(); indIter != indexedFields.end(); ++indIter)
+    {
+        // qDebug() << indIter.key() << " " << indIter.value().fieldNum << FN;
+
+        dStream << indIter.key();
+        dStream << indIter.value().fieldNum;
+        dStream << indIter.value().indexSize;
+        dStream << indIter.value().isSigned;
+        dStream << indIter.value().functionID;
+    }
 
     ddt_file.close();    
 
@@ -64,10 +97,9 @@ int EgDataNodeTypeMetaInfo::LocalStoreMetaInfo()
 
 int EgDataNodeTypeMetaInfo::LocalLoadMetaInfo()
 {
-    QList<QString> indexedFields;
+    QList<QString> indexedFieldsLocal;
 
-    QList<QString>::iterator stringListIter;
-    int order = 0;
+    Clear(); // init metainfo
 
         // open file
     QFile ddt_file("egdb/" + typeName + ".ddt");
@@ -87,8 +119,6 @@ int EgDataNodeTypeMetaInfo::LocalLoadMetaInfo()
         return -1;
     }
 
-    Clear();
-
     dStream >> nodesCount;  // data nodes (NOT field descriptors) count
     dStream >> nextObjID;   // incremental counter
 
@@ -99,14 +129,38 @@ int EgDataNodeTypeMetaInfo::LocalLoadMetaInfo()
     dStream >> useGUIsettings;
 
     dStream  >> dataFields;  // field descriptors
-    dStream  >> indexedFields;
+    // dStream  >> indexedFieldsLocal;
 
-    for (stringListIter = dataFields.begin(); stringListIter != dataFields.end(); stringListIter++)
+    quint32 theSize = 0;
+    EgIndexSettings theSettings;
+    QString theName;
+
+    dStream >> theSize;
+
+    for (quint32 i = 0; i < theSize; i++)
+    {
+        dStream  >> theName;
+        dStream  >> theSettings.fieldNum;
+        dStream  >> theSettings.indexSize;
+        dStream  >> theSettings.isSigned;
+        dStream  >> theSettings.functionID;
+
+        // qDebug() << theName << " " << theSettings.fieldNum << FN;
+
+        indexedFields.insert(theName, theSettings);
+    }
+
+    int order = 0;
+
+        // QList<QString>::iterator
+    for (auto stringListIter = dataFields.begin(); stringListIter != dataFields.end(); stringListIter++)
         nameToOrder.insert(*stringListIter, order++);
-
-    for (stringListIter = indexedFields.begin(); stringListIter != indexedFields.end(); stringListIter++)
+/*
+        // QList<QString>::iterator
+    for (auto stringListIter = indexedFieldsLocal.begin(); stringListIter != indexedFieldsLocal.end(); stringListIter++)
         if (nameToOrder.contains(*stringListIter))
             indexedToOrder.insert(*stringListIter, nameToOrder[*stringListIter]);
+            */
 
     ddt_file.close();
 
@@ -121,15 +175,15 @@ void EgDataNodeTypeMetaInfo::PrintMetaInfo()
      qDebug() << dataFields;
 
      qDebug() << "Fields order:";
-     for (QHash<QString, int> ::iterator curDesc = nameToOrder.begin(); curDesc != nameToOrder.end(); ++curDesc)
+     for (auto curDesc = nameToOrder.begin(); curDesc != nameToOrder.end(); ++curDesc)
          qDebug() << curDesc.value() << " " << curDesc.key();
 
      // qDebug() << "Indexes order:";
      // qDebug() << indexedFields;
 
      qDebug() << "Indexes order:";
-     for (QHash<QString, int> ::iterator curDesc = indexedToOrder.begin(); curDesc != indexedToOrder.end(); ++curDesc)
-         qDebug() << curDesc.value() << " " << curDesc.key();
+     // for (auto curDesc = indexedToOrder.begin(); curDesc != indexedToOrder.end(); ++curDesc)
+     //    qDebug() << curDesc.value() << " " << curDesc.key();
 }
 
 /*

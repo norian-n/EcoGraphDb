@@ -108,6 +108,7 @@ int main() // int argc, char *argv[])
     graphDB.Connect();
 
     testEgDataNodesType.Connect(graphDB, "test");
+    // testEgDataNodesType.metaInfo.PrintMetaInfo();
 
     // return 0; // FIXME STUB
 

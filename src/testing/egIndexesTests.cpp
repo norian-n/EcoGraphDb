@@ -16,7 +16,7 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataIndexAddFirs
     egIndexFiles.theIndex  = 0x1; // 0x6144;
     egIndexFiles.dataOffset = 0xabcd01;
 
-    egIndexFiles.AddObjToIndex();
+    egIndexFiles.AddIndex();
 
     // egIndexFiles.LoadFingersChunk();
     // egIndexFiles.LoadIndexChunk();
@@ -62,7 +62,7 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataInsertIndexe
             egIndexFiles.dataOffset = 0xabcd00 + i + 0x10;
         }
 
-        egIndexFiles.AddObjToIndex();
+        egIndexFiles.AddIndex();
     }
 
     // egIndexFiles.fingersTree.PrintAllChunksInfo("After insert");

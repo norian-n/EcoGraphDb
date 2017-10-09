@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
  *
- * License: propietary open source, free for non-commercial applications
+ * License: defined in license.txt file located in the root sources dir
  *
  */
 
@@ -49,14 +49,15 @@ public:
     // EgDataNodesType controlDescs;
 
     QMap<QString, EgDataNodesLinkType>  linkTypes;
-    QMap<QString, EgDataNodesType*>  connNodeTypes;
+//     QMap<QString, EgDataNodesType*>  connNodeTypes;
 
     EgGraphDatabase() {} // : isConnected(false), metaInfo(nullptr), locationMetaInfo(nullptr), attributesMetaInfo(nullptr), connection(nullptr) {}
 
     ~EgGraphDatabase(); //  { if (metaInfo) delete metaInfo; if (locationMetaInfo) delete locationMetaInfo; if (attributesMetaInfo) delete attributesMetaInfo; }
 
+    // int CreateRemoteEgDb(); // FIXME - Remote on server
     int Connect();
-    int Attach(EgDataNodesType* nType);
+    // int Attach(EgDataNodesType* nType);
 
     bool CheckLinksMetaInfo();
     int  CreateLinksMetaInfo();
@@ -68,11 +69,14 @@ public:
 
     // int CreateNodeType(QString typeName, bool addLocation = false, bool addAttributes = false); // FIXME delete
 
-    int AddDataField(QString fieldName, bool indexed = false);    // add field descriptor, no GUI control data
-    int AddLocationField(QString fieldName, bool indexed = false);
+    int AddDataField(QString fieldName, bool uint32index = false);    // add field descriptor, no GUI control data
+    int AddLocationField(QString fieldName, bool uint32index = false);
+
+    int AddDataField(QString fieldName, EgIndexSettings indexSettings);    // add field descriptor, no GUI control data
+    int AddLocationField(QString fieldName, EgIndexSettings indexSettings);
+
     int CommitNodeType();
 
-    int CreateEgDb();
     int AddLinkType(QString linkName, QString firstDataNodeType, QString secondDataNodeType);
 
     // int StoreAllLinks();

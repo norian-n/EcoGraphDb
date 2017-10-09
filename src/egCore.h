@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
  *
- * License: propietary open source, free for non-commercial applications
+ * License: defined in license.txt file located in the root sources dir
  *
  */
 
@@ -33,13 +33,14 @@ typedef quint16 EgFieldIDtype;      // data field ID type
 
 class EgDataNode;
 
-// filter callback type (remote filter could be set via Qt plugins)
+    // custom filter function type (remote filter could be set via Qt plugins)
 typedef bool (*FilterFunctionType) (EgDataNode& data_object, QList<QVariant>& filter_values);
 // sample: int FilterTest (DataObj& data_object, QList<QVariant>& filter_values)
 
-    // index-based filter type
 
-enum FilterType     // fortran-style indexes logical abbreviations
+
+    // index-based filter type (fortran-style logical acronims)
+enum FilterType
 {
     EQ, // ==
     GE, // >=
@@ -49,7 +50,8 @@ enum FilterType     // fortran-style indexes logical abbreviations
     NE  // !=
 };
 
-enum LOType         // indexes logical operations
+    // indexes tree logical operations
+enum LOType
 {
     AND,
     OR
@@ -64,7 +66,8 @@ enum DataStatusType // data status type
     is_deleted
 };
 
-enum formMode   // Qt form for data node operations mode
+    // Qt form data node operations
+enum formMode
 {
     formModeAdd,
     formModeEdit,
@@ -72,22 +75,23 @@ enum formMode   // Qt form for data node operations mode
 };
 
     // Qt data model related constants - service fields location
-
 const int data_status = Qt::UserRole + 1;   // DataStatusType equivalent
 const int data_id     = Qt::UserRole + 2;   // egDb data node ID
 
-struct NamedAttribute   // data node add-on
+    // data node add-on
+struct NamedAttribute
 {
     QString  name;
     QVariant value;
 };
 
-struct EgRemoteConnect    // server connection info
+    // server connection info
+struct EgRemoteConnect
 {
     QString server_address;
 };
 
-
+    // data node type settings
 struct EgNodeTypeSettings
 {
     bool useEntryNodes = false;         // start points for graph operations
@@ -97,6 +101,16 @@ struct EgNodeTypeSettings
     bool useGUIsettings = false;
 
     EgRemoteConnect*  connection = nullptr;     // connection data (nullptr means local files)
+};
+
+// data node type settings
+struct EgIndexSettings
+{
+    quint16 fieldNum;       // field # in data node fields list
+    quint16 indexSize;      // bits - 32, 64 etc.
+    quint16 isSigned;       // uniform bool representation
+    quint16 functionID;     // transformation function
+
 };
 
 

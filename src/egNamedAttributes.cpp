@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
  *
- * License: propietary open source, free for non-commercial applications
+ * License: defined in license.txt file located in the root sources dir
  *
  */
 
@@ -37,25 +37,40 @@ int EgNamedAttributes::AddNamedAttribute(EgDataNodeIDtype nodeID, const QString 
 
 
 int EgNamedAttributes::UpdateNamedAttribute(EgDataNodeIDtype nodeID, const QString &name, QVariant &value)
-{
-    QList<QVariant> myData;
+{   
+        // find attribute
+    GetNamedAttributesIDs(nodeID);
 
-    myData << nodeID << name << value;
+    auto attributeIter = namedAttributesOfNodeIDs.find(name);
 
-        // FIXME find attribute
+    if (attributeIter != namedAttributesOfNodeIDs.end())
+    {
+        QList<QVariant> myData;
 
-    namedAttributesStorage-> UpdateDataNode(myData, nodeID);
+        myData << nodeID << name << value;
 
-    return 0;
+        namedAttributesStorage-> UpdateDataNode(myData, nodeID);
+        return 0;
+    }
+
+    return -1; // not found
 }
 
 int EgNamedAttributes::DeleteNamedAttribute(EgDataNodeIDtype nodeID, const QString &name)
 {
-    // FIXME find attribute
+        // find attribute
+    GetNamedAttributesIDs(nodeID);
 
-    // namedAttributesStorage->DeleteDataNode(nodeID);
+    auto attributeIter = namedAttributesOfNodeIDs.find(name);
 
-    return 0;
+    if (attributeIter != namedAttributesOfNodeIDs.end())
+    {
+        namedAttributesStorage->DeleteDataNode(nodeID);
+
+        return 0;
+    }
+
+    return -1; // not found
 }
 
 int EgNamedAttributes::LoadNamedAttributes()
@@ -69,8 +84,10 @@ int EgNamedAttributes::LoadNamedAttributes()
     // for (QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodeIter = primaryNodesType-> dataNodes.begin(); dataNodeIter != primaryNodesType-> dataNodes.end(); ++dataNodeIter)
     for (auto dataNodeIter = primaryNodesType-> dataNodes.begin(); dataNodeIter != primaryNodesType-> dataNodes.end(); ++dataNodeIter)
         // namedAttributesType-> LocalFiles-> primIndexFiles-> Load_EQ(namedAttributesType->IndexOffsets, dataNodeIter.key()); // FIXME wrong index
-
-        namedAttributesStorage-> LocalFiles-> indexFiles["nodeid"]-> Load_EQ(namedAttributesStorage->IndexOffsets, dataNodeIter.key());
+    {
+        QVariant tmpID = dataNodeIter.key();
+        namedAttributesStorage-> LocalFiles-> indexFiles["nodeid"]-> Load_EQ(namedAttributesStorage->IndexOffsets, tmpID);
+    }
 
 
     if (! namedAttributesStorage-> IndexOffsets.isEmpty())
@@ -107,6 +124,21 @@ int EgNamedAttributes::GetNamedAttributes(EgDataNodeIDtype nodeID)
     while (attributeIter != attributesById.end() && attributeIter.key() == nodeID)
     {
         namedAttributesOfNode.insert((*(attributeIter.value()))["key"].toString(), (*(attributeIter.value()))["value"]);
+        ++attributeIter;
+    }
+
+    return 0;
+}
+
+int EgNamedAttributes::GetNamedAttributesIDs(EgDataNodeIDtype nodeID)
+{
+    namedAttributesOfNodeIDs.clear();
+
+        // QMultiMap <EgDataNodeIDtype, EgDataNode*>
+    auto attributeIter = attributesById.find(nodeID);
+    while (attributeIter != attributesById.end() && attributeIter.key() == nodeID)
+    {
+        namedAttributesOfNodeIDs.insert((*(attributeIter.value()))["key"].toString(), attributeIter.value()-> dataNodeID);
         ++attributeIter;
     }
 

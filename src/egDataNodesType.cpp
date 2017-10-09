@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
  *
- * License: propietary open source, free for non-commercial applications
+ * License: defined in license.txt file located in the root sources dir
  *
  */
 
@@ -161,9 +161,9 @@ int EgDataNodesType::getMyLinkTypes()
     if (metaInfo.myECoGraphDB)
         for (QMap<QString, EgDataNodesLinkType>::iterator linksIter = metaInfo.myECoGraphDB-> linkTypes.begin(); linksIter != metaInfo.myECoGraphDB-> linkTypes.end(); ++linksIter)
         {
-            // qDebug() << "linksIter.key() = " << linksIter.key()
-            //         << "linksIter.value().firstTypeName = " << linksIter.value().firstTypeName
-            //         << "linksIter.value().secondTypeName = " << linksIter.value().secondTypeName << FN;
+             // qDebug() << "linksIter.key() = " << linksIter.key()
+             //        << "linksIter.value().firstTypeName = " << linksIter.value().firstTypeName
+             //        << "linksIter.value().secondTypeName = " << linksIter.value().secondTypeName << FN;
 
             if ((linksIter.value().firstTypeName == metaInfo.typeName) || (linksIter.value().secondTypeName == metaInfo.typeName))
             {
@@ -184,8 +184,8 @@ void EgDataNodesType::SetLocalFilter(FilterFunctionType theFunction) // set filt
 
 void EgDataNodesType::SetFilterParams(QList<QVariant>& values)
 {
-    LocalFiles-> filter_values.clear();
-    LocalFiles-> filter_values = values;
+    LocalFiles-> filterValues.clear();
+    LocalFiles-> filterValues = values;
 }
 
 
@@ -783,7 +783,7 @@ int EgDataNodesType::StoreLinkType(QString linkName)
     return 0;
 }
 
-
+// int EgDataNodesType::LoadLinkedIDsOnly(QString linkName)
 int EgDataNodesType::LoadLinkType(QString linkName)
 {
     if (! myLinkTypes.contains(linkName))

@@ -69,7 +69,7 @@ public:
     EgIndexConditionsTree(): root(NULL) {}
     ~EgIndexConditionsTree() { if (root) RecursiveClear(root);}
 
-    void Init(EgIndexFiles<qint32>* indexes_ptr);        // attach to indexes to get leaf sets
+    void Init(EgIndexFiles<qint32>* indexes_ptr);        // attach to indexes to get leaf sets FIXME check type
 
     // void clearSets(EgIndexNode *rootNode);      // clear sets in nodes
     void RecursiveClearSets(EgIndexNode* branch);

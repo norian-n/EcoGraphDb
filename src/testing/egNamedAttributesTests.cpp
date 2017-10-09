@@ -13,7 +13,7 @@ bool EgNamedAttributesTests::testCreateAttributes()
 {
     EgNodeTypeSettings typeSettings;
 
-    graphDB.CreateEgDb();
+    // graphDB.CreateEgDb();
 
         // test all options
 

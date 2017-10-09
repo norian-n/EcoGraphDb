@@ -20,6 +20,29 @@
 #include "egMetaInfo.h"
 #include "indexes/egIndexesFiles.h"
 
+// templates instances to make linker happy
+
+template class EgFingers<qint32>;
+template class EgFingers<quint32>;
+template class EgFingers<qint64>;
+template class EgFingers<quint64>;
+template class EgFingers<float>;
+template class EgFingers<double>;
+
+template class EgIndexes<qint32>;
+template class EgIndexes<quint32>;
+template class EgIndexes<qint64>;
+template class EgIndexes<quint64>;
+template class EgIndexes<float>;
+template class EgIndexes<double>;
+
+template class EgIndexFiles<qint32>;
+template class EgIndexFiles<quint32>;
+template class EgIndexFiles<qint64>;
+template class EgIndexFiles<quint64>;
+template class EgIndexFiles<float>;
+template class EgIndexFiles<double>;
+
 class EgDataNodesType;
 
 class EgDataFiles // Data Files operations
@@ -36,15 +59,15 @@ public:
     QFile dat_file;                             // data file
     QDataStream dat;
 
-    EgIndexFiles<qint32>* primIndexFiles;                // primary index files
-    QHash<QString, EgIndexFiles<qint32>*> indexFiles;   // other indexes files
+    EgIndexFiles<qint32>* primIndexFiles;                   // primary index files
+    QHash<QString, EgIndexFilesBase*> indexFiles;       // other indexes files
 
     FilterFunctionType FilterCallback;
 
         // filter callback support
-    QList <QVariant> filter_values;        // values for filter callback parameters
+    QList <QVariant> filterValues;                  // values for custom filter function parameters
 
-    // EgDataNode tmpNode;                        // for data load and indexes update
+    // EgDataNode tmpNode;                          // for data load and indexes update
 
     EgDataFiles() : /*indexes(new EgIndex()),*/ FilterCallback(nullptr) { /*indexes->LocalFiles = this;*/ }
     // EgDataFiles(const EgDataNodesType* my_class);
