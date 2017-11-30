@@ -365,4 +365,12 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LT(QSet<quint64>& in
     return res;
 }
 
+/*
+EgIndexFiles<qint32>  EgIndexFilesqint32(QString("EgIndexFilesqint32"));
+EgIndexFiles<quint32> EgIndexFilesquint32(QString("EgIndexFilesquint32"));
+EgIndexFiles<qint64>  EgIndexFilesqint64(QString("EgIndexFilesqint64"));
+EgIndexFiles<quint64> EgIndexFilesquint64(QString("EgIndexFilesquint64"));
+EgIndexFiles<float>   EgIndexFilesfloat(QString("EgIndexFilesfloat"));
+EgIndexFiles<double>  EgIndexFilesdouble(QString("EgIndexFilesdouble"));
+*/
 

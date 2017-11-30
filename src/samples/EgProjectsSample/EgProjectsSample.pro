@@ -11,35 +11,30 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = EgProjectsSample
 TEMPLATE = app
 
+#LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_8_0_MinGW_32bit-Debug/debug -lEcoGraphDb
+
+#DEPENDPATH += . ../EcoGraphDb
+#INCLUDEPATH += ../EcoGraphDb/include
+
+#win32:CONFIG(release, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_8_0_MinGW_32bit-Release/release -lEcoGraphDb
+#else:win32:CONFIG(debug, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_8_0_MinGW_32bit-Debug/debug -lEcoGraphDb
+
+win32:CONFIG(release, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_9_2_MinGW_32bit-Release/release -lEcoGraphDb
+else:win32:CONFIG(debug, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_9_2_MinGW_32bit-Debug/debug -lEcoGraphDb
+
+#else:unix: LIBS += -L$$PWD/build-MyLibrary/ -lMyLibrary
+
 SOURCES += main.cpp \
     mainwindow.cpp \
     project_form.cpp \
     funcblocks.cpp \
-    ../../egDataNodesType.cpp \
-    ../../egGUIconnect.cpp \
-    ../../egGraphDatabase.cpp \
-    ../../indexes/egIndexConditions.cpp \
-    ../../egDataNode.cpp \
-    ../../egDataClient.cpp \
-    ../../egLocalFiles.cpp \
-    ../../egMetaInfo.cpp \
-    ../../egDataNodesLink.cpp \
-    ../../indexes/egIndexesFiles.cpp \
-    ../../indexes/egIndexes.cpp \
-    ../../indexes/egFingers.cpp \
-    ../../egEntryNodes.cpp \
     funcblock_form.cpp \
     projects.cpp \
-    references.cpp \
-    ../../egNodesLocation.cpp \
-    ../../egNamedAttributes.cpp
-
+    references.cpp
 
 HEADERS += mainwindow.h \
     project_form.h \
     funcblocks.h \
-    ../../indexes/egIndexesFiles.h \
-    ../../indexes/egIndexConditions.h \
     funcblock_form.h \
     projects.h \
     references.h

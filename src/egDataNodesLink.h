@@ -39,17 +39,21 @@ class EgDataNodesLinkType
 public:
     bool isConnected = false;
 
-    EgGraphDatabase* egDatabase;        // backlink to db
-    EgDataNodesType* linksStorage;      // data nodes for links info
+    EgGraphDatabase* egDatabase  {nullptr};        // backlink to db
+    EgDataNodesType* linksStorage {nullptr};      // data nodes for links info
+
+    EgDataNodesType* firstType {nullptr};
+    EgDataNodesType* secondType {nullptr};
 
     QString linkName;
 
     QString firstTypeName;
     QString secondTypeName;
 
-    EgDataNodesLinkType(): egDatabase(nullptr), linksStorage(nullptr) {}        // required by debug, don't use it
+    EgDataNodesLinkType() {}  // required for debug purposes, don't use it ever
 
     EgDataNodesLinkType(EgGraphDatabase* theDatabase);
+
     ~EgDataNodesLinkType();
 
     int AddLink (EgDataNodeIDtype leftNodeID, EgDataNodeIDtype rightNodeID);
@@ -57,7 +61,10 @@ public:
 
     int LoadLinks();
     int StoreLinks();
-    int ResolveLinks(EgDataNodesType& firstType, EgDataNodesType& secondType);  // move loaded links to data nodes if loaded
+
+    int ResolveLinksToPointers();
+
+    int ResolveNodeTypes();
 
     int LoadLinkedNodes(EgDataNodeIDtype fromNodeID);
 

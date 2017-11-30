@@ -120,9 +120,9 @@ void FuncBlocksForm::loadFuncblocks()
     Funcblocks.LoadLinkType("funcblocksTree");
 
     Projects.LoadLinkType("projects_funcblocks");
-    Projects.myLinkTypes["projects_funcblocks"]-> ResolveLinks(Projects, Funcblocks);
+    Projects.myLinkTypes["projects_funcblocks"]-> ResolveLinksToPointers();
 
-    Funcblocks.myLinkTypes["funcblocksTree"]-> ResolveLinks(Funcblocks, Funcblocks);
+    Funcblocks.myLinkTypes["funcblocksTree"]-> ResolveLinksToPointers();
 
 /*
     qDebug() << "project ID = " << project_id << FN;

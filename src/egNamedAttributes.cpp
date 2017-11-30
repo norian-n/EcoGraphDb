@@ -85,7 +85,7 @@ int EgNamedAttributes::LoadNamedAttributes()
     for (auto dataNodeIter = primaryNodesType-> dataNodes.begin(); dataNodeIter != primaryNodesType-> dataNodes.end(); ++dataNodeIter)
         // namedAttributesType-> LocalFiles-> primIndexFiles-> Load_EQ(namedAttributesType->IndexOffsets, dataNodeIter.key()); // FIXME wrong index
     {
-        QVariant tmpID = dataNodeIter.key();
+        QVariant tmpID (dataNodeIter.key());
         namedAttributesStorage-> LocalFiles-> indexFiles["nodeid"]-> Load_EQ(namedAttributesStorage->IndexOffsets, tmpID);
     }
 

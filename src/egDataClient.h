@@ -21,7 +21,7 @@
 class EgDataClient // Data Conection Operations
 {
 public:
-    EgDataNodesType* d_class;
+    EgDataNodesType* dataNodesType;
     QTcpSocket tcpSocket;
     QByteArray block;
 
@@ -30,7 +30,7 @@ public:
 
     EgDataNodesTypeID egDataNodesTypeID; // server odb ID
 
-    EgDataClient(const EgDataNodesType* my_class);
+    EgDataClient(const EgDataNodesType* nodesType);
     ~EgDataClient() {}
 
     int RemoteGetOdbId();             // get odb_id from server

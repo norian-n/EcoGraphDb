@@ -2546,4 +2546,11 @@ template <typename KeyType> int EgFingers<KeyType>::AppendFingersChunk(QDataStre
     return 0;
 }
 
-
+/*
+EgFingers<qint32> EgFingersqint32;
+EgFingers<quint32> EgFingersquint32;
+EgFingers<qint64>  EgFingersqint64;
+EgFingers<quint64> EgFingersquint64;
+EgFingers<float> EgFingersfloat;
+EgFingers<double> EgFingersdouble;
+*/

@@ -47,7 +47,7 @@ bool EgNamedAttributesTests::testAddAttributes()
     QList<QVariant> addValues;
     QString nameString;
 
-    graphDB.Connect();
+    // graphDB.Connect();
 
     testDataNodes.Connect(graphDB, "attributes");
 
@@ -75,7 +75,7 @@ bool EgNamedAttributesTests::testAddAttributes()
 
 bool EgNamedAttributesTests::testLoadAttributes()
 {
-    graphDB.Connect();
+    // graphDB.Connect();
 
     testDataNodes.Connect(graphDB, "attributes");
 

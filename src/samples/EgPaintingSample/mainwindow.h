@@ -4,6 +4,9 @@
 #include <QMainWindow>
 #include <GraphSceneForm.h>
 
+#include <QFile>
+#include <QDir>
+
 #include "../../egDataNodesType.h"
 #include "../../egGraphDatabase.h"
 
@@ -35,6 +38,8 @@ private:
     EgDataNodesType images;
 
     void AddImages();
+
+    void cleanUpFiles();
 
 };
 

@@ -49,7 +49,7 @@ public:
     // EgDataNodesType controlDescs;
 
     QMap<QString, EgDataNodesLinkType>  linkTypes;
-//     QMap<QString, EgDataNodesType*>  connNodeTypes;
+    QMap<QString, EgDataNodesType*>  connectedNodeTypes;
 
     EgGraphDatabase() {} // : isConnected(false), metaInfo(nullptr), locationMetaInfo(nullptr), attributesMetaInfo(nullptr), connection(nullptr) {}
 
@@ -57,7 +57,7 @@ public:
 
     // int CreateRemoteEgDb(); // FIXME - Remote on server
     int Connect();
-    // int Attach(EgDataNodesType* nType);
+    int Attach(EgDataNodesType* nType);
 
     bool CheckLinksMetaInfo();
     int  CreateLinksMetaInfo();

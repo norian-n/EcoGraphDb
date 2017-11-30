@@ -92,7 +92,7 @@ void MainWindow::FillTestData()
     QList<QVariant> ins_values;
     EgNodeTypeSettings typeSettings;
 
-    graphDB.CreateEgDb();
+    // graphDB.CreateEgDb();
 
     graphDB.CreateNodeType("statuses", typeSettings);
 

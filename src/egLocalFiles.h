@@ -22,6 +22,33 @@
 
 // templates instances to make linker happy
 
+#ifdef EG_LIB_BUILD     // library build switch, define it in project or egCore.h
+
+#include "ecographdb_global.h"
+
+template class ECOGRAPHDBSHARED_EXPORT EgFingers<qint32>;
+template class ECOGRAPHDBSHARED_EXPORT EgFingers<quint32>;
+template class ECOGRAPHDBSHARED_EXPORT EgFingers<qint64>;
+template class ECOGRAPHDBSHARED_EXPORT EgFingers<quint64>;
+template class ECOGRAPHDBSHARED_EXPORT EgFingers<float>;
+template class ECOGRAPHDBSHARED_EXPORT EgFingers<double>;
+
+template class ECOGRAPHDBSHARED_EXPORT EgIndexes<qint32>;
+template class ECOGRAPHDBSHARED_EXPORT EgIndexes<quint32>;
+template class ECOGRAPHDBSHARED_EXPORT EgIndexes<qint64>;
+template class ECOGRAPHDBSHARED_EXPORT EgIndexes<quint64>;
+template class ECOGRAPHDBSHARED_EXPORT EgIndexes<float>;
+template class ECOGRAPHDBSHARED_EXPORT EgIndexes<double>;
+
+template class ECOGRAPHDBSHARED_EXPORT EgIndexFiles<qint32>;
+template class ECOGRAPHDBSHARED_EXPORT EgIndexFiles<quint32>;
+template class ECOGRAPHDBSHARED_EXPORT EgIndexFiles<qint64>;
+template class ECOGRAPHDBSHARED_EXPORT EgIndexFiles<quint64>;
+template class ECOGRAPHDBSHARED_EXPORT EgIndexFiles<float>;
+template class ECOGRAPHDBSHARED_EXPORT EgIndexFiles<double>;
+
+#else                   // not a library build
+
 template class EgFingers<qint32>;
 template class EgFingers<quint32>;
 template class EgFingers<qint64>;
@@ -42,6 +69,25 @@ template class EgIndexFiles<qint64>;
 template class EgIndexFiles<quint64>;
 template class EgIndexFiles<float>;
 template class EgIndexFiles<double>;
+
+#endif
+
+
+/*
+EgFingers<qint32> EgFingersqint32;
+EgFingers<quint32> EgFingersquint32;
+EgFingers<qint64>  EgFingersqint64;
+EgFingers<quint64> EgFingersquint64;
+EgFingers<float> EgFingersfloat;
+EgFingers<double> EgFingersdouble;
+
+EgIndexes<qint32> EgIndexesqint32;
+EgIndexes<quint32> EgIndexesquint32;
+EgIndexes<qint64> EgIndexesqint64;
+EgIndexes<quint64> EgIndexesquint64;
+EgIndexes<float> EgIndexesfloat;
+EgIndexes<double> EgIndexesdouble;
+*/
 
 class EgDataNodesType;
 

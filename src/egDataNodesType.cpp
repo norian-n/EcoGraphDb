@@ -83,51 +83,6 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
         LocalFiles-> Init(metaInfo);
         index_tree = new EgIndexConditionsTree();
 
-        if (metaInfo.useLocation)
-        {
-            // qDebug()  << "Connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
-
-            locations = new EgDataNodesLocation(this);
-
-            int locres = locations->locationStorage-> Connect(myDB, nodeTypeName + EgDataNodesNamespace::egLocationFileName);
-
-            if (locres)
-                qDebug()  << "Can't load location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
-        }
-
-        if (metaInfo.useNamedAttributes)
-        {
-            // qDebug()  << "Connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
-
-            namedAttributes = new EgNamedAttributes(this);
-
-            int attrres = namedAttributes->namedAttributesStorage-> Connect(myDB, nodeTypeName + EgDataNodesNamespace::egAttributesFileName);
-
-            if (attrres)
-                qDebug()  << "Can't load named attributes info " << nodeTypeName + EgDataNodesNamespace::egAttributesFileName << FN;
-        }
-
-        if (metaInfo.useEntryNodes)
-        {
-            // qDebug()  << "Connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
-
-            entryNodes = new EgEntryNodes(this);
-
-            int entres = entryNodes->entryStorage-> Connect(myDB, nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName);
-
-            if (entres)
-                qDebug()  << "Can't connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
-        }
-
-        if (metaInfo.useGUIsettings)
-        {
-            GUI = new EgDataNodesGUIsupport(this);
-
-            int guires = GUI-> LoadSimpleControlDesc();
-
-            if (guires)
-                qDebug()  << "Can't load GUI settings of " << nodeTypeName << FN;
-        }
     }
     else
     {
@@ -135,6 +90,53 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
 
         // FIXME TODO process server based version
     }
+
+    if (metaInfo.useLocation)
+    {
+        // qDebug()  << "Connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
+
+        locations = new EgDataNodesLocation(this);
+
+        int locres = locations->locationStorage-> ConnectServiceNodeType(myDB, nodeTypeName + EgDataNodesNamespace::egLocationFileName, connection);
+
+        if (locres)
+            qDebug()  << "Can't load location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
+    }
+
+    if (metaInfo.useNamedAttributes)
+    {
+        // qDebug()  << "Connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
+
+        namedAttributes = new EgNamedAttributes(this);
+
+        int attrres = namedAttributes->namedAttributesStorage-> ConnectServiceNodeType(myDB, nodeTypeName + EgDataNodesNamespace::egAttributesFileName, connection);
+
+        if (attrres)
+            qDebug()  << "Can't load named attributes info " << nodeTypeName + EgDataNodesNamespace::egAttributesFileName << FN;
+    }
+
+    if (metaInfo.useEntryNodes)
+    {
+        // qDebug()  << "Connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
+
+        entryNodes = new EgEntryNodes(this);
+
+        int entres = entryNodes->entryStorage-> ConnectServiceNodeType(myDB, nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName, connection);
+
+        if (entres)
+            qDebug()  << "Can't connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
+    }
+
+    if (metaInfo.useGUIsettings)
+    {
+        GUI = new EgDataNodesGUIsupport(this);
+
+        int guires = GUI-> LoadSimpleControlDesc();
+
+        if (guires)
+            qDebug()  << "Can't load GUI settings of " << nodeTypeName << FN;
+    }
+
 
         // init special data node
     notFound.metaInfo = &metaInfo;    
@@ -144,8 +146,8 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
         notFound.dataFields << QVariant("<Not found>");
 
         // connect to peer database controller
-    // if (! res)
-    //    res = myDB.Attach(this);  // FIXME implement double-check files
+    if (! res)
+        res = myDB.Attach(this);  // FIXME implement double-check files
 
     if (! res)
         res = getMyLinkTypes(); // extract nodetype-specific link types from all link types
@@ -156,10 +158,62 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
     return res;
 }
 
+int EgDataNodesType::ConnectServiceNodeType(EgGraphDatabase& myDB, const QString& nodeTypeName, EgRemoteConnect* server) // connect to server
+{
+    int res = 0;
+
+        // check if already connected FIXME implement reconnect
+    if (isConnected)
+    {
+        // qDebug()  << "Warning: attempt to connect again data nodes type: " << nodeTypeName << FN;
+
+        return 1;
+    }
+
+    metaInfo.myECoGraphDB = &myDB;
+    metaInfo.typeName = nodeTypeName;
+    connection = server;
+
+    if (! server)
+    {
+        if (metaInfo.LocalLoadMetaInfo())
+        {
+            // if (! nodeTypeName.contains(EgDataNodesNamespace::egGUIfileName))
+                qDebug()  << "Can't load meta info of data nodes type " << nodeTypeName << FN;
+
+            res = -1;
+        }
+
+        LocalFiles-> Init(metaInfo);
+        index_tree = new EgIndexConditionsTree();
+
+    }
+    else
+    {
+        ConnectonClient= new EgDataClient(this);
+
+        // FIXME TODO process server based version
+    }
+
+        // init special data node
+    notFound.metaInfo = &metaInfo;
+    notFound.dataFields.clear();
+
+    for (int i = 0; i < metaInfo.dataFields.count(); i++)
+        notFound.dataFields << QVariant("<Not found>");
+
+    if (! res)
+        isConnected = true;
+
+    return res;
+}
+
+
 int EgDataNodesType::getMyLinkTypes()
 {
     if (metaInfo.myECoGraphDB)
-        for (QMap<QString, EgDataNodesLinkType>::iterator linksIter = metaInfo.myECoGraphDB-> linkTypes.begin(); linksIter != metaInfo.myECoGraphDB-> linkTypes.end(); ++linksIter)
+            // QMap<QString, EgDataNodesLinkType>::iterator
+        for (auto linksIter = metaInfo.myECoGraphDB-> linkTypes.begin(); linksIter != metaInfo.myECoGraphDB-> linkTypes.end(); ++linksIter)
         {
              // qDebug() << "linksIter.key() = " << linksIter.key()
              //        << "linksIter.value().firstTypeName = " << linksIter.value().firstTypeName
@@ -399,7 +453,7 @@ int EgDataNodesType::LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeI
 
         // iterate loaded links
     for (auto Iter = myLinkTypes[linkName]->linksStorage-> dataNodes.begin(); Iter != myLinkTypes[linkName]->linksStorage-> dataNodes.end(); ++Iter)
-        LocalFiles->primIndexFiles-> Load_EQ(IndexOffsets, Iter.value()["to_node_id"].toInt());
+        LocalFiles->primIndexFiles-> Load_EQ(IndexOffsets, Iter.value()["to_node_id"].toInt()); //
 
     // qDebug() << "IndexOffsets.count() = " << IndexOffsets.count() << FN;
 

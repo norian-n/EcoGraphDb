@@ -63,7 +63,10 @@ int EgDataNodesLocation::LoadLocationsData()
 
     // for (QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodeIter = primaryNodesType-> dataNodes.begin(); dataNodeIter != primaryNodesType-> dataNodes.end(); ++dataNodeIter)
     for (auto dataNodeIter = primaryNodesType-> dataNodes.begin(); dataNodeIter != primaryNodesType-> dataNodes.end(); ++dataNodeIter)
-        locationStorage-> LocalFiles-> primIndexFiles-> Load_EQ(locationStorage->IndexOffsets, dataNodeIter.key());
+    {
+        QVariant tmpNodeID(dataNodeIter.key());
+        locationStorage-> LocalFiles-> primIndexFiles-> Load_EQ(locationStorage->IndexOffsets, tmpNodeID);
+    }
 
 
     if (! locationStorage-> IndexOffsets.isEmpty())

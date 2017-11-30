@@ -27,8 +27,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEPENDPATH += . ../EcoGraphDb
 #INCLUDEPATH += ../EcoGraphDb/include
 
-win32:CONFIG(release, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_8_0_MinGW_32bit-Debug/release -lEcoGraphDb
-else:win32:CONFIG(debug, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_8_0_MinGW_32bit-Debug/debug -lEcoGraphDb
+#win32:CONFIG(release, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_8_0_MinGW_32bit-Release/release -lEcoGraphDb
+#else:win32:CONFIG(debug, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_8_0_MinGW_32bit-Debug/debug -lEcoGraphDb
+
+win32:CONFIG(release, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_9_2_MinGW_32bit-Release/release -lEcoGraphDb
+else:win32:CONFIG(debug, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_9_2_MinGW_32bit-Debug/debug -lEcoGraphDb
 
 #else:unix: LIBS += -L$$PWD/build-MyLibrary/ -lMyLibrary
 

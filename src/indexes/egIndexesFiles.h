@@ -44,6 +44,8 @@ public:
 
     virtual int Load_EQ(QSet<quint64>& index_offsets, QVariant& Key) = 0;
 
+    // virtual int Load_EQ(QSet<quint64>& index_offsets, int key) {}
+
     virtual int Load_GE(QSet<quint64>& index_offsets, QVariant& Key) = 0;
     virtual int Load_GT(QSet<quint64>& index_offsets, QVariant& Key) = 0;
 
@@ -105,38 +107,38 @@ public:
     int Load_EQ(QSet<quint64>& index_offsets, QVariant& KeyValue) { if (KeyValue.canConvert<KeyType>())
                                                                         Load_EQ(index_offsets, KeyValue.value<KeyType>());
                                                                     return 0;
-                                                                  } // FIXME STUB
+                                                                  } // FIXME STU
 
-    int Load_EQ(QSet<quint64>& index_offsets, KeyType Key);                  // load equal objects
-    // int Load_NE(QSet<quint64>& index_offsets, KeyType& Key, const QString& IndexFileName);          // load not equal objects
 
     int Load_GE(QSet<quint64>& index_offsets, QVariant& KeyValue) { if (KeyValue.canConvert<KeyType>())
                                                                         Load_GE(index_offsets, KeyValue.value<KeyType>());
                                                                     return 0;
                                                                   } // FIXME STUB
 
-    int Load_GE(QSet<quint64>& index_offsets, KeyType Key);       // load greater or equal objects
-
     int Load_GT(QSet<quint64>& index_offsets, QVariant& KeyValue) { if (KeyValue.canConvert<KeyType>())
                                                                         Load_GT(index_offsets, KeyValue.value<KeyType>());
                                                                     return 0;
                                                                   } // FIXME STUB
-
-    int Load_GT(QSet<quint64>& index_offsets, KeyType Key);       // load greater objects
 
     int Load_LE(QSet<quint64>& index_offsets, QVariant& KeyValue) { if (KeyValue.canConvert<KeyType>())
                                                                         Load_LE(index_offsets, KeyValue.value<KeyType>());
                                                                     return 0;
                                                                   } // FIXME STUB
 
-    int Load_LE(QSet<quint64>& index_offsets, KeyType Key);       // load lesser or equal objects
-
     int Load_LT(QSet<quint64>& index_offsets, QVariant& KeyValue) { if (KeyValue.canConvert<KeyType>())
                                                                         Load_LT(index_offsets, KeyValue.value<KeyType>());
                                                                     return 0;
                                                                   } // FIXME STUB
 
+    // int Load_NE(QSet<quint64>& index_offsets, KeyType& Key, const QString& IndexFileName);          // load not equal objects
+
+
+    int Load_GE(QSet<quint64>& index_offsets, KeyType Key);       // load greater or equal objects
+    int Load_GT(QSet<quint64>& index_offsets, KeyType Key);       // load greater objects
+    int Load_LE(QSet<quint64>& index_offsets, KeyType Key);       // load lesser or equal objects
     int Load_LT(QSet<quint64>& index_offsets, KeyType Key);       // load lesser objects
+    int Load_EQ(QSet<quint64>& index_offsets, KeyType Key);       // load equal objects
+
 
 };
 

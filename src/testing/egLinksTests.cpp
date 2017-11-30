@@ -37,7 +37,7 @@ void EgLinksTests::testCreateNodes()
 
     graphDB.AddLinkType("linksTestTree", "linksTest", "linksTest");
 
-    graphDB.Connect();
+    // graphDB.Connect();
 
     testDataNodes.Connect(graphDB, "linksTest");
 
@@ -56,7 +56,7 @@ void EgLinksTests::testCreateLinks()
     // EgGraphDatabase graphDB;
     // EgDataNodesType testDataNodes;
 
-    graphDB.Connect();
+    // graphDB.Connect();
 
     testDataNodes.Connect(graphDB, "linksTest");
 
@@ -93,7 +93,7 @@ void EgLinksTests::testAddIndexedNodes()
 {
     QList<QVariant> addValues;
 
-    graphDB.Connect();
+    // graphDB.Connect();
 
     testDataNodes.Connect(graphDB, "linksTest");
 
@@ -111,7 +111,7 @@ void EgLinksTests::testUpdateIndexedNodes()
 {
     // QList<QVariant> addValues;
 
-    graphDB.Connect();
+    // graphDB.Connect();
 
     testDataNodes.Connect(graphDB, "linksTest");
 

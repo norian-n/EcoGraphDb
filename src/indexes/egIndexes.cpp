@@ -1258,3 +1258,11 @@ template <typename KeyType> void EgIndexes<KeyType>::RemoveChunkFromChain()
 
 }
 
+/*
+EgIndexes<qint32> EgIndexesqint32;
+EgIndexes<quint32> EgIndexesquint32;
+EgIndexes<qint64> EgIndexesqint64;
+EgIndexes<quint64> EgIndexesquint64;
+EgIndexes<float> EgIndexesfloat;
+EgIndexes<double> EgIndexesdouble;
+*/

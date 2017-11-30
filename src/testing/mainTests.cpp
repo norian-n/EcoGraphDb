@@ -105,7 +105,7 @@ int main() // int argc, char *argv[])
     // tmpRes = egDbTests.testEgLinksCreate(); // special links module created
     // res = res && tmpRes;
 
-    graphDB.Connect();
+    // graphDB.Connect();
 
     testEgDataNodesType.Connect(graphDB, "test");
     // testEgDataNodesType.metaInfo.PrintMetaInfo();

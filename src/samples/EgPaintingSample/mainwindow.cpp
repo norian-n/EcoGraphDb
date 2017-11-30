@@ -23,28 +23,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_initButton_clicked()
 {
-    QDir dir("");
-
-    QStringList nameFilters;
-
-        // clear egDb
-
-    nameFilters  << "*.odf" << "*.odx" << "*.dat" << "*.ddt" << "*.dln" << "*.ent";
-
-    if (dir.exists("egdb"))
-    {
-        dir.setCurrent("egdb");
-
-            // get filtered filenames
-        QStringList ent = dir.entryList(nameFilters);
-        // qDebug() << dir.entryList();
-
-            // remove files
-        foreach (const QString& str, ent)
-            dir.remove(str);
-
-        dir.setCurrent("..");
-    }
+    cleanUpFiles();
 
         // create node type
 
@@ -86,7 +65,7 @@ void MainWindow::on_initButton_clicked()
     nodes.AddDataNode(addValues, newID);
 
     locValues.clear();
-    locValues << 150 << 150 << 2;
+    locValues << 150 << 150 << 1;
 
     nodes.AddLocation(locValues, newID);
 
@@ -106,7 +85,7 @@ void MainWindow::on_initButton_clicked()
     nodes.AddDataNode(addValues, newID);
 
     locValues.clear();
-    locValues << 0 << 0 << 2;
+    locValues << 0 << 0 << 3;
 
     nodes.AddLocation(locValues, newID);
 
@@ -116,7 +95,7 @@ void MainWindow::on_initButton_clicked()
     nodes.AddDataNode(addValues, newID);
 
     locValues.clear();
-    locValues << 0 << 100 << 2;
+    locValues << 0 << 100 << 4;
 
     nodes.AddLocation(locValues, newID);
 
@@ -134,6 +113,37 @@ void MainWindow::on_initButton_clicked()
     close();
 }
 
+void MainWindow::cleanUpFiles()
+{
+    QDir dir("");
+
+    QStringList nameFilters;
+
+    nameFilters  << "*.odf" << "*.odx" << "*.dat" << "*.ddt" << "*.dln" << "*.ent"; // << "test*.*";
+
+        // get filtered filenames
+    QStringList ent = dir.entryList(nameFilters);
+    // qDebug() << dir.entryList();
+
+        // remove files
+    foreach (const QString& str, ent)
+        dir.remove(str);
+
+    if (! dir.exists("egdb"))
+        return;
+
+    dir.setCurrent("egdb");
+
+        // get filtered filenames
+    ent = dir.entryList(nameFilters);
+    // qDebug() << dir.entryList();
+
+        // remove files
+    foreach (const QString& str, ent)
+        dir.remove(str);
+
+    dir.setCurrent("..");
+}
 
 void MainWindow::AddImages()
 {
@@ -153,26 +163,42 @@ void MainWindow::AddImages()
     EgDataNodeIDtype newID;
     QList<QVariant> addValues;
 
-    QPixmap pixMap(40,40);
+        // get all files
+    QDir dir;
 
-    QString fileName("test.png");
+    QStringList nameFilters;
 
-    bool loadRes = pixMap.load(fileName);
+    nameFilters  << "*.png" << "*.jpg" << "*.bmp" << "*.gif" << "*.ico"; // << "test*.*";
 
-    if (loadRes)
-        pixMap = pixMap.scaled(40,40);
-    else
-        pixMap.fill(Qt::green);
+        // get filtered filenames
+    QStringList ent = dir.entryList(nameFilters);
+    qDebug() << ent;
 
-    QByteArray imageData;
-    QDataStream dataStream(&imageData, QIODevice::WriteOnly);
+    foreach (const QString& fileName, ent)
+    {
+        // QString fileName("test.png");
 
-    dataStream << pixMap;
+        QPixmap pixMap(40,40);
 
-    addValues.clear();
-    addValues << "name" << imageData;
+        bool loadRes = pixMap.load(fileName);
 
-    images.AddDataNode(addValues, newID);
+        if (loadRes)
+        {
+            pixMap = pixMap.scaled(40,40);
+
+            QByteArray imageData;
+            QDataStream dataStream(&imageData, QIODevice::WriteOnly);
+
+            dataStream << pixMap;
+
+            addValues.clear();
+            addValues << fileName << imageData;
+
+            images.AddDataNode(addValues, newID);
+
+            qDebug() << fileName;
+        }
+    }
 
     images.StoreData();
 

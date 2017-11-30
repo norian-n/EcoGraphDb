@@ -74,7 +74,7 @@ int EgDataNodesGUIsupport::LoadSimpleControlDesc()
     // if (! controlDescs)
     //    controlDescs = new EgDataNodesType();
 
-    if (controlDescs-> Connect(*(primaryNodesType-> metaInfo.myECoGraphDB), primaryNodesType-> metaInfo.typeName + egGUIfileName))
+    if (controlDescs-> ConnectServiceNodeType(*(primaryNodesType-> metaInfo.myECoGraphDB), primaryNodesType-> metaInfo.typeName + egGUIfileName, primaryNodesType-> connection))
     {
             // qDebug()  << "No control descs for dataNodeType " << primaryNodesType-> metaInfo.typeName + egGUIfileName << FN;
             return 1;

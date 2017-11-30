@@ -6,10 +6,14 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QMimeData>
 #include <QDrag>
+#include <QMap>
+
 // #include <QGraphicsSceneMouseEvent>
 
 #include "../../egDataNodesType.h"
 #include "../../egGraphDatabase.h"
+
+const int pixmapSizeFixed  = 40;
 
 namespace Ui {
 class GraphSceneForm;
@@ -22,7 +26,8 @@ class MyGraphicsScene : public QGraphicsScene
     Q_OBJECT
 public:
     // explicit GraphicsScene(QObject *parent = 0);
-    virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * mouseEvent);
+    // virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * mouseEvent);
+
     virtual void wheelEvent(QGraphicsSceneWheelEvent *wheelEvent);
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent);
     virtual void mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent);
@@ -47,6 +52,8 @@ private:
     int saveX = 0;
     int saveY = 0;
 
+    qreal scaleFactor = 1.0;
+
     QTransform deviceTransform;
     QGraphicsItem* theItem = nullptr;
 };
@@ -58,8 +65,8 @@ public:
 
     virtual void mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent);
 
-    virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event);
-    virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent *event);
+    // virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event);
+    // virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent *event);
 
     /*
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * mouseEvent);
@@ -100,6 +107,8 @@ public:
     EgDataNodesType nodes;
     EgDataNodesType images;
 
+    QMap <EgDataNodeIDtype, QPixmap> imagesPix;
+
     bool firstNodeStored = false;
     QGraphicsItem* firstNode = nullptr;
 
@@ -118,9 +127,7 @@ private:
     EgGraphDatabase graphDB;
 
     void LoadImages();
-
     void LoadGraph();
-    void SaveGraph();
 };
 
 #endif // GRAPHSCENEFORM_H

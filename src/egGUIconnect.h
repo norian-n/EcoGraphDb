@@ -43,7 +43,19 @@ public:
     ~EgBasicControlDesc() {}
 };
 
-class EgDataNodesGUIsupport   // Data Nodes GUI functionality
+
+#ifdef EG_LIB_BUILD   // library build switch, define it in project or egCore.h
+
+#include "ecographdb_global.h"
+
+class ECOGRAPHDBSHARED_EXPORT EgDataNodesGUIsupport
+
+#else   // no library build
+
+class EgDataNodesGUIsupport
+
+#endif
+              // Data Nodes GUI functionality
 {
 public:
 

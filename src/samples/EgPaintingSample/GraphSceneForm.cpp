@@ -21,15 +21,15 @@ GraphSceneForm::GraphSceneForm(QWidget *parent) :
     for (int counterR = 0; counterR < ui->tableWidget->rowCount(); counterR++)
         ui->tableWidget->setRowHeight(counterR, 50);
 
-    ui->tableWidget-> setIconSize(QSize(40,40));
+    ui->tableWidget-> setIconSize(QSize(pixmapSizeFixed,pixmapSizeFixed));
     */
 
-
+    scene.setSceneRect(-300, -150, 600, 300);
 
     scene.myForm = this;
     iconsScene.myForm = this;
 
-    graphDB.Connect();
+    // graphDB.Connect();
 
 
     // LoadGraph();
@@ -40,13 +40,6 @@ void GraphSceneForm::LoadImages()
     iconsScene.clear();
 
     iconsScene.addRect(QRect(0, 0, 0, 0)); //, circleBrush); // center stub
-
-
-
-
-    QPixmap pixMap(40,40);
-    QByteArray imageData;
-    QDataStream dataStream(&imageData, QIODevice::ReadOnly);
 
     images.Connect(graphDB, "images");
 
@@ -59,20 +52,39 @@ void GraphSceneForm::LoadImages()
 
     for (auto dataNodeIter = images.dataNodes.begin(); dataNodeIter != images.dataNodes.end(); ++dataNodeIter)
     {
+        QPixmap pixMap(pixmapSizeFixed,pixmapSizeFixed);
+
+        QByteArray imageData;
+        QDataStream dataStream(&imageData, QIODevice::ReadOnly);
+
         imageData = dataNodeIter.value()["bytearray"].toByteArray();
 
-        // qDebug() << "Size: " << imageData.size() << " content:" << imageData << FN;
+        // qDebug() << "Size: " << imageData.size() << " name: " << dataNodeIter.value()["name"].toString() << FN;
 
         dataStream >> pixMap;
 
-        // pixMap = pixMap.scaled(40,40);
+        // pixMap = pixMap.scaled(pixmapSizeFixed,pixmapSizeFixed);
 
         newItem = iconsScene.addPixmap(pixMap);
+
+                // add to the map
+        imagesPix.insert(dataNodeIter.key(), pixMap);
+
         if (newItem)
         {
-            newItem->setPos(-750 + k*50, -40);
-            k++;
+            // qDebug() << "dataNodeIter.key(): " << QVariant((int) dataNodeIter.key());
+
+            newItem->setData(0, dataNodeIter.key());
+
+            // qDebug() << "new item ID: " << newItem-> data(0).toInt();
+
+            newItem->setPos(-750 + k*(pixmapSizeFixed+10), -pixmapSizeFixed);
+            // qDebug() << "new item placed at " << -750 + k*50 << FN;
+
         }
+
+        k++;
+
     }
 }
 
@@ -80,13 +92,13 @@ void GraphSceneForm::LoadGraph()
 {
     QGraphicsItem* newItem;
 
-    QPixmap pixMap(40,40);
+    QPixmap pixMap(pixmapSizeFixed,pixmapSizeFixed);
     QString fileName("test.png");
 
     bool loadRes = pixMap.load(fileName);
 
     if (loadRes)
-        pixMap = pixMap.scaled(40,40);
+        pixMap = pixMap.scaled(pixmapSizeFixed,pixmapSizeFixed);
     else
         pixMap.fill(Qt::green);
 
@@ -115,7 +127,7 @@ void GraphSceneForm::LoadGraph()
     {
         newItem = iconsScene.addPixmap(pixMap);
         if (newItem)
-            newItem->setPos(-750 + k*50, -40);
+            newItem->setPos(-750 + k*50, -pixmapSizeFixed);
     }
 */
 
@@ -135,13 +147,13 @@ void GraphSceneForm::LoadGraph()
     // qDebug() << "Loaded" << FN;
 
     nodes.LoadLinkType("linktype");
-    nodes.myLinkTypes["linktype"]-> ResolveLinks(nodes, nodes);
+    nodes.myLinkTypes["linktype"]-> ResolveLinksToPointers();
 
     QList<QVariant> locValues;
 
         // nodes size and center
-    int w = 40;
-    int h = 40;
+    // int w = pixmapSizeFixed;
+    // int h = pixmapSizeFixed;
 
     int x = 0;
     int y = 0;
@@ -149,9 +161,10 @@ void GraphSceneForm::LoadGraph()
     int type;
 
         // add nodes to the scene - QMap<EgDataNodeIDtype, EgDataNode>::iterator
-    for (auto dataNodeIter = nodes.dataNodes.begin(); dataNodeIter != nodes.dataNodes.end(); ++dataNodeIter)
-    {
-        nodes.GetLocation(locValues, dataNodeIter.key());
+    // for (auto dataNodeIter = nodes.dataNodes.begin(); dataNodeIter != nodes.dataNodes.end(); ++dataNodeIter)
+    for (auto& dataNodeIter : nodes.dataNodes)
+    {      
+        nodes.GetLocation(locValues, dataNodeIter.dataNodeID); //key());
 
         if (locValues.count() > 2)
         {
@@ -161,31 +174,34 @@ void GraphSceneForm::LoadGraph()
 
             type = locValues[2].toInt();
 
+            QPixmap pixMap(imagesPix[type]);
+
+            /*
             if (type == 1)
                 newItem = scene.addEllipse(QRect(0, 0, w, h), circlePen, circleBrush);
             else // if (type == 2)
-                //newItem = scene.addRect(QRect(x-20, y-20, w, h), circlePen, circleBrush);
-                newItem = scene.addPixmap(pixMap);
+                //newItem = scene.addRect(QRect(x-pixmapSizeFixed/2, y-pixmapSizeFixed/2, w, h), circlePen, circleBrush);
+                */
+
+            newItem = scene.addPixmap(pixMap);
 
             if (newItem)
-                newItem->setPos(x-20, y-20);
+            {
+                newItem->setPos(x-pixmapSizeFixed/2, y-pixmapSizeFixed/2);
+                newItem->setData(0, dataNodeIter.dataNodeID); //key()); // nodeID
 
                 // save first item to push lines below
-            if (! firstNodeStored)
-            {
-                firstNode = newItem;
-                firstNodeStored = true;
+                if (! firstNodeStored)
+                {
+                    firstNode = newItem;
+                    firstNodeStored = true;
+                }
+
+                QGraphicsTextItem* label = new QGraphicsTextItem(dataNodeIter["name"].toString()); // .value()
+                label->setPos(x-pixmapSizeFixed+10, y-pixmapSizeFixed);
+
+                scene.addItem(label);
             }
-
-            // QString msg = dataNodeIter.value()["name"].toString();
-
-            if (newItem)
-                newItem->setData(0, dataNodeIter.key()); // nodeID
-
-            QGraphicsTextItem* label = new QGraphicsTextItem(dataNodeIter.value()["name"].toString());
-            label->setPos(x-30, y-40);
-
-            scene.addItem(label);
 
             // qDebug() << msg << FN;
         }
@@ -196,9 +212,10 @@ void GraphSceneForm::LoadGraph()
     int yDst = 0;
 
         // add links - QMap <EgDataNodeIDtype, EgDataNode>::iterator
-    for (auto dataNodeIter = nodes.dataNodes.begin(); dataNodeIter != nodes.dataNodes.end(); ++dataNodeIter)
+    // for (auto dataNodeIter = nodes.dataNodes.begin(); dataNodeIter != nodes.dataNodes.end(); ++dataNodeIter)
+    for (auto const& dataNodeIter : nodes.dataNodes)
     {
-        nodes.GetLocation(locValues, dataNodeIter.key());
+        nodes.GetLocation(locValues, dataNodeIter.dataNodeID); // .key());
 
         if (locValues.count() > 1)
         {
@@ -207,15 +224,17 @@ void GraphSceneForm::LoadGraph()
         }
 
             // get linked nodes
-        if (dataNodeIter.value().nodeLinks && (! dataNodeIter.value().nodeLinks-> outLinks.empty()))
+        if (dataNodeIter.nodeLinks && (! dataNodeIter.nodeLinks-> outLinks.empty())) // value()
         {
                 // QList<EgExtendedLinkType>::iterator
-            for (auto linksIter  = dataNodeIter.value().nodeLinks-> outLinks["linktype"].begin();
-                      linksIter != dataNodeIter.value().nodeLinks-> outLinks["linktype"].end(); ++linksIter)
+            // for (auto linksIter  = dataNodeIter.value().nodeLinks-> outLinks["linktype"].begin();
+            //          linksIter != dataNodeIter.value().nodeLinks-> outLinks["linktype"].end(); ++linksIter)
+
+            for (auto const& linksIter : dataNodeIter.nodeLinks-> outLinks["linktype"])
             {
                 // qDebug()  << "Dst node ID = " << (*linksIter).dataNodePtr-> dataNodeID << FN;
 
-                nodes.GetLocation(locValues, (*linksIter).dataNodePtr-> dataNodeID);
+                nodes.GetLocation(locValues, linksIter.dataNodePtr-> dataNodeID);
 
                 if (locValues.count() > 1)
                 {
@@ -243,32 +262,41 @@ void ItemsMenuGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEve
 
     // saveX = clickPoint.x();
     // saveY = clickPoint.y();
-
-    QPixmap pixMap(40,40);
+/*
+    QPixmap pixMap(pixmapSizeFixed,pixmapSizeFixed);
     QString fileName("test.png");
 
     bool loadRes = pixMap.load(fileName);
 
     if (loadRes)
-        pixMap = pixMap.scaled(40,40);
+        pixMap = pixMap.scaled(pixmapSizeFixed,pixmapSizeFixed);
     else
         pixMap.fill(Qt::green);
+        */
 
     theItem = itemAt(mouseEvent->scenePos().x(), mouseEvent->scenePos().y(), deviceTransform);
 
     if (theItem)
     {
+        int imageID = theItem-> data(0).toInt();
+
+        // qDebug() << "image ID:"  << imageID;
+
+        QPixmap pixMap(myForm-> imagesPix[imageID]);
+
         QByteArray itemData;
         QDataStream dataStream(&itemData, QIODevice::WriteOnly);
-        dataStream << pixMap << QPoint(20,20);
+
+        dataStream << pixMap << QPoint(pixmapSizeFixed/2,pixmapSizeFixed/2);
 
         QMimeData *mimeData = new QMimeData;
         mimeData->setData("application/x-dnditemdata", itemData);
+        mimeData->setImageData(imageID);
 
         QDrag *drag = new QDrag(this);
         drag->setMimeData(mimeData);
         drag->setPixmap(pixMap);
-        drag->setHotSpot(QPoint(20,20));
+        drag->setHotSpot(QPoint(pixmapSizeFixed/2,pixmapSizeFixed/2));
 
         drag->start(Qt::CopyAction);
         // drag->exec(Qt::MoveAction);
@@ -279,12 +307,14 @@ void ItemsMenuGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEve
     //                             << theItem->pos().toPoint().y();
 }
 
-
+/*
 void ItemsMenuGraphicsScene::dragMoveEvent(QGraphicsSceneDragDropEvent *event)
 {
     // qDebug() << "Drag move event at " <<  event-> scenePos().x() << " " << event-> scenePos().y();
 }
+*/
 
+/*
 void ItemsMenuGraphicsScene::dragLeaveEvent(QGraphicsSceneDragDropEvent *event)
 {
     // Q_UNUSED(event);
@@ -293,17 +323,21 @@ void ItemsMenuGraphicsScene::dragLeaveEvent(QGraphicsSceneDragDropEvent *event)
 
     // qDebug() << "Drag leave event at " <<  event-> scenePos().x() << " " << event-> scenePos().y();
 }
+*/
 
 void MyGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
 {
     // QPoint clickPoint = mouseEvent->scenePos().toPoint();
 
-    isPressed = true;
-
     // saveX = clickPoint.x();
     // saveY = clickPoint.y();
 
-    theItem = itemAt(mouseEvent->scenePos().x(), mouseEvent->scenePos().y(), deviceTransform);
+    if (mouseEvent->button() == Qt::LeftButton)
+    {
+        isPressed = true;
+
+        theItem = itemAt(mouseEvent->scenePos().x(), mouseEvent->scenePos().y(), deviceTransform);
+    }
 
     // if (theItem)
         // theItem->moveBy(-100,-100);
@@ -337,8 +371,8 @@ void MyGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent)
         // QGraphicsItem * theLine = addLine(theItem->boundingRect().center().toPoint().x(), theItem->boundingRect().center().toPoint().y(),
         //        theDestItem->boundingRect().center().toPoint().x(), theDestItem->boundingRect().center().toPoint().y(), linkPen);
 
-        QGraphicsItem * theLine = addLine(theItem->scenePos().toPoint().x()+20, theItem->scenePos().toPoint().y()+20,
-                theDestItem->scenePos().toPoint().x()+20, theDestItem->scenePos().toPoint().y()+20, linkPen);
+        QGraphicsItem * theLine = addLine(theItem->scenePos().toPoint().x()+pixmapSizeFixed/2, theItem->scenePos().toPoint().y()+pixmapSizeFixed/2,
+                theDestItem->scenePos().toPoint().x()+pixmapSizeFixed/2, theDestItem->scenePos().toPoint().y()+pixmapSizeFixed/2, linkPen);
 
         if (myForm-> firstNode)
             theLine->stackBefore(myForm-> firstNode);
@@ -386,61 +420,19 @@ void MyGraphicsScene::dragMoveEvent(QGraphicsSceneDragDropEvent *event)
 
 void MyGraphicsScene::dropEvent(QGraphicsSceneDragDropEvent *event)
 {
-    // addRect(QRect(event-> scenePos().x()-20, event-> scenePos().y()-20, 40, 40)); // , circlePen, circleBrush
+    // qDebug() << "dropped item ID: " << event->mimeData()->imageData().toInt();
 
-    QPixmap pixMap(40,40);
-    QString fileName("test.png");
+    int imageID = event->mimeData()->imageData().toInt();
 
-    bool loadRes = pixMap.load(fileName);
-
-    if (loadRes)
-        pixMap = pixMap.scaled(40,40);
-    else
-        pixMap.fill(Qt::green);
+    QPixmap pixMap(myForm-> imagesPix[imageID]);
 
     QGraphicsItem* newItem = addPixmap(pixMap);
 
     QPoint clickPoint = event->scenePos().toPoint();
 
     if (newItem)
-        newItem->setPos(clickPoint.x()-20, clickPoint.y()-20);
-
-    // qDebug() << "Drop event at " <<  event-> scenePos().x() << " " << event-> scenePos().y();
-}
-
-void MyGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent)
-{
-    // QPoint clickPoint = mouseEvent->scenePos().toPoint();
-
-    if (isPressed)
     {
-        isMoved = true;
-    }
-}
-
-void MyGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent * mouseEvent)
-{
-    // qDebug() << mouseEvent->scenePos();
-
-    if (! myForm-> nodes.isConnected)
-        return;
-
-    QPoint clickPoint = mouseEvent->scenePos().toPoint();
-
-    // qDebug() <<  clickPoint.x() << " " << clickPoint.y();
-
-    QBrush circleBrush = QBrush(Qt::magenta); // gradient
-    QPen circlePen = QPen(Qt::black);
-    circlePen.setWidth(1);
-
-    int w = 40;
-    int h = 40;
-
-    QGraphicsItem* newItem = addEllipse(QRect(0, 0, w, h), circlePen, circleBrush);
-
-    if (newItem)
-    {
-        newItem->setPos(clickPoint.x()-20, clickPoint.y()-20);
+        newItem->setPos(clickPoint.x()-pixmapSizeFixed/2, clickPoint.y()-pixmapSizeFixed/2);
 
         EgDataNodeIDtype newID;
         QList<QVariant> addValues;
@@ -456,7 +448,7 @@ void MyGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent * mouseEven
         newItem->setData(0, newID); // nodeID
 
         locValues.clear();
-        locValues << clickPoint.x() << clickPoint.y() << 1;
+        locValues << clickPoint.x() << clickPoint.y() << imageID;
 
         myForm-> nodes.AddLocation(locValues, newID);
 
@@ -464,8 +456,30 @@ void MyGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent * mouseEven
             myForm-> firstNode = newItem;
     }
 
-    // QGraphicsScene::mouseDoubleClickEvent(mouseEvent);
+    // qDebug() << "Drop event at " <<  event-> scenePos().x() << " " << event-> scenePos().y();
 }
+
+void MyGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent)
+{
+    // QPoint clickPoint = mouseEvent->scenePos().toPoint();
+
+    if (isPressed)
+    {
+        isMoved = true;
+    }
+}
+
+/*
+void MyGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent * mouseEvent)
+{
+    // qDebug() << mouseEvent->scenePos();
+
+    if (! myForm-> nodes.isConnected)
+        return;
+
+    QPoint clickPoint = mouseEvent->scenePos().toPoint();
+}
+*/
 
 void MyGraphicsScene::wheelEvent(QGraphicsSceneWheelEvent *wheelEvent)
 {
@@ -473,21 +487,22 @@ void MyGraphicsScene::wheelEvent(QGraphicsSceneWheelEvent *wheelEvent)
 
     if (wheelEvent->delta() > 0)
     {
-        myForm->ui->graphicsView->scale(2.0, 2.0);
+        if (scaleFactor < 5.0)
+        {
+            myForm->ui->graphicsView->scale(1.25, 1.25); // (2.0, 2.0);
+            scaleFactor *= 1.25;
+        }
     }
     else
     {
-        myForm->ui->graphicsView->scale(0.5, 0.5);
+        if (scaleFactor > 1/5.0)
+        {
+            myForm->ui->graphicsView->scale(0.8, 0.8); // (0.5, 0.5);
+            scaleFactor *= 0.8;
+        }
     }
 
     // QGraphicsScene::wheelEvent(wheelEvent);
-}
-
-void GraphSceneForm::SaveGraph()
-{
-    nodes.StoreData();
-
-    nodes.StoreAllLinks();
 }
 
 GraphSceneForm::~GraphSceneForm()
@@ -503,5 +518,6 @@ void GraphSceneForm::on_loadButton_clicked()
 
 void GraphSceneForm::on_saveButton_clicked()
 {
-    SaveGraph();
+    nodes.StoreData();
+    nodes.StoreAllLinks();
 }

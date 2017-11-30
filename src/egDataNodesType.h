@@ -74,8 +74,9 @@ public:
 
         // basic operations
 
-        // connect to local connection or server, load fields and controls descriptions FIXME TODO disconnect
-    int Connect(EgGraphDatabase& myDB,const QString& nodeTypeName, EgRemoteConnect* server = NULL);
+        // register node type at EgGraphDatabase, load metadata
+    int Connect(EgGraphDatabase& myDB, const QString& nodeTypeName, EgRemoteConnect* server = nullptr);
+    int ConnectServiceNodeType(EgGraphDatabase& myDB, const QString& nodeTypeName, EgRemoteConnect* server = nullptr);
 
     void ClearData();                   // data nodes content and support data cleanup
 

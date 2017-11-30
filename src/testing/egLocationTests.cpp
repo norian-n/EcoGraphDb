@@ -37,7 +37,7 @@ bool EgLocationTests::testAddLocations()
     QList<QVariant> addValues;
     QList<QVariant> locValues;
 
-    graphDB.Connect();
+    // graphDB.Connect();
 
     testDataNodes.Connect(graphDB, "locations");
 
@@ -71,7 +71,7 @@ bool EgLocationTests::testAddLocations()
 
 bool EgLocationTests::testLoadLocationsData()
 {
-    graphDB.Connect();
+    // graphDB.Connect();
 
     testDataNodes.Connect(graphDB, "locations");
 

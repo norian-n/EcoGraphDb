@@ -9,8 +9,8 @@
 
 #include "egDataClient.h"
 
-EgDataClient::EgDataClient(const EgDataNodesType* my_class):
-   d_class((EgDataNodesType*) my_class),
+EgDataClient::EgDataClient(const EgDataNodesType* nodesType):
+   dataNodesType((EgDataNodesType*) nodesType),
    in(&tcpSocket),
    out(&block, QIODevice::WriteOnly),
    egDataNodesTypeID(0)
@@ -23,14 +23,15 @@ int EgDataClient::RemoteGetOdbId()
 {
     // tcpSocket.abort();
     if (tcpSocket.state() != QAbstractSocket::ConnectedState)
-        tcpSocket.connectToHost(d_class->connection->server_address, server_port);
+        tcpSocket.connectToHost(dataNodesType->connection->server_address, server_port);
     else
         qDebug() << FN << "tcpSocket was not disconnected before";
 
     if (! tcpSocket.waitForConnected(10000)) // wait up to 10 sec
     {
-        // process error
-        qDebug() << FN << "tcpSocket waitForConnected error";
+            // process error
+        // qDebug() << "tcpSocket waitForConnected timeout"  << FN;
+        qDebug() << "can't connect to the server: " << dataNodesType->connection-> server_address  << FN;
         return -2;
     }
         // check egDataNodesTypeID
@@ -40,8 +41,7 @@ int EgDataClient::RemoteGetOdbId()
         block.clear();
         out.device()->seek(0);
         out << opcode_get_odb_id; // operation code
-        // qDebug() << FN << "sending DClassName = " << d_class->DClassName;
-        out << d_class-> metaInfo.typeName;
+        out << dataNodesType-> metaInfo.typeName;
 
         tcpSocket.write(block);
         block.clear();
@@ -51,7 +51,7 @@ int EgDataClient::RemoteGetOdbId()
         // start read
         if (! tcpSocket.waitForReadyRead(10000)) // wait up to 10 sec
         {
-            qDebug() << FN << "waitForReadyRead error";
+            qDebug() << "waitForReadyRead error" << FN;
             // process error
             return -3;
         }

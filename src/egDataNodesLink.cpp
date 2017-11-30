@@ -20,6 +20,8 @@ EgDataNodesLinkType::EgDataNodesLinkType(EgGraphDatabase *theDatabase):
 
 }
 
+
+
 EgDataNodesLinkType::~EgDataNodesLinkType()
 {
     if (linksStorage)
@@ -80,11 +82,35 @@ int EgDataNodesLinkType::LoadLinks()
     return 0;
 }
 
-int EgDataNodesLinkType::ResolveLinks(EgDataNodesType& firstType, EgDataNodesType& secondType)
+int EgDataNodesLinkType::ResolveNodeTypes()
+{
+    auto iterFirst = egDatabase-> connectedNodeTypes.find(firstTypeName);
+    auto iterSecond = egDatabase-> connectedNodeTypes.find(secondTypeName);
+
+    if (iterFirst != egDatabase-> connectedNodeTypes.end() && iterSecond != egDatabase-> connectedNodeTypes.end())
+    {
+        firstType = iterFirst.value();
+        secondType = iterSecond.value();
+
+        return 0;
+    }
+
+    return 1;
+}
+
+int EgDataNodesLinkType::ResolveLinksToPointers()
 {
     EgDataNodeIDtype fromNode, toNode;
     EgExtendedLinkType fwdLink, backLink;
+
     QList<EgExtendedLinkType> newLinks;
+
+    if (ResolveNodeTypes())
+    {
+        qDebug() << "EgDataNodesType not found: " << firstTypeName << " or " << secondTypeName << FN;
+
+        return -1;
+    }
 
         // iterate loaded links
     for (auto Iter = linksStorage-> dataNodes.begin(); Iter != linksStorage-> dataNodes.end(); ++Iter)
@@ -95,17 +121,17 @@ int EgDataNodesLinkType::ResolveLinks(EgDataNodesType& firstType, EgDataNodesTyp
 
         // qDebug() << "From Node ID = " << fromNode << " To Node ID = " << toNode << FN;
 
-        if (firstType.dataNodes.contains(fromNode) && secondType.dataNodes.contains(toNode))
+        if (firstType-> dataNodes.contains(fromNode) && secondType-> dataNodes.contains(toNode))
         {
                 // fill new links info
             fwdLink.dataNodeID = toNode;
-            fwdLink.dataNodePtr = &(secondType.dataNodes[toNode]);
+            fwdLink.dataNodePtr = &(secondType-> dataNodes[toNode]);
 
             if (! fwdLink.dataNodePtr-> nodeLinks)
                 fwdLink.dataNodePtr-> nodeLinks = new EgDataNodeLinks();
 
             backLink.dataNodeID = fromNode;
-            backLink.dataNodePtr = &(firstType.dataNodes[fromNode]);
+            backLink.dataNodePtr = &(firstType-> dataNodes[fromNode]);
 
             if (! backLink.dataNodePtr-> nodeLinks)
                 backLink.dataNodePtr-> nodeLinks = new EgDataNodeLinks();
@@ -140,16 +166,16 @@ int EgDataNodesLinkType::ResolveLinks(EgDataNodesType& firstType, EgDataNodesTyp
                 fwdLink.dataNodePtr->nodeLinks-> inLinks.insert(linkName, newLinks);
             }
 
-            // qDebug() << "Link " << linkName << " added " << firstType.metaInfo.typeName << " " << fromNode << " to "
-            //          << secondType.metaInfo.typeName << " " <<  toNode << FN;
+            // qDebug() << "Link " << linkName << " added " << firstType-> metaInfo.typeName << " " << fromNode << " to "
+            //          << secondType-> metaInfo.typeName << " " <<  toNode << FN;
 
-            // qDebug() << "Nodes Type " << firstType.metaInfo.typeName << " out links count = " << backLink.dataNodePtr->nodeLinks-> outLinks[linkName].count() << FN;
+            // qDebug() << "Nodes Type " << firstType-> metaInfo.typeName << " out links count = " << backLink.dataNodePtr->nodeLinks-> outLinks[linkName].count() << FN;
 
         }
         else
         {
-            // qDebug() << "Link " << linkName << " of " << firstType.metaInfo.typeName << " link NOT added for ID = " << fromNode << " to "
-            //         << secondType.metaInfo.typeName << " " << toNode << FN;
+            // qDebug() << "Link " << linkName << " of " << firstType-> metaInfo.typeName << " link NOT added for ID = " << fromNode << " to "
+            //         << secondType-> metaInfo.typeName << " " << toNode << FN;
         }
 
 
@@ -173,7 +199,7 @@ int EgDataNodesLinkType::LoadLinkedNodes(EgDataNodeIDtype fromNodeID)
 
     linksStorage-> IndexOffsets.clear();
 
-    QVariant variantID = fromNodeID;
+    QVariant variantID (fromNodeID);
 
     linksStorage-> LocalFiles-> indexFiles["from_node_id"]-> Load_EQ(linksStorage->IndexOffsets, variantID);
 

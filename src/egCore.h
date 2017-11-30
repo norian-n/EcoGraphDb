@@ -38,7 +38,6 @@ typedef bool (*FilterFunctionType) (EgDataNode& data_object, QList<QVariant>& fi
 // sample: int FilterTest (DataObj& data_object, QList<QVariant>& filter_values)
 
 
-
     // index-based filter type (fortran-style logical acronims)
 enum FilterType
 {

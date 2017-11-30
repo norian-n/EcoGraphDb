@@ -37,7 +37,7 @@ struct EgExtendedLinkType
       EgDataNodeIDtype dataNodeID;
       EgDataNode* dataNodePtr;
 
-      EgExtendedLinkType(): dataNodeID(0), dataNodePtr(NULL) {}
+      EgExtendedLinkType(): dataNodeID(0), dataNodePtr(nullptr) {}
 };
 
 class EgDataNodeLinks           // Data Object Instance 1
