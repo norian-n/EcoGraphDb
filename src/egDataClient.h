@@ -33,6 +33,10 @@ public:
     EgDataClient(const EgDataNodesType* nodesType);
     ~EgDataClient() {}
 
+
+    int  OpenMetaInfoStoreStream(QDataStream **metaInfoStream);      // save to local file
+    int  OpenMetaInfoLoadStream(QDataStream **metaInfoStream);      // load from local file
+
     int RemoteGetOdbId();             // get odb_id from server
 
     int RemoteLoadFieldDesc(QByteArray* field_descs, QByteArray* control_descs, EgDataNodeIDtype& obj_count, EgDataNodeIDtype& next_obj_id);    // load from server

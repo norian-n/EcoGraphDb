@@ -47,7 +47,7 @@ void EgDataNodeTypeMetaInfo::AddDataField(QString fieldName, EgIndexSettings ind
     indexedFields.insert(fieldName, indexSettings);
 }
 
-int EgDataNodeTypeMetaInfo::LocalStoreMetaInfo()
+int  EgDataNodeTypeMetaInfo::OpenLocalStoreStream()
 {
     QDir dir;
 
@@ -55,95 +55,114 @@ int EgDataNodeTypeMetaInfo::LocalStoreMetaInfo()
         dir.mkdir("egdb");
 
         // open file
-    QFile ddt_file("egdb/" + typeName + ".ddt");
-    QDataStream dStream(&ddt_file);
+    metaInfoFile.setFileName("egdb/" + typeName + ".ddt");
+    localMetaInfoStream.setDevice(&metaInfoFile);
 
-    if (!ddt_file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    if (!metaInfoFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
     {
-        qDebug() << FN << "can't open " << typeName + ".ddt" << " file";        
+        qDebug() << FN << "can't open " << typeName + ".ddt" << " file";
 
         return -1;
     }
 
-    dStream << nodesCount;  // data nodes (NOT field descriptors) count
-    dStream << nextObjID;   // incremental counter
+    return 0;
+}
 
-    dStream << useEntryNodes;
-    dStream << useLocation;
-    dStream << useNamedAttributes;
-    dStream << useLinks;
-    dStream << useGUIsettings;
+int  EgDataNodeTypeMetaInfo::SendMetaInfoToStream(QDataStream& metaInfoStream)
+{
+    metaInfoStream << nodesCount;  // data nodes (NOT field descriptors) count
+    metaInfoStream << nextObjID;   // incremental counter
 
-    dStream << dataFields;  // field descriptors
+    metaInfoStream << useEntryNodes;
+    metaInfoStream << useLocation;
+    metaInfoStream << useNamedAttributes;
+    metaInfoStream << useLinks;
+    metaInfoStream << useGUIsettings;
+
+    metaInfoStream << dataFields;  // field descriptors
     // dStream << indexedToOrder.keys();
 
-    dStream << (quint32) indexedFields.size();
+    metaInfoStream << (quint32) indexedFields.size();
 
     for (auto indIter = indexedFields.begin(); indIter != indexedFields.end(); ++indIter)
     {
         // qDebug() << indIter.key() << " " << indIter.value().fieldNum << FN;
 
-        dStream << indIter.key();
-        dStream << indIter.value().fieldNum;
-        dStream << indIter.value().indexSize;
-        dStream << indIter.value().isSigned;
-        dStream << indIter.value().functionID;
+        metaInfoStream << indIter.key();
+        metaInfoStream << indIter.value().fieldNum;
+        metaInfoStream << indIter.value().indexSize;
+        metaInfoStream << indIter.value().isSigned;
+        metaInfoStream << indIter.value().functionID;
     }
-
-    ddt_file.close();    
 
     return 0;
 }
 
-int EgDataNodeTypeMetaInfo::LocalLoadMetaInfo()
+
+int EgDataNodeTypeMetaInfo::LocalStoreMetaInfo()
 {
-    QList<QString> indexedFieldsLocal;
+    int res = 0;
+
+    // if (myECoGraphDB && myECoGraphDB->connection)
+      // res = client.OpenMetaInfoStoreStream();
+    res = OpenLocalStoreStream();
+
+    if (! res)
+        res = SendMetaInfoToStream(localMetaInfoStream);
+
+    metaInfoFile.close();
+
+    return res;
+}
+
+int EgDataNodeTypeMetaInfo::OpenLocalLoadStream()
+{
+        // open file
+    metaInfoFile.setFileName("egdb/" + typeName + ".ddt");
+    localMetaInfoStream.setDevice(&metaInfoFile);
+
+    if (!metaInfoFile.open(QIODevice::ReadOnly))
+    {
+        // if (! typeName.contains(EgDataNodesNamespace::egGUIfileName))
+        qDebug() << FN << "can't open " << typeName + ".ddt" << " file";
+
+        return -1;
+    }
+
+    return 0;
+}
+
+int EgDataNodeTypeMetaInfo::LoadMetaInfoFromStream(QDataStream& metaInfoStream)
+{
+    // QList<QString> indexedFieldsLocal;
 
     Clear(); // init metainfo
 
-        // open file
-    QFile ddt_file("egdb/" + typeName + ".ddt");
-    QDataStream dStream(&ddt_file);
+    metaInfoStream >> nodesCount;  // data nodes (NOT field descriptors) count
+    metaInfoStream >> nextObjID;   // incremental counter
 
-/*    if (!ddt_file.exists())
-    {
-        qDebug() << FN << "file doesn't exist " << typeName + ".ddt";
-        return -1;
-    }
-*/
+    metaInfoStream >> useEntryNodes;
+    metaInfoStream >> useLocation;
+    metaInfoStream >> useNamedAttributes;
+    metaInfoStream >> useLinks;
+    metaInfoStream >> useGUIsettings;
 
-    if (!ddt_file.open(QIODevice::ReadOnly))
-    {
-        if (! typeName.contains(EgDataNodesNamespace::egGUIfileName))
-            qDebug() << FN << "can't open " << typeName + ".ddt" << " file";
-        return -1;
-    }
-
-    dStream >> nodesCount;  // data nodes (NOT field descriptors) count
-    dStream >> nextObjID;   // incremental counter
-
-    dStream >> useEntryNodes;
-    dStream >> useLocation;
-    dStream >> useNamedAttributes;
-    dStream >> useLinks;
-    dStream >> useGUIsettings;
-
-    dStream  >> dataFields;  // field descriptors
-    // dStream  >> indexedFieldsLocal;
+    metaInfoStream  >> dataFields;  // field descriptors
+    // metaInfoStream  >> indexedFieldsLocal;
 
     quint32 theSize = 0;
     EgIndexSettings theSettings;
     QString theName;
 
-    dStream >> theSize;
+    metaInfoStream >> theSize;
 
     for (quint32 i = 0; i < theSize; i++)
     {
-        dStream  >> theName;
-        dStream  >> theSettings.fieldNum;
-        dStream  >> theSettings.indexSize;
-        dStream  >> theSettings.isSigned;
-        dStream  >> theSettings.functionID;
+        metaInfoStream  >> theName;
+        metaInfoStream  >> theSettings.fieldNum;
+        metaInfoStream  >> theSettings.indexSize;
+        metaInfoStream  >> theSettings.isSigned;
+        metaInfoStream  >> theSettings.functionID;
 
         // qDebug() << theName << " " << theSettings.fieldNum << FN;
 
@@ -155,16 +174,23 @@ int EgDataNodeTypeMetaInfo::LocalLoadMetaInfo()
         // QList<QString>::iterator
     for (auto stringListIter = dataFields.begin(); stringListIter != dataFields.end(); stringListIter++)
         nameToOrder.insert(*stringListIter, order++);
-/*
-        // QList<QString>::iterator
-    for (auto stringListIter = indexedFieldsLocal.begin(); stringListIter != indexedFieldsLocal.end(); stringListIter++)
-        if (nameToOrder.contains(*stringListIter))
-            indexedToOrder.insert(*stringListIter, nameToOrder[*stringListIter]);
-            */
-
-    ddt_file.close();
 
     return 0;
+}
+
+int EgDataNodeTypeMetaInfo::LocalLoadMetaInfo()
+{
+    int res = 0;
+
+    // if (myECoGraphDB && myECoGraphDB->connection)
+    res = OpenLocalLoadStream();
+
+    if (! res)
+        res = LoadMetaInfoFromStream(localMetaInfoStream);
+
+    metaInfoFile.close();
+
+    return res;
 }
 
 void EgDataNodeTypeMetaInfo::PrintMetaInfo()

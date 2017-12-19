@@ -72,23 +72,6 @@ template class EgIndexFiles<double>;
 
 #endif
 
-
-/*
-EgFingers<qint32> EgFingersqint32;
-EgFingers<quint32> EgFingersquint32;
-EgFingers<qint64>  EgFingersqint64;
-EgFingers<quint64> EgFingersquint64;
-EgFingers<float> EgFingersfloat;
-EgFingers<double> EgFingersdouble;
-
-EgIndexes<qint32> EgIndexesqint32;
-EgIndexes<quint32> EgIndexesquint32;
-EgIndexes<qint64> EgIndexesqint64;
-EgIndexes<quint64> EgIndexesquint64;
-EgIndexes<float> EgIndexesfloat;
-EgIndexes<double> EgIndexesdouble;
-*/
-
 class EgDataNodesType;
 
 class EgDataFiles // Data Files operations

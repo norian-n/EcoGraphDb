@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
  *
- * License: propietary open source, free for non-commercial applications
+ * License: defined in license.txt file located in the root sources dir
  *
  */
 
@@ -11,6 +11,7 @@
 #define EG_META_INFO_H
 
 #include <QDir>
+#include <QDataStream>
 
 #include "egDataNode.h"
 
@@ -34,17 +35,20 @@ public:
 
     EgGraphDatabase* myECoGraphDB = nullptr;      // peer database
 
-    QList<QString> dataFields;          // fields of DataNodeType
+    QList<QString> dataFields;          // fields names of DataNodeType
 
     QHash<QString, int> nameToOrder;    // map field names to data list order (dont mesh up with data index)
     // QHash<QString, int> indexedToOrder; // map indexed fields names to data list order (dont mesh up with data index)
     QHash<QString, EgIndexSettings> indexedFields; // map indexed fields names to structure
 
+        // load & store support
+    QFile metaInfoFile;
+    QDataStream localMetaInfoStream;
 
     EgDataNodeTypeMetaInfo(): typeName("Error_no_type_name") {}
     EgDataNodeTypeMetaInfo(QString a_typeName) : typeName(a_typeName) {}
 
-    ~EgDataNodeTypeMetaInfo() {}
+    ~EgDataNodeTypeMetaInfo() { Clear(); metaInfoFile.close(); }
 
     void Clear() {nodesCount = 0; nextObjID = 1; dataFields.clear(); nameToOrder.clear(); indexedFields.clear();}
 
@@ -52,8 +56,14 @@ public:
 
     void AddDataField(QString fieldName, EgIndexSettings indexSettings);
 
-    int  LocalStoreMetaInfo();               // save to file or server
-    int  LocalLoadMetaInfo();                // load from file or server
+    int  LocalStoreMetaInfo();          // save to file or server
+    int  LocalLoadMetaInfo();           // load from file or server
+
+    int  OpenLocalStoreStream();      // save to local file
+    int  SendMetaInfoToStream(QDataStream &metaInfoStream);
+
+    int  OpenLocalLoadStream();      // load from local file
+    int  LoadMetaInfoFromStream(QDataStream& metaInfoStream);
 
     void PrintMetaInfo();               // debug print of field descriptions
 

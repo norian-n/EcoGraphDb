@@ -49,7 +49,7 @@ int EgNamedAttributes::UpdateNamedAttribute(EgDataNodeIDtype nodeID, const QStri
 
         myData << nodeID << name << value;
 
-        namedAttributesStorage-> UpdateDataNode(myData, nodeID);
+        namedAttributesStorage-> UpdateDataNode(myData, nodeID);    // FIXME check
         return 0;
     }
 

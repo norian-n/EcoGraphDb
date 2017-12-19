@@ -20,21 +20,21 @@
     // debug info definition
 #define FN "[" << __FUNCTION__  << ", " << __FILE__ << "]"
 #define FNS QString("[") + __FUNCTION__ + ", " + __FILE__ + "]"
-#define LOCAL NULL          // alias : use local files, not server link
+#define LOCAL nullptr          // alias : use local files, not server link
 
     // flags aliases
 const bool isIndexed = true;
 const bool useLocations = true;
 
     // ID and other types
-typedef quint32 EgDataNodesTypeID;    // data object class ID type
-typedef qint32  EgDataNodeIDtype;     // data object ID type !!! signed to mark deleted !!!
-typedef quint16 EgFieldIDtype;      // data field ID type
+typedef uint32_t EgDataNodesTypeID;    // data object class ID type
+typedef int32_t  EgDataNodeIDtype;     // data object ID type !!! signed to mark deleted !!!
+typedef uint16_t EgFieldIDtype;      // data field ID type
 
 class EgDataNode;
 
     // custom filter function type (remote filter could be set via Qt plugins)
-typedef bool (*FilterFunctionType) (EgDataNode& data_object, QList<QVariant>& filter_values);
+typedef bool (*FilterFunctionType) (EgDataNode& dataNode, QList<QVariant>& filterValues);
 // sample: int FilterTest (DataObj& data_object, QList<QVariant>& filter_values)
 
 
@@ -65,25 +65,6 @@ enum DataStatusType // data status type
     is_deleted
 };
 
-    // Qt form data node operations
-enum formMode
-{
-    formModeAdd,
-    formModeEdit,
-    formModeDelete
-};
-
-    // Qt data model related constants - service fields location
-const int data_status = Qt::UserRole + 1;   // DataStatusType equivalent
-const int data_id     = Qt::UserRole + 2;   // egDb data node ID
-
-    // data node add-on
-struct NamedAttribute
-{
-    QString  name;
-    QVariant value;
-};
-
     // server connection info
 struct EgRemoteConnect
 {
@@ -102,14 +83,33 @@ struct EgNodeTypeSettings
     EgRemoteConnect*  connection = nullptr;     // connection data (nullptr means local files)
 };
 
-// data node type settings
+    // data node type settings
 struct EgIndexSettings
 {
-    quint16 fieldNum;       // field # in data node fields list
-    quint16 indexSize;      // bits - 32, 64 etc.
-    quint16 isSigned;       // uniform bool representation
-    quint16 functionID;     // transformation function
+    uint16_t fieldNum;       // field # in data node fields list
+    uint16_t indexSize;      // bits - 32, 64 etc.
+    uint16_t isSigned;       // uniform bool representation
+    uint16_t functionID;     // transformation function
 
+};
+
+    // Qt form data node operations
+enum formMode
+{
+    formModeAdd,
+    formModeEdit,
+    formModeDelete
+};
+
+    // Qt data model related constants - service fields location
+const int data_status = Qt::UserRole + 1;   // DataStatusType equivalent
+const int data_id     = Qt::UserRole + 2;   // egDb data node ID
+
+    // data node add-on
+struct NamedAttribute
+{
+    QString  name;
+    QVariant value;
 };
 
 

@@ -3,60 +3,16 @@
 EgServerEngine::EgServerEngine():
         field_count(0),
         filter_id(-1),
-        glob_odb_map(NULL),
+        // glob_odb_map(NULL),
         in(&srvSocket),
         out(&block, QIODevice::WriteOnly)
 {
-    out.setVersion(QDataStream::Qt_4_0);
-    in.setVersion(QDataStream::Qt_4_0);
+    out.setVersion(QDataStream::Qt_5_0);
+    in.setVersion(QDataStream::Qt_5_0);
 }
 
 void EgServerEngine::Init()   // read stored Odb names from file - do it ONCE on server launch, not for each thread
 {
-    // mutex lock is not required, init called only once on server start
-    qint32 rSize;
-    char buf[2048]; // FIXME
-    QString odb_map_name;
-
-    QFile ddt_file("odb_names.onf");
-    QDataStream ddt(&ddt_file);
-        // check global ID counter
-    if (! glob_new_id)
-    {
-        qDebug() << "EgServerEngine::Init() got bad glob_new_id ptr";
-        return;
-    }
-        // check global map ptr
-    if (! glob_odb_map)
-    {
-        qDebug() << "EgServerEngine::Init() got bad glob_odb_map ptr ";
-        return;
-    }
-        // init ID counter
-    *glob_new_id = 1;
-        // clear map and list
-    glob_odb_map->clear();
-    glob_odb_list->clear();
-
-    if (!ddt_file.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
-    {
-        qDebug() << "EgServerEngine::Init() can't open " << "odb_names.onf" << " file";
-        return;
-    }
-        // read odb names from file
-    while (! ddt.atEnd())
-    {
-        ddt >> rSize;
-        // qDebug() << "rSize= " << rSize;
-        ddt.readRawData(buf, rSize);
-        buf[rSize] = 0;
-        odb_map_name = QString(buf); // codec->toUnicode(buf);
-
-        glob_odb_map->insert(odb_map_name, (*glob_new_id)++);
-        glob_odb_list->append(odb_map_name);  // sync list for backward access
-    }
-
-    ddt_file.close();
 
 }
     // set obj databse name for local file operations
@@ -64,10 +20,12 @@ void EgServerEngine::SetFileName(QString& FNameBase)
 {
     // FileNameBase  = FNameBase;
 
-    d_files.Init(FNameBase, &FD);
+    // d_files.Init(FNameBase, &FD);
         // load from file TODO : make it global ?
     // d_files.LocalLoadFieldDesc2(desc_list, field_indexes, field_count, obj_count, next_obj_id); FIXME
 }
+
+/*
     // load filter callbacks plugin
 bool EgServerEngine::loadPlugin()
 {
@@ -99,18 +57,17 @@ bool EgServerEngine::loadPlugin()
 
     return false;
 }
+
+*/
     // primary processor
 // int EgServerEngine::Execute(int socketDescriptor)                     // execute client's request
 void EgServerEngine::run()
 {
     // quint16 desc_count = 0;
-    odb_id_type  odb_id = 0; // 0 means bad Odb ID
+    // odb_id_type  odb_id = 0; // 0 means bad Odb ID
     qint16 a_size = 0;
 
     QByteArray field_descs, control_descs;
-
-    if ( !loadPlugin())
-        qDebug() << FN << "can't load plugins ";
 
     qDebug() << FN << &srvSocket;
 
@@ -135,6 +92,9 @@ void EgServerEngine::run()
     in >> command_id;
     // qDebug() << "command_id 1 = " << command_id;
         // process first command - opcode_get_odb_id or opcode_send_odb_id
+
+    /*
+
     switch ( command_id )
     {
     case opcode_get_odb_id:
@@ -247,9 +207,12 @@ void EgServerEngine::run()
         break;
     }
 
+    */
+
     return; // 0;
 }
 
+/*
 void EgServerEngine::LoadFilterArgs()
 {
     qint16 argsCount;
@@ -286,10 +249,11 @@ void EgServerEngine::LoadFilterArgs()
         }
     }
 }
-
+*/
 
 int EgServerEngine::ServerSendObjects()    // FIXME send objects
 {
+    /*
     QList<EgPackedDataNode>::iterator cur_obj;
         // send recs count
     out << (quint32) PackedList.count();
@@ -312,11 +276,13 @@ int EgServerEngine::ServerSendObjects()    // FIXME send objects
 
         cur_obj++;
     }
+    */
     return 0;
 }
 
 inline void EgServerEngine::ServerRecvDataObj()
 {
+    /*
     qint32 obj_count;
 
     PackedList.clear();
@@ -332,11 +298,13 @@ inline void EgServerEngine::ServerRecvDataObj()
 
         PackedList << tmpObj;
     }
+    */
 }
 
 
 int EgServerEngine::ServerSendOdbID() 		// find or create new ODB entry in global map and save it to file
 {
+    /*
     QString odb_name;
     odb_id_type  odb_id = 0; // 0 means bad Odb ID
         // object description data
@@ -396,12 +364,14 @@ int EgServerEngine::ServerSendOdbID() 		// find or create new ODB entry in globa
     out.device()->seek(0);
 
     qDebug() << FN << "Sent new odb_id " <<  odb_id;
+    */
 
     return 0;
 }
 
 int EgServerEngine::ServerSendFieldDescs(QByteArray* field_descs, QByteArray* control_descs)    // send field descriptors to client app
 {
+    /*
         // send recs count
     // qDebug() << FN << "data objects count = " << obj_count;
     out << obj_count;
@@ -419,6 +389,7 @@ int EgServerEngine::ServerSendFieldDescs(QByteArray* field_descs, QByteArray* co
 
     if (control_descs->size())
         srvSocket.write(*control_descs);
+        */
 
     return 0;
 }

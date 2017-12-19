@@ -127,10 +127,10 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
             qDebug()  << "Can't connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
     }
 
+    GUI = new EgDataNodesGUIsupport(this); // needed for basic UI interaction
+
     if (metaInfo.useGUIsettings)
     {
-        GUI = new EgDataNodesGUIsupport(this);
-
         int guires = GUI-> LoadSimpleControlDesc();
 
         if (guires)
@@ -147,7 +147,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
 
         // connect to peer database controller
     if (! res)
-        res = myDB.Attach(this);  // FIXME implement double-check files
+        res = myDB.Attach(this);  // TODO FIXME implement double-check files
 
     if (! res)
         res = getMyLinkTypes(); // extract nodetype-specific link types from all link types

@@ -8,29 +8,27 @@
 #include <QMutex>
 #include <QtNetwork>
 
-#include "egMetaInfo.h"
-#include "egClientServer.h"
-#include "egLocalFiles.h"
-
-#include "objdb_filters.h"
+#include "../egMetaInfo.h"
+#include "../egClientServer.h"
+// #include "../egLocalFiles.h"
 
 class EgServerEngine  //  : public QRunnable // Data Files operations
 {
 public:
-    EgDataFiles d_files;
+    // EgDataFiles d_files;
     quint16 field_count;
-    obj_id_type obj_count;
-    obj_id_type next_obj_id;
+    // obj_id_type obj_count;
+    // obj_id_type next_obj_id;
 
     command_id_type command_id;
-    odb_id_type db_id;
+    // odb_id_type db_id;
 
     qint32 filter_id;   // data filter callback ID
     int socketDescriptor;
 
-    odb_id_type* glob_new_id;
+    // odb_id_type* glob_new_id;
     QMutex* OdbMapMutex;         // lock
-    QMap<QString, odb_id_type>* glob_odb_map;
+    // QMap<QString, odb_id_type>* glob_odb_map;
     QList<QString>* glob_odb_list;
         // data transfer
     QTcpSocket srvSocket;
@@ -39,14 +37,14 @@ public:
     QDataStream in;
     QDataStream out;
 
-    QList<EgPackedDataNode> PackedList;
-    EgFieldDescriptors FD;
+    // QList<EgPackedDataNode> PackedList;
+    // EgFieldDescriptors FD;
 
     QList<EgDataNode*> data_obj_list;          // 1-element list to support local files interface
-    QMap<obj_id_type, EgDataNode> dobj_map;    // map to send to client
+    // QMap<obj_id_type, EgDataNode> dobj_map;    // map to send to client
 
         // data filter
-    FilterInterface* filterInterface;
+    // FilterInterface* filterInterface;
 
     EgServerEngine();
     ~EgServerEngine() {}

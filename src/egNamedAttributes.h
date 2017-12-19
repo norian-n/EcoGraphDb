@@ -20,11 +20,11 @@ public:
 
     // FIXME TODO check if all functionality implemented, write coverage tests
 
-    EgDataNodesType* primaryNodesType;      // backlink
-    EgDataNodesType* namedAttributesStorage;
+    EgDataNodesType* primaryNodesType;                  // backlink to my type
+    EgDataNodesType* namedAttributesStorage;            // data
 
-    // EgDataNodeIDtype currentNodeId = 0;                     // last for GetNamedAttributes
-    QMap <QString, QVariant>  namedAttributesOfNode;   // temporary for GetNamedAttributes
+    // EgDataNodeIDtype currentNodeId = 0;              // last for GetNamedAttributes
+    QMap <QString, QVariant>  namedAttributesOfNode;    // temporary for GetNamedAttributes
     QMap <QString, EgDataNodeIDtype>  namedAttributesOfNodeIDs;   // IDs in the namedAttributesStorage
 
     QMultiMap <EgDataNodeIDtype, EgDataNode*>  attributesById;

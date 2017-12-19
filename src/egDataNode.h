@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
  *
- * License: propietary open source, free for non-commercial applications
+ * License: defined in license.txt file located in the root sources dir
  *
  */
 
@@ -12,8 +12,6 @@
 
 #include <QString>
 #include <QVariant>
-#include <QStandardItemModel>
-#include <QDate>
 
 #include "egCore.h"
 
@@ -34,10 +32,10 @@ class EgDataNodeTypeMetaInfo;
 
 struct EgExtendedLinkType
 {
-      EgDataNodeIDtype dataNodeID;
-      EgDataNode* dataNodePtr;
+      EgDataNodeIDtype dataNodeID = 0;
+      EgDataNode* dataNodePtr = nullptr;
 
-      EgExtendedLinkType(): dataNodeID(0), dataNodePtr(nullptr) {}
+      // EgExtendedLinkType(): dataNodeID(0), dataNodePtr(nullptr) {}
 };
 
 class EgDataNodeLinks           // Data Object Instance 1
@@ -65,15 +63,15 @@ public:
 
     EgDataNodeIDtype dataNodeID = 0;
 
-    quint64 dataFileOffset = 0;
+    quint64 dataFileOffset = 0;                     // stored offset for local file
 
-    bool isAdded = false;                         // new data node
+    bool isAdded = false;                           // is not stored yet
 
     EgDataNodeTypeMetaInfo* metaInfo = nullptr;     // data type metainfo backlink
 
     EgDataNodeLinks* nodeLinks = nullptr;           // links to other nodes if required
 
-    QList<QVariant> dataFields;           // data itself
+    QList<QVariant> dataFields;                     // data itself
 
     EgDataNode() {}
     EgDataNode(EgDataNodeTypeMetaInfo& a_metaInfo);
@@ -82,8 +80,8 @@ public:
 
     void clear();
 
-    QVariant& operator [] (QString& fieldName);  // value by name 1
-    QVariant& operator [] (const char* fName);   // value by name 2
+    QVariant& operator [] (QString& fieldName);     // value by name 1
+    QVariant& operator [] (const char* fName);      // value by name 2
 
 };
 

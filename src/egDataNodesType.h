@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
  *
- * License: propietary open source, free for non-commercial applications
+ * License: defined in license.txt file located in the root sources dir
  *
  */
 
@@ -76,6 +76,8 @@ public:
 
         // register node type at EgGraphDatabase, load metadata
     int Connect(EgGraphDatabase& myDB, const QString& nodeTypeName, EgRemoteConnect* server = nullptr);
+
+        // minimal config, no type extensions, no gui, dont use it in apps
     int ConnectServiceNodeType(EgGraphDatabase& myDB, const QString& nodeTypeName, EgRemoteConnect* server = nullptr);
 
     void ClearData();                   // data nodes content and support data cleanup

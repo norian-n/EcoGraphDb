@@ -241,52 +241,6 @@ inline void EgDataFiles::LocalCloseFiles()
     dir.setCurrent("..");
 }
 
-/*
-int EgDataFiles::LocalStoreFieldDesc(QByteArray* field_descs, QByteArray* control_descs)
-{
-        // open file
-    QFile ddt_file(metaInfo-> typeName + ".ddt");
-    QDataStream ddt(&ddt_file);
-    if (!ddt_file.open(QIODevice::WriteOnly | QIODevice::Truncate)) // WriteOnly Append | QIODevice::Truncate
-    {
-        qDebug() << FN << "can't open " << metaInfo-> typeName + ".ddt" << " file";
-        return -1;
-    }
-
-    ddt << (EgDataNodeIDtype) 0; // obj_count;     // data objects (NOT field descriptors) count
-    ddt << (EgDataNodeIDtype) 1; // next_obj_id;   // next_obj_id
-
-    ddt << *field_descs;                // packed field descriptors
-    ddt << *control_descs;              // packed control descriptors
-
-    ddt_file.close();
-    return 0;
-}
-
-int EgDataFiles::LocalLoadFieldDesc(QByteArray* field_descs, QByteArray* control_descs, EgDataNodeIDtype& obj_count, EgDataNodeIDtype& next_obj_id)
-{
-        // open file
-    QFile ddt_file(metaInfo-> typeName + ".ddt");
-    QDataStream ddt(&ddt_file);
-    if (!ddt_file.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
-    {
-        qDebug() << FN << "can't open " << metaInfo-> typeName + ".ddt" << " file";
-        return -1;
-    }
-
-    field_descs->clear();
-    control_descs->clear();
-
-    ddt >> obj_count;       // data objects (NOT field descriptors) count
-    ddt >> next_obj_id;     // next_obj_id
-
-    ddt >> *field_descs;    // packed field descriptors
-    ddt >> *control_descs;  // packed control descriptors
-
-    ddt_file.close();
-    return 0;
-}
-*/
 
 int EgDataFiles::RemoveLocalFiles()
 {
@@ -415,21 +369,8 @@ inline void EgDataFiles::LocalAddObjects(QDataStream& dat, QMap<EgDataNodeIDtype
 {
     dat.device()-> seek(dat.device()-> size());
 
-        // open index files
-    /*
-    primIndexFiles-> OpenIndexFilesToUpdate();
-
-    for (QHash<QString, int> ::iterator indIter = metaInfo-> indexedToOrder.begin(); indIter != metaInfo-> indexedToOrder.end(); ++indIter)
-        if (indexFiles.contains(indIter.key()))
-            indexFiles[indIter.key()]-> OpenIndexFilesToUpdate();
-        else
-            qDebug() << FN << "Index not found: " << indIter.key();
-
-    */
-
-
-        // walk add list
-    for (QMap<EgDataNodeIDtype, EgDataNode*>::iterator addIter = addedDataNodes.begin(); addIter != addedDataNodes.end(); ++addIter)
+        // walk add list QMap<EgDataNodeIDtype, EgDataNode*>::iterator
+    for (auto addIter = addedDataNodes.begin(); addIter != addedDataNodes.end(); ++addIter)
     {
         // qDebug() << FN << "Adding object" << (int) addIter.value()-> dataNodeID << " on offset" << hex << (int) dat.device()-> pos();
 
@@ -440,7 +381,6 @@ inline void EgDataFiles::LocalAddObjects(QDataStream& dat, QMap<EgDataNodeIDtype
         dat << *(addIter.value());
 
             // add primary index
-
         primIndexFiles-> theIndex = addIter.value()-> dataNodeID;
         primIndexFiles-> AddIndex();
 
@@ -578,9 +518,11 @@ inline int EgDataFiles::LocalModifyObjects(QDataStream& dat, QMap<EgDataNodeIDty
     return 0;
 }
 
-int EgDataFiles::LocalCompressData() // FIXME remove deleted records TODO : optional remove to archive
+int EgDataFiles::LocalCompressData() // FIXME TODO copy all except deleted records
 {
-    // FIXME
+    // select all
+
+    // add to new file
 
     return 0;
 }

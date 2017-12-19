@@ -3,17 +3,17 @@
 
 // client/server related constants
 
-#include <qglobal.h>
+// #include <qglobal.h>
 
-typedef quint8  command_id_type;    // client/server operation codes
+typedef uint8_t  command_id_type;    // client/server operation codes
 
-const quint16 server_port = 5777;   // hardcoded default server port
+const uint16_t server_port = 5777;   // hardcoded default server port
 
 const command_id_type opcode_send_odb_id     = 0x01;     // send odb_id to server
 const command_id_type opcode_get_odb_id      = 0x02;     // get odb id from server by object class name
 
-const command_id_type opcode_store_fdesc     = 0x03;     // store fields descriptions on server
-const command_id_type opcode_load_fdesc      = 0x04;     // load ones from server
+const command_id_type opcode_store_metainfo  = 0x03;     // store fields descriptions on server
+const command_id_type opcode_load_metainfo   = 0x04;     // load ones from server
 
 const command_id_type opcode_append_dataobj  = 0x05;     // append new data obj to file on server
 const command_id_type opcode_delete_dataobj  = 0x06;     // mark data obj as deleted on server
