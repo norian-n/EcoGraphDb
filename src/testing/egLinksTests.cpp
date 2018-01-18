@@ -44,7 +44,7 @@ void EgLinksTests::testCreateNodes()
     for (int i = 0; i < 100; i++)
     {
         addValues.clear();
-        addValues << QVariant("linksTestName_" + QVariant(i+1).toString()) << QVariant(2);
+        addValues << QVariant("linksTestName_" + QVariant(i+1).toString()) << QVariant(1);
         testDataNodes.AddDataNode(addValues);
     }
 
@@ -97,10 +97,10 @@ void EgLinksTests::testAddIndexedNodes()
 
     testDataNodes.Connect(graphDB, "linksTest");
 
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 10; i++)
     {
         addValues.clear();
-        addValues << QVariant("testIndexed_" + QVariant(i+1).toString()) << QVariant(i);
+        addValues << QVariant("testIndexed_" + QVariant(i+1).toString()) << QVariant(3);
         testDataNodes.AddDataNode(addValues);
     }
 
@@ -117,7 +117,7 @@ void EgLinksTests::testUpdateIndexedNodes()
 
     testDataNodes.LoadAllNodes();
 
-    for (int i = 0; i < 200; i++)
+    for (int i = 0; i < 110; i++)
     {
         // update node index
 
@@ -147,7 +147,9 @@ void EgLinksTests::testUpdateIndexedNodes()
 
     testDataNodes.LoadData(IC("status", EQ, 2));
 
-    bool res = (testDataNodes.DataNodesCount() == 200);
+    // qDebug() << testDataNodes.DataNodesCount() << FN;
+
+    bool res = (testDataNodes.DataNodesCount() == 110);
 
     testShowResult(res, FNS);
 

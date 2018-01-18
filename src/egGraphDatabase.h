@@ -42,7 +42,7 @@ public:
     EgDataNodeTypeMetaInfo* locationMetaInfo = nullptr;
     EgDataNodeTypeMetaInfo* attributesMetaInfo = nullptr;
 
-    EgRemoteConnect*  connection = nullptr;     // connection data (nullptr means local files)
+    // EgRemoteConnect*  connection = nullptr;     // connection data (nullptr means local files)
 
     QDir dir;
 

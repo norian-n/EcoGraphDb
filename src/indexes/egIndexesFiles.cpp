@@ -106,7 +106,7 @@ template <typename KeyType> void EgIndexFiles<KeyType>::AddIndex()
     }
 }
 
-template <typename KeyType> int EgIndexFiles<KeyType>::UpdateIndex(bool isChanged)
+template <typename KeyType> int EgIndexFiles<KeyType>::UpdateIndex(bool isChanged, bool isPrimary)
 {
     indexChunks.theKey = theIndex;
     indexChunks.oldDataOffset = dataOffset;
@@ -119,10 +119,10 @@ template <typename KeyType> int EgIndexFiles<KeyType>::UpdateIndex(bool isChange
     }
 
     if (! isChanged)
-        indexChunks.UpdateIndex();
+        indexChunks.UpdateIndex(isPrimary);
     else // FIXME : check if last index
     {
-        indexChunks.DeleteIndex();
+        indexChunks.DeleteIndex(isPrimary);
 
         indexChunks.theKey = newIndex;
         indexChunks.oldDataOffset = newOffset;
@@ -134,10 +134,13 @@ template <typename KeyType> int EgIndexFiles<KeyType>::UpdateIndex(bool isChange
         indexChunks.InsertToIndexChunk();
     }
 
+    if (isPrimary)
+        dataOffset = indexChunks.oldDataOffset;
+
     return 0;
 }
 
-template <typename KeyType> int EgIndexFiles<KeyType>::DeleteIndex()
+template <typename KeyType> int EgIndexFiles<KeyType>::DeleteIndex(bool isPrimary)
 {
 
     indexChunks.theKey = theIndex;
@@ -149,7 +152,10 @@ template <typename KeyType> int EgIndexFiles<KeyType>::DeleteIndex()
         return -1;
     }
 
-    indexChunks.DeleteIndex();
+    indexChunks.DeleteIndex(isPrimary);
+
+    if (isPrimary)
+        dataOffset = indexChunks.oldDataOffset;
 
     return 0;
 }
@@ -286,7 +292,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GT(QSet<quint64>& in
     if (! res)
         indexChunks.LoadDataByChunkUp(index_offsets, EgIndexes<KeyType>::CompareGT);
 
-    // qDebug()  << "res = " << res << "index_offsets count = " << index_offsets.count() << FN;
+    qDebug()  << "res = " << res << "index_offsets count = " << index_offsets.count() << FN;
 
     CloseIndexFiles();
 

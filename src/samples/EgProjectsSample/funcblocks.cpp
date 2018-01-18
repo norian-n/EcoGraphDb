@@ -117,10 +117,11 @@ void FuncBlocksForm::loadFuncblocks()
     // Projects.LoadLinks();
 
     Funcblocks.LoadLinkedData("projects_funcblocks", projectID);
+
     Funcblocks.LoadLinkType("funcblocksTree");
 
-    Projects.LoadLinkType("projects_funcblocks");
-    Projects.myLinkTypes["projects_funcblocks"]-> ResolveLinksToPointers();
+    Projects.LoadLinkType("projects_funcblocks");   // to add new linked fblocks (?) check if is required
+    Projects.myLinkTypes["projects_funcblocks"]-> ResolveLinksToPointers(); // (?) check if is required
 
     Funcblocks.myLinkTypes["funcblocksTree"]-> ResolveLinksToPointers();
 

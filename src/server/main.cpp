@@ -7,16 +7,26 @@
  *
  */
 
-#include <thread>
+#include <QCoreApplication>
+#include <QtCore>
+
+// #include <thread>
 #include <iostream>
 
-// server sample & smoke test
+#include "egServerEngine.h"
 
 using namespace std;
 
-int main() // int argc, char *argv[]
+int main(int argc, char *argv[])
 {
+    QCoreApplication a(argc, argv);
 
-    cout << "Number of hardware cores = "
-              <<  std::thread::hardware_concurrency() << endl;
+    EgServerEngine serverEngine; // QWidget *parent
+
+    serverEngine.run();
+
+    cout << "Press Ctrl-C to quit ..." << endl;
+    // getchar();
+
+    return a.exec();
 }

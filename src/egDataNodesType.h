@@ -20,7 +20,7 @@
 #include "egNodesLocation.h"
 #include "egNamedAttributes.h"
 
-class EgDataClient;     // server connection functionality
+class EgServerConnection;     // server connection functionality
 
 #ifdef EG_LIB_BUILD     // library build switch, define it in project or egCore.h
 
@@ -38,16 +38,16 @@ class EgDataNodesType
 public:
     bool isConnected = false;
 
-    EgRemoteConnect*  connection = nullptr;         // connection data (NULL means local files)
+    // EgRemoteConnect*  connection = nullptr;         // connection data (NULL means local files)
 
-    EgDataFiles*  LocalFiles = nullptr;             // data files support functionality
-    EgDataClient* ConnectonClient = nullptr;        // server connection client
+    // EgServerConnection* ConnectonClient = nullptr;        // server connection client
 
     EgEntryNodes* entryNodes = nullptr;
     EgDataNodesGUIsupport* GUI = nullptr;
     EgDataNodesLocation* locations = nullptr;
     EgNamedAttributes* namedAttributes = nullptr;
 
+    EgDataFiles*  LocalFiles = nullptr;             // data files support functionality
     EgIndexConditionsTree* index_tree = nullptr;    // indexed fields operations
 
     EgDataNodeTypeMetaInfo metaInfo;                // general data nodes type info
@@ -56,6 +56,8 @@ public:
 
     QMap <QString, EgDataNodesLinkType*>  myLinkTypes;
 
+    QSet <quint64> IndexOffsets;           // offsets returned by index tree, for index-based operations (AND, OR)
+
         // data nodes content and changes
     QMap <EgDataNodeIDtype, EgDataNode>   dataNodes;
 
@@ -63,7 +65,6 @@ public:
     QMap <EgDataNodeIDtype, EgDataNode*>  addedDataNodes;
     QMap <EgDataNodeIDtype, EgDataNode*>  updatedDataNodes;
 
-    QSet <quint64> IndexOffsets;           // offsets returned by index tree, for index-based operations (AND, OR)
 
     EgDataNodesType();
     ~EgDataNodesType();
@@ -75,10 +76,10 @@ public:
         // basic operations
 
         // register node type at EgGraphDatabase, load metadata
-    int Connect(EgGraphDatabase& myDB, const QString& nodeTypeName, EgRemoteConnect* server = nullptr);
+    int Connect(EgGraphDatabase& myDB, const QString& nodeTypeName, const QString& serverAddress = QString());
 
         // minimal config, no type extensions, no gui, dont use it in apps
-    int ConnectServiceNodeType(EgGraphDatabase& myDB, const QString& nodeTypeName, EgRemoteConnect* server = nullptr);
+    int ConnectServiceNodeType(EgGraphDatabase& myDB, const QString& nodeTypeName, const QString& serverAddress = QString());
 
     void ClearData();                   // data nodes content and support data cleanup
 

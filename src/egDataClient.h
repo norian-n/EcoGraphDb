@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
  *
- * License: propietary open source, free for non-commercial applications
+ * License: defined in license.txt file located in the root sources dir
  *
  */
 
@@ -14,30 +14,39 @@
 #include <QList>
 #include <QVariant>
 #include <QTcpSocket>
+#include <QDataStream>
 
 #include "egDataNodesType.h"
+#include "egCore.h"
 #include "egClientServer.h"
 
-class EgDataClient // Data Conection Operations
+class EgServerConnection // Data Conection Operations
 {
 public:
-    EgDataNodesType* dataNodesType;
+    // EgDataNodesType* dataNodesType;
     QTcpSocket tcpSocket;
     QByteArray block;
 
     QDataStream in;
     QDataStream out;
 
-    EgDataNodesTypeID egDataNodesTypeID; // server odb ID
+    // EgDataNodesTypeID egDataNodesTypeID; // server odb ID
 
-    EgDataClient(const EgDataNodesType* nodesType);
-    ~EgDataClient() {}
+    QString serverAddress;
+
+    EgServerConnection();
+
+    // EgServerConnection(const EgDataNodesType* nodesType);
+    ~EgServerConnection() { /*Disconnect(); out.unsetDevice();  */}
 
 
-    int  OpenMetaInfoStoreStream(QDataStream **metaInfoStream);      // save to local file
-    int  OpenMetaInfoLoadStream(QDataStream **metaInfoStream);      // load from local file
+    int  OpenStoreStream(const CommandIdType command, QDataStream*& metaInfoStream, const QString &typeName);      // save to local file
+    int  OpenLoadStream(const CommandIdType command, QDataStream*& metaInfoStream, const QString& typeName);      // load from local file
 
-    int RemoteGetOdbId();             // get odb_id from server
+    int  SendCommand(const CommandIdType command, const QString& nodeTypeName);             // get odb_id from server
+    int  WaitForSending();
+    int  WaitForReadyRead();
+    void Disconnect();
 
     int RemoteLoadFieldDesc(QByteArray* field_descs, QByteArray* control_descs, EgDataNodeIDtype& obj_count, EgDataNodeIDtype& next_obj_id);    // load from server
     int RemoteStoreFieldDesc(QByteArray* field_descs, QByteArray* control_descs);

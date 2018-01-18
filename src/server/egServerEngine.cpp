@@ -1,395 +1,339 @@
 #include "egServerEngine.h"
+#include <QThread>
 
 EgServerEngine::EgServerEngine():
-        field_count(0),
-        filter_id(-1),
-        // glob_odb_map(NULL),
-        in(&srvSocket),
-        out(&block, QIODevice::WriteOnly)
+    // field_count(0),
+    // filter_id(-1),
+    // glob_odb_map(NULL),
+    // in(&srvSocket),
+    // out(&block, QIODevice::WriteOnly),
+    tcpServer(new QTcpServer(this))
 {
-    out.setVersion(QDataStream::Qt_5_0);
-    in.setVersion(QDataStream::Qt_5_0);
-}
+    // out.setVersion(QDataStream::Qt_4_0);
+    // in.setVersion(QDataStream::Qt_4_0);
 
-void EgServerEngine::Init()   // read stored Odb names from file - do it ONCE on server launch, not for each thread
-{
-
-}
-    // set obj databse name for local file operations
-void EgServerEngine::SetFileName(QString& FNameBase)
-{
-    // FileNameBase  = FNameBase;
-
-    // d_files.Init(FNameBase, &FD);
-        // load from file TODO : make it global ?
-    // d_files.LocalLoadFieldDesc2(desc_list, field_indexes, field_count, obj_count, next_obj_id); FIXME
+    connect(tcpServer, &QTcpServer::newConnection, this, &EgServerEngine::processRequest);
 }
 
 /*
-    // load filter callbacks plugin
-bool EgServerEngine::loadPlugin()
+egDbTcpServer::egDbTcpServer(QObject *parent)
+      : QTcpServer(parent)
 {
-    QDir pluginsDir(qApp->applicationDirPath());
-#if defined(Q_OS_WIN)
-    if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release")
-        pluginsDir.cdUp();
-#elif defined(Q_OS_MAC)
-    if (pluginsDir.dirName() == "MacOS") {
-        pluginsDir.cdUp();
-        pluginsDir.cdUp();
-        pluginsDir.cdUp();
-    }
-#endif
-    pluginsDir.cd("plugins");
-    foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
-        QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
-        QObject *plugin = pluginLoader.instance();
-        if (plugin) {
-            filterInterface = qobject_cast<FilterInterface *>(plugin);
-            if (filterInterface)
-            {
-                // filterInterface->PingFilter();
-                // LocalFilterCallback = filterInterface->FilterByID(1);
-                return true;
-            }
-        }
-    }
 
-    return false;
 }
 
+
+void egDbTcpServer::incomingConnection(qintptr socketDescriptor)
+{
+        qDebug() << "incomingConnection() called" << FN;
+
+    // FortuneThread *thread = new FortuneThread(socketDescriptor, fortune, this);
+    // connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    // thread->start();
+}
 */
+
+inline void EgServerEngine::ReceiveNodesList(QList<EgDataNode>& dataNodes, QDataStream& in)
+{
+    dataNodes.clear();
+
+    uint32_t count = 0;
+    EgDataNode node;
+
+    in >> count;
+
+    // qDebug()  << "count = " << count << FN ;
+
+    for (uint32_t i =0; i < count; ++i)
+    {
+        node.dataFields.clear();
+        in >> node;
+
+        dataNodes.append(node);
+    }
+}
+
+inline void EgServerEngine::ReceiveIndexesTree(QDataStream& in)
+{
+    indexNodes.clear();
+
+    uint32_t count = 0;
+
+    EgIndexNode node;
+
+    in >> count;
+    in >> rootNodeID;
+
+    // qDebug()  << "count = " << count << FN ;
+
+    for (uint32_t i =0; i < count; ++i)
+    {
+        in >> node;
+
+        // qDebug()  << "node IDs = " << node.nodeID << " " << node.leftID << " " << node.rightID << FN ;
+
+        indexNodes.insert(node.nodeID, node);
+    }
+}
+
+inline void EgServerEngine::StoreMetaInfo(QDataStream& in)
+{
+    metaInfo.LoadMetaInfoFromStream(in);
+    metaInfo.LocalStoreMetaInfo();
+}
+
+inline void EgServerEngine::LoadMetaInfo(QDataStream& out)
+{
+    metaInfo.LocalLoadMetaInfo();
+    metaInfo.SendMetaInfoToStream(out);
+
+    // qDebug()  << block;
+
+    clientConnection-> write(block);
+
+    if (! clientConnection-> waitForBytesWritten(egServerTimeout)) // wait up to 10 sec
+    {
+        qDebug() << "waitForBytesWritten error" << FN;
+    }
+
+    block.clear();
+    out.device()->seek(0);
+}
+
+inline void EgServerEngine::LoadDataNodes(QDataStream& out)
+{
+
+    addNodes.clear();
+    IndexOffsets.clear();
+
+    localFiles.primIndexFiles -> LoadAllDataOffsets(IndexOffsets);
+
+    localFiles.LocalLoadDataNodes(IndexOffsets, addNodes);
+
+    out << (uint32_t) addNodes.count();
+
+    for (auto sendIter = addNodes.begin(); sendIter != addNodes.end(); ++sendIter)
+    {
+        // qDebug() << "Sending node " << (int) addIter.value()-> dataNodeID << FN ;
+
+        out << *sendIter;
+    }
+
+    // qDebug()  << block;
+
+    clientConnection-> write(block);
+
+    if (! clientConnection-> waitForBytesWritten(egServerTimeout)) // wait up to N sec
+    {
+        qDebug() << "waitForBytesWritten error" << FN;
+    }
+
+    block.clear();
+    out.device()->seek(0);
+
+    addNodes.clear();
+    IndexOffsets.clear();
+}
+
+inline void EgServerEngine::LoadSelectedDataNodes(QDataStream& out)
+{
+    addNodes.clear();
+    IndexOffsets.clear();
+
+    if (index_tree)
+        index_tree-> CalcTreeSet(rootIndexCondition.iTreeNode, IndexOffsets, &localFiles);
+
+    // qDebug() << "IndexOffsets count: " << IndexOffsets.count() << FN ;
+
+    if (! IndexOffsets.isEmpty())
+        localFiles.LocalLoadDataNodes(IndexOffsets, addNodes);
+
+    out << (uint32_t) addNodes.count();
+
+    for (auto sendIter = addNodes.begin(); sendIter != addNodes.end(); ++sendIter)
+    {
+        // qDebug() << "Sending node " << (int) addIter.value()-> dataNodeID << FN ;
+
+        out << *sendIter;
+    }
+
+    // qDebug()  << block;
+
+    clientConnection-> write(block);
+
+    if (! clientConnection-> waitForBytesWritten(egServerTimeout)) // wait up to N sec
+    {
+        qDebug() << "waitForBytesWritten error" << FN;
+    }
+
+    block.clear();
+    out.device()->seek(0);
+
+    addNodes.clear();
+    IndexOffsets.clear();
+}
+
+inline void EgServerEngine::AppendData(QDataStream& in)
+{
+    // addNodes.clear();
+    ReceiveNodesList(addNodes, in);
+
+    // qDebug()  << "addNodes.count(): " << addNodes.count() << FN ;
+
+    if (addNodes.count() > 0)
+        localFiles.LocalAddNodes(addNodes);
+}
+
+inline void EgServerEngine::DeleteData(QDataStream& in)
+{
+    // deleteNodes.clear();
+    ReceiveNodesList(deleteNodes, in);
+
+    // qDebug()  << "deleteNodes.count(): " << deleteNodes.count() << FN ;
+
+    if (deleteNodes.count() > 0)
+        localFiles.LocalDeleteNodes(deleteNodes);
+}
+
+inline void EgServerEngine::UpdateData(QDataStream& in)
+{
+    // updateNodes.clear();
+    ReceiveNodesList(updateNodes, in);
+
+    // qDebug()  << "updateNodes.count(): " << updateNodes.count() << FN ;
+
+    if (updateNodes.count() > 0)
+        localFiles.LocalModifyNodes(updateNodes);
+}
+
+void EgServerEngine::getCommand()
+{
+
+    // qDebug() << "getCommand() called";
+
+    QDataStream in(clientConnection);
+    in.setVersion(QDataStream::Qt_4_0);
+
+    block.clear();
+
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_4_0);
+
+    in >> commandID;
+    in >> nodeTypeName;
+
+    qDebug() << "commandID = " << hex << commandID << ", nodeTypeName = " << nodeTypeName;
+
+    metaInfo.typeName = nodeTypeName;
+
+    // process command
+    switch ( commandID )
+    {
+    case opcode_store_metainfo: // store metainfo on server
+
+        StoreMetaInfo(in);
+        break;
+
+    case opcode_load_metainfo: // load metainfo from server
+
+        LoadMetaInfo(out);
+        break;
+
+    case opcode_store_data: // store data nodes changes on server
+
+        metaInfo.LocalLoadMetaInfo();
+        localFiles.Init(metaInfo);
+
+        localFiles.LocalOpenFilesToUpdate();
+
+        AppendData(in);
+        DeleteData(in);
+        UpdateData(in);
+
+        localFiles.LocalCloseFiles();
+
+        break;
+
+    case opcode_load_all_data: // load metainfo from server
+
+        metaInfo.LocalLoadMetaInfo();
+        localFiles.Init(metaInfo);
+
+        LoadDataNodes(out);
+
+        localFiles.LocalCloseFiles();
+
+        break;
+
+    case opcode_load_selected_data: // load metainfo from server
+
+        // clientConnection-> waitForReadyRead(egServerTimeout);
+        // QThread::msleep(100);
+
+        ReceiveIndexesTree(in);
+
+        if (rootNodeID && indexNodes.count())
+        {
+
+            metaInfo.LocalLoadMetaInfo();
+            localFiles.Init(metaInfo);
+
+            index_tree = new EgIndexConditionsTree();
+            rootIndexCondition.BuildTreeFromMap(indexNodes, rootNodeID);
+
+            LoadSelectedDataNodes(out);
+
+            localFiles.LocalCloseFiles();
+        }
+        else
+          qDebug()  << "ERROR: empty indexes map or rootID: " << rootNodeID << "count(): " << indexNodes.count() << FN ;
+
+        break;
+
+
+    default:
+        qDebug()  << "ERROR: bad opcode " << commandID << FN ;
+    }
+
+    // clientConnection->write(block);
+    clientConnection->disconnectFromHost();
+
+    if (clientConnection-> state() == QAbstractSocket::ConnectedState)
+        clientConnection-> waitForDisconnected(egServerTimeout);
+}
+
+
+void EgServerEngine::processRequest()
+{
+    // QByteArray block;
+    // QDataStream out(&block, QIODevice::WriteOnly);
+    // out.setVersion(QDataStream::Qt_4_0);
+
+    // CommandIdType command_id;
+
+    // qDebug() << "processRequest() called";
+
+    clientConnection = tcpServer->nextPendingConnection();
+
+    connect(clientConnection, &QAbstractSocket::readyRead, this, &EgServerEngine::getCommand);
+    connect(clientConnection, &QAbstractSocket::disconnected, clientConnection, &QObject::deleteLater);
+
+    return;
+}
+
     // primary processor
 // int EgServerEngine::Execute(int socketDescriptor)                     // execute client's request
 void EgServerEngine::run()
 {
-    // quint16 desc_count = 0;
-    // odb_id_type  odb_id = 0; // 0 means bad Odb ID
-    qint16 a_size = 0;
-
-    QByteArray field_descs, control_descs;
-
-    qDebug() << FN << &srvSocket;
-
-    srvSocket.moveToThread(QThread::currentThread());
-
-    qDebug() << FN << QThread::currentThread();
-
-    if (!srvSocket.setSocketDescriptor(socketDescriptor)) {
-        qDebug() << FN << "can't set socket descriptor";
-        // emit error(srvSocket.error());
-        return; // -1;
-    }
-        // start read
-    if (! srvSocket.waitForReadyRead(10000)) // wait up to 10 sec
+    if (!tcpServer-> listen(QHostAddress::LocalHost, server_port))
     {
-        qDebug() << FN << "waitForReadyRead error 1";
-      // process error
-        return; // -2;
+              qDebug() << "Unable to start the server: " << tcpServer-> errorString();
+
+              return;
     }
 
-        // get/set database ID
-    in >> command_id;
-    // qDebug() << "command_id 1 = " << command_id;
-        // process first command - opcode_get_odb_id or opcode_send_odb_id
+    // QString ipAddress = QHostAddress(QHostAddress::LocalHost).toString(); << ipAddress
 
-    /*
-
-    switch ( command_id )
-    {
-    case opcode_get_odb_id:
-        ServerSendOdbID();  // get ID by name and send to client
-        // start read
-        if (! srvSocket.waitForReadyRead(10000)) // wait up to 10 sec
-        {
-            qDebug() << FN << "waitForReadyRead error 2";
-            // process error
-            return; // -3;
-        }
-        break;
-    case opcode_send_odb_id:      // get ID from client
-        in >> odb_id;
-        // qDebug() << "odb_id = " << odb_id;
-            // TODO: get odb name by odb_id
-        SetFileName((QString&) glob_odb_list->at(odb_id-1));
-        // qDebug() << "file_name_base = " << FileNameBase;
-        break;
-    default:
-        qDebug() << FN << "ERROR: bad opcode " << command_id;
-        srvSocket.disconnectFromHost();
-        return; // -4;
-        break;
-    }
-        // get (second) command
-    in >> command_id;
-    // qDebug() << FN << "command_id 2 = " << command_id;
-
-        // process command
-    switch ( command_id )
-    {
-    case opcode_store_fdesc: // store field descriptors on server
-
-        field_descs.clear();
-        control_descs.clear();
-
-        // in >> a_size;
-        // qDebug() << FN << "field desc size =" << a_size;
-        // if (a_size)
-            in >> field_descs;
-
-        in >> a_size;
-        // qDebug() << FN << "control desc size =" << a_size;
-        if (a_size)
-            in >> control_descs;
-
-        srvSocket.disconnectFromHost();
-        // qDebug() << FN << "disconnect ";
-
-        d_files.RemoveLocalFiles(); // total destruction
-        d_files.LocalStoreFieldDesc(&field_descs, &control_descs);
-
-        break;
-    case opcode_load_fdesc:  // load field descriptors from server
-
-        d_files.LocalLoadFieldDesc(&field_descs, &control_descs, obj_count, next_obj_id);    // load from file
-        ServerSendFieldDescs(&field_descs, &control_descs);    // send to client
-        srvSocket.waitForDisconnected();
-        break;
-    case opcode_append_dataobj:  // append new data obj to file
-
-        ServerRecvDataObj();       // receive the list
-        srvSocket.disconnectFromHost();
-
-        // d_files.AppendNewData(PackedList); FIXME
-
-        break;
-    case opcode_delete_dataobj:  // mark data obj as deleted
-
-        ServerRecvDataObj();       // receive the list
-        srvSocket.disconnectFromHost();
-
-        // d_files.DeleteObjects(PackedList); FIXME
-
-        break;
-    case opcode_update_dataobj:  // append new data obj to file
-
-        ServerRecvDataObj();       // receive the list
-        srvSocket.disconnectFromHost();
-
-        // d_files.UpdateModifiedData2(PackedList); FIXME
-
-        break;
-    case opcode_load_data:  // append new data obj to file
-
-        // d_files.LocalLoadData(PackedList, FD); // load data FIXME
-
-        ServerSendObjects();                    // send it
-        srvSocket.waitForDisconnected();
-        break;
-    case opcode_load_filtered:  // append new data obj to file
-            // process filter
-        in >> filter_id;    // download filter ID
-        qDebug() << FN << "filter_id = " << filter_id;
-        // d_files.FilterCallback = filterInterface->FilterByID(filter_id); // set filter callback
-            // get filter arguments
-        LoadFilterArgs();
-
-        // d_files.LocalLoadData(PackedList, FD); // load data FIXME
-
-        ServerSendObjects();                    // send it
-        srvSocket.waitForDisconnected();
-
-        break;
-    default:
-        qDebug() << FN << "ERROR: bad command_id = " << command_id;
-        srvSocket.disconnectFromHost();
-        return; // -6;
-        break;
-    }
-
-    */
-
-    return; // 0;
+    qDebug() << "The egDb server is running on"  << " port " << tcpServer-> serverPort();
 }
 
-/*
-void EgServerEngine::LoadFilterArgs()
-{
-    qint16 argsCount;
-    qint32 rSize, intValue;
-    char buf[2048]; // FIXME
-    // QTextCodec *codec = QTextCodec::codecForName("Windows-1251");
-
-    // d_files.filter_values.clear();
-        // get args count
-    in >> argsCount;
-    qDebug() << "LoadFilterArgs(): argsCount = " << argsCount;
-        // get args
-    for(int i = 0; i < argsCount; i++)
-    {
-        in >> rSize;   // TODO : remove stub
-        qDebug() << "LoadFilterArgs(): value = " << rSize;
-            // zero is int flag
-        if (!rSize) // int
-        {
-            in >> intValue;
-            // d_files.filter_values << intValue;
-        }
-        else
-        {
-            if ((rSize >= 2048)) // FIXME
-            {
-                qDebug() <<  "LoadFilterArgs(): fSize >= MAX_BUF_SIZE " << rSize;
-                return;  // TODO : process error
-            }
-                // read string
-            in.readRawData(buf, rSize);
-            buf[rSize] = 0;
-            //d_files.filter_values << codec->toUnicode(buf);
-        }
-    }
-}
-*/
-
-int EgServerEngine::ServerSendObjects()    // FIXME send objects
-{
-    /*
-    QList<EgPackedDataNode>::iterator cur_obj;
-        // send recs count
-    out << (quint32) PackedList.count();
-    srvSocket.write(block);
-    block.clear();
-    out.device()->seek(0);
-        // send data
-    cur_obj = PackedList.begin();
-    while (cur_obj != PackedList.end())
-    {
-        out << (*cur_obj).OBJ_ID;
-        srvSocket.write(block);
-        block.clear();
-        out.device()->seek(0);
-
-        out << (*cur_obj).bar;
-        srvSocket.write(block);
-        block.clear();
-        out.device()->seek(0);
-
-        cur_obj++;
-    }
-    */
-    return 0;
-}
-
-inline void EgServerEngine::ServerRecvDataObj()
-{
-    /*
-    qint32 obj_count;
-
-    PackedList.clear();
-    EgPackedDataNode tmpObj;
-
-    in >> obj_count;
-    qDebug() << FN << "obj_count = " << obj_count;
-        // get args
-    for(int i = 0; i < obj_count; i++)
-    {
-        in >> tmpObj.OBJ_ID;
-        in >> tmpObj.bar;
-
-        PackedList << tmpObj;
-    }
-    */
-}
-
-
-int EgServerEngine::ServerSendOdbID() 		// find or create new ODB entry in global map and save it to file
-{
-    /*
-    QString odb_name;
-    odb_id_type  odb_id = 0; // 0 means bad Odb ID
-        // object description data
-    QFile ddt_file("odb_names.onf");
-    QDataStream ddt(&ddt_file);
-        // get name from client
-    in >> odb_name;
-    // qDebug() << FN << "Got odb_name = " <<  odb_name;
-    SetFileName(odb_name);
-        // lock mutex
-    OdbMapMutex->lock();
-        // search for name // ??? check pointer if (!glob_odb_map)
-    QMap<QString, odb_id_type>::iterator my_field = glob_odb_map->find(odb_name);
-    if (my_field != glob_odb_map->end())
-    {
-        odb_id = my_field.value();
-            // unlock mutex - branch 1
-        OdbMapMutex->unlock();
-            // send odb_id
-        out << odb_id;
-        srvSocket.write(block);
-            // clear after use
-        block.clear();
-        out.device()->seek(0);
-
-        // qDebug() << "ServerSendOdbID(): Sent old odb_id = " <<  odb_id;
-
-        return 0;
-    }
-        // TODO : check Odb files existance
-
-        // get new odb_id
-    odb_id = (*glob_new_id)++; // TODO : check pointer if (!glob_new_id)
-        // add new record
-    glob_odb_map->insert(odb_name, odb_id);
-    glob_odb_list->append(odb_name);  // sync list for backward access
-        // add to file
-        // open file
-    if (!ddt_file.open(QIODevice::Append)) // WriteOnly Append | QIODevice::Truncate
-    {
-        qDebug() << FN << "can't open " << "odb_names.onf" << " file";
-        return -1;
-    }
-        // append to end
-    // ddt.device()->seek(ddt.device()->size());
-    ddt << (qint32) odb_name.length();
-    ddt.writeRawData( odb_name.toLocal8Bit(), odb_name.length()); //data().toByteArray();
-        // close file
-    ddt_file.close();
-        // unlock mutex - branch 2
-    OdbMapMutex->unlock();
-        // send odb_id - new value
-    out << odb_id;
-    srvSocket.write(block);
-        // clear after use
-    block.clear();
-    out.device()->seek(0);
-
-    qDebug() << FN << "Sent new odb_id " <<  odb_id;
-    */
-
-    return 0;
-}
-
-int EgServerEngine::ServerSendFieldDescs(QByteArray* field_descs, QByteArray* control_descs)    // send field descriptors to client app
-{
-    /*
-        // send recs count
-    // qDebug() << FN << "data objects count = " << obj_count;
-    out << obj_count;
-    out << next_obj_id;
-    srvSocket.write(block);
-    block.clear();
-    out.device()->seek(0);
-
-    srvSocket.write(*field_descs);
-
-    out << (qint16) control_descs->size();
-    srvSocket.write(block);
-    block.clear();
-    out.device()->seek(0);
-
-    if (control_descs->size())
-        srvSocket.write(*control_descs);
-        */
-
-    return 0;
-}

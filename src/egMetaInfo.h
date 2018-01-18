@@ -16,6 +16,7 @@
 #include "egDataNode.h"
 
 class EgGraphDatabase;
+class EgServerConnection;
 
 class EgDataNodeTypeMetaInfo
 {
@@ -24,7 +25,7 @@ public:
     QString typeName;
 
     EgDataNodeIDtype nodesCount = 0;          // data objects count
-    EgDataNodeIDtype nextObjID = 1;         // next available data object ID
+    EgDataNodeIDtype nextNodeID = 1;         // next available data object ID
 
         // copy of EgNodeTypeSettings fields
     bool useEntryNodes = false;         // start points for graph operations
@@ -34,6 +35,7 @@ public:
     bool useGUIsettings = false;
 
     EgGraphDatabase* myECoGraphDB = nullptr;      // peer database
+    EgServerConnection* serverConnection = nullptr;
 
     QList<QString> dataFields;          // fields names of DataNodeType
 
@@ -44,13 +46,14 @@ public:
         // load & store support
     QFile metaInfoFile;
     QDataStream localMetaInfoStream;
+    QDataStream* serverStream;
 
     EgDataNodeTypeMetaInfo(): typeName("Error_no_type_name") {}
     EgDataNodeTypeMetaInfo(QString a_typeName) : typeName(a_typeName) {}
 
-    ~EgDataNodeTypeMetaInfo() { Clear(); metaInfoFile.close(); }
+    ~EgDataNodeTypeMetaInfo();
 
-    void Clear() {nodesCount = 0; nextObjID = 1; dataFields.clear(); nameToOrder.clear(); indexedFields.clear();}
+    void Clear() {nodesCount = 0; nextNodeID = 1; dataFields.clear(); nameToOrder.clear(); indexedFields.clear();}
 
     void AddDataField(QString fieldName, bool indexed = false);    // add field descriptor, no GUI control data
 
@@ -59,8 +62,11 @@ public:
     int  LocalStoreMetaInfo();          // save to file or server
     int  LocalLoadMetaInfo();           // load from file or server
 
+    int  ServerStoreMetaInfo();          // save to file or server
+    int  ServerLoadMetaInfo();           // load from file or server
+
     int  OpenLocalStoreStream();      // save to local file
-    int  SendMetaInfoToStream(QDataStream &metaInfoStream);
+    void SendMetaInfoToStream(QDataStream &metaInfoStream);
 
     int  OpenLocalLoadStream();      // load from local file
     int  LoadMetaInfoFromStream(QDataStream& metaInfoStream);

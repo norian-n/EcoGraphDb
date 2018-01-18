@@ -9,8 +9,18 @@
 
 #include "egMetaInfo.h"
 #include "egDataNodesType.h"
+#include "egDataClient.h"
 
 #include <QtDebug>
+
+EgDataNodeTypeMetaInfo::~EgDataNodeTypeMetaInfo()
+{
+    Clear();
+    metaInfoFile.close();
+
+    if (serverConnection)
+        delete serverConnection;
+}
 
 void EgDataNodeTypeMetaInfo::AddDataField(QString fieldName, bool indexed)
 {
@@ -68,10 +78,10 @@ int  EgDataNodeTypeMetaInfo::OpenLocalStoreStream()
     return 0;
 }
 
-int  EgDataNodeTypeMetaInfo::SendMetaInfoToStream(QDataStream& metaInfoStream)
+void EgDataNodeTypeMetaInfo::SendMetaInfoToStream(QDataStream& metaInfoStream)
 {
     metaInfoStream << nodesCount;  // data nodes (NOT field descriptors) count
-    metaInfoStream << nextObjID;   // incremental counter
+    metaInfoStream << nextNodeID;   // incremental counter
 
     metaInfoStream << useEntryNodes;
     metaInfoStream << useLocation;
@@ -94,8 +104,6 @@ int  EgDataNodeTypeMetaInfo::SendMetaInfoToStream(QDataStream& metaInfoStream)
         metaInfoStream << indIter.value().isSigned;
         metaInfoStream << indIter.value().functionID;
     }
-
-    return 0;
 }
 
 
@@ -103,14 +111,54 @@ int EgDataNodeTypeMetaInfo::LocalStoreMetaInfo()
 {
     int res = 0;
 
-    // if (myECoGraphDB && myECoGraphDB->connection)
-      // res = client.OpenMetaInfoStoreStream();
     res = OpenLocalStoreStream();
 
     if (! res)
-        res = SendMetaInfoToStream(localMetaInfoStream);
+        SendMetaInfoToStream(localMetaInfoStream);
 
     metaInfoFile.close();
+
+    return res;
+}
+
+int EgDataNodeTypeMetaInfo::ServerStoreMetaInfo()
+{
+    int res = 0;
+
+    if (serverConnection)
+        res = serverConnection->OpenStoreStream(opcode_store_metainfo, serverStream, typeName);
+
+    if (! res)
+        SendMetaInfoToStream(*serverStream);
+
+    if (! res)
+        res = serverConnection-> WaitForSending();
+
+    serverConnection-> Disconnect();
+
+    return res;
+}
+
+int EgDataNodeTypeMetaInfo::ServerLoadMetaInfo()
+{
+    int res = 0;
+
+    if (serverConnection)
+        res = serverConnection-> OpenLoadStream(opcode_load_metainfo, serverStream, typeName);
+
+    if (! res)
+        res = serverConnection-> WaitForSending(); // command
+
+    // qDebug << serverConnection-> tcpSocket.state() << "" << ; WaitForReadyRead
+
+    if (! res)
+        res = serverConnection-> WaitForReadyRead();
+
+    if (! res)
+        res = LoadMetaInfoFromStream(*serverStream);
+
+    serverConnection-> Disconnect();
+
 
     return res;
 }
@@ -139,7 +187,7 @@ int EgDataNodeTypeMetaInfo::LoadMetaInfoFromStream(QDataStream& metaInfoStream)
     Clear(); // init metainfo
 
     metaInfoStream >> nodesCount;  // data nodes (NOT field descriptors) count
-    metaInfoStream >> nextObjID;   // incremental counter
+    metaInfoStream >> nextNodeID;   // incremental counter
 
     metaInfoStream >> useEntryNodes;
     metaInfoStream >> useLocation;
@@ -182,7 +230,6 @@ int EgDataNodeTypeMetaInfo::LocalLoadMetaInfo()
 {
     int res = 0;
 
-    // if (myECoGraphDB && myECoGraphDB->connection)
     res = OpenLocalLoadStream();
 
     if (! res)
@@ -195,7 +242,7 @@ int EgDataNodeTypeMetaInfo::LocalLoadMetaInfo()
 
 void EgDataNodeTypeMetaInfo::PrintMetaInfo()
 {
-     qDebug() << FN << "\nType name:" << typeName << " Obj Count:" << nodesCount << " Next ID:" << nextObjID;
+     qDebug() << FN << "\nType name:" << typeName << " Obj Count:" << nodesCount << " Next ID:" << nextNodeID;
 
      qDebug() << "Fields:";
      qDebug() << dataFields;

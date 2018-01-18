@@ -25,12 +25,6 @@ EgDataNodesType::~EgDataNodesType()
     if (LocalFiles)
         delete LocalFiles;
 
-    if (ConnectonClient)
-        delete ConnectonClient;
-
-    if (connection)
-        delete connection;
-
     if (locations)
         delete locations;
     /*
@@ -54,7 +48,7 @@ EgDataNodesType::~EgDataNodesType()
         delete index_tree;
 }
 
-int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName, EgRemoteConnect* server) // connect to server
+int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,  const QString &serverAddress) // connect to server
 {
     int res = 0;
 
@@ -67,10 +61,9 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
     }
 
     metaInfo.myECoGraphDB = &myDB;
-    metaInfo.typeName = nodeTypeName;
-    connection = server;    
+    metaInfo.typeName = nodeTypeName;   
 
-    if (! server)
+    if (serverAddress.isEmpty())
     {
         if (metaInfo.LocalLoadMetaInfo())
         {
@@ -86,9 +79,15 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
     }
     else
     {
-        ConnectonClient= new EgDataClient(this);
+        metaInfo.serverConnection= new EgServerConnection(); // FIXME serverAddress
 
-        // FIXME TODO process server based version
+        if (metaInfo.ServerLoadMetaInfo())
+        {
+            // if (! nodeTypeName.contains(EgDataNodesNamespace::egGUIfileName))
+                qDebug()  << "Can't load meta info of data nodes type " << nodeTypeName << FN;
+
+            res = -1;
+        }
     }
 
     if (metaInfo.useLocation)
@@ -97,10 +96,10 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
 
         locations = new EgDataNodesLocation(this);
 
-        int locres = locations->locationStorage-> ConnectServiceNodeType(myDB, nodeTypeName + EgDataNodesNamespace::egLocationFileName, connection);
+        int locres = locations->locationStorage-> ConnectServiceNodeType(myDB, nodeTypeName + EgDataNodesNamespace::egLocationFileName, serverAddress);
 
         if (locres)
-            qDebug()  << "Can't load location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
+            qDebug()  << "Can't connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
     }
 
     if (metaInfo.useNamedAttributes)
@@ -109,10 +108,10 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
 
         namedAttributes = new EgNamedAttributes(this);
 
-        int attrres = namedAttributes->namedAttributesStorage-> ConnectServiceNodeType(myDB, nodeTypeName + EgDataNodesNamespace::egAttributesFileName, connection);
+        int attrres = namedAttributes->namedAttributesStorage-> ConnectServiceNodeType(myDB, nodeTypeName + EgDataNodesNamespace::egAttributesFileName, serverAddress);
 
         if (attrres)
-            qDebug()  << "Can't load named attributes info " << nodeTypeName + EgDataNodesNamespace::egAttributesFileName << FN;
+            qDebug()  << "Can't connect named attributes info " << nodeTypeName + EgDataNodesNamespace::egAttributesFileName << FN;
     }
 
     if (metaInfo.useEntryNodes)
@@ -121,7 +120,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
 
         entryNodes = new EgEntryNodes(this);
 
-        int entres = entryNodes->entryStorage-> ConnectServiceNodeType(myDB, nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName, connection);
+        int entres = entryNodes->entryStorage-> ConnectServiceNodeType(myDB, nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName, serverAddress);
 
         if (entres)
             qDebug()  << "Can't connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
@@ -129,7 +128,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
 
     GUI = new EgDataNodesGUIsupport(this); // needed for basic UI interaction
 
-    if (metaInfo.useGUIsettings)
+    if (metaInfo.useGUIsettings) // FIXME server
     {
         int guires = GUI-> LoadSimpleControlDesc();
 
@@ -158,7 +157,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
     return res;
 }
 
-int EgDataNodesType::ConnectServiceNodeType(EgGraphDatabase& myDB, const QString& nodeTypeName, EgRemoteConnect* server) // connect to server
+int EgDataNodesType::ConnectServiceNodeType(EgGraphDatabase& myDB, const QString& nodeTypeName, const QString &serverAddress) // connect to server
 {
     int res = 0;
 
@@ -172,9 +171,8 @@ int EgDataNodesType::ConnectServiceNodeType(EgGraphDatabase& myDB, const QString
 
     metaInfo.myECoGraphDB = &myDB;
     metaInfo.typeName = nodeTypeName;
-    connection = server;
 
-    if (! server)
+    if (serverAddress.isEmpty())
     {
         if (metaInfo.LocalLoadMetaInfo())
         {
@@ -190,9 +188,7 @@ int EgDataNodesType::ConnectServiceNodeType(EgGraphDatabase& myDB, const QString
     }
     else
     {
-        ConnectonClient= new EgDataClient(this);
-
-        // FIXME TODO process server based version
+        metaInfo.serverConnection= new EgServerConnection(); // FIXME serverAddress
     }
 
         // init special data node
@@ -382,13 +378,34 @@ int EgDataNodesType::LoadAllNodes()
 
     IndexOffsets.clear();
 
-    LocalFiles-> primIndexFiles -> LoadAllDataOffsets(IndexOffsets);
-
     // qDebug() << "IndexOffsets = " << IndexOffsets << FN;
 
-    if (! IndexOffsets.isEmpty())
+    if (metaInfo.serverConnection)
     {
-        res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
+        res = metaInfo.serverConnection-> OpenLoadStream(opcode_load_all_data, metaInfo.serverStream, metaInfo.typeName);
+
+        if (! res)
+        {
+            res = metaInfo.serverConnection-> WaitForSending(); // command
+
+            // qDebug << serverConnection-> tcpSocket.state() << "" << ; WaitForReadyRead
+
+            if (! res)
+                res = metaInfo.serverConnection-> WaitForReadyRead();
+
+            if(! res)
+                LocalFiles-> ReceiveDataNodes(dataNodes, *(metaInfo.serverStream));
+
+            metaInfo.serverConnection-> Disconnect();
+        }
+
+    }
+    else    // local
+    {
+        LocalFiles-> primIndexFiles -> LoadAllDataOffsets(IndexOffsets);
+
+        if (! IndexOffsets.isEmpty())
+            res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
     }
 
     return res;
@@ -403,27 +420,54 @@ int EgDataNodesType::AutoLoadAllData()
     if (locations)
         locations->locationStorage-> ClearData();
 
+    if (entryNodes)
+        entryNodes->entryStorage-> ClearData();
+
+    if (namedAttributes)
+        namedAttributes->namedAttributesStorage-> ClearData();
+
     IndexOffsets.clear();
 
-    LocalFiles-> primIndexFiles -> LoadAllDataOffsets(IndexOffsets);
-
-    // qDebug() << "IndexOffsets = " << IndexOffsets << FN;
-
-    if (! IndexOffsets.isEmpty())
+    if (metaInfo.serverConnection)
     {
-        res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
+        res = metaInfo.serverConnection-> OpenLoadStream(opcode_load_all_data, metaInfo.serverStream, metaInfo.typeName);
 
-            // load secondary info
-        if (locations && ! res)
-            locations->locationStorage-> LoadAllNodes();
+        if (! res)
+        {
+            res = metaInfo.serverConnection-> WaitForSending(); // command
 
-        if (entryNodes && ! res)
-            entryNodes->entryStorage-> LoadAllNodes();
+            // qDebug << serverConnection-> tcpSocket.state() << "" << ; WaitForReadyRead
 
-        if (namedAttributes && ! res)
-            namedAttributes->namedAttributesStorage-> LoadAllNodes();
+            if (! res)
+                res = metaInfo.serverConnection-> WaitForReadyRead();
+
+            if(! res)
+                LocalFiles-> ReceiveDataNodes(dataNodes, *(metaInfo.serverStream));
+
+            metaInfo.serverConnection-> Disconnect();
+        }
 
     }
+    else    // local
+    {
+        LocalFiles-> primIndexFiles -> LoadAllDataOffsets(IndexOffsets);
+
+        // qDebug() << "IndexOffsets = " << IndexOffsets << FN;
+
+        if (! IndexOffsets.isEmpty())
+            res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
+    }
+
+
+    // load secondary info
+    if (locations && ! res)
+        locations->locationStorage-> LoadAllNodes();
+
+    if (entryNodes && ! res)
+        entryNodes->entryStorage-> LoadAllNodes();
+
+    if (namedAttributes && ! res)
+        namedAttributes->namedAttributesStorage-> LoadAllNodes();
 
     return res;
 }
@@ -495,8 +539,8 @@ int EgDataNodesType::LoadLocationsData()
 
 int EgDataNodesType::CompressData()
 {
-    if (connection)
-       return -1; // return ConnectonClient->RemoteCompressData();
+    if (metaInfo.serverConnection)
+       return -1; // return ConnectonClient->RemoteCompressData();  FIXME
     else
         return LocalFiles->LocalCompressData();
 }
@@ -508,7 +552,7 @@ int EgDataNodesType::AddDataNode(EgDataNode& tmpObj)
     // qDebug() << "metaInfo.nextObjID = " << metaInfo.nextObjID << FN;
 
         // set next available ID FIXME : thread safe
-    tmpObj.dataNodeID = metaInfo.nextObjID++;
+    tmpObj.dataNodeID = metaInfo.nextNodeID++;
     tmpObj.isAdded = true;
     tmpObj.metaInfo = &metaInfo;
 
@@ -527,7 +571,7 @@ int EgDataNodesType::AddDataNode(QList<QVariant>& myData)
     EgDataNode tmpObj;
 
         // set next available ID FIXME : thread safe
-    tmpObj.dataNodeID = metaInfo.nextObjID++;
+    tmpObj.dataNodeID = metaInfo.nextNodeID++;
     tmpObj.dataFields = myData;
     tmpObj.isAdded = true;
     tmpObj.metaInfo = &metaInfo;
@@ -545,7 +589,7 @@ int EgDataNodesType::AddDataNode(QList<QVariant>& myData, EgDataNodeIDtype& newI
     EgDataNode tmpObj;
 
         // set next available ID FIXME : thread safe
-    tmpObj.dataNodeID = metaInfo.nextObjID++;
+    tmpObj.dataNodeID = metaInfo.nextNodeID++;
     tmpObj.dataFields = myData;
     tmpObj.isAdded = true;
     tmpObj.metaInfo = &metaInfo;
@@ -567,7 +611,7 @@ int EgDataNodesType::AddHardLinked(QList<QVariant>& myData, EgDataNodeIDtype nod
 
         // set next available ID FIXME : thread safe
     tmpObj.dataNodeID = nodeID;
-    metaInfo.nextObjID = (metaInfo.nextObjID >= nodeID) ?  metaInfo.nextObjID+1 : nodeID;
+    metaInfo.nextNodeID = (metaInfo.nextNodeID >= nodeID) ?  metaInfo.nextNodeID+1 : nodeID;
 
     tmpObj.dataFields = myData;
     tmpObj.isAdded = true;
@@ -695,35 +739,76 @@ int EgDataNodesType::UpdateDataNode(EgDataNodeIDtype nodeID)
     return 0;
 }
 
+
+
 int EgDataNodesType::StoreData()
 {
     int ret_val = 0;
 
+    // check empty lists
+    if (! (addedDataNodes.isEmpty() && deletedDataNodes.isEmpty() && updatedDataNodes.isEmpty())) // not all are empty
+    {
+            // update metainfo
+        metaInfo.nodesCount += addedDataNodes.count() - deletedDataNodes.count();
+
+        // qDebug()  << "metaInfo.nextNodeID: " << metaInfo.nextNodeID << FN;
+
         // pack data and update index fields
+        if (metaInfo.serverConnection)
+        {
+            ret_val = metaInfo.ServerStoreMetaInfo();
 
-    /*
+            if (! ret_val)
+                ret_val = metaInfo.serverConnection-> OpenStoreStream(opcode_store_data, metaInfo.serverStream, metaInfo.typeName);
 
-    if (connection)
-        ret_val = ConnectonClient-> StoreData(packed_add_list, packed_del_list, packed_mod_list);
+                // send added nodes
+            if (! ret_val)
+            {
+                LocalFiles-> SendNodesToStream(addedDataNodes, *(metaInfo.serverStream));
+
+                metaInfo.serverConnection-> WaitForSending();
+
+                LocalFiles-> SendNodesToStream(deletedDataNodes, *(metaInfo.serverStream));
+
+                metaInfo.serverConnection-> WaitForSending();
+
+                LocalFiles-> SendNodesToStream(updatedDataNodes, *(metaInfo.serverStream));
+
+                metaInfo.serverConnection-> WaitForSending();
+            }
+
+
+            metaInfo.serverConnection-> Disconnect();
+        }
+        else
+        {
+            ret_val = metaInfo.LocalStoreMetaInfo();
+
+            if(! ret_val)
+                ret_val = LocalFiles-> LocalStoreData(addedDataNodes, deletedDataNodes, updatedDataNodes);
+        }
+
+        if (! ret_val) // FIXME check
+        {
+            deletedDataNodes.clear();
+            addedDataNodes.clear();
+            updatedDataNodes.clear();
+        }
+    }
+
+    if (!ret_val)
+    {
+        // if (entryNodes)
+        //    entryNodes->entryStorage-> StoreData();
+
+        if (locations)
+            locations->locationStorage-> StoreData();
+
+        if (namedAttributes)
+            namedAttributes->namedAttributesStorage-> StoreData();
+    }
     else
-        */
-
-    ret_val = LocalFiles-> LocalStoreData(addedDataNodes, deletedDataNodes, updatedDataNodes);
-
-    // entryNodesInst.StoreEntryNodes(*this); // FIXME check changes
-
-    deletedDataNodes.clear();
-    addedDataNodes.clear();
-    updatedDataNodes.clear();
-
-    if (locations)
-        locations->locationStorage-> StoreData();
-
-    if (namedAttributes)
-        namedAttributes->namedAttributesStorage-> StoreData();
-
-    if (ret_val)
-       qDebug()  << "ERROR: got non-zero error code from callee" << FN;
+        qDebug()  << "ERROR: got non-zero error code from subfunction, changes not saved " << FN;
 
     return  ret_val;
 }
@@ -742,29 +827,55 @@ int EgDataNodesType::LoadData(const EgIndexCondition &indexCondition)
 
     ClearData();
 
-    index_tree-> CalcTreeSet(indexCondition.iTreeNode, IndexOffsets, LocalFiles);
-
-    // qDebug() << FN << "IndexOffsets.count() = " << IndexOffsets.count();
-
-    if (! IndexOffsets.isEmpty())
+    if (metaInfo.serverConnection)
     {
-        res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
+        res = metaInfo.serverConnection-> OpenStoreStream(opcode_load_selected_data, metaInfo.serverStream, metaInfo.typeName);
+
+        if (! res)
+        {
+            index_tree-> TransferTreeSet(indexCondition.iTreeNode, *(metaInfo.serverStream));
+
+            res = metaInfo.serverConnection-> WaitForSending();
+
+            // qDebug << serverConnection-> tcpSocket.state() << "" << ; WaitForReadyRead
+
+            if (! res)
+                res = metaInfo.serverConnection-> WaitForReadyRead();
+
+            if(! res)
+                LocalFiles-> ReceiveDataNodes(dataNodes, metaInfo.serverConnection-> in);
+
+
+            metaInfo.serverConnection-> Disconnect();
+        }
+    }
+    else
+    {
+
+        index_tree-> CalcTreeSet(indexCondition.iTreeNode, IndexOffsets, LocalFiles);
+
+        // qDebug() << FN << "IndexOffsets.count() = " << IndexOffsets.count();
+
+        if (! IndexOffsets.isEmpty())
+        {
+            res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
 
             // FIXME special auto load
 
-        if (! res && locations)
-            res = locations-> LoadLocationsData();
+            if (! res && locations)
+                res = locations-> LoadLocationsData();
 
-        if (! res && namedAttributes)
-            res = namedAttributes-> LoadNamedAttributes();
+            if (! res && namedAttributes)
+                res = namedAttributes-> LoadNamedAttributes();
 
-        if (! res && entryNodes)
-            res = entryNodes->LoadEntryNodes();
+            if (! res && entryNodes)
+                res = entryNodes->LoadEntryNodes();
 
-        // entryNodesInst.LoadEntryNodes(*this);
+            // entryNodesInst.LoadEntryNodes(*this);
+        }
+
+        index_tree-> RecursiveClear(indexCondition.iTreeNode);
     }
-
-    index_tree-> RecursiveClear(indexCondition.iTreeNode);
 
     return res;
 }

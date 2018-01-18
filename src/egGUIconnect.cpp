@@ -9,6 +9,7 @@
 
 #include "egGUIconnect.h"
 #include "egDataNodesType.h"
+#include "egDataClient.h"
 
 #include <QFile>
 
@@ -74,7 +75,7 @@ int EgDataNodesGUIsupport::LoadSimpleControlDesc()
     // if (! controlDescs)
     //    controlDescs = new EgDataNodesType();
 
-    if (controlDescs-> ConnectServiceNodeType(*(primaryNodesType-> metaInfo.myECoGraphDB), primaryNodesType-> metaInfo.typeName + egGUIfileName, primaryNodesType-> connection))
+    if (controlDescs-> ConnectServiceNodeType(*(primaryNodesType-> metaInfo.myECoGraphDB), primaryNodesType-> metaInfo.typeName + egGUIfileName, primaryNodesType-> metaInfo.serverConnection->serverAddress))
     {
             // qDebug()  << "No control descs for dataNodeType " << primaryNodesType-> metaInfo.typeName + egGUIfileName << FN;
             return 1;

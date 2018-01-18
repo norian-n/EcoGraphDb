@@ -37,8 +37,8 @@ public:
     virtual void RemoveIndexFiles() = 0;
 
     virtual void AddIndex() = 0;
-    virtual int UpdateIndex(bool isChanged) = 0;
-    virtual int DeleteIndex() = 0;
+    virtual int UpdateIndex(bool isChanged, bool isPrimary) = 0;
+    virtual int DeleteIndex(bool isPrimary) = 0;
 
     virtual int LoadAllDataOffsets(QSet<quint64>& dataOffsets) = 0;
 
@@ -98,8 +98,10 @@ public:
 
         // single node operations
     void AddIndex();
-    int UpdateIndex(bool isChanged);
-    int DeleteIndex();
+    int UpdateIndex(bool isChanged, bool isPrimary = false);
+    int DeleteIndex(bool isPrimary = false);
+
+    // int GetOffsetByKey(); // improvement for server-side operations
 
         // load operations
     int LoadAllDataOffsets(QSet<quint64>& dataOffsets);

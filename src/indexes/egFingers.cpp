@@ -1041,8 +1041,8 @@ template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkFirst(bool isE
     int res = 0;
 
         // check root borders
-    if (indexChunks-> theKey > fingersRootHeader.maxKey) // no first chunk found
-        return -1;
+    // if (indexChunks-> theKey > fingersRootHeader.maxKey) // no first chunk found
+    //    return -1;
 
     // int myLevel  = fingersRootHeader.myLevel;
     parentFinger = fingersRootHeader;
@@ -1099,8 +1099,8 @@ template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkLast(bool isEx
     int res = 0;
 
         // check root borders
-    if (indexChunks-> theKey < fingersRootHeader.minKey) // no first chunk found
-        return -1;
+    // if (indexChunks-> theKey < fingersRootHeader.minKey) // no first chunk found
+    //    return -1;
 
     // int myLevel  = fingersRootHeader.myLevel;
     parentFinger = fingersRootHeader;

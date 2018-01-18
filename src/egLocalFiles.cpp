@@ -227,7 +227,7 @@ inline int EgDataFiles::LocalOpenFilesToUpdate()
     return 0;
 }
 
-inline void EgDataFiles::LocalCloseFiles()
+void EgDataFiles::LocalCloseFiles()
 {
     ddt_file.close();
     dat_file.close();
@@ -246,6 +246,98 @@ int EgDataFiles::RemoveLocalFiles()
 {
         // FIXME check dir
     return (int)(ddt_file.remove() && dat_file.remove());
+}
+
+
+void EgDataFiles::ReceiveDataNodes(QMap<EgDataNodeIDtype, EgDataNode>& dataNodesMap, QDataStream& in)
+{
+    EgDataNode tmpNode;
+
+    dataNodesMap.clear();
+
+    uint32_t count = 0;
+
+    in >> count;
+
+    // qDebug()  << "count = " << count << FN ;
+
+    for (uint32_t i =0; i < count; ++i)
+    {
+        tmpNode.dataFields.clear();
+        in >> tmpNode;
+
+        // qDebug()  << "tmpNode.dataNodeID = " << tmpNode.dataNodeID << FN ;
+
+        dataNodesMap.insert(tmpNode.dataNodeID, tmpNode);
+    }
+
+}
+
+int EgDataFiles::LocalLoadDataNodes(const QSet<quint64> &dataOffsets, QList<EgDataNode>& dataNodes)
+{
+    EgDataNode tmpNode;
+    int retCode = 0;
+
+    tmpNode.metaInfo = metaInfo;
+
+        // open data nodes file
+    dat_file.setFileName("egdb/" + metaInfo-> typeName + ".dat");
+
+    if (!dat_file.exists())
+    {
+        qDebug() << FN << "file doesn't exist' " << metaInfo-> typeName << ".dat";
+        return -1;
+    }
+
+    if (!dat_file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << FN << "can't open file for read " << metaInfo-> typeName << ".dat";
+        return -1;
+    }
+
+    dat.setDevice(&dat_file);
+
+    // qDebug() << FN << "Opened file for read " << metaInfo-> typeName << ".dat";
+
+        // read data to dataNodesMap by dataOffsets QSet<quint64>::iterator
+    for (auto offsets_iter = dataOffsets.begin(); offsets_iter != dataOffsets.end(); ++offsets_iter)
+    {
+        // qDebug() << FN <<  "Seek data file, pos =" << hex << (int) *offsets_iter;
+
+            // go to rec position
+        if (! dat.device()-> seek(*offsets_iter)) // move to data
+        {
+            qDebug() << FN <<  "Can't seek data file, pos =" << hex << (int) *offsets_iter;
+            retCode = -2;
+            continue;
+            // dat_file.close();
+            // return -2;
+        }
+            // read data
+        tmpNode.dataFields.clear();
+
+        dat >> tmpNode.dataNodeID;
+        dat >> tmpNode.dataFields;
+
+        tmpNode.dataFileOffset = *offsets_iter;
+
+        // qDebug() << FN <<  "tmpNode2.dataNodeID =" << tmpNode2.dataNodeID;
+
+        // TODO FIXME : implement local filter here
+
+
+        if (FilterCallback)
+            if (! FilterCallback(tmpNode, filterValues))
+                continue;
+
+        dataNodes.append(tmpNode);
+    }
+
+    // qDebug() << FN <<  "dataNodesMap.count() =" << dataNodesMap.count();
+
+    dat_file.close();
+
+    return retCode;
 }
 
 int EgDataFiles::LocalLoadData(QSet<quint64>& dataOffsets, QMap<EgDataNodeIDtype, EgDataNode>& dataNodesMap)
@@ -290,7 +382,7 @@ int EgDataFiles::LocalLoadData(QSet<quint64>& dataOffsets, QMap<EgDataNodeIDtype
             // read data
         tmpNode2.dataFields.clear();
         dat >> tmpNode2.dataNodeID;                
-        dat >> tmpNode2;
+        dat >> tmpNode2.dataFields;
 
         tmpNode2.dataFileOffset = *offsets_iter;
 
@@ -315,47 +407,21 @@ int EgDataFiles::LocalLoadData(QSet<quint64>& dataOffsets, QMap<EgDataNodeIDtype
 
 int EgDataFiles::LocalStoreData(QMap<EgDataNodeIDtype, EgDataNode*>&  addedDataNodes, QMap<EgDataNodeIDtype, EgDataNode>& deletedDataNodes, QMap<EgDataNodeIDtype, EgDataNode*>&  updatedDataNodes)
 {
-    EgDataNodeIDtype obj_count;      // FIXME : thread safe solution for next_obj_id;
-    EgDataNodeIDtype next_obj_id;    // FIXME : thread safe solution
-
-        // check empty lists
-    if (addedDataNodes.isEmpty() && deletedDataNodes.isEmpty() && updatedDataNodes.isEmpty()) // all are empty
-    {
-        return 0;
-    }
-        // TODO lock table
-
     if (LocalOpenFilesToUpdate())
         return -1;
 
-        // update ObjDb metadata (data definition table)
-    if (ddt.device()->size() > 0)
-    {
-        ddt >> obj_count;
-        ddt >> next_obj_id;
-        obj_count += addedDataNodes.count() - deletedDataNodes.count();
-        next_obj_id += addedDataNodes.count(); // FIXME : thread-safe solution for server
-            // update
-        ddt.device()->seek(0);
-        ddt << (EgDataNodeIDtype) obj_count;
-        ddt << (EgDataNodeIDtype) next_obj_id;
-    }
-    else
-    {
-        qDebug() << FN << "Error: ddt file is empty: " << metaInfo-> typeName + ".ddt";
-    }
-
         // process deleted objects
     if (! deletedDataNodes.isEmpty())
-        LocalDeleteObjects(deletedDataNodes);
+        // LocalDeleteObjects(deletedDataNodes);
+        LocalDeleteNodes(deletedDataNodes.values());
 
         // process updated objects
     if (! updatedDataNodes.isEmpty())
-        LocalModifyObjects(dat, updatedDataNodes);
+        LocalModifyObjects(updatedDataNodes);
 
         // add new records
     if (! addedDataNodes.isEmpty())
-        LocalAddObjects(dat, addedDataNodes);
+        LocalAddObjects(addedDataNodes);
 
         // close files
     LocalCloseFiles();
@@ -365,7 +431,7 @@ int EgDataFiles::LocalStoreData(QMap<EgDataNodeIDtype, EgDataNode*>&  addedDataN
     return 0;
 }
 
-inline void EgDataFiles::LocalAddObjects(QDataStream& dat, QMap<EgDataNodeIDtype, EgDataNode*>&  addedDataNodes)
+inline void EgDataFiles::LocalAddObjects(const QMap<EgDataNodeIDtype, EgDataNode *> &addedDataNodes)
 {
     dat.device()-> seek(dat.device()-> size());
 
@@ -378,7 +444,7 @@ inline void EgDataFiles::LocalAddObjects(QDataStream& dat, QMap<EgDataNodeIDtype
         addIter.value()-> dataFileOffset = primIndexFiles-> dataOffset;    // save offset;
 
         dat << addIter.value()-> dataNodeID;
-        dat << *(addIter.value());
+        dat << addIter.value()-> dataFields;
 
             // add primary index
         primIndexFiles-> theIndex = addIter.value()-> dataNodeID;
@@ -401,7 +467,67 @@ inline void EgDataFiles::LocalAddObjects(QDataStream& dat, QMap<EgDataNodeIDtype
     }
 }
 
+void EgDataFiles::LocalAddNodes(const QList<EgDataNode>&  addedDataNodes)
+{
+    dat.device()-> seek(dat.device()-> size());
 
+        // walk add list QMap<EgDataNodeIDtype, EgDataNode*>::iterator
+    for (auto addIter : addedDataNodes)
+    {
+        // qDebug() << FN << "Adding object" << (int) addIter.value()-> dataNodeID << " on offset" << hex << (int) dat.device()-> pos();
+
+        primIndexFiles-> dataOffset = dat.device()-> pos();
+        addIter.dataFileOffset = primIndexFiles-> dataOffset;    // save offset;
+
+        dat << addIter.dataNodeID;
+        dat << addIter.dataFields;;
+
+            // add primary index
+        primIndexFiles-> theIndex = addIter.dataNodeID;
+        primIndexFiles-> AddIndex();
+
+            // add other indexes
+        // for (QHash<QString, int> ::iterator indIter = metaInfo-> indexedToOrder.begin(); indIter != metaInfo-> indexedToOrder.end(); ++indIter)
+        for (auto indIter = metaInfo-> indexedFields.begin(); indIter != metaInfo-> indexedFields.end(); ++indIter)
+        {
+            if (indexFiles.contains(indIter.key()))
+            {
+                indexFiles[indIter.key()]-> setIndex(addIter.dataFields[indIter.value().fieldNum]); // TODO - calc index of QVariant
+                indexFiles[indIter.key()]-> setDataOffset(primIndexFiles-> dataOffset);
+                indexFiles[indIter.key()]-> AddIndex();
+            }
+            else
+                qDebug() << FN << "Index not found: " << indIter.key();
+
+        }
+    }
+}
+
+void EgDataFiles::SendNodesToStream(QMap<EgDataNodeIDtype, EgDataNode*>&  dataNodesMap, QDataStream &nodesStream)
+{
+    nodesStream << (uint32_t) dataNodesMap.count();
+
+    for (auto sendIter = dataNodesMap.begin(); sendIter != dataNodesMap.end(); ++sendIter)
+    {
+        // qDebug() << "Sending node " << (int) addIter.value()-> dataNodeID << FN ;
+
+        nodesStream << *(sendIter.value());
+    }
+}
+
+void EgDataFiles::SendNodesToStream(QMap<EgDataNodeIDtype, EgDataNode>&  dataNodesMap, QDataStream &nodesStream)
+{
+    nodesStream << (uint32_t) dataNodesMap.count();
+
+    for (auto sendIter = dataNodesMap.begin(); sendIter != dataNodesMap.end(); ++sendIter)
+    {
+        // qDebug() << "Sending node " << (int) addIter.value()-> dataNodeID << FN ;
+
+        nodesStream << sendIter.value();
+    }
+}
+
+/*
 inline void EgDataFiles::LocalDeleteObjects(QMap<EgDataNodeIDtype, EgDataNode>& deletedDataNodes)
 {
     for (QMap<EgDataNodeIDtype, EgDataNode>::iterator delIter = deletedDataNodes.begin(); delIter != deletedDataNodes.end(); ++delIter)
@@ -411,7 +537,7 @@ inline void EgDataFiles::LocalDeleteObjects(QMap<EgDataNodeIDtype, EgDataNode>& 
             // del primary index
         primIndexFiles-> theIndex = delIter.value().dataNodeID;
         primIndexFiles-> dataOffset = delIter.value().dataFileOffset;
-        primIndexFiles-> DeleteIndex();   // SIDE estimate old offset stored here
+        primIndexFiles-> DeleteIndex(true);   // SIDE estimate old offset stored here
 
             // del other indexes
         // for (QHash<QString, int> ::iterator indIter = metaInfo-> indexedToOrder.begin(); indIter != metaInfo-> indexedToOrder.end(); ++indIter)
@@ -421,7 +547,36 @@ inline void EgDataFiles::LocalDeleteObjects(QMap<EgDataNodeIDtype, EgDataNode>& 
             {
                 indexFiles[indIter.key()]-> setIndex(delIter.value().dataFields[indIter.value().fieldNum]); // TODO - calc index of QVariant
                 indexFiles[indIter.key()]-> setDataOffset(primIndexFiles-> dataOffset);
-                indexFiles[indIter.key()]-> DeleteIndex();
+                indexFiles[indIter.key()]-> DeleteIndex(false);
+            }
+            else
+                qDebug() << FN << "Index not found: " << indIter.key();
+
+        }
+    }
+}
+*/
+
+void EgDataFiles::LocalDeleteNodes(const QList<EgDataNode>&  deletedDataNodes)
+{
+    for (auto delIter : deletedDataNodes)
+    {
+        // qDebug() << FN << "Del object ID = " << (int) delIter.dataNodeID << " with offset" << hex << (int) delIter.dataFileOffset;
+
+            // del primary index
+        primIndexFiles-> theIndex = delIter.dataNodeID;
+        primIndexFiles-> dataOffset = delIter.dataFileOffset;
+        primIndexFiles-> DeleteIndex(true);   // SIDE estimate old offset stored here
+
+            // del other indexes
+        // for (QHash<QString, int> ::iterator indIter = metaInfo-> indexedToOrder.begin(); indIter != metaInfo-> indexedToOrder.end(); ++indIter)
+        for (auto indIter = metaInfo-> indexedFields.begin(); indIter != metaInfo-> indexedFields.end(); ++indIter)
+        {
+            if (indexFiles.contains(indIter.key()))
+            {
+                indexFiles[indIter.key()]-> setIndex(delIter.dataFields[indIter.value().fieldNum]); // TODO - calc index of QVariant
+                indexFiles[indIter.key()]-> setDataOffset(primIndexFiles-> dataOffset);
+                indexFiles[indIter.key()]-> DeleteIndex(false);
             }
             else
                 qDebug() << FN << "Index not found: " << indIter.key();
@@ -430,7 +585,8 @@ inline void EgDataFiles::LocalDeleteObjects(QMap<EgDataNodeIDtype, EgDataNode>& 
     }
 }
 
-inline int EgDataFiles::LocalModifyObjects(QDataStream& dat, QMap<EgDataNodeIDtype, EgDataNode*>&  updatedDataNodes)
+
+inline int EgDataFiles::LocalModifyObjects(const QMap<EgDataNodeIDtype, EgDataNode*>&  updatedDataNodes)
 {
     EgDataNode tmpNode;
 
@@ -446,12 +602,12 @@ inline int EgDataFiles::LocalModifyObjects(QDataStream& dat, QMap<EgDataNodeIDty
         //           << " new offset " << hex << primIndexFiles-> newOffset << FN;
 
         dat << addIter.value()-> dataNodeID;
-        dat << *(addIter.value());
+        dat << addIter.value()-> dataFields;
 
             // add primary index
         primIndexFiles-> theIndex = addIter.value()-> dataNodeID;
         primIndexFiles-> dataOffset = addIter.value()-> dataFileOffset;
-        primIndexFiles-> UpdateIndex(false); // false means primary ID is not changed
+        primIndexFiles-> UpdateIndex(false, true); // false means primary ID is not changed
 
         addIter.value()-> dataFileOffset = primIndexFiles-> newOffset;
 
@@ -486,27 +642,77 @@ inline int EgDataFiles::LocalModifyObjects(QDataStream& dat, QMap<EgDataNodeIDty
 
                     indexFiles[indIter.key()]-> setNewOffset(primIndexFiles-> newOffset);
                     indexFiles[indIter.key()]-> setNewIndex(addIter.value()-> dataFields[indIter.value().fieldNum]);
-                    indexFiles[indIter.key()]-> UpdateIndex(isUpdated);
+                    indexFiles[indIter.key()]-> UpdateIndex(isUpdated, false);
 
-                    /*
-                    if (tmpNode.dataFields[indIter.value()].toInt() != addIter.value()-> dataFields[indIter.value()].toInt())
-                    {
-                        // delete/add index
-                        indexFiles[indIter.key()]-> DeleteIndex();
+                }
+                else
+                    qDebug() << "Error: Index not found: " << indIter.key() << FN;
 
-                        indexFiles[indIter.key()]-> theIndex   = addIter.value()-> dataFields[indIter.value()].toInt();
-                        indexFiles[indIter.key()]-> dataOffset = primIndexFiles-> newOffset;
-                        indexFiles[indIter.key()]-> AddObjToIndex();
-                    }
-                    else
-                    {
-                        // update
-                        indexFiles[indIter.key()]-> newOffset = primIndexFiles-> newOffset;
-                        indexFiles[indIter.key()]-> UpdateIndex(false);
-                    }
-                    */
+            }
+        }
+    }
 
-                    // indexFiles[indIter.key()]-> UpdateIndex(false);
+    return 0;
+}
+
+int EgDataFiles::LocalModifyNodes(const QList<EgDataNode> &updatedDataNodes)
+{
+    EgDataNode tmpNode;
+
+        // walk updated nodes list    QMap<EgDataNodeIDtype, EgDataNode*>::iterator
+    for (auto updIter : updatedDataNodes)
+    {
+        dat.device()-> seek(dat.device()-> size());
+
+            // primary index data offset
+        primIndexFiles-> newOffset = dat.device()-> pos();
+
+        // qDebug()  << "Update object" << addIter.value()-> dataNodeID << " old offset" << hex << addIter.value()-> dataFileOffset
+        //           << " new offset " << hex << primIndexFiles-> newOffset << FN;
+
+        dat << updIter.dataNodeID;
+        dat << updIter.dataFields;
+
+            // add primary index
+        primIndexFiles-> theIndex = updIter.dataNodeID;
+        primIndexFiles-> dataOffset = updIter.dataFileOffset;   // obsolete, set by UpdateIndex(), FIXME check
+        primIndexFiles-> UpdateIndex(false, true); // first bool means primary ID is not changed, second - is primary
+
+        updIter.dataFileOffset = primIndexFiles-> newOffset;
+
+        if (! metaInfo-> indexedFields.isEmpty())
+        {
+                // save old field values
+            if (! dat.device()-> seek(primIndexFiles-> dataOffset))
+            {
+                qDebug() << FN << "can't seek to data offset" << hex << (int) primIndexFiles-> dataOffset;
+                return -1;
+            }
+
+            // tmpNode.clear();
+
+            dat >> tmpNode.dataNodeID;
+            dat >> tmpNode.dataFields;
+
+                // process other indexes QHash<QString, int> ::iterator
+            // for (auto indIter = metaInfo-> indexedToOrder.begin(); indIter != metaInfo-> indexedToOrder.end(); ++indIter)
+            for (auto indIter = metaInfo-> indexedFields.begin(); indIter != metaInfo-> indexedFields.end(); ++indIter)
+            {
+                if (indexFiles.contains(indIter.key()))
+                {
+                    // qDebug()  << "Update index from " << tmpNode.dataFields  // << tmpNode.dataFields[indIter.value()].toInt()
+                    //          << " to " << addIter.value()-> dataFields[indIter.value()].toInt() << FN;
+
+                    indexFiles[indIter.key()]-> setIndex(tmpNode.dataFields[indIter.value().fieldNum]); // TODO - calc index of QVariant
+                    indexFiles[indIter.key()]-> setDataOffset(primIndexFiles-> dataOffset);
+
+
+                    bool isUpdated = tmpNode.dataFields[indIter.value().fieldNum] != updIter.dataFields[indIter.value().fieldNum];
+
+                    indexFiles[indIter.key()]-> setNewOffset(primIndexFiles-> newOffset);
+                    indexFiles[indIter.key()]-> setNewIndex(updIter.dataFields[indIter.value().fieldNum]);
+                    indexFiles[indIter.key()]-> UpdateIndex(isUpdated, false);
+
                 }
                 else
                     qDebug() << "Error: Index not found: " << indIter.key() << FN;

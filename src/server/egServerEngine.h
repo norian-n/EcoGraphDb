@@ -1,69 +1,88 @@
 #ifndef EG_SERVER_ENGINE_H
 #define EG_SERVER_ENGINE_H
 
+
 #include <QString>
 #include <QList>
 #include <QByteArray>
 
 #include <QMutex>
 #include <QtNetwork>
+#include <QTcpServer>
 
 #include "../egMetaInfo.h"
 #include "../egClientServer.h"
-// #include "../egLocalFiles.h"
+#include "../egLocalFiles.h"
+#include "../indexes/egIndexConditions.h"
 
-class EgServerEngine  //  : public QRunnable // Data Files operations
+/*
+class egDbTcpServer : public QTcpServer
 {
+    Q_OBJECT
+
 public:
-    // EgDataFiles d_files;
-    quint16 field_count;
-    // obj_id_type obj_count;
-    // obj_id_type next_obj_id;
+    egDbTcpServer(QObject *parent = 0);
 
-    command_id_type command_id;
-    // odb_id_type db_id;
+protected:
+    void incomingConnection(qintptr socketDescriptor) override;
 
-    qint32 filter_id;   // data filter callback ID
-    int socketDescriptor;
+private:
 
-    // odb_id_type* glob_new_id;
-    QMutex* OdbMapMutex;         // lock
-    // QMap<QString, odb_id_type>* glob_odb_map;
-    QList<QString>* glob_odb_list;
-        // data transfer
-    QTcpSocket srvSocket;
+};
+*/
+
+class EgServerEngine : public QObject // Data Files operations
+{   
+    Q_OBJECT
+
+public:
+
+    QTcpServer* tcpServer;
+
+    CommandIdType commandID;
+    QString nodeTypeName;
+
+    EgDataNodeTypeMetaInfo metaInfo;
+
+    EgDataFiles localFiles;
+
     QByteArray block;
 
-    QDataStream in;
-    QDataStream out;
+    QList<EgDataNode> addNodes;
+    QList<EgDataNode> updateNodes;
+    QList<EgDataNode> deleteNodes;
 
-    // QList<EgPackedDataNode> PackedList;
-    // EgFieldDescriptors FD;
+    QSet <quint64> IndexOffsets;
 
-    QList<EgDataNode*> data_obj_list;          // 1-element list to support local files interface
-    // QMap<obj_id_type, EgDataNode> dobj_map;    // map to send to client
+    QMap<EgIndexNodeIDtype, EgIndexNode> indexNodes;
+    EgIndexNodeIDtype rootNodeID = 0;
 
-        // data filter
-    // FilterInterface* filterInterface;
+    EgIndexConditionsTree* index_tree = nullptr;
+    EgIndexCondition rootIndexCondition;
 
-    EgServerEngine();
-    ~EgServerEngine() {}
-
-    // void Init();
-    void Init();   // read stored Odb names from file
-    void SetFileName(QString& FNameBase);   // set name for files
-    bool loadPlugin();
+    EgServerEngine(); // QWidget *parent
+    virtual ~EgServerEngine() { if (tcpServer) { tcpServer->close(); delete tcpServer; } }
 
     void run(); // Qt Thread Pool compatible TODO : another custom thread pool (Workbox-type)
 
-        // field descriptors
-    int ServerSendFieldDescs(QByteArray* field_descs, QByteArray* control_descs);    // send to client
-        // service
-    void LoadFilterArgs();
-    int ServerSendOdbID();              // get ODB entry ID
+    inline void ReceiveNodesList(QList<EgDataNode>& dataNodes, QDataStream& in);
+    inline void ReceiveIndexesTree(QDataStream& in);
 
-    inline void ServerRecvDataObj();    // receive data obj to add/modify
-    int ServerSendObjects();            // send data objects
+    inline void StoreMetaInfo(QDataStream &in);
+    inline void LoadMetaInfo(QDataStream &out);
+
+    inline void AppendData(QDataStream& in);
+    inline void DeleteData(QDataStream& in);
+    inline void UpdateData(QDataStream& in);
+
+    inline void LoadDataNodes(QDataStream& out);
+    inline void LoadSelectedDataNodes(QDataStream& out);
+
+    QTcpSocket* clientConnection;
+
+private slots:
+    void processRequest();
+    void getCommand();
 
 };
 

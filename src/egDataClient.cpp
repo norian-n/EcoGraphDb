@@ -8,158 +8,125 @@
  */
 
 #include "egDataClient.h"
+#include <QHostAddress>
 
-EgDataClient::EgDataClient(const EgDataNodesType* nodesType):
-   dataNodesType((EgDataNodesType*) nodesType),
+EgServerConnection::EgServerConnection(): // const EgDataNodesType* nodesType):
+   // dataNodesType((EgDataNodesType*) nodesType),
+   in(&tcpSocket),
+   out(&block, QIODevice::WriteOnly),
+   serverAddress(QHostAddress(QHostAddress::LocalHost).toString())  // FIXME
+   // egDataNodesTypeID(0)
+{
+    out.setVersion(QDataStream::Qt_4_0);    // FIXME version hardcoded
+    in.setVersion(QDataStream::Qt_4_0);
+}
+
+/*
+
+EgServerConnection::EgServerConnection(const EgDataNodesType* nodesType):
+   // dataNodesType((EgDataNodesType*) nodesType),
    in(&tcpSocket),
    out(&block, QIODevice::WriteOnly),
    egDataNodesTypeID(0)
 {
-    out.setVersion(QDataStream::Qt_5_0);    // FIXME version hardcoded
-    in.setVersion(QDataStream::Qt_5_0);
+    out.setVersion(QDataStream::Qt_4_0);    // FIXME version hardcoded
+    in.setVersion(QDataStream::Qt_4_0);
+}
+*/
+
+int  EgServerConnection::OpenStoreStream(const CommandIdType command, QDataStream*& metaInfoStream, const QString& typeName)
+{  
+    int res = SendCommand(command, typeName);
+
+    metaInfoStream = &out;
+
+    return res;
 }
 
-int  EgDataClient::OpenMetaInfoStoreStream(QDataStream** metaInfoStream)
+int  EgServerConnection::OpenLoadStream(const CommandIdType command, QDataStream*& metaInfoStream, const QString& typeName)
 {
-    if (tcpSocket.state() != QAbstractSocket::ConnectedState)
-        tcpSocket.connectToHost(dataNodesType->connection->server_address, server_port);
-    else
-        qDebug() << FN << "tcpSocket was not disconnected before";
+    int res = SendCommand(command, typeName);
 
-    if (! tcpSocket.waitForConnected(10000)) // wait up to 10 sec
-    {
-        // process error
-        // qDebug() << "tcpSocket waitForConnected timeout"  << FN;
-        qDebug() << "can't connect to the server: " << dataNodesType->connection-> server_address  << FN;
-        return -2;
-    }
+    metaInfoStream = &in;
 
-        // send opcode
-    block.clear();
-    out.device()->seek(0);
+    return res;
+}
 
-    out << opcode_store_metainfo; // operation code FIXME
-    out << dataNodesType-> metaInfo.typeName;
-
+int  EgServerConnection::WaitForSending()
+{
     tcpSocket.write(block);
 
-        // send data
+    if (! tcpSocket.waitForBytesWritten(egServerTimeout)) // wait up to 10 sec
+    {
+        qDebug() << "waitForBytesWritten error" << FN;
+        // process error
+        return -1;
+    }
+
     block.clear();
     out.device()->seek(0);
-
-    *metaInfoStream = &out;
 
     return 0;
 }
 
-int  EgDataClient::OpenMetaInfoLoadStream(QDataStream** metaInfoStream)
+int  EgServerConnection::WaitForReadyRead()
 {
-    if (tcpSocket.state() != QAbstractSocket::ConnectedState)
-        tcpSocket.connectToHost(dataNodesType->connection->server_address, server_port);
-    else
-        qDebug() << FN << "tcpSocket was not disconnected before";
-
-    if (! tcpSocket.waitForConnected(10000)) // wait up to 10 sec
+    if (! tcpSocket.waitForReadyRead(egServerTimeout)) // wait up to 10 sec
     {
+        qDebug() << FN << "waitForReadyRead error";
         // process error
-        // qDebug() << "tcpSocket waitForConnected timeout"  << FN;
-        qDebug() << "can't connect to the server: " << dataNodesType->connection-> server_address  << FN;
-        return -2;
+        return -1;
     }
-
-        // send opcode
-    block.clear();
-    out.device()->seek(0);
-
-    out << opcode_load_metainfo; // operation code FIXME
-    out << dataNodesType-> metaInfo.typeName;
-
-    tcpSocket.write(block);
-
-    block.clear();
-    out.device()->seek(0);
-
-        // receive data
-    *metaInfoStream = &in;
 
     return 0;
 }
 
+void  EgServerConnection::Disconnect()
+{
+    if (tcpSocket.state() == QAbstractSocket::ConnectedState)
+        tcpSocket.disconnectFromHost();
 
-int EgDataClient::RemoteGetOdbId()
+    if (tcpSocket.state() == QAbstractSocket::ConnectedState)
+        tcpSocket.waitForDisconnected(egServerTimeout);
+}
+
+int EgServerConnection::SendCommand(const CommandIdType command, const QString &nodeTypeName)
 {
     // tcpSocket.abort();
     if (tcpSocket.state() != QAbstractSocket::ConnectedState)
-        tcpSocket.connectToHost(dataNodesType->connection->server_address, server_port);
+        tcpSocket.connectToHost(serverAddress, server_port);
     else
-        qDebug() << FN << "tcpSocket was not disconnected before";
+        qDebug()  << "tcpSocket was not disconnected before" << FN;
 
-    if (! tcpSocket.waitForConnected(10000)) // wait up to 10 sec
+    if (! tcpSocket.waitForConnected(egServerTimeout)) // wait up to 10 sec
     {
             // process error
         // qDebug() << "tcpSocket waitForConnected timeout"  << FN;
-        qDebug() << "can't connect to the server: " << dataNodesType->connection-> server_address  << FN;
+        qDebug() << "can't connect to the server: " << serverAddress << " port " << server_port << FN;
         return -2;
     }
-        // check egDataNodesTypeID
-    if (!egDataNodesTypeID)
-    {
-            // send opcode
-        block.clear();
-        out.device()->seek(0);
-        out << opcode_get_odb_id; // operation code
-        out << dataNodesType-> metaInfo.typeName;
 
-        tcpSocket.write(block);
-        block.clear();
-        out.device()->seek(0);
-        // get egDataNodesTypeID
+        // send opcode
+    block.clear();
+    out.device()->seek(0);
 
-        // start read
-        if (! tcpSocket.waitForReadyRead(10000)) // wait up to 10 sec
-        {
-            qDebug() << "waitForReadyRead error" << FN;
-            // process error
-            return -3;
-        }
-        // get count
-        in >> egDataNodesTypeID;
-    }
-    else // send egDataNodesTypeID
-    {
-            // send opcode
-        block.clear();
-        out.device()->seek(0);
-        out << opcode_send_odb_id; // operation code
-            // send egDataNodesTypeID
-        out << egDataNodesTypeID; // operation code
-        tcpSocket.write(block);
-        // clear
-        block.clear();
-        out.device()->seek(0);
-    }
-
-        // check egDataNodesTypeID
-    if (!egDataNodesTypeID)
-    {
-        qDebug() << FN << "server sent bad egDataNodesTypeID = 0";
-        return -4;
-    }
-
-    // qDebug() << FN << "egDataNodesTypeID = " << egDataNodesTypeID;
+    out << command;
+    out << nodeTypeName;
 
     return 0;
 }
 
 
-int EgDataClient::RemoteStoreFieldDesc(QByteArray* field_descs, QByteArray* control_descs)
+int EgServerConnection::RemoteStoreFieldDesc(QByteArray* field_descs, QByteArray* control_descs)
 {
         // get/set egDataNodesTypeID
+    /*
     if (RemoteGetOdbId())
     {
         qDebug() << FN << "RemoteGetOdbId got an error";
         return -2;
     }
+    */
     // qDebug() << FN << "opcode_store_fdesc";
         // send opcode
     out << opcode_store_metainfo;  // operation code
@@ -216,16 +183,17 @@ int EgDataClient::StoreData(QList<EgPackedDataNode*>& a_list, QList<EgPackedData
 }
 */
 
-int EgDataClient::RemoteLoadFieldDesc(QByteArray* field_descs, QByteArray* control_descs, EgDataNodeIDtype& obj_count, EgDataNodeIDtype& next_obj_id)
+int EgServerConnection::RemoteLoadFieldDesc(QByteArray* field_descs, QByteArray* control_descs, EgDataNodeIDtype& obj_count, EgDataNodeIDtype& next_obj_id)
 {
     qint16 a_size = 0;
 
         // get/set egDataNodesTypeID
-    if (RemoteGetOdbId())
+    /*if (RemoteGetOdbId())
     {
         qDebug() << FN << "RemoteGetOdbId got an error";
         return -1;
     }
+    */
     // qDebug() << FN << "opcode_load_fdesc";
         // send opcode
     out << opcode_load_metainfo; // operation code
@@ -233,7 +201,7 @@ int EgDataClient::RemoteLoadFieldDesc(QByteArray* field_descs, QByteArray* contr
     block.clear();
     out.device()->seek(0);
         // start read
-    if (! tcpSocket.waitForReadyRead(10000)) // wait up to 10 sec
+    if (! tcpSocket.waitForReadyRead(egServerTimeout)) // wait up to 10 sec
     {
         qDebug() << FN << "waitForReadyRead error";
         // process error
@@ -369,7 +337,7 @@ inline int EgDataClient::SendObjData(QList<EgPackedDataNode*>& a_list, command_i
 }
 */
 
-int EgDataClient::RemoteLoadData()
+int EgServerConnection::RemoteLoadData()
 {
     /*
     QByteArray bar;
@@ -412,7 +380,7 @@ int EgDataClient::RemoteLoadData()
         out.device()->seek(0);
     }
         // start read
-    if (! tcpSocket.waitForReadyRead(10000)) // wait up to 10 sec
+    if (! tcpSocket.waitForReadyRead(egServerTimeout)) // wait up to 10 sec
     {
         qDebug() << FN << "waitForReadyRead error";
         return -2;
@@ -437,7 +405,7 @@ int EgDataClient::RemoteLoadData()
     return 0;
 }
 
-int EgDataClient::RemoteSendList(QList<QVariant>& d_list) // send variant list
+int EgServerConnection::RemoteSendList(QList<QVariant>& d_list) // send variant list
 {
     // qint16 arg_size;
         // send arguments count

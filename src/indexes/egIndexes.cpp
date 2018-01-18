@@ -1004,7 +1004,7 @@ template <typename KeyType> void EgIndexes<KeyType>::LoadDataByChunkEqual(QSet<q
 }
 
 
-template <typename KeyType> int EgIndexes<KeyType>::FindIndexByDataOffset(QDataStream &localIndexStream)
+template <typename KeyType> int EgIndexes<KeyType>::FindIndexByDataOffset(QDataStream &localIndexStream, bool isPrimary)
 {
     KeyType currentIndex;
     quint64 dataOffset;
@@ -1067,8 +1067,16 @@ template <typename KeyType> int EgIndexes<KeyType>::FindIndexByDataOffset(QDataS
 
             if (currentIndex == theKey)
             {
-                if (dataOffset == oldDataOffset)
-                    return 0; // found indexPosition
+                if (! isPrimary)
+                {
+                    if (dataOffset == oldDataOffset)
+                        return 0; // found indexPosition
+                }
+                else    // found ID, store offset
+                {
+                    oldDataOffset = dataOffset;
+                    return 0;
+                }
             }
             else
                 keyOutOfRange = true;
@@ -1157,20 +1165,20 @@ template <typename KeyType> int EgIndexes<KeyType>::DeleteDataOffset(QDataStream
     return 0;
 }
 
-template <typename KeyType> void EgIndexes<KeyType>::UpdateIndex()
+template <typename KeyType> void EgIndexes<KeyType>::UpdateIndex(bool isPrimary)
 {
     QDataStream localIndexStream(&indexBA, QIODevice::ReadWrite);
 
     // qDebug() << "theKey = " << theKey << ", IndexFileName = " << fingersTree-> IndexFileName << FN;
 
-    if (FindIndexByDataOffset(localIndexStream) == 0) // index found
+    if (FindIndexByDataOffset(localIndexStream, isPrimary) == 0) // index found
         UpdateDataOffset(localIndexStream);
     else
         qDebug() << "Index to update not found, theKey = " << theKey << ", IndexFileName = " << fingersTree-> IndexFileName << FN;
 
 }
 
-template <typename KeyType> void EgIndexes<KeyType>::DeleteIndex()
+template <typename KeyType> void EgIndexes<KeyType>::DeleteIndex(bool isPrimary)
 {
     QDataStream localIndexStream(&indexBA, QIODevice::ReadWrite);
 
@@ -1178,7 +1186,7 @@ template <typename KeyType> void EgIndexes<KeyType>::DeleteIndex()
 
     // fingersTree-> PrintFingerInfo(fingersTree-> currentFinger, "DeleteIndex");
 
-    if (FindIndexByDataOffset(localIndexStream) == 0) // index found
+    if (FindIndexByDataOffset(localIndexStream, isPrimary) == 0) // index found
     {
         // qDebug() << "chunkCount 1 =  " << hex << (int) chunkCount << FN;
 

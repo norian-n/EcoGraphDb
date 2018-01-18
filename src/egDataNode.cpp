@@ -77,6 +77,8 @@ QVariant& EgDataNode::operator [] (const char* fName)
 
 QDataStream& operator << (QDataStream& d_stream, EgDataNode& d_node)   // transfer and file operations
 {
+    d_stream << d_node.dataNodeID;
+    d_stream << d_node.dataFileOffset;
     d_stream << d_node.dataFields;     // write to stream
 
     return d_stream;
@@ -84,6 +86,8 @@ QDataStream& operator << (QDataStream& d_stream, EgDataNode& d_node)   // transf
 
 QDataStream& operator >> (QDataStream& d_stream, EgDataNode& d_node)         // unpack
 {
+    d_stream >> d_node.dataNodeID;
+    d_stream >> d_node.dataFileOffset;
     d_stream >> d_node.dataFields;
 
     return d_stream;

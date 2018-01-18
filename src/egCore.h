@@ -27,9 +27,10 @@ const bool isIndexed = true;
 const bool useLocations = true;
 
     // ID and other types
-typedef uint32_t EgDataNodesTypeID;    // data object class ID type
-typedef int32_t  EgDataNodeIDtype;     // data object ID type !!! signed to mark deleted !!!
-typedef uint16_t EgFieldIDtype;      // data field ID type
+typedef uint32_t EgDataNodesTypeID;     // data object class ID type
+typedef int32_t  EgDataNodeIDtype;      // data object ID type
+typedef uint16_t EgFieldIDtype;         // data field ID type
+typedef uint32_t  EgIndexNodeIDtype;     // index node ID type
 
 class EgDataNode;
 
@@ -66,10 +67,12 @@ enum DataStatusType // data status type
 };
 
     // server connection info
+/*
 struct EgRemoteConnect
 {
     QString server_address;
 };
+*/
 
     // data node type settings
 struct EgNodeTypeSettings
@@ -80,7 +83,7 @@ struct EgNodeTypeSettings
     bool useLinks = false;
     bool useGUIsettings = false;
 
-    EgRemoteConnect*  connection = nullptr;     // connection data (nullptr means local files)
+    // EgRemoteConnect*  connection = nullptr;     // connection data (nullptr means local files)
 };
 
     // data node type settings

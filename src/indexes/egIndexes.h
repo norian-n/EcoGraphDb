@@ -125,10 +125,10 @@ public:
 
     void LoadDataByChunkEqual(QSet<quint64>& index_offsets);
 
-    int FindIndexByDataOffset(QDataStream &localIndexStream);
+    int FindIndexByDataOffset(QDataStream &localIndexStream, bool isPrimary);
 
-    void UpdateIndex();
-    void DeleteIndex();
+    void UpdateIndex(bool isPrimary = false);
+    void DeleteIndex(bool isPrimary = false);
 
     int UpdateDataOffset(QDataStream &localIndexStream);
     int DeleteDataOffset(QDataStream &localIndexStream);
