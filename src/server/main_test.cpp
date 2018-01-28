@@ -18,7 +18,7 @@
 int main() // int argc, char *argv[])
 {
     int res = true;
-
+/*
     EgServerConnection* serverConnect = new EgServerConnection;
     EgDataNodeTypeMetaInfo metaInfo;
 
@@ -41,20 +41,36 @@ int main() // int argc, char *argv[])
     // res = res && ! metaInfo.ServerLoadMetaInfo();
 
     // metaInfo.PrintMetaInfo();
+    */
 
-
-/*
+    EgGraphDatabase graphDB;
     EgNodeTypeSettings typeSettings;
 
-    graphDB.CreateNodeType("serverTest", typeSettings);
+    // graphDB.CreateEgDb();
+
+        // test all options
+
+    /*
+    typeSettings.useLinks = true;
+    typeSettings.useGUIsettings = true;
+    typeSettings.useEntryNodes = true;
+    typeSettings.useLocation = true;
+    typeSettings.useNamedAttributes = true;
+    */
+
+    // typeSettings.useEntryNodes = true;
+
+    qDebug() << "Tests launched ";
+
+    graphDB.CreateNodeType("serverTestNodeType", typeSettings, "localhost");
 
     graphDB.AddDataField("name");
     graphDB.AddDataField("status", isIndexed); // true for index
 
     graphDB.CommitNodeType();
-    */
 
-    EgGraphDatabase graphDB;
+    QThread::msleep(100);
+
     EgDataNodesType testType;
 
     testType.Connect(graphDB, "serverTestNodeType", "localhost");
@@ -68,7 +84,6 @@ int main() // int argc, char *argv[])
     testType.AddDataNode(addValues, newID);
     testType.AddDataNode(addValues);
 
-    QThread::msleep(200);
     testType.StoreData();
 
     addValues.clear();
@@ -76,26 +91,32 @@ int main() // int argc, char *argv[])
 
     testType.UpdateDataNode(addValues, newID);
 
-    QThread::msleep(200);
+    QThread::msleep(100);
     testType.StoreData();
 
     testType.DeleteDataNode(newID+1);
 
-    QThread::msleep(200);
+    QThread::msleep(100);
     testType.StoreData();
 
-    QThread::msleep(500);
+    QThread::msleep(100);
 
         // load test
     EgDataNodesType testType2;
     testType2.Connect(graphDB, "serverTestNodeType", "localhost");
 
-    testType2.LoadData(IC("status", EQ, 7));
+    // QThread::msleep(200);
+    testType2.LoadData(IC("status", EQ, 8));
 
-    // testType2.LoadAllNodes();
+    //testType2.LoadAllNodes();
 
-    qDebug() << "nodes count: " << testType2.dataNodes.count();
+    // QThread::msleep(200);
+    // qDebug() << "nodes count: " << testType2.dataNodes.count();
 
+    // for (auto iter: testType2.dataNodes.values())
+    //    qDebug() << iter.dataFields;
+
+    res = (testType2.dataNodes.count() == 1);
 
     if (res)
         qDebug() << "\nAll tests PASSED\n";

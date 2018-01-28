@@ -146,7 +146,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
 
         // connect to peer database controller
     if (! res)
-        res = myDB.Attach(this);  // TODO FIXME implement double-check files
+        res = myDB.Attach(this, serverAddress);  // TODO FIXME implement double-check files
 
     if (! res)
         res = getMyLinkTypes(); // extract nodetype-specific link types from all link types

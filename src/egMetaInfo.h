@@ -61,9 +61,11 @@ public:
 
     int  LocalStoreMetaInfo();          // save to file or server
     int  LocalLoadMetaInfo();           // load from file or server
+    int  LocalUpdateMetaInfo();          // save to file or server
 
     int  ServerStoreMetaInfo();          // save to file or server
     int  ServerLoadMetaInfo();           // load from file or server
+    int  ServerUpdateMetaInfo();          // save to file or server
 
     int  OpenLocalStoreStream();      // save to local file
     void SendMetaInfoToStream(QDataStream &metaInfoStream);
@@ -75,8 +77,11 @@ public:
 
 };
 
-// QDataStream& operator << (QDataStream& dStream, EgDataNodeTypeMetaInfo& metaInfo);
-// QDataStream& operator >> (QDataStream& dStream, EgDataNodeTypeMetaInfo& metaInfo);
+QDataStream& operator << (QDataStream& dStream, EgNodeTypeSettings& typeSettings);    // transfer and file operations
+QDataStream& operator >> (QDataStream& dStream, EgNodeTypeSettings& typeSettings);    // transfer and file operations
+
+QDataStream& operator << (QDataStream& dStream, EgDataNodeTypeMetaInfo& metaInfo);
+QDataStream& operator >> (QDataStream& dStream, EgDataNodeTypeMetaInfo& metaInfo);
 
 
 #endif // EG_META_INFO_H

@@ -115,7 +115,7 @@ void MainWindow::on_initButton_clicked()
 
 void MainWindow::cleanUpFiles()
 {
-    QDir dir("");
+    QDir dir();
 
     QStringList nameFilters;
 
@@ -132,7 +132,7 @@ void MainWindow::cleanUpFiles()
     if (! dir.exists("egdb"))
         return;
 
-    dir.setCurrent("egdb");
+    dir = QDir("egdb");
 
         // get filtered filenames
     ent = dir.entryList(nameFilters);
@@ -141,8 +141,6 @@ void MainWindow::cleanUpFiles()
         // remove files
     foreach (const QString& str, ent)
         dir.remove(str);
-
-    dir.setCurrent("..");
 }
 
 void MainWindow::AddImages()

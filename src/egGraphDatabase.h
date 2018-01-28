@@ -45,6 +45,7 @@ public:
     // EgRemoteConnect*  connection = nullptr;     // connection data (nullptr means local files)
 
     QDir dir;
+    QString currentServerAddress;
 
     // EgDataNodesType controlDescs;
 
@@ -57,15 +58,15 @@ public:
 
     // int CreateRemoteEgDb(); // FIXME - Remote on server
     int Connect();
-    int Attach(EgDataNodesType* nType);
+    int Attach(EgDataNodesType* nType, const QString& serverAddress = QString());
 
-    bool CheckLinksMetaInfo();
+    bool CheckLinksMetaInfoLocal();
     int  CreateLinksMetaInfo();
     int  LoadLinksMetaInfo();
 
     inline void ClearMetaInfo(EgDataNodeTypeMetaInfo* metaInfo);
 
-    int CreateNodeType(QString typeName, EgNodeTypeSettings& typeSettings);
+    int CreateNodeType(QString typeName, EgNodeTypeSettings& typeSettings, const QString& serverAddress = QString());
 
     // int CreateNodeType(QString typeName, bool addLocation = false, bool addAttributes = false); // FIXME delete
 
@@ -83,6 +84,7 @@ public:
     // int LoadAllLinks(); // load all links to memory - debug use only
 
 };
+
 
 #endif // EG_GRAPH_DATABASE_H
 

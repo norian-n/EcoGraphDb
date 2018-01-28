@@ -17,8 +17,8 @@
 
 namespace EgDataNodesNamespace
 {
-    const char* const egDummyNodesType("egdummynodestype");
-    const char* const egDummyLinkType("egdummylinktype");
+    const char* const egDummyNodesType("egDummyNodesType");
+    const char* const egDummyLinkType("egDummyLinkType");
 
     const char* const egGUIfileName("_egGUIcontrolDescriptors");
     const char* const egLocationFileName("_egLocationNodes");

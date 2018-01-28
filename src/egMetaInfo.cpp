@@ -59,10 +59,18 @@ void EgDataNodeTypeMetaInfo::AddDataField(QString fieldName, EgIndexSettings ind
 
 int  EgDataNodeTypeMetaInfo::OpenLocalStoreStream()
 {
-    QDir dir;
+    QDir dir(QDir::current());
 
-    if (! dir.exists("egdb"))
-        dir.mkdir("egdb");
+    if (dir.dirName() == "egdb")
+    {
+        qDebug() << "error: unexpected folder: " << dir.path() << FN;
+
+        return -1;
+    }
+
+    // qDebug()  << "dir name: " << dir.dirName() << FN;
+    // qDebug()  << "dir current path: " << dir.currentPath() << FN;
+    // qDebug()  << dir.entryList() << FN;
 
         // open file
     metaInfoFile.setFileName("egdb/" + typeName + ".ddt");
@@ -70,7 +78,7 @@ int  EgDataNodeTypeMetaInfo::OpenLocalStoreStream()
 
     if (!metaInfoFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
     {
-        qDebug() << FN << "can't open " << typeName + ".ddt" << " file";
+        qDebug() << "can't open " << metaInfoFile.fileName() << " file" << FN;
 
         return -1;
     }
@@ -116,6 +124,24 @@ int EgDataNodeTypeMetaInfo::LocalStoreMetaInfo()
     if (! res)
         SendMetaInfoToStream(localMetaInfoStream);
 
+        // localMetaInfoStream << *this;
+
+    metaInfoFile.close();
+
+    return res;
+}
+
+int EgDataNodeTypeMetaInfo::LocalUpdateMetaInfo()
+{
+    int res = 0;
+
+    res = OpenLocalStoreStream();
+
+    if (! res)
+        SendMetaInfoToStream(localMetaInfoStream);
+
+        // localMetaInfoStream << *this;
+
     metaInfoFile.close();
 
     return res;
@@ -131,6 +157,8 @@ int EgDataNodeTypeMetaInfo::ServerStoreMetaInfo()
     if (! res)
         SendMetaInfoToStream(*serverStream);
 
+        // *serverStream << *this;
+
     if (! res)
         res = serverConnection-> WaitForSending();
 
@@ -138,6 +166,27 @@ int EgDataNodeTypeMetaInfo::ServerStoreMetaInfo()
 
     return res;
 }
+
+int EgDataNodeTypeMetaInfo::ServerUpdateMetaInfo()
+{
+    int res = 0;
+
+    if (serverConnection)
+        res = serverConnection->OpenStoreStream(opcode_store_metainfo, serverStream, typeName);
+
+    if (! res)
+        SendMetaInfoToStream(*serverStream);
+
+        // *serverStream << *this;
+
+    if (! res)
+        res = serverConnection-> WaitForSending();
+
+    serverConnection-> Disconnect();
+
+    return res;
+}
+
 
 int EgDataNodeTypeMetaInfo::ServerLoadMetaInfo()
 {
@@ -259,23 +308,104 @@ void EgDataNodeTypeMetaInfo::PrintMetaInfo()
      //    qDebug() << curDesc.value() << " " << curDesc.key();
 }
 
-/*
 
-// store meta info
-QDataStream& operator << (QDataStream& dStream, EgDataNodeTypeMetaInfo &metaInfo)
-// QByteArray& operator << (QByteArray& packedMetaInfo, EgDataNodeTypeMetaInfo& metaInfo)
+QDataStream& operator << (QDataStream& dStream, EgNodeTypeSettings& typeSettings)    // transfer and file operations
 {
-    dStream << metaInfo.dataFields;
-    dStream << metaInfo.indexedToOrder.keys();
+    dStream << typeSettings.useEntryNodes;
+    dStream << typeSettings.useGUIsettings;
+    dStream << typeSettings.useLinks;
+    dStream << typeSettings.useLocation;
+    dStream << typeSettings.useNamedAttributes;
 
     return dStream;
+}
+
+QDataStream& operator >> (QDataStream& dStream, EgNodeTypeSettings& typeSettings)    // transfer and file operations
+{
+    dStream >> typeSettings.useEntryNodes;
+    dStream >> typeSettings.useGUIsettings;
+    dStream >> typeSettings.useLinks;
+    dStream >> typeSettings.useLocation;
+    dStream >> typeSettings.useNamedAttributes;
+
+    return dStream;
+}
+
+// store meta info
+QDataStream& operator << (QDataStream& metaInfoStream, EgDataNodeTypeMetaInfo &metaInfo)
+{
+    metaInfoStream << metaInfo.nodesCount;  // data nodes (NOT field descriptors) count
+    metaInfoStream << metaInfo.nextNodeID;   // incremental counter
+
+    metaInfoStream << metaInfo.useEntryNodes;
+    metaInfoStream << metaInfo.useLocation;
+    metaInfoStream << metaInfo.useNamedAttributes;
+    metaInfoStream << metaInfo.useLinks;
+    metaInfoStream << metaInfo.useGUIsettings;
+
+    metaInfoStream << metaInfo.dataFields;  // field descriptors
+    // dStream << indexedToOrder.keys();
+
+    metaInfoStream << (quint32) metaInfo.indexedFields.size();
+
+    for (auto indIter = metaInfo.indexedFields.begin(); indIter != metaInfo.indexedFields.end(); ++indIter)
+    {
+        // qDebug() << indIter.key() << " " << indIter.value().fieldNum << FN;
+
+        metaInfoStream << indIter.key();
+        metaInfoStream << indIter.value().fieldNum;
+        metaInfoStream << indIter.value().indexSize;
+        metaInfoStream << indIter.value().isSigned;
+        metaInfoStream << indIter.value().functionID;
+    }
+
+    return metaInfoStream;
 }
 
 // load meta info
-QDataStream& operator >> (QDataStream& dStream, EgDataNodeTypeMetaInfo& metaInfo)
+QDataStream& operator >> (QDataStream& metaInfoStream, EgDataNodeTypeMetaInfo& metaInfo)
 {
+    // QList<QString> indexedFieldsLocal;
 
-    return dStream;
+    metaInfo.Clear(); // init metainfo
+
+    metaInfoStream >> metaInfo.nodesCount;  // data nodes (NOT field descriptors) count
+    metaInfoStream >> metaInfo.nextNodeID;   // incremental counter
+
+    metaInfoStream >> metaInfo.useEntryNodes;
+    metaInfoStream >> metaInfo.useLocation;
+    metaInfoStream >> metaInfo.useNamedAttributes;
+    metaInfoStream >> metaInfo.useLinks;
+    metaInfoStream >> metaInfo.useGUIsettings;
+
+    metaInfoStream  >> metaInfo.dataFields;  // field descriptors
+    // metaInfoStream  >> indexedFieldsLocal;
+
+    quint32 theSize = 0;
+    EgIndexSettings theSettings;
+    QString theName;
+
+    metaInfoStream >> theSize;
+
+    for (quint32 i = 0; i < theSize; i++)
+    {
+        metaInfoStream  >> theName;
+        metaInfoStream  >> theSettings.fieldNum;
+        metaInfoStream  >> theSettings.indexSize;
+        metaInfoStream  >> theSettings.isSigned;
+        metaInfoStream  >> theSettings.functionID;
+
+        // qDebug() << theName << " " << theSettings.fieldNum << FN;
+
+        metaInfo.indexedFields.insert(theName, theSettings);
+    }
+
+    int order = 0;
+
+        // QList<QString>::iterator
+    for (auto stringListIter = metaInfo.dataFields.begin(); stringListIter != metaInfo.dataFields.end(); stringListIter++)
+        metaInfo.nameToOrder.insert(*stringListIter, order++);
+
+    return metaInfoStream;
 }
 
-*/

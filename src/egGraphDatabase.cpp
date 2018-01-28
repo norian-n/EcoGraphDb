@@ -9,6 +9,7 @@
 
 #include "egGraphDatabase.h"
 #include "egDataNodesLink.h"
+#include "egDataClient.h"
 
 EgGraphDatabase::~EgGraphDatabase()
 {
@@ -25,9 +26,16 @@ EgGraphDatabase::~EgGraphDatabase()
 }
 
 
-bool EgGraphDatabase::CheckLinksMetaInfo()
+bool EgGraphDatabase::CheckLinksMetaInfoLocal()
 {
     // EgDataNodesType linksMetaInfo;
+
+    if (dir.dirName() == "egdb")
+    {
+        qDebug() << "error: unexpected folder: " << dir.path() << FN;
+
+        return false;
+    }
 
         // check folder and ddt file
     if (! dir.exists(QString("egdb/") + EgDataNodesLinkNamespace::egLinkTypesFileName + ".ddt"))
@@ -62,6 +70,16 @@ bool EgGraphDatabase::CheckLinksMetaInfo()
 int EgGraphDatabase::CreateLinksMetaInfo()
 {
     // EgNodeTypeSettings typeSettings;
+
+    if (dir.dirName() == "egdb")
+    {
+        qDebug() << "error: unexpected folder: " << dir.path() << FN;
+
+        return false;
+    }
+
+    if (! dir.exists("egdb"))
+        dir.mkdir("egdb");
 
         // init links meta-info
     if (metaInfo)
@@ -117,19 +135,27 @@ inline void EgGraphDatabase::ClearMetaInfo(EgDataNodeTypeMetaInfo* metaInfo)
     }
 }
 
-int EgGraphDatabase::CreateNodeType(QString typeName,  EgNodeTypeSettings& typeSettings)
+int EgGraphDatabase::CreateNodeType(QString typeName,  EgNodeTypeSettings& typeSettings, const QString &serverAddress)
 {
     // check/create DB metainfo
 
-    if(! CheckLinksMetaInfo())
-        CreateLinksMetaInfo();
+    currentServerAddress = serverAddress;
+
+    if (serverAddress.isEmpty())
+    {
+
+        dir = QDir::current();
+
+        if(! CheckLinksMetaInfoLocal())
+            CreateLinksMetaInfo();
 
         // check if node type exists
-    if (dir.exists("egdb/" + typeName + ".ddt"))
-    {
-        qDebug()  << "Data node type already exists: " << typeName << FN;
+        if (dir.exists("egdb/" + typeName + ".ddt"))
+        {
+            qDebug()  << "Data node type already exists: " << typeName << FN;
 
-        return 1;
+            return 1;
+        }
     }
 
         // init all
@@ -167,6 +193,20 @@ int EgGraphDatabase::CreateNodeType(QString typeName,  EgNodeTypeSettings& typeS
 
     if (typeSettings.useNamedAttributes)
         attributesMetaInfo = new EgDataNodeTypeMetaInfo(typeName + EgDataNodesNamespace::egAttributesFileName);
+
+    if (! serverAddress.isEmpty())  // FIXME delete connections
+    {
+        metaInfo-> serverConnection= new EgServerConnection();
+
+        if (GUIcontrolsMetaInfo)
+            GUIcontrolsMetaInfo-> serverConnection= new EgServerConnection();
+        if (entryNodesMetaInfo)
+            entryNodesMetaInfo-> serverConnection= new EgServerConnection();
+        if (locationMetaInfo)
+            locationMetaInfo-> serverConnection= new EgServerConnection();
+        if (attributesMetaInfo)
+            attributesMetaInfo-> serverConnection= new EgServerConnection();
+    }
 
     return 0;
 }
@@ -282,7 +322,10 @@ int EgGraphDatabase::CommitNodeType()
 
     fieldsCreated = metaInfo->dataFields.count();
 
-    metaInfo-> LocalStoreMetaInfo();
+    if (currentServerAddress.isEmpty())
+        metaInfo-> LocalStoreMetaInfo();
+    else
+        metaInfo-> ServerStoreMetaInfo();   // FIXME check result
 
     if (GUIcontrolsMetaInfo)
     {
@@ -290,7 +333,10 @@ int EgGraphDatabase::CommitNodeType()
         GUIcontrolsMetaInfo-> AddDataField("label");
         GUIcontrolsMetaInfo-> AddDataField("width");
 
-        GUIcontrolsMetaInfo-> LocalStoreMetaInfo();
+        if (currentServerAddress.isEmpty())
+            GUIcontrolsMetaInfo-> LocalStoreMetaInfo();
+        else
+            GUIcontrolsMetaInfo-> ServerStoreMetaInfo();
 
         delete GUIcontrolsMetaInfo;
         GUIcontrolsMetaInfo = nullptr;
@@ -300,7 +346,10 @@ int EgGraphDatabase::CommitNodeType()
     {
         entryNodesMetaInfo-> AddDataField("subgraphid");    // hard linked by node id, field is optional
 
-        entryNodesMetaInfo-> LocalStoreMetaInfo();
+        if (currentServerAddress.isEmpty())
+            entryNodesMetaInfo-> LocalStoreMetaInfo();
+        else
+            entryNodesMetaInfo-> ServerStoreMetaInfo();
 
         delete entryNodesMetaInfo;
         entryNodesMetaInfo = nullptr;
@@ -314,7 +363,10 @@ int EgGraphDatabase::CommitNodeType()
 
         locationFieldsCreated = locationMetaInfo->dataFields.count();
 
-        locationMetaInfo-> LocalStoreMetaInfo();
+        if (currentServerAddress.isEmpty())
+            locationMetaInfo-> LocalStoreMetaInfo();
+        else
+            locationMetaInfo-> ServerStoreMetaInfo();
 
         delete locationMetaInfo;
         locationMetaInfo = nullptr;
@@ -327,7 +379,10 @@ int EgGraphDatabase::CommitNodeType()
         attributesMetaInfo-> AddDataField("key");
         attributesMetaInfo-> AddDataField("value");
 
-        attributesMetaInfo-> LocalStoreMetaInfo();
+        if (currentServerAddress.isEmpty())
+            attributesMetaInfo-> LocalStoreMetaInfo();
+        else
+            attributesMetaInfo-> ServerStoreMetaInfo();
 
         delete attributesMetaInfo;
         attributesMetaInfo = nullptr;
@@ -347,7 +402,9 @@ int  EgGraphDatabase::AddLinkType(QString linkName, QString firstDataNodeType, Q
     QList<QVariant> addValues;
     EgDataNodesType linksMetaInfo; // == LinkTypes
 
-    if(! CheckLinksMetaInfo())
+    dir = QDir::current();
+
+    if(! CheckLinksMetaInfoLocal())
         CreateLinksMetaInfo();
 
     if (linksMetaInfo.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName))
@@ -412,21 +469,21 @@ int EgGraphDatabase::Connect()
     return res;
 }
 
-int EgGraphDatabase::Attach(EgDataNodesType* nType)
+int EgGraphDatabase::Attach(EgDataNodesType* nType, const QString &serverAddress)
 {
-    int res = 0;
+    // int res = 0;
+
+    currentServerAddress = serverAddress;
 
     if (! isConnected)
     {
         // qDebug()  << "egGraphDatabase is not connected, connect it prior data nodes types" << FN;
 
-        // return -1;
-
-        res = Connect();
+        if (! LoadLinksMetaInfo())
+            isConnected = true;
     }
 
-    if (! res && nType)
-
+    if (nType)
     {
         // qDebug() << "trying to attach: " << nType-> metaInfo.typeName << FN;
 
@@ -442,14 +499,20 @@ int EgGraphDatabase::LoadLinksMetaInfo()
     EgDataNodesLinkType* newLink;
     EgDataNodesType linksMetaInfo;
 
-    if (! dir.exists("egdb/" + QString(EgDataNodesLinkNamespace::egLinkTypesFileName) + ".dat"))
+    if (currentServerAddress.isEmpty())
     {
-        qDebug()  << "EgDB connect error: Links meta info doesn't exist: " << EgDataNodesLinkNamespace::egLinkTypesFileName << ".dat" << FN;
 
-        return -1;
+        dir = QDir::current();
+
+        if (! dir.exists("egdb/" + QString(EgDataNodesLinkNamespace::egLinkTypesFileName) + ".dat"))
+        {
+            qDebug()  << "EgDB connect error: Links meta info doesn't exist: " << EgDataNodesLinkNamespace::egLinkTypesFileName << ".dat" << FN;
+
+            return -1;
+        }
     }
 
-    if (linksMetaInfo.ConnectServiceNodeType(*this, EgDataNodesLinkNamespace::egLinkTypesFileName) < 0)
+    if (linksMetaInfo.ConnectServiceNodeType(*this, EgDataNodesLinkNamespace::egLinkTypesFileName, currentServerAddress) < 0)
     {
         // qDebug()  << "EgDB connect error: Links meta info doesn't exist: " << EgDataNodesLinkNamespace::egLinkTypesFileName << ".dat" << FN;
 

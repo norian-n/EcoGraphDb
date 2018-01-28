@@ -14,6 +14,7 @@
 #include "../egClientServer.h"
 #include "../egLocalFiles.h"
 #include "../indexes/egIndexConditions.h"
+#include "../egGraphDatabase.h"
 
 /*
 class egDbTcpServer : public QTcpServer

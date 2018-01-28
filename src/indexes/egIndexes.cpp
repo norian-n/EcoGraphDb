@@ -18,7 +18,7 @@ template <typename KeyType> void EgIndexes<KeyType>::RemoveIndexFiles(const QStr
     if (indexFile.isOpen())
         indexFile.close();
 
-    indexFile.setFileName(IndexFileName + ".odx");
+    indexFile.setFileName("egdb/" + IndexFileName + ".odx");
     indexFile.remove();
 }
 
@@ -31,7 +31,7 @@ template <typename KeyType> int EgIndexes<KeyType>::OpenIndexFilesToUpdate(const
 {
     indexFile.close();
 
-    indexFile.setFileName(IndexFileName + ".odx");
+    indexFile.setFileName("egdb/" + IndexFileName + ".odx");
     indexStream.setDevice(&indexFile);
 
     if (!indexFile.open(QIODevice::ReadWrite)) // WriteOnly Append | QIODevice::Truncate
@@ -47,7 +47,7 @@ template <typename KeyType> int EgIndexes<KeyType>::OpenIndexFilesToRead(const Q
 {
     indexFile.close();
 
-    indexFile.setFileName(IndexFileName + ".odx");
+    indexFile.setFileName("egdb/" + IndexFileName + ".odx");
     indexStream.setDevice(&indexFile);
 
     if (!indexFile.exists())

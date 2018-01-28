@@ -20,6 +20,15 @@ template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToUpdate()
 {
     // qDebug() << "IndexFileName = " << IndexFileName << FN;
 
+    dir = QDir::current();
+
+    if (! dir.exists("egdb"))
+    {
+        qDebug()  << "error: can't find the egdb dir " << FN;
+        return -1;
+    }
+
+
     int res = indexChunks.OpenIndexFilesToUpdate(IndexFileName);
     res += fingersTree.OpenFingerFileToUpdate(IndexFileName);
 
@@ -42,12 +51,32 @@ template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToRead()
 {
     // qDebug() << "In OpenIndexFilesToRead()" << FN;
 
+    dir = QDir::current();
+
+    // if (dir.dirName() != "egdb")
+    if (! dir.exists("egdb"))
+    {
+        qDebug()  << "error: can't find the egdb dir " << FN;
+        return -1;
+    }
+
     int res = indexChunks.OpenIndexFilesToRead(IndexFileName);
     res += fingersTree.OpenFingerFileToRead(IndexFileName);
 
+    if (res)    // error
+    {
+        indexChunks.CloseIndexFiles();
+        fingersTree.CloseIndexFiles();
+
+        // if (dir.dirName() == "egdb")
+        //    dir.setCurrent("..");
+
+        return res;
+    }
+
     fingersTree.IndexFileName = IndexFileName;
 
-    if (fingersTree.fingerStream.device()->size() && ! res) // is not empty FIXME check both files
+    if (fingersTree.fingerStream.device()->size()) // && indexChunks.indexStream.device()->size()) // is not empty
     {
         // indexChunks.LoadRootHeader();
         fingersTree.LoadRootHeader();
@@ -64,6 +93,9 @@ template <typename KeyType> void EgIndexFiles<KeyType>::CloseIndexFiles()
 
     indexChunks.CloseIndexFiles();
     fingersTree.CloseIndexFiles();
+
+    // if (dir.dirName() == "egdb")
+    //    dir.setCurrent("..");
 }
 
 
@@ -162,49 +194,26 @@ template <typename KeyType> int EgIndexFiles<KeyType>::DeleteIndex(bool isPrimar
 
 template <typename KeyType> int EgIndexFiles<KeyType>::LoadAllDataOffsets(QSet<quint64>& dataOffsets)
 {
+    int res = OpenIndexFilesToRead();
 
-    if (! dir.setCurrent("egdb"))
-    {
-        qDebug()  << "can't find the egdb dir " << FN;
-        return -1;
-    }
-
-    int res = indexChunks.OpenIndexFilesToRead(IndexFileName);
-
-    if (res)
-    {
-        dir.setCurrent("..");
+    if (res)    // error
         return res;
-    }
 
     fingersTree.IndexFileName = IndexFileName;  // debug info
 
     indexChunks.LoadAllData(dataOffsets);
 
-    indexChunks.CloseIndexFiles();
-
-    dir.setCurrent("..");
+    CloseIndexFiles();
 
     return res;
 }
 
 template <typename KeyType> int EgIndexFiles<KeyType>::Load_EQ(QSet<quint64>& index_offsets, KeyType Key)
 {
-    int res = 0;
+    int res = OpenIndexFilesToRead();
 
-    if (! dir.setCurrent("egdb"))
-    {
-        qDebug()  << "can't find the egdb dir " << FN;
-        return -1;
-    }
-
-    res = OpenIndexFilesToRead();
-
-    if (res)
-    {
-        dir.setCurrent("..");
+    if (res)    // error
         return res;
-    }
 
     indexChunks.theKey   = Key;
 
@@ -215,12 +224,10 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_EQ(QSet<quint64>& in
     //         << ", offset: " << hex << (int) indexChunks.indexesChunkOffset << "res = " << res << FN;
 
 
-    if (! res)
+    if (! res)  // ok
         indexChunks.LoadDataByChunkEqual(index_offsets);
 
     CloseIndexFiles();
-
-    dir.setCurrent("..");
 
     return res;
 }
@@ -228,23 +235,10 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_EQ(QSet<quint64>& in
 
 template <typename KeyType> int EgIndexFiles<KeyType>::Load_GE(QSet<quint64>& index_offsets, KeyType Key)
 {
-    int res = 0;
+    int res = OpenIndexFilesToRead();
 
-    // qDebug() << "File name " << IndexFileName << FN;
-
-    if (! dir.setCurrent("egdb"))
-    {
-        qDebug()  << "can't find the egdb dir " << FN;
-        return -1;
-    }
-
-    res = OpenIndexFilesToRead();
-
-    if (res)
-    {
-        dir.setCurrent("..");
+    if (res)    // error
         return res;
-    }
 
     indexChunks.theKey   = Key;
 
@@ -254,35 +248,20 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GE(QSet<quint64>& in
         res = -1;
     }
 
-    if (! res)
+    if (! res)  // ok
         indexChunks.LoadDataByChunkUp(index_offsets, EgIndexes<KeyType>::CompareGE);
 
     CloseIndexFiles();
-
-    dir.setCurrent("..");
 
     return res;
 }
 
 template <typename KeyType> int EgIndexFiles<KeyType>::Load_GT(QSet<quint64>& index_offsets, KeyType Key)
 {
-    int res = 0;
+    int res = OpenIndexFilesToRead();
 
-    index_offsets.clear();
-
-    if (! dir.setCurrent("egdb"))
-    {
-        qDebug()  << "can't find the egdb dir " << FN;
-        return -1;
-    }
-
-    res = OpenIndexFilesToRead();
-
-    if (res)
-    {
-        dir.setCurrent("..");
+    if (res)    // error
         return res;
-    }
 
     indexChunks.theKey = Key;
 
@@ -296,28 +275,15 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GT(QSet<quint64>& in
 
     CloseIndexFiles();
 
-    dir.setCurrent("..");
-
     return res;
 }
 
 template <typename KeyType> int EgIndexFiles<KeyType>::Load_LE(QSet<quint64>& index_offsets, KeyType Key)
 {
-    int res = 0;
+    int res = OpenIndexFilesToRead();
 
-    if (! dir.setCurrent("egdb"))
-    {
-        qDebug()  << "can't find the egdb dir " << FN;
-        return -1;
-    }
-
-    res = OpenIndexFilesToRead();
-
-    if (res)
-    {
-        dir.setCurrent("..");
+    if (res)    // error
         return res;
-    }
 
     indexChunks.theKey   = Key;
 
@@ -329,30 +295,15 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LE(QSet<quint64>& in
 
     CloseIndexFiles();
 
-    dir.setCurrent("..");
-
     return res;
 }
 
 template <typename KeyType> int EgIndexFiles<KeyType>::Load_LT(QSet<quint64>& index_offsets, KeyType Key)
 {
-    int res = 0;
+    int res = OpenIndexFilesToRead();
 
-    index_offsets.clear();
-
-    if (! dir.setCurrent("egdb"))
-    {
-        qDebug()  << "can't find the egdb dir " << FN;
-        return -1;
-    }
-
-    res = OpenIndexFilesToRead();
-
-    if (res)
-    {
-        dir.setCurrent("..");
+    if (res)    // error
         return res;
-    }
 
     indexChunks.theKey = Key;
 
@@ -365,8 +316,6 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LT(QSet<quint64>& in
     // qDebug()  << "res = " << res << "index_offsets count = " << index_offsets.count() << FN;
 
     CloseIndexFiles();
-
-    dir.setCurrent("..");
 
     return res;
 }

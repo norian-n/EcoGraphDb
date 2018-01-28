@@ -72,7 +72,7 @@ void MainWindow::FillTestData()
 
     if (dir.exists("egdb"))
     {
-        dir.setCurrent("egdb");
+        dir = QDir("egdb");
 
             // get filtered filenames
         QStringList ent = dir.entryList(nameFilters);
@@ -81,8 +81,6 @@ void MainWindow::FillTestData()
             // remove files
         foreach (const QString& str, ent)
             dir.remove(str);
-
-        dir.setCurrent("..");
     }
 
     // return; // FIXME STUB

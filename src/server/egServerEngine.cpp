@@ -79,6 +79,19 @@ inline void EgServerEngine::ReceiveIndexesTree(QDataStream& in)
 inline void EgServerEngine::StoreMetaInfo(QDataStream& in)
 {
     metaInfo.LoadMetaInfoFromStream(in);
+    // in >> metaInfo;
+
+    QDir dir(QDir::current());
+
+    if (! dir.exists("egdb"))
+    {
+        // dir.mkdir("egdb");
+
+        EgGraphDatabase graphDB;
+
+        graphDB.CreateLinksMetaInfo();
+    }
+
     metaInfo.LocalStoreMetaInfo();
 }
 
@@ -86,6 +99,8 @@ inline void EgServerEngine::LoadMetaInfo(QDataStream& out)
 {
     metaInfo.LocalLoadMetaInfo();
     metaInfo.SendMetaInfoToStream(out);
+
+    // out << metaInfo;
 
     // qDebug()  << block;
 

@@ -26,7 +26,14 @@ SOURCES += \
     ../indexes/egFingers.cpp \
     ../egLocalFiles.cpp \
     ../egDataNode.cpp \
-    ../indexes/egIndexConditions.cpp
+    ../indexes/egIndexConditions.cpp \
+    ../egGraphDatabase.cpp \
+    ../egDataNodesType.cpp \
+    ../egDataNodesLink.cpp \
+    ../egNamedAttributes.cpp \
+    ../egEntryNodes.cpp \
+    ../egGUIconnect.cpp \
+    ../egNodesLocation.cpp
 
 HEADERS += \
     egServerEngine.h

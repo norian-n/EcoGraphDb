@@ -22,8 +22,16 @@
 
 void cleanUpFiles()
 {
-    QDir dir("");
+    QDir dir("egdb"); // QDir::currentPath()
 
+    // qDebug()  << "dir name: " << dir.dirName() << FN;
+    // qDebug()  << "dir current path: " << dir.currentPath() << FN;
+
+    dir.removeRecursively();
+
+    return;
+
+    /*
     QStringList nameFilters;
 
     nameFilters  << "*.odf" << "*.odx" << "*.dat" << "*.ddt" << "*.dln" << "*.ent"; // << "test*.*";
@@ -37,19 +45,33 @@ void cleanUpFiles()
         dir.remove(str);
 
     if (! dir.exists("egdb"))
+    {
+        qDebug() << "no egdb dir found at " << dir.path() << FN;
         return;
+    }
 
-    dir.setCurrent("egdb");
+    qDebug()  << "dir name: " << dir.dirName() << FN;
+    qDebug()  << "dir current path: " << dir.currentPath() << FN;
+
+    if (! dir.setCurrent("egdb"))
+    {
+        qDebug()  << "can't find the egdb dir " << FN;
+    }
+
+
+    qDebug()  << "dir name 2: " << dir.dirName() << FN;
+    qDebug()  << "dir current path 2: " << dir.currentPath() << FN;
 
         // get filtered filenames
     ent = dir.entryList(nameFilters);
-    // qDebug() << dir.entryList();
+    qDebug() << dir.entryList();
 
         // remove files
     foreach (const QString& str, ent)
         dir.remove(str);
 
     dir.setCurrent("..");
+    */
 }
 
 int main() // int argc, char *argv[])
@@ -63,6 +85,20 @@ int main() // int argc, char *argv[])
     EgDataNodesType testEgDataNodesType;
 
     cleanUpFiles();
+
+/*
+    EgDataNodesType testType2;
+    testType2.Connect(graphDB, "serverTestNodeType");
+
+    testType2.LoadData(IC("status", EQ, 8));
+
+    // testType2.LoadAllNodes();
+
+    qDebug() << "nodes count: " << testType2.dataNodes.count();
+
+    for (auto iter: testType2.dataNodes.values())
+        qDebug() << iter.dataFields;
+*/
 
     // return 0; // FIXME STUB
 

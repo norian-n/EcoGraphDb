@@ -145,7 +145,7 @@ int EgIndexConditionsTree::TransferTreeSet(EgIndexNode* rootNode, QDataStream& d
 {
     if (rootNode)
     {
-         qDebug() << "rootNode-> subnodesCount+1: " << rootNode-> subnodesCount+1 << " nodeID: " << rootNode-> nodeID << FN;
+        // qDebug() << "rootNode-> subnodesCount+1: " << rootNode-> subnodesCount+1 << " nodeID: " << rootNode-> nodeID << FN;
 
         d_stream << rootNode-> subnodesCount+1;
         d_stream << rootNode-> nodeID;
@@ -158,7 +158,7 @@ int EgIndexConditionsTree::TransferTreeSet(EgIndexNode* rootNode, QDataStream& d
 
 void EgIndexConditionsTree::RecursiveTransfer(EgIndexNode* branch, QDataStream& d_stream)
 {
-    qDebug() << "Transfer  tree index " << branch->FieldName << (int) branch-> oper << FN;
+    // qDebug() << "Transfer  tree index " << branch->FieldName << (int) branch-> oper << " " << branch->value << FN;
 
     if (! branch)
         return;

@@ -167,7 +167,7 @@ template <typename KeyType> void EgFingers<KeyType>::RemoveIndexFiles(const QStr
     if (fingerFile.isOpen())
         fingerFile.close();
 
-    fingerFile.setFileName(IndexFileName + ".odf");
+    fingerFile.setFileName("egdb/" + IndexFileName + ".odf");
     fingerFile.remove();
 }
 
@@ -175,7 +175,7 @@ template <typename KeyType> int EgFingers<KeyType>::OpenFingerFileToUpdate(const
 {
     fingerFile.close();
 
-    fingerFile.setFileName(IndexFileName + ".odf");
+    fingerFile.setFileName("egdb/" + IndexFileName + ".odf");
     fingerStream.setDevice(&fingerFile);
 
     if (!fingerFile.open(QIODevice::ReadWrite)) // WriteOnly Append | QIODevice::Truncate
@@ -191,7 +191,7 @@ template <typename KeyType> int EgFingers<KeyType>::OpenFingerFileToRead(const Q
 {
     fingerFile.close();
 
-    fingerFile.setFileName(IndexFileName + ".odf");
+    fingerFile.setFileName("egdb/" + IndexFileName + ".odf");
     fingerStream.setDevice(&fingerFile);
 
     if (!fingerFile.exists())
