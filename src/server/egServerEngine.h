@@ -10,13 +10,17 @@
 #include <QtNetwork>
 #include <QTcpServer>
 
+#include <QThread>
+
 #include "../egMetaInfo.h"
 #include "../egClientServer.h"
 #include "../egLocalFiles.h"
 #include "../indexes/egIndexConditions.h"
 #include "../egGraphDatabase.h"
 
-/*
+#include "egServerOperProc.h"
+
+
 class egDbTcpServer : public QTcpServer
 {
     Q_OBJECT
@@ -30,7 +34,27 @@ protected:
 private:
 
 };
-*/
+
+class FortuneThread : public QThread
+{
+    Q_OBJECT
+
+public:
+    FortuneThread(int socketDescriptor, QObject *parent);
+
+    virtual ~FortuneThread();
+
+    void run() override;
+
+signals:
+    // void error(QTcpSocket::SocketError socketError);
+
+private:
+    int socketDescriptor;
+
+    EgServerOperProc* operProcessor = nullptr;
+};
+
 
 class EgServerEngine : public QObject // Data Files operations
 {   
@@ -38,52 +62,17 @@ class EgServerEngine : public QObject // Data Files operations
 
 public:
 
-    QTcpServer* tcpServer;
-
-    CommandIdType commandID;
-    QString nodeTypeName;
-
-    EgDataNodeTypeMetaInfo metaInfo;
-
-    EgDataFiles localFiles;
-
-    QByteArray block;
-
-    QList<EgDataNode> addNodes;
-    QList<EgDataNode> updateNodes;
-    QList<EgDataNode> deleteNodes;
-
-    QSet <quint64> IndexOffsets;
-
-    QMap<EgIndexNodeIDtype, EgIndexNode> indexNodes;
-    EgIndexNodeIDtype rootNodeID = 0;
-
-    EgIndexConditionsTree* index_tree = nullptr;
-    EgIndexCondition rootIndexCondition;
+    egDbTcpServer customServer;
 
     EgServerEngine(); // QWidget *parent
-    virtual ~EgServerEngine() { if (tcpServer) { tcpServer->close(); delete tcpServer; } }
+    virtual ~EgServerEngine() { }
 
     void run(); // Qt Thread Pool compatible TODO : another custom thread pool (Workbox-type)
 
-    inline void ReceiveNodesList(QList<EgDataNode>& dataNodes, QDataStream& in);
-    inline void ReceiveIndexesTree(QDataStream& in);
-
-    inline void StoreMetaInfo(QDataStream &in);
-    inline void LoadMetaInfo(QDataStream &out);
-
-    inline void AppendData(QDataStream& in);
-    inline void DeleteData(QDataStream& in);
-    inline void UpdateData(QDataStream& in);
-
-    inline void LoadDataNodes(QDataStream& out);
-    inline void LoadSelectedDataNodes(QDataStream& out);
-
-    QTcpSocket* clientConnection;
+    // QTcpSocket* clientConnection;
 
 private slots:
     void processRequest();
-    void getCommand();
 
 };
 

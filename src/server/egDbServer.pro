@@ -33,7 +33,9 @@ SOURCES += \
     ../egNamedAttributes.cpp \
     ../egEntryNodes.cpp \
     ../egGUIconnect.cpp \
-    ../egNodesLocation.cpp
+    ../egNodesLocation.cpp \
+    egServerOperProc.cpp
 
 HEADERS += \
-    egServerEngine.h
+    egServerEngine.h \
+    egServerOperProc.h

@@ -37,7 +37,13 @@ int main() // int argc, char *argv[])
 
     // save metainfo to server
 
-    res = ! metaInfo.ServerStoreMetaInfo();
+    metaInfo.ServerStoreMetaInfo();
+    metaInfo.ServerStoreMetaInfo();
+    metaInfo.ServerStoreMetaInfo();
+
+    return 0; // FIXME STUB
+
+
     // res = res && ! metaInfo.ServerLoadMetaInfo();
 
     // metaInfo.PrintMetaInfo();
