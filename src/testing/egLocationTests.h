@@ -1,3 +1,12 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
+ *
+ * License: defined in license.txt file located in the root sources dir
+ *
+ */
+
 #ifndef EGLOCATIONTESTS_H
 #define EGLOCATIONTESTS_H
 

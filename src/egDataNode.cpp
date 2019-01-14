@@ -1,7 +1,7 @@
 /*
  * EcoGraphDB - Exo Cortex Graph Database Engine
  *
- * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
+ * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
  *
  * License: defined in license.txt file located in the root sources dir
  *
@@ -44,7 +44,7 @@ void EgDataNode::clear()
         nodeLinks-> outLinks.clear();
         delete nodeLinks;
 
-        nodeLinks = NULL;
+        nodeLinks = nullptr;
     }
 
     dataFileOffset = 0;
@@ -62,9 +62,9 @@ QVariant& EgDataNode::operator [] (QString& fieldName)
     return egNotFound;
 }
 
-QVariant& EgDataNode::operator [] (const char* fName)
+QVariant& EgDataNode::operator [] (const char* fieldCharName)
 {
-    QString fieldName(fName);
+    QString fieldName(fieldCharName);
     // static QVariant not_found("<Not found>"); // to return index error as QVariant.isNull()
 
     if (metaInfo)
@@ -75,22 +75,22 @@ QVariant& EgDataNode::operator [] (const char* fName)
 }
 
 
-QDataStream& operator << (QDataStream& d_stream, EgDataNode& d_node)   // transfer and file operations
+QDataStream& operator << (QDataStream& dStream, EgDataNode& dNode)   // transfer and file operations
 {
-    d_stream << d_node.dataNodeID;
-    d_stream << d_node.dataFileOffset;
-    d_stream << d_node.dataFields;     // write to stream
+    dStream << dNode.dataNodeID;
+    dStream << dNode.dataFileOffset;
+    dStream << dNode.dataFields;
 
-    return d_stream;
+    return dStream;
 }
 
-QDataStream& operator >> (QDataStream& d_stream, EgDataNode& d_node)         // unpack
+QDataStream& operator >> (QDataStream& dStream, EgDataNode& dNode)         // unpack
 {
-    d_stream >> d_node.dataNodeID;
-    d_stream >> d_node.dataFileOffset;
-    d_stream >> d_node.dataFields;
+    dStream >> dNode.dataNodeID;
+    dStream >> dNode.dataFileOffset;
+    dStream >> dNode.dataFields;
 
-    return d_stream;
+    return dStream;
 }
 
 

@@ -239,7 +239,7 @@ void FuncBlocksForm::refreshView()
 
         items << new QStandardItem(Funcblocks[funcBlockForm-> FuncBlockID]["name"].toString());
 
-        items[0]->setData(QVariant(is_unchanged), data_status);     // loaded data status
+        items[0]->setData(QVariant(isUnchanged), data_status);     // loaded data status
         items[0]->setData(QVariant(funcBlockForm-> FuncBlockID), data_id);                    // ID
 
         parentItem-> appendRow(items);

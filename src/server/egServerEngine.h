@@ -1,3 +1,12 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
+ *
+ * License: defined in license.txt file located in the root sources dir
+ *
+ */
+
 #ifndef EG_SERVER_ENGINE_H
 #define EG_SERVER_ENGINE_H
 
@@ -20,13 +29,12 @@
 
 #include "egServerOperProc.h"
 
-
-class egDbTcpServer : public QTcpServer
+class EgDbTcpServer : public QTcpServer
 {
     Q_OBJECT
 
 public:
-    egDbTcpServer(QObject *parent = 0);
+    EgDbTcpServer(QObject *parent = 0);
 
 protected:
     void incomingConnection(qintptr socketDescriptor) override;
@@ -35,14 +43,14 @@ private:
 
 };
 
-class FortuneThread : public QThread
+class EgDbServerThread : public QThread
 {
     Q_OBJECT
 
 public:
-    FortuneThread(int socketDescriptor, QObject *parent);
+    EgDbServerThread(int socketDescriptor, QObject *parent);
 
-    virtual ~FortuneThread();
+    virtual ~EgDbServerThread();
 
     void run() override;
 
@@ -62,7 +70,7 @@ class EgServerEngine : public QObject // Data Files operations
 
 public:
 
-    egDbTcpServer customServer;
+    EgDbTcpServer customServer;
 
     EgServerEngine(); // QWidget *parent
     virtual ~EgServerEngine() { }

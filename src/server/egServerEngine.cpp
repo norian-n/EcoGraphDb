@@ -1,3 +1,12 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
+ *
+ * License: defined in license.txt file located in the root sources dir
+ *
+ */
+
 #include "egServerEngine.h"
 #include <QThread>
 
@@ -16,18 +25,18 @@ EgServerEngine::EgServerEngine()
 }
 
 
-egDbTcpServer::egDbTcpServer(QObject *parent)
+EgDbTcpServer::EgDbTcpServer(QObject *parent)
       : QTcpServer(parent)
 {
 
 }
 
 
-void egDbTcpServer::incomingConnection(qintptr socketDescriptor)
+void EgDbTcpServer::incomingConnection(qintptr socketDescriptor)
 {
     // qDebug() << "incomingConnection() called" << FN;
 
-    FortuneThread *thread = new FortuneThread(socketDescriptor, this);
+    EgDbServerThread *thread = new EgDbServerThread(socketDescriptor, this);
 
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
 
@@ -38,20 +47,20 @@ void egDbTcpServer::incomingConnection(qintptr socketDescriptor)
     // connect(clientConnection, &QAbstractSocket::readyRead, this, &EgServerEngine::getCommand);
 }
 
-FortuneThread::FortuneThread(int socketDescriptor, QObject *parent)
+EgDbServerThread::EgDbServerThread(int socketDescriptor, QObject *parent)
     : QThread(parent)
     , socketDescriptor(socketDescriptor)
     , operProcessor(new EgServerOperProc())
 {
 }
 
-FortuneThread::~FortuneThread()
+EgDbServerThread::~EgDbServerThread()
 {
     if (operProcessor)
         delete operProcessor;
 }
 
-void FortuneThread::run()
+void EgDbServerThread::run()
 {
     // operProcessor->clientConnection-> setParent(this);
 

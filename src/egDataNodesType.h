@@ -1,7 +1,7 @@
 /*
  * EcoGraphDB - Exo Cortex Graph Database Engine
  *
- * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
+ * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
  *
  * License: defined in license.txt file located in the root sources dir
  *
@@ -13,12 +13,14 @@
 #include "egDataNode.h"
 #include "egMetaInfo.h"
 #include "egLocalFiles.h"
-#include "indexes/egIndexConditions.h"
+
 #include "egGUIconnect.h"
 #include "egDataNodesLink.h"
 #include "egEntryNodes.h"
 #include "egNodesLocation.h"
 #include "egNamedAttributes.h"
+
+#include "indexes/egIndexConditions.h"
 
 class EgServerConnection;     // server connection functionality
 
@@ -37,10 +39,6 @@ class EgDataNodesType
 {
 public:
     bool isConnected = false;
-
-    // EgRemoteConnect*  connection = nullptr;         // connection data (NULL means local files)
-
-    // EgServerConnection* ConnectonClient = nullptr;        // server connection client
 
     EgEntryNodes* entryNodes = nullptr;
     EgDataNodesGUIsupport* GUI = nullptr;
@@ -87,7 +85,7 @@ public:
     int LoadData(const EgIndexCondition &indexCondition);             // any index condition IC("owner", EQ, 2) &&  IC("status", EQ, 3)
 
     int LoadAllNodes();                 // no locations, links, entry, GUI, etc.
-    int LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeID); // only linked nodes from spec node
+    int LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeID); // only nodes linked to this one
     // int LoadLocationsData();         // FIXME private, if not load all
 
     int AutoLoadAllData();              // all existing info - locations, links, entry, GUI, etc.

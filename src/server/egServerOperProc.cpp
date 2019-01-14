@@ -1,4 +1,22 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
+ *
+ * License: defined in license.txt file located in the root sources dir
+ *
+ */
+
 #include "egServerOperProc.h"
+
+namespace egDbMutexSpace {
+
+QMutex masterMutex;
+
+QMap<QString, QMutex*> nodeTypesMutexes;
+
+}
+
 
 EgServerOperProc::EgServerOperProc() // QObject(parent)
 {
@@ -222,6 +240,26 @@ void EgServerOperProc::processCommand()
 
     metaInfo.typeName = nodeTypeName;
 
+    egDbMutexSpace::masterMutex.lock();
+
+    if (egDbMutexSpace::nodeTypesMutexes.contains(nodeTypeName))
+    {
+        // if(! egDbMutexSpace::nodeTypesMutexes[nodeTypeName]->tryLock())
+        //{
+        //    qDebug() << "Mutex is locked for nodeTypeName = " << nodeTypeName;
+            egDbMutexSpace::nodeTypesMutexes[nodeTypeName]-> lock();
+        //}
+    }
+    else
+    {
+        QMutex* newMutex = new QMutex(); // intentional mem leak
+
+        egDbMutexSpace::nodeTypesMutexes.insert(nodeTypeName, newMutex);
+        egDbMutexSpace::nodeTypesMutexes[nodeTypeName]-> lock();
+    }
+
+    egDbMutexSpace::masterMutex.unlock();
+
     // process command
     switch ( commandID )
     {
@@ -290,6 +328,10 @@ void EgServerOperProc::processCommand()
     default:
         qDebug()  << "ERROR: bad opcode " << commandID << FN ;
     }
+
+    // qDebug()  << "Mutex map keys: " << egDbMutexSpace::nodeTypesMutexes.keys() << FN ;
+
+    egDbMutexSpace::nodeTypesMutexes[nodeTypeName]-> unlock();
 
     // clientConnection->write(block);
     clientConnection->disconnectFromHost();

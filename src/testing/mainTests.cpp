@@ -1,9 +1,9 @@
 /*
  * EcoGraphDB - Exo Cortex Graph Database Engine
  *
- * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
+ * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
  *
- * License: propietary open source, free for non-commercial applications
+ * License: defined in license.txt file located in the root sources dir
  *
  */
 

@@ -1,7 +1,7 @@
 /*
  * EcoGraphDB - Exo Cortex Graph Database Engine
  *
- * Copyright (c) 2016 Dmitry 'Norian' Solodkiy
+ * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
  *
  * License: defined in license.txt file located in the root sources dir
  *
@@ -159,7 +159,7 @@ int EgDataNodesGUIsupport::AddRowOfModel(QStandardItemModel* model, QList<QStand
          }
      }
 
-    items[0]->setData(QVariant(is_added), data_status); // added row
+    items[0]->setData(QVariant(isAdded), data_status); // added row
     items[0]->setData(QVariant(0), data_id); // OBJ_ID
 
     // model->appendRow(items);
@@ -180,8 +180,8 @@ int EgDataNodesGUIsupport::DeleteRowOfModel(QStandardItemModel* model)
 
 int EgDataNodesGUIsupport::ModifyRowOfModel(QStandardItemModel* model)
 {
-    if (model->item(model_current_row,0)-> data(data_status).toInt() == is_unchanged) // not added or already modified
-        model->item(model_current_row,0)-> setData(QVariant(is_modified), data_status); // mark as modified
+    if (model->item(model_current_row,0)-> data(data_status).toInt() == isUnchanged) // not added or already modified
+        model->item(model_current_row,0)-> setData(QVariant(isModified), data_status); // mark as modified
 
     // qDebug() << FN << "Model data changed at row " << current_row; //  << "," << bottomRight.row();
 
@@ -255,7 +255,7 @@ void EgDataNodesGUIsupport::DataToModel(QStandardItemModel* model)
 
         // qDebug() << model->rowCount() << FN;
 
-        items[0]->setData(QVariant(is_unchanged), data_status);                 // loaded data status
+        items[0]->setData(QVariant(isUnchanged), data_status);                 // loaded data status
         items[0]->setData(QVariant(dataNodeIter.value().dataNodeID), data_id);  // ID
 
         // qDebug() << dataNodeIter.value().dataNodeID << FN;
@@ -288,7 +288,7 @@ inline QStandardItem* EgDataNodesGUIsupport::AddNodeToModelTree(QStandardItem* p
         }
     }
 
-    items[0]->setData(QVariant(is_unchanged), data_status);       // loaded data status
+    items[0]->setData(QVariant(isUnchanged), data_status);       // loaded data status
     items[0]->setData(QVariant(dataNode-> dataNodeID), data_id);  // ID
 
     parentItem-> appendRow(items);
@@ -422,7 +422,7 @@ int EgDataNodesGUIsupport::DataFromModel(QStandardItemModel* model) // get from 
     {
         // qDebug() << FN << "Status of model row " << row << " is " << model->item(row,0)->data(DATA_STATUS).toInt();
 
-        if (model->item(row,0)->data(data_status).toInt() == is_added) // added data row
+        if (model->item(row,0)->data(data_status).toInt() == isAdded) // added data row
         {
             tmpDataNode.clear();
 
@@ -431,7 +431,7 @@ int EgDataNodesGUIsupport::DataFromModel(QStandardItemModel* model) // get from 
 
             primaryNodesType-> AddDataNode(tmpDataNode);
         }
-        else if (model->item(row,0)->data(data_status).toInt() == is_modified) // updated data row
+        else if (model->item(row,0)->data(data_status).toInt() == isModified) // updated data row
         {
                 // update object
             for (int column = 0; column < model-> columnCount(); ++column)

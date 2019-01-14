@@ -1,3 +1,12 @@
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
+ *
+ * License: defined in license.txt file located in the root sources dir
+ *
+ */
+
 #ifndef EG_SERVER_OPER_PROC_H
 #define EG_SERVER_OPER_PROC_H
 
@@ -18,7 +27,6 @@
 #include "../egLocalFiles.h"
 #include "../indexes/egIndexConditions.h"
 #include "../egGraphDatabase.h"
-
 
 class EgServerOperProc // : public QObject // Data Files operations
 {   

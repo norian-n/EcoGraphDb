@@ -1,7 +1,7 @@
 /*
- * egDb server sample console application
+ * EcoGraphDB - Exo Cortex Graph Database Engine
  *
- * Copyright (c) 2017 Dmitry 'Norian' Solodkiy
+ * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
  *
  * License: defined in license.txt file located in the root sources dir
  *
@@ -75,7 +75,7 @@ int main() // int argc, char *argv[])
 
     graphDB.CommitNodeType();
 
-    QThread::msleep(100);
+    QThread::msleep(200);
 
     EgDataNodesType testType;
 
@@ -97,15 +97,15 @@ int main() // int argc, char *argv[])
 
     testType.UpdateDataNode(addValues, newID);
 
-    QThread::msleep(100);
+    // QThread::msleep(100);
     testType.StoreData();
 
     testType.DeleteDataNode(newID+1);
 
-    QThread::msleep(100);
+    // QThread::msleep(100);
     testType.StoreData();
 
-    QThread::msleep(100);
+    QThread::msleep(200);
 
         // load test
     EgDataNodesType testType2;
