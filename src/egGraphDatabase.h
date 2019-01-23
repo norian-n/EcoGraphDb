@@ -68,8 +68,6 @@ public:
 
     int CreateNodeType(QString typeName, EgNodeTypeSettings& typeSettings, const QString& serverAddress = QString());
 
-    // int CreateNodeType(QString typeName, bool addLocation = false, bool addAttributes = false); // FIXME delete
-
     int AddDataField(QString fieldName, bool uint32index = false);    // add field descriptor, no GUI control data
     int AddLocationField(QString fieldName, bool uint32index = false);
 

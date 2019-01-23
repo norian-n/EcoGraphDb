@@ -24,8 +24,8 @@ public:
     // EgDataNodeIDtype typeID;            // data class ID
     QString typeName;
 
-    EgDataNodeIDtype nodesCount = 0;          // data objects count
-    EgDataNodeIDtype nextNodeID = 1;         // next available data object ID
+    EgDataNodeIdType nodesCount = 0;          // data objects count
+    EgDataNodeIdType nextNodeID = 1;         // next available data object ID
 
         // copy of EgNodeTypeSettings fields
     bool useEntryNodes = false;         // start points for graph operations
@@ -35,6 +35,9 @@ public:
     bool useGUIsettings = false;
 
     EgGraphDatabase* myECoGraphDB = nullptr;      // peer database
+
+    QString serverAddress;
+
     EgServerConnection* serverConnection = nullptr;
 
     QList<QString> dataFields;          // fields names of DataNodeType

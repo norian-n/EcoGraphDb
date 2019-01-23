@@ -107,7 +107,7 @@ public:
     EgDataNodesType nodes;
     EgDataNodesType images;
 
-    QMap <EgDataNodeIDtype, QPixmap> imagesPix;
+    QMap <EgDataNodeIdType, QPixmap> imagesPix;
 
     bool firstNodeStored = false;
     QGraphicsItem* firstNode = nullptr;

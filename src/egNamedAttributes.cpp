@@ -24,7 +24,7 @@ EgNamedAttributes::~EgNamedAttributes()
         delete namedAttributesStorage;
 }
 
-int EgNamedAttributes::AddNamedAttribute(EgDataNodeIDtype nodeID, const QString &name, const QVariant &value)
+int EgNamedAttributes::AddNamedAttribute(EgDataNodeIdType nodeID, const QString &name, const QVariant &value)
 {
     QList<QVariant> myData;
 
@@ -36,7 +36,7 @@ int EgNamedAttributes::AddNamedAttribute(EgDataNodeIDtype nodeID, const QString 
 }
 
 
-int EgNamedAttributes::UpdateNamedAttribute(EgDataNodeIDtype nodeID, const QString &name, QVariant &value)
+int EgNamedAttributes::UpdateNamedAttribute(EgDataNodeIdType nodeID, const QString &name, QVariant &value)
 {   
         // find attribute
     GetNamedAttributesIDs(nodeID);
@@ -56,7 +56,7 @@ int EgNamedAttributes::UpdateNamedAttribute(EgDataNodeIDtype nodeID, const QStri
     return -1; // not found
 }
 
-int EgNamedAttributes::DeleteNamedAttribute(EgDataNodeIDtype nodeID, const QString &name)
+int EgNamedAttributes::DeleteNamedAttribute(EgDataNodeIdType nodeID, const QString &name)
 {
         // find attribute
     GetNamedAttributesIDs(nodeID);
@@ -115,7 +115,7 @@ int EgNamedAttributes::ResolveNamedAttributes()
     return 0;
 }
 
-int EgNamedAttributes::GetNamedAttributes(EgDataNodeIDtype nodeID)
+int EgNamedAttributes::GetNamedAttributes(EgDataNodeIdType nodeID)
 {
     namedAttributesOfNode.clear();
 
@@ -130,7 +130,7 @@ int EgNamedAttributes::GetNamedAttributes(EgDataNodeIDtype nodeID)
     return 0;
 }
 
-int EgNamedAttributes::GetNamedAttributesIDs(EgDataNodeIDtype nodeID)
+int EgNamedAttributes::GetNamedAttributesIDs(EgDataNodeIdType nodeID)
 {
     namedAttributesOfNodeIDs.clear();
 

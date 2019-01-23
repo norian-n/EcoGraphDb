@@ -27,7 +27,7 @@ EgEntryNodes::~EgEntryNodes()
         delete entryStorage;
 }
 
-int EgEntryNodes::AddEntryNode (EgDataNodeIDtype nodeID)
+int EgEntryNodes::AddEntryNode (EgDataNodeIdType nodeID)
 {
     QList<QVariant> myData;
 
@@ -42,7 +42,7 @@ int EgEntryNodes::AddEntryNode (EgDataNodeIDtype nodeID)
     return 0;
 }
 
-int EgEntryNodes::DeleteEntryNode (EgDataNodeIDtype nodeID)
+int EgEntryNodes::DeleteEntryNode (EgDataNodeIdType nodeID)
 {
     entryStorage-> DeleteDataNode(nodeID);
 

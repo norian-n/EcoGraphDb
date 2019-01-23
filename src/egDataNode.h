@@ -32,7 +32,7 @@ class EgDataNodeTypeMetaInfo;
 
 struct EgExtendedLinkType
 {
-      EgDataNodeIDtype dataNodeID { 0 };
+      EgDataNodeIdType dataNodeID { 0 };
       EgDataNode* dataNodePtr     { nullptr };
 
       // EgExtendedLinkType(): dataNodeID(0), dataNodePtr(nullptr) {}
@@ -61,7 +61,7 @@ class EgDataNode
 {
 public:
 
-    EgDataNodeIDtype dataNodeID { 0 };
+    EgDataNodeIdType dataNodeID { 0 };
     quint64 dataFileOffset      { 0 };                  // stored offset for local file
 
     bool isAdded {false};                               // is not stored yet

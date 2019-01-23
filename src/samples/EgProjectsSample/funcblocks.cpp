@@ -88,12 +88,12 @@ FuncBlocksForm::FuncBlocksForm(QWidget *parent)
     ui->treeView->expandAll();
     */
 
-    graphDB.Connect();
+    // graphDB.Connect();
 
-    Funcblocks.Connect(graphDB, "funcblocks");
+
     // Funcblocks.getGUIinfo();
 
-    Projects.Connect(graphDB, "projects");
+    // Projects.Connect(graphDB, "projects");
 
     if (! model)
         model = new QStandardItemModel(0, Funcblocks.ModelFieldsCount());
@@ -109,21 +109,26 @@ void FuncBlocksForm::loadFuncblocks()
     // Funcblocks.Connect(graphDB, "funcblocks");
     // Projects.Connect(graphDB, "projects");
 
-    Projects.LoadData("odb_pit", EQ, projectID);
+    // Projects.LoadData("odb_pit", EQ, projectID);
 
 
     // Funcblocks.LoadAllData(); // STUB
 
     // Projects.LoadLinks();
 
+    Funcblocks.Connect(calleeForm-> graphDB, "funcblocks");
+
+    Funcblocks.ConnectLinkType("projects_funcblocks");
+    Funcblocks.ConnectLinkType("funcblocksTree");
+
     Funcblocks.LoadLinkedData("projects_funcblocks", projectID);
 
     Funcblocks.LoadLinkType("funcblocksTree");
-
-    Projects.LoadLinkType("projects_funcblocks");   // to add new linked fblocks (?) check if is required
-    Projects.myLinkTypes["projects_funcblocks"]-> ResolveLinksToPointers(); // (?) check if is required
-
     Funcblocks.myLinkTypes["funcblocksTree"]-> ResolveLinksToPointers();
+
+    // calleeForm-> Projects.LoadLinkType("projects_funcblocks");   // to add new linked fblocks (?) check if is required
+    // calleeForm-> Projects.myLinkTypes["projects_funcblocks"]-> ResolveLinksToPointers(); // (?) check if is required
+
 
 /*
     qDebug() << "project ID = " << project_id << FN;
@@ -214,7 +219,9 @@ void FuncBlocksForm::refreshView()
         // FIXME add links
 
 
-        Projects.AddArrowLink("projects_funcblocks", projectID, Funcblocks, funcBlockForm-> FuncBlockID);
+        calleeForm-> Projects.AddArrowLink("projects_funcblocks", projectID, Funcblocks, funcBlockForm-> FuncBlockID);
+
+        calleeForm-> Projects.StoreLinkType("projects_funcblocks");
 
         if (isTop)
         {
@@ -226,8 +233,6 @@ void FuncBlocksForm::refreshView()
                                     Funcblocks, funcBlockForm-> FuncBlockID);
 
         }
-
-        Funcblocks.StoreAllLinks();
 
             // show new item
         if (isTop)
@@ -282,6 +287,9 @@ void FuncBlocksForm::okExit()
 {
     // Funcblocks.LoadData();
     // Funcblocks.PrintObjData();
+
+    // calleeForm-> Projects.StoreLinkType("projects_funcblocks");
+    Funcblocks.StoreLinkType("funcblocksTree");
         // exit
     close();
 }

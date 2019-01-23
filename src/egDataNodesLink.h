@@ -39,8 +39,8 @@ class EgDataNodesLinkType
 public:
     bool isConnected = false;
 
-    EgGraphDatabase* egDatabase  {nullptr};        // backlink to db
-    EgDataNodesType* linksStorage {nullptr};      // data nodes for links info
+    EgGraphDatabase* egDatabase  {nullptr};     // backlink to db
+    EgDataNodesType* linksStorage {nullptr};    // data nodes type for links
 
     EgDataNodesType* firstType {nullptr};
     EgDataNodesType* secondType {nullptr};
@@ -56,8 +56,8 @@ public:
 
     ~EgDataNodesLinkType();
 
-    int AddLink (EgDataNodeIDtype leftNodeID, EgDataNodeIDtype rightNodeID);
-    int DeleteLink (EgDataNodeIDtype linkNodeID); // FIXME store linkNodeID or search
+    int AddLink (EgDataNodeIdType fromNodeID, EgDataNodeIdType toNodeID);
+    int DeleteLink (EgDataNodeIdType linkNodeID); // FIXME store linkNodeID or search
 
     int LoadLinks();
     int StoreLinks();
@@ -66,7 +66,7 @@ public:
 
     int ResolveNodeTypes();
 
-    int LoadLinkedNodes(EgDataNodeIDtype fromNodeID);
+    int LoadLinkedNodes(EgDataNodeIdType fromNodeID);
 
 };
 

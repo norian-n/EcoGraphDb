@@ -64,7 +64,7 @@ void MainWindow::on_initButton_clicked()
 
     nodes.Connect(graphDB, "locations");
 
-    EgDataNodeIDtype newID;
+    EgDataNodeIdType newID;
     QList<QVariant> addValues;
     QList<QVariant> locValues;
 
@@ -109,6 +109,7 @@ void MainWindow::on_initButton_clicked()
     nodes.AddLocation(locValues, newID);
 
         // add links (graph edges)
+    nodes.ConnectLinkType("linktype");
 
     nodes.AddArrowLink("linktype", 1, nodes, 2);
     nodes.AddArrowLink("linktype", 2, nodes, 3);
@@ -167,7 +168,7 @@ void MainWindow::AddImages()
 
     images.Connect(graphDB, "images");
 
-    EgDataNodeIDtype newID;
+    EgDataNodeIdType newID;
     QList<QVariant> addValues;
 
         // get all files

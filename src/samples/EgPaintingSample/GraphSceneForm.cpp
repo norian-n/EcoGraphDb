@@ -139,6 +139,7 @@ void GraphSceneForm::LoadGraph()
     // qDebug() << "Before connect" << FN;
 
     nodes.Connect(graphDB, "locations");
+    nodes.ConnectLinkType("linktype");
 
     // qDebug() << "Data loading" << FN;
 
@@ -434,7 +435,7 @@ void MyGraphicsScene::dropEvent(QGraphicsSceneDragDropEvent *event)
     {
         newItem->setPos(clickPoint.x()-pixmapSizeFixed/2, clickPoint.y()-pixmapSizeFixed/2);
 
-        EgDataNodeIDtype newID;
+        EgDataNodeIdType newID;
         QList<QVariant> addValues;
         QList<QVariant> locValues;
 

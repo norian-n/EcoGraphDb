@@ -15,7 +15,7 @@ public:
 
     FuncBlocksForm* main_callee;
 //    SubProjectsForm * sub_callee;
-    EgDataNodeIDtype FuncBlockID;
+    EgDataNodeIdType FuncBlockID;
 
     // EgDataNodeIDtype newNodeID;
 

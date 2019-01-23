@@ -57,11 +57,11 @@ public:
     QSet <quint64> IndexOffsets;           // offsets returned by index tree, for index-based operations (AND, OR)
 
         // data nodes content and changes
-    QMap <EgDataNodeIDtype, EgDataNode>   dataNodes;
+    QMap <EgDataNodeIdType, EgDataNode>   dataNodes;
 
-    QMap <EgDataNodeIDtype, EgDataNode>   deletedDataNodes; // TODO process entryNodes on delete
-    QMap <EgDataNodeIDtype, EgDataNode*>  addedDataNodes;
-    QMap <EgDataNodeIDtype, EgDataNode*>  updatedDataNodes;
+    QMap <EgDataNodeIdType, EgDataNode>   deletedDataNodes; // TODO process entryNodes on delete
+    QMap <EgDataNodeIdType, EgDataNode*>  addedDataNodes;
+    QMap <EgDataNodeIdType, EgDataNode*>  updatedDataNodes;
 
 
     EgDataNodesType();
@@ -76,6 +76,8 @@ public:
         // register node type at EgGraphDatabase, load metadata
     int Connect(EgGraphDatabase& myDB, const QString& nodeTypeName, const QString& serverAddress = QString());
 
+    int ConnectLinkType(const QString& linkTypeName);
+
         // minimal config, no type extensions, no gui, dont use it in apps
     int ConnectServiceNodeType(EgGraphDatabase& myDB, const QString& nodeTypeName, const QString& serverAddress = QString());
 
@@ -85,7 +87,7 @@ public:
     int LoadData(const EgIndexCondition &indexCondition);             // any index condition IC("owner", EQ, 2) &&  IC("status", EQ, 3)
 
     int LoadAllNodes();                 // no locations, links, entry, GUI, etc.
-    int LoadLinkedData(QString linkName, EgDataNodeIDtype fromNodeID); // only nodes linked to this one
+    int LoadLinkedData(QString linkName, EgDataNodeIdType fromNodeID); // only nodes linked to this one
     // int LoadLocationsData();         // FIXME private, if not load all
 
     int AutoLoadAllData();              // all existing info - locations, links, entry, GUI, etc.
@@ -97,26 +99,26 @@ public:
     int StoreData();
 
     int AddDataNode(QList<QVariant>& myData);
-    int AddDataNode(QList<QVariant>& myData, EgDataNodeIDtype &newID); // return ID
+    int AddDataNode(QList<QVariant>& myData, EgDataNodeIdType &newID); // return ID
     int AddDataNode(EgDataNode& tmpObj);
 
-    int AddHardLinked(QList<QVariant>& myData, EgDataNodeIDtype nodeID);
+    int AddHardLinked(QList<QVariant>& myData, EgDataNodeIdType nodeID);
 
-    int AddLocation(QList<QVariant>& locationData, EgDataNodeIDtype nodeID);
+    int AddLocation(QList<QVariant>& locationData, EgDataNodeIdType nodeID);
 
-    int GetLocation(QList<QVariant>& locationData, EgDataNodeIDtype nodeID);
+    int GetLocation(QList<QVariant>& locationData, EgDataNodeIdType nodeID);
 
     // int AddLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype nodeID);
 
-    int DeleteDataNode(EgDataNodeIDtype nodeID);
+    int DeleteDataNode(EgDataNodeIdType nodeID);
 
-    int UpdateDataNode(QList<QVariant>& my_data, EgDataNodeIDtype nodeID);
-    int UpdateDataNode(EgDataNodeIDtype nodeID);
+    int UpdateDataNode(QList<QVariant>& my_data, EgDataNodeIdType nodeID);
+    int UpdateDataNode(EgDataNodeIdType nodeID);
 
-    EgDataNode &operator [](EgDataNodeIDtype objID); // {return GetObjByID(obj_id);}
+    EgDataNode &operator [](EgDataNodeIdType objID); // {return GetObjByID(obj_id);}
 
         // links
-    int AddArrowLink(const QString &linkName, EgDataNodeIDtype fromNode, EgDataNodesType& toType, EgDataNodeIDtype toNode);
+    int AddArrowLink(const QString &linkName, EgDataNodeIdType fromNode, EgDataNodesType& toType, EgDataNodeIdType toNode);
 
     int StoreAllLinks();
     int LoadAllLinks();
@@ -127,7 +129,7 @@ public:
 
     int getMyLinkTypes();         // load from myDB on connect
 
-    int AddEntryNode(EgDataNodeIDtype entryNodeID); // e.g. tree root
+    int AddEntryNode(EgDataNodeIdType entryNodeID); // e.g. tree root
 
         // service
     int CompressData();           // FIXME delete records marked as deleted
@@ -137,7 +139,7 @@ public:
 
     EgFieldIDtype FieldsCount()       { return metaInfo.dataFields.count(); }
     EgFieldIDtype ModelFieldsCount()  { if (GUI) return GUI-> basicControlDescs.count(); else return 0; }
-    EgDataNodeIDtype DataNodesCount() { return dataNodes.count(); }
+    EgDataNodeIdType DataNodesCount() { return dataNodes.count(); }
 
 };
 

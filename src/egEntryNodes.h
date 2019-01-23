@@ -23,15 +23,15 @@ public:
     EgDataNodesType* nodesType = nullptr;           // entry nodes (aka "root" nodes) of this type
     EgDataNodesType* entryStorage = nullptr;        // entry nodes info storage
 
-    QList <EgDataNodeIDtype> entryNodesList;   // fast search by ID ??
+    QList <EgDataNodeIdType> entryNodesList;   // fast search by ID ??
 
     EgEntryNodes() = delete;                        //  only bound to node type
 
     EgEntryNodes(EgDataNodesType* theNodesType);
     ~EgEntryNodes();
 
-    int AddEntryNode (EgDataNodeIDtype nodeID);
-    int DeleteEntryNode (EgDataNodeIDtype nodeID);
+    int AddEntryNode (EgDataNodeIdType nodeID);
+    int DeleteEntryNode (EgDataNodeIdType nodeID);
 
     int LoadEntryNodes();
     int StoreEntryNodes();

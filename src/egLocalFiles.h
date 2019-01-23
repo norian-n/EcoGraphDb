@@ -123,17 +123,17 @@ public:
     // int LocalLoadFieldDesc(QByteArray* field_descs, QByteArray* control_descs, EgDataNodeIDtype& obj_count, EgDataNodeIDtype& next_obj_id);
 
         // load&store data operations
-    int LocalLoadData(QSet<quint64>& dataOffsets, QMap<EgDataNodeIDtype, EgDataNode>& dataNodesMap);
+    int LocalLoadData(QSet<quint64>& dataOffsets, QMap<EgDataNodeIdType, EgDataNode>& dataNodesMap);
 
     int LocalLoadDataNodes(const QSet<quint64>& dataOffsets, QList<EgDataNode>& dataNodes);
-    void ReceiveDataNodes(QMap<EgDataNodeIDtype, EgDataNode>& dataNodesMap, QDataStream& in);
+    void ReceiveDataNodes(QMap<EgDataNodeIdType, EgDataNode>& dataNodesMap, QDataStream& in);
 
-    int LocalStoreData(QMap<EgDataNodeIDtype, EgDataNode*>&  addedDataNodes, QMap<EgDataNodeIDtype, EgDataNode>& deletedDataNodes, QMap<EgDataNodeIDtype, EgDataNode*>&  updatedDataNodes);
+    int LocalStoreData(QMap<EgDataNodeIdType, EgDataNode*>&  addedDataNodes, QMap<EgDataNodeIdType, EgDataNode>& deletedDataNodes, QMap<EgDataNodeIdType, EgDataNode*>&  updatedDataNodes);
 
         // local (non-server) store
     // inline void LocalDeleteObjects(QMap<EgDataNodeIDtype, EgDataNode>& deletedDataNodes); // same as server-side
-    inline void LocalAddObjects(const QMap<EgDataNodeIDtype, EgDataNode*>&  addedDataNodes);
-    inline int LocalModifyObjects(const QMap<EgDataNodeIDtype, EgDataNode *> &updatedDataNodes);
+    inline void LocalAddObjects(const QMap<EgDataNodeIdType, EgDataNode*>&  addedDataNodes);
+    inline int LocalModifyObjects(const QMap<EgDataNodeIdType, EgDataNode *> &updatedDataNodes);
 
         // server-side store
     void LocalAddNodes(const QList<EgDataNode>& addedDataNodes);
@@ -141,8 +141,8 @@ public:
     int  LocalModifyNodes(const QList<EgDataNode>&  updatedDataNodes);
 
         // client-side transfers
-    void SendNodesToStream(QMap<EgDataNodeIDtype, EgDataNode*>&  dataNodesMap, QDataStream &nodesStream);
-    void SendNodesToStream(QMap<EgDataNodeIDtype, EgDataNode>&  dataNodesMap, QDataStream &nodesStream);
+    void SendNodesToStream(QMap<EgDataNodeIdType, EgDataNode*>&  dataNodesMap, QDataStream &nodesStream);
+    void SendNodesToStream(QMap<EgDataNodeIdType, EgDataNode>&  dataNodesMap, QDataStream &nodesStream);
 
     int LocalCompressData();             // FIXME TODO delete data or move to archive
 

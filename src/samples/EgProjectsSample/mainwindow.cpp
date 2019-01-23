@@ -227,7 +227,7 @@ void MainWindow::FillTestData()
     graphDB.AddLinkType("funcblocksTree", "funcblocks", "funcblocks");
     graphDB.AddLinkType("projects_funcblocks", "projects", "funcblocks");
 
-    graphDB.Connect();
+    // graphDB.Connect();
 
     Funcblocks.Connect(graphDB, "funcblocks");
 
@@ -251,12 +251,15 @@ void MainWindow::FillTestData()
 
     Funcblocks.StoreData();
 
+    Funcblocks.ConnectLinkType("projects_funcblocks");
+    Funcblocks.ConnectLinkType("funcblocksTree");
+
         // set links
     Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 2);
     Funcblocks.AddArrowLink("funcblocksTree", 2, Funcblocks, 3);
     // Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 4);
 
-    // Projects.LoadAllData();
+    Funcblocks.StoreLinkType("funcblocksTree");
 
     Projects.getMyLinkTypes();
 
@@ -265,10 +268,7 @@ void MainWindow::FillTestData()
     Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 3);
     Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 4);
 
-    Funcblocks.StoreAllLinks();
-
-    // Projects.StoreLinks();
-
+    Projects.StoreLinkType("projects_funcblocks");
 }
 
 // =============================================================================================

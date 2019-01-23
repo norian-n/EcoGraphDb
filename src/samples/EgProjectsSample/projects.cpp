@@ -35,7 +35,7 @@ ProjectsForm::ProjectsForm(QWidget *parent) :
     ui->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
 
-    graphDB.Connect();
+    // graphDB.Connect();
 
     // test_server.server_address = "106.109.9.43";
         // dataclasses
@@ -239,12 +239,14 @@ void ProjectsForm::on_addButton_clicked()
     if (! funcblocks_form)
     {
         funcblocks_form = new FuncBlocksForm();
+        funcblocks_form-> calleeForm = this;
     }
 
     if (model-> item(Projects.GUI-> model_current_row,0))
     {
-        funcblocks_form-> projectID = model-> item(Projects.GUI-> model_current_row,0)-> data(data_id).toInt();;
+        funcblocks_form-> projectID = model-> item(Projects.GUI-> model_current_row,0)-> data(data_id).toInt();
         funcblocks_form-> loadFuncblocks();
+
         funcblocks_form-> hide();
         funcblocks_form-> setWindowModality(Qt::WindowModal);
         funcblocks_form-> show();

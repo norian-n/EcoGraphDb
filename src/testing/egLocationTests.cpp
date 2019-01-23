@@ -33,7 +33,7 @@ bool EgLocationTests::testCreateLocations()
 
 bool EgLocationTests::testAddLocations()
 {
-    EgDataNodeIDtype newID;
+    EgDataNodeIdType newID;
     QList<QVariant> addValues;
     QList<QVariant> locValues;
 

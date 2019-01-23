@@ -99,7 +99,7 @@ public:
   int ModifyRowOfModel(QStandardItemModel* model);
 
     // get selected ID
-  EgDataNodeIDtype GetIDByModel(QStandardItemModel* model); // get selected object's ID
+  EgDataNodeIdType GetIDByModel(QStandardItemModel* model); // get selected object's ID
 
     // combo box operations
   void FillComboBox(QComboBox* my_box); // move all data to combo box

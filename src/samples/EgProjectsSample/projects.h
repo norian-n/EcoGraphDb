@@ -51,7 +51,7 @@ public:
     // QString currentFortune;
     // quint16 blockSize;
 
-    EgRemoteConnect test_server;
+    // EgRemoteConnect test_server;
 
 protected:
     void closeEvent(QCloseEvent *event) Q_DECL_OVERRIDE;

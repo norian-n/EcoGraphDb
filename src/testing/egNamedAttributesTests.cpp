@@ -43,7 +43,7 @@ bool EgNamedAttributesTests::testCreateAttributes()
 
 bool EgNamedAttributesTests::testAddAttributes()
 {
-    EgDataNodeIDtype newID;
+    EgDataNodeIdType newID;
     QList<QVariant> addValues;
     QString nameString;
 

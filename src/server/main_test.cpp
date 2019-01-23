@@ -85,7 +85,7 @@ int main() // int argc, char *argv[])
 
     addValues << QVariant("testName") << QVariant(7);
 
-    EgDataNodeIDtype newID;
+    EgDataNodeIdType newID;
 
     testType.AddDataNode(addValues, newID);
     testType.AddDataNode(addValues);

@@ -37,7 +37,7 @@ void EgDataNodeTypeMetaInfo::AddDataField(QString fieldName, bool indexed)
         EgIndexSettings indexSettings;
 
         indexSettings.fieldNum = order;
-        indexSettings.indexSize = 32;
+        indexSettings.indexSize = 32;   // FIXME check
         indexSettings.isSigned = 0;
         indexSettings.functionID = 0;
 

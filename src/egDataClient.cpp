@@ -10,29 +10,26 @@
 #include "egDataClient.h"
 #include <QHostAddress>
 
-EgServerConnection::EgServerConnection(): // const EgDataNodesType* nodesType):
-   // dataNodesType((EgDataNodesType*) nodesType),
+EgServerConnection::EgServerConnection():
    in(&tcpSocket),
    out(&block, QIODevice::WriteOnly),
-   serverAddress(QHostAddress(QHostAddress::LocalHost).toString())  // FIXME
-   // egDataNodesTypeID(0)
+   serverAddress(QHostAddress(QHostAddress::LocalHost).toString())
 {
     out.setVersion(QDataStream::Qt_4_0);    // FIXME version hardcoded
     in.setVersion(QDataStream::Qt_4_0);
 }
 
-/*
 
-EgServerConnection::EgServerConnection(const EgDataNodesType* nodesType):
-   // dataNodesType((EgDataNodesType*) nodesType),
-   in(&tcpSocket),
-   out(&block, QIODevice::WriteOnly),
-   egDataNodesTypeID(0)
+
+EgServerConnection::EgServerConnection(const QString& aServerAddress):
+    in(&tcpSocket),
+    out(&block, QIODevice::WriteOnly),
+    serverAddress(aServerAddress)
 {
     out.setVersion(QDataStream::Qt_4_0);    // FIXME version hardcoded
     in.setVersion(QDataStream::Qt_4_0);
 }
-*/
+
 
 int  EgServerConnection::OpenStoreStream(const CommandIdType command, QDataStream*& metaInfoStream, const QString& typeName)
 {  
@@ -116,7 +113,7 @@ int EgServerConnection::SendCommand(const CommandIdType command, const QString &
     return 0;
 }
 
-
+/*
 int EgServerConnection::RemoteStoreFieldDesc(QByteArray* field_descs, QByteArray* control_descs)
 {
         // get/set egDataNodesTypeID
@@ -128,16 +125,19 @@ int EgServerConnection::RemoteStoreFieldDesc(QByteArray* field_descs, QByteArray
     }
     */
     // qDebug() << FN << "opcode_store_fdesc";
+
+    /*
         // send opcode
     out << opcode_store_metainfo;  // operation code
 
-    /*
     tcpSocket.write(block);     // clean up
     block.clear();
     out.device()->seek(0);
     */
 
     // out << (qint16) field_descs->size();
+
+    /*
     tcpSocket.write(*field_descs);        // packed field descriptors
 
     out << (qint16) control_descs->size();
@@ -159,6 +159,7 @@ int EgServerConnection::RemoteStoreFieldDesc(QByteArray* field_descs, QByteArray
 
     return 0;
 }
+*/
 
 /*
 int EgDataClient::StoreData(QList<EgPackedDataNode*>& a_list, QList<EgPackedDataNode*>& d_list, QList<EgPackedDataNode*>& m_list)
@@ -183,6 +184,7 @@ int EgDataClient::StoreData(QList<EgPackedDataNode*>& a_list, QList<EgPackedData
 }
 */
 
+/*
 int EgServerConnection::RemoteLoadFieldDesc(QByteArray* field_descs, QByteArray* control_descs, EgDataNodeIDtype& obj_count, EgDataNodeIDtype& next_obj_id)
 {
     qint16 a_size = 0;
@@ -195,6 +197,8 @@ int EgServerConnection::RemoteLoadFieldDesc(QByteArray* field_descs, QByteArray*
     }
     */
     // qDebug() << FN << "opcode_load_fdesc";
+
+    /*
         // send opcode
     out << opcode_load_metainfo; // operation code
     tcpSocket.write(block);
@@ -227,6 +231,8 @@ int EgServerConnection::RemoteLoadFieldDesc(QByteArray* field_descs, QByteArray*
 
     return 0;
 }
+*/
+
 /*
 int EgDataClient::RemoteStoreData(QList<DataObj*>& a_list, QList<DataObj*>& d_list, QList<DataObj*>& m_list)
 {

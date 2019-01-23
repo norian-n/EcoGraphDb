@@ -34,9 +34,9 @@ public:
 
     QString serverAddress;
 
-    EgServerConnection();
+    EgServerConnection();   // localhost
+    EgServerConnection(const QString& aServerAddress);
 
-    // EgServerConnection(const EgDataNodesType* nodesType);
     ~EgServerConnection() { /*Disconnect(); out.unsetDevice();  */}
 
 
@@ -48,8 +48,8 @@ public:
     int  WaitForReadyRead();
     void Disconnect();
 
-    int RemoteLoadFieldDesc(QByteArray* field_descs, QByteArray* control_descs, EgDataNodeIDtype& obj_count, EgDataNodeIDtype& next_obj_id);    // load from server
-    int RemoteStoreFieldDesc(QByteArray* field_descs, QByteArray* control_descs);
+    // int RemoteLoadFieldDesc(QByteArray* field_descs, QByteArray* control_descs, EgDataNodeIDtype& obj_count, EgDataNodeIDtype& next_obj_id);    // load from server
+    // int RemoteStoreFieldDesc(QByteArray* field_descs, QByteArray* control_descs);
 
     // inline void* RemoteSendByteArray(QByteArray* ba);
 

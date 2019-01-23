@@ -28,20 +28,22 @@ EgDataNodesLinkType::~EgDataNodesLinkType()
         delete linksStorage;
 }
 
-int EgDataNodesLinkType::AddLink (EgDataNodeIDtype leftNodeID, EgDataNodeIDtype rightNodeID)
+int EgDataNodesLinkType::AddLink (EgDataNodeIdType fromNodeID, EgDataNodeIdType toNodeID)
 {
     QList<QVariant> myData;
 
-    myData << leftNodeID << rightNodeID;
+    myData << fromNodeID << toNodeID;
 
     linksStorage-> AddDataNode(myData); // AddDataNode(EgDataNode& tmpObj)
 
-    // qDebug() << linkName << ": link added " << leftNodeID << "to" <<  rightNodeID << FN;
+    // qDebug() << linkName << ": link added " << fromNodeID << "to" <<  toNodeID << FN;
+
+    // qDebug() << linkName << " Next link node ID " << linksStorage->metaInfo.nextNodeID << FN;
 
     return 0;
 }
 
-int EgDataNodesLinkType::DeleteLink (EgDataNodeIDtype linkNodeID)
+int EgDataNodesLinkType::DeleteLink (EgDataNodeIdType linkNodeID)
 {
         // FIXME check
 
@@ -54,12 +56,12 @@ int EgDataNodesLinkType::StoreLinks()
 {
     if (! isConnected)
     {
-        linksStorage-> Connect(*egDatabase, linkName + egLinkFileNamePostfix);
+        linksStorage-> ConnectServiceNodeType(*egDatabase, linkName + egLinkFileNamePostfix);
 
         isConnected = true;
     }
 
-    // qDebug() << linkName << " Links count: " << linksStorage-> dataNodes.count() << FN;
+    // qDebug() << linkName << " Added links count: " << linksStorage->addedDataNodes.count() << FN;
 
     linksStorage-> StoreData();
 
@@ -70,7 +72,7 @@ int EgDataNodesLinkType::LoadLinks()
 {
     if (! isConnected)
     {
-        linksStorage-> Connect(*egDatabase, linkName + egLinkFileNamePostfix);
+        linksStorage-> ConnectServiceNodeType(*egDatabase, linkName + egLinkFileNamePostfix);
 
         isConnected = true;
     }
@@ -78,6 +80,8 @@ int EgDataNodesLinkType::LoadLinks()
     linksStorage-> LoadAllNodes();
 
     // qDebug() << linkName << " Links count: " << linksStorage-> dataNodes.count() << FN;
+
+    // linksStorage-> PrintObjData();
 
     return 0;
 }
@@ -100,7 +104,7 @@ int EgDataNodesLinkType::ResolveNodeTypes()
 
 int EgDataNodesLinkType::ResolveLinksToPointers()
 {
-    EgDataNodeIDtype fromNode, toNode;
+    EgDataNodeIdType fromNode, toNode;
     EgExtendedLinkType fwdLink, backLink;
 
     QList<EgExtendedLinkType> newLinks;
@@ -119,7 +123,7 @@ int EgDataNodesLinkType::ResolveLinksToPointers()
         fromNode = Iter.value()["from_node_id"].toInt();
         toNode = Iter.value()["to_node_id"].toInt();
 
-        // qDebug() << "From Node ID = " << fromNode << " To Node ID = " << toNode << FN;
+        // qDebug() << "LinkName: " << linkName << " From Node ID = " << fromNode << " To Node ID = " << toNode << FN;
 
         if (firstType-> dataNodes.contains(fromNode) && secondType-> dataNodes.contains(toNode))
         {
@@ -183,14 +187,14 @@ int EgDataNodesLinkType::ResolveLinksToPointers()
     return 0;
 }
 
-int EgDataNodesLinkType::LoadLinkedNodes(EgDataNodeIDtype fromNodeID)
+int EgDataNodesLinkType::LoadLinkedNodes(EgDataNodeIdType fromNodeID)
 {
 
     int res = 0;
 
     if (! isConnected)
     {
-        linksStorage-> Connect(*egDatabase, linkName + egLinkFileNamePostfix);
+        linksStorage-> ConnectServiceNodeType(*egDatabase, linkName + egLinkFileNamePostfix); // FIXME server
 
         isConnected = true;
     }
@@ -207,6 +211,11 @@ int EgDataNodesLinkType::LoadLinkedNodes(EgDataNodeIDtype fromNodeID)
     if (! linksStorage-> IndexOffsets.isEmpty())
         res = linksStorage-> LocalFiles-> LocalLoadData(linksStorage-> IndexOffsets, linksStorage-> dataNodes);
 
+    qDebug() << linkName << " Links count: " << linksStorage-> dataNodes.count() << FN;
+
+    qDebug() << linkName << " Next node ID:" << linksStorage-> metaInfo.nextNodeID << FN;
+
+    linksStorage-> PrintObjData();
 
     return res;
 }

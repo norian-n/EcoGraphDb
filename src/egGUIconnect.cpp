@@ -75,7 +75,7 @@ int EgDataNodesGUIsupport::LoadSimpleControlDesc()
     // if (! controlDescs)
     //    controlDescs = new EgDataNodesType();
 
-    if (controlDescs-> ConnectServiceNodeType(*(primaryNodesType-> metaInfo.myECoGraphDB), primaryNodesType-> metaInfo.typeName + egGUIfileName, primaryNodesType-> metaInfo.serverConnection->serverAddress))
+    if (controlDescs-> ConnectServiceNodeType(*(primaryNodesType-> metaInfo.myECoGraphDB), primaryNodesType-> metaInfo.typeName + egGUIfileName, primaryNodesType-> metaInfo.serverAddress))
     {
             // qDebug()  << "No control descs for dataNodeType " << primaryNodesType-> metaInfo.typeName + egGUIfileName << FN;
             return 1;
@@ -87,7 +87,7 @@ int EgDataNodesGUIsupport::LoadSimpleControlDesc()
 
     // qDebug()  << "Control descs count = " << controlDescs-> dataNodes.count() << FN;
 
-    for (QMap<EgDataNodeIDtype, EgDataNode>::iterator nodesIter = controlDescs-> dataNodes.begin(); nodesIter != controlDescs-> dataNodes.end(); ++nodesIter)
+    for (QMap<EgDataNodeIdType, EgDataNode>::iterator nodesIter = controlDescs-> dataNodes.begin(); nodesIter != controlDescs-> dataNodes.end(); ++nodesIter)
     {
         if (primaryNodesType-> metaInfo.nameToOrder.contains(nodesIter.value()["name"].toString()))
         {
@@ -189,7 +189,7 @@ int EgDataNodesGUIsupport::ModifyRowOfModel(QStandardItemModel* model)
 }
 
 
-EgDataNodeIDtype EgDataNodesGUIsupport::GetIDByModel(QStandardItemModel* model)
+EgDataNodeIdType EgDataNodesGUIsupport::GetIDByModel(QStandardItemModel* model)
 {
     if (! model->item(model_current_row,0))
         return 0;
@@ -239,7 +239,7 @@ void EgDataNodesGUIsupport::DataToModel(QStandardItemModel* model)
     model->clear();
     SetModelHeaders(model);  // fill headers
 
-    for (QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodeIter = primaryNodesType-> dataNodes.begin(); dataNodeIter != primaryNodesType-> dataNodes.end(); ++dataNodeIter)
+    for (QMap<EgDataNodeIdType, EgDataNode>::iterator dataNodeIter = primaryNodesType-> dataNodes.begin(); dataNodeIter != primaryNodesType-> dataNodes.end(); ++dataNodeIter)
     {
         items.clear();
         for (QList<EgBasicControlDesc>::iterator curDesc = basicControlDescs.begin(); curDesc != basicControlDescs.end(); ++curDesc)
@@ -248,7 +248,7 @@ void EgDataNodesGUIsupport::DataToModel(QStandardItemModel* model)
                 items << new QStandardItem(dataNodeIter.value().dataFields[(*curDesc).fieldIndex].toString());
             else
             {
-                EgDataNodeIDtype substNodeID = dataNodeIter.value().dataFields[(*curDesc).fieldIndex].toInt();
+                EgDataNodeIdType substNodeID = dataNodeIter.value().dataFields[(*curDesc).fieldIndex].toInt();
                 items << new QStandardItem((*(*curDesc).AutoSubstClass)[substNodeID].dataFields[(*curDesc).AutoSubstFieldIndex].toString());
             }
         }
@@ -283,7 +283,7 @@ inline QStandardItem* EgDataNodesGUIsupport::AddNodeToModelTree(QStandardItem* p
             items << new QStandardItem(dataNode-> dataFields[(*curDesc).fieldIndex].toString());
         else
         {
-            EgDataNodeIDtype substNodeID = dataNode-> dataFields[(*curDesc).fieldIndex].toInt();
+            EgDataNodeIdType substNodeID = dataNode-> dataFields[(*curDesc).fieldIndex].toInt();
             items << new QStandardItem((*(*curDesc).AutoSubstClass)[substNodeID].dataFields[(*curDesc).AutoSubstFieldIndex].toString());
         }
     }
@@ -449,7 +449,7 @@ void EgDataNodesGUIsupport::FillComboBox(QComboBox* my_box)
     my_box->clear();
     my_box->addItem(QString("<Not found>"), 0); // <Not found>
 
-    for (QMap<EgDataNodeIDtype, EgDataNode>::iterator dataNodeIter = primaryNodesType-> dataNodes.begin(); dataNodeIter != primaryNodesType-> dataNodes.end(); ++dataNodeIter)
+    for (QMap<EgDataNodeIdType, EgDataNode>::iterator dataNodeIter = primaryNodesType-> dataNodes.begin(); dataNodeIter != primaryNodesType-> dataNodes.end(); ++dataNodeIter)
            my_box->addItem(dataNodeIter.value().dataFields[0].toString(), QVariant(dataNodeIter.key())); // FIXME - field name
 }
 

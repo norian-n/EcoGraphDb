@@ -268,7 +268,7 @@ int EgDataFiles::RemoveLocalFiles()
 }
 
 
-void EgDataFiles::ReceiveDataNodes(QMap<EgDataNodeIDtype, EgDataNode>& dataNodesMap, QDataStream& in)
+void EgDataFiles::ReceiveDataNodes(QMap<EgDataNodeIdType, EgDataNode>& dataNodesMap, QDataStream& in)
 {
     EgDataNode tmpNode;
 
@@ -359,7 +359,7 @@ int EgDataFiles::LocalLoadDataNodes(const QSet<quint64> &dataOffsets, QList<EgDa
     return retCode;
 }
 
-int EgDataFiles::LocalLoadData(QSet<quint64>& dataOffsets, QMap<EgDataNodeIDtype, EgDataNode>& dataNodesMap)
+int EgDataFiles::LocalLoadData(QSet<quint64>& dataOffsets, QMap<EgDataNodeIdType, EgDataNode>& dataNodesMap)
 {
     EgDataNode tmpNode2;
     int retCode = 0;
@@ -424,7 +424,7 @@ int EgDataFiles::LocalLoadData(QSet<quint64>& dataOffsets, QMap<EgDataNodeIDtype
     return retCode;
 }
 
-int EgDataFiles::LocalStoreData(QMap<EgDataNodeIDtype, EgDataNode*>&  addedDataNodes, QMap<EgDataNodeIDtype, EgDataNode>& deletedDataNodes, QMap<EgDataNodeIDtype, EgDataNode*>&  updatedDataNodes)
+int EgDataFiles::LocalStoreData(QMap<EgDataNodeIdType, EgDataNode*>&  addedDataNodes, QMap<EgDataNodeIdType, EgDataNode>& deletedDataNodes, QMap<EgDataNodeIdType, EgDataNode*>&  updatedDataNodes)
 {
     if (LocalOpenFilesToUpdate())
         return -1;
@@ -450,7 +450,7 @@ int EgDataFiles::LocalStoreData(QMap<EgDataNodeIDtype, EgDataNode*>&  addedDataN
     return 0;
 }
 
-inline void EgDataFiles::LocalAddObjects(const QMap<EgDataNodeIDtype, EgDataNode *> &addedDataNodes)
+inline void EgDataFiles::LocalAddObjects(const QMap<EgDataNodeIdType, EgDataNode *> &addedDataNodes)
 {
     dat.device()-> seek(dat.device()-> size());
 
@@ -522,7 +522,7 @@ void EgDataFiles::LocalAddNodes(const QList<EgDataNode>&  addedDataNodes)
     }
 }
 
-void EgDataFiles::SendNodesToStream(QMap<EgDataNodeIDtype, EgDataNode*>&  dataNodesMap, QDataStream &nodesStream)
+void EgDataFiles::SendNodesToStream(QMap<EgDataNodeIdType, EgDataNode*>&  dataNodesMap, QDataStream &nodesStream)
 {
     nodesStream << (uint32_t) dataNodesMap.count();
 
@@ -534,7 +534,7 @@ void EgDataFiles::SendNodesToStream(QMap<EgDataNodeIDtype, EgDataNode*>&  dataNo
     }
 }
 
-void EgDataFiles::SendNodesToStream(QMap<EgDataNodeIDtype, EgDataNode>&  dataNodesMap, QDataStream &nodesStream)
+void EgDataFiles::SendNodesToStream(QMap<EgDataNodeIdType, EgDataNode>&  dataNodesMap, QDataStream &nodesStream)
 {
     nodesStream << (uint32_t) dataNodesMap.count();
 
@@ -605,7 +605,7 @@ void EgDataFiles::LocalDeleteNodes(const QList<EgDataNode>&  deletedDataNodes)
 }
 
 
-inline int EgDataFiles::LocalModifyObjects(const QMap<EgDataNodeIDtype, EgDataNode*>&  updatedDataNodes)
+inline int EgDataFiles::LocalModifyObjects(const QMap<EgDataNodeIdType, EgDataNode*>&  updatedDataNodes)
 {
     EgDataNode tmpNode;
 

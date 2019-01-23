@@ -12,6 +12,7 @@
 
 #include "ui_funcblocks.h"
 #include "funcblock_form.h"
+#include "projects.h"
 
 #include "../../egDataNodesType.h"
 #include "../../egGraphDatabase.h"
@@ -30,13 +31,14 @@ public:
 
     FuncBlocksForm(QWidget *parent = 0);
 
+    ProjectsForm* calleeForm;
+
     void loadFuncblocks();
 
     void refreshView();
     void refreshView2();
 
 private slots:
-
 
     void addSubBlock();
     void addTopBlock();
@@ -58,10 +60,10 @@ private:
     DataObjects Owners;
     */    
 
-    EgGraphDatabase graphDB;
+    // EgGraphDatabase graphDB;
 
     EgDataNodesType Funcblocks;
-    EgDataNodesType Projects;
+    // EgDataNodesType Projects;
 
     // EgDataNodesType Statuses;
     // EgDataNodesType Owners;
@@ -70,6 +72,8 @@ private:
     // LinkData* FuncblockOwnerLink;
 
     FuncblockForm* funcBlockForm;
+
+
 
     QStandardItemModel* model;
 
