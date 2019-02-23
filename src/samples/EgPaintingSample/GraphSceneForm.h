@@ -19,7 +19,7 @@ namespace Ui {
 class GraphSceneForm;
 }
 
-class GraphSceneForm;
+class FingersTreeForm;
 
 class MyGraphicsScene : public QGraphicsScene
 {
@@ -37,7 +37,7 @@ public:
     virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event);
     virtual void dropEvent(QGraphicsSceneDragDropEvent *event);
 
-    GraphSceneForm* myForm = nullptr;
+    FingersTreeForm* myForm = nullptr;
 signals:
 
 public slots:
@@ -78,7 +78,7 @@ public:
 
 
 
-    GraphSceneForm* myForm = nullptr;
+    FingersTreeForm* myForm = nullptr;
 signals:
 
 public slots:
@@ -97,7 +97,7 @@ private:
     QGraphicsItem* theItem = nullptr;
 };
 
-class GraphSceneForm : public QWidget
+class FingersTreeForm : public QWidget
 {
     Q_OBJECT
 
@@ -112,8 +112,8 @@ public:
     bool firstNodeStored = false;
     QGraphicsItem* firstNode = nullptr;
 
-    explicit GraphSceneForm(QWidget *parent = 0);
-    ~GraphSceneForm();
+    explicit FingersTreeForm(QWidget *parent = 0);
+    ~FingersTreeForm();
 
 private slots:
     void on_loadButton_clicked();

@@ -4,7 +4,7 @@
 #include <QtDebug>
 #include <QGraphicsTextItem>
 
-GraphSceneForm::GraphSceneForm(QWidget *parent) :
+FingersTreeForm::FingersTreeForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::GraphSceneForm)
 {
@@ -35,7 +35,7 @@ GraphSceneForm::GraphSceneForm(QWidget *parent) :
     // LoadGraph();
 }
 
-void GraphSceneForm::LoadImages()
+void FingersTreeForm::LoadImages()
 {
     iconsScene.clear();
 
@@ -88,7 +88,7 @@ void GraphSceneForm::LoadImages()
     }
 }
 
-void GraphSceneForm::LoadGraph()
+void FingersTreeForm::LoadGraph()
 {
     QGraphicsItem* newItem;
 
@@ -506,18 +506,18 @@ void MyGraphicsScene::wheelEvent(QGraphicsSceneWheelEvent *wheelEvent)
     // QGraphicsScene::wheelEvent(wheelEvent);
 }
 
-GraphSceneForm::~GraphSceneForm()
+FingersTreeForm::~FingersTreeForm()
 {
     delete ui;
 }
 
-void GraphSceneForm::on_loadButton_clicked()
+void FingersTreeForm::on_loadButton_clicked()
 {
     LoadImages();
     LoadGraph();
 }
 
-void GraphSceneForm::on_saveButton_clicked()
+void FingersTreeForm::on_saveButton_clicked()
 {
     nodes.StoreData();
     nodes.StoreAllLinks();

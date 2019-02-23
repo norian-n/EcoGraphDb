@@ -31,7 +31,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    GraphSceneForm *sceneForm = nullptr;
+    FingersTreeForm *sceneForm = nullptr;
 
     EgGraphDatabase graphDB;
     EgDataNodesType nodes;

@@ -20,36 +20,36 @@
 
 template <typename KeyType> class EgFingers;
 
+template <typename KeyType> struct EgIndexStruct
+{
+    KeyType indexKey;
+    quint64 dataOffset;
+};
+
 template <typename KeyType> class EgIndexes
 {
+
 public:
 
-    EgFingers<KeyType>* fingersTree;
+    EgFingers<KeyType>* fingersTree = nullptr;    // tree to find key chunk
 
     KeyType theKey;             // current index key
-    // quint64 data_offset;        // current index value - offset in data file
-    // quint64 new_offset;         // offset in data file for updated objects
 
-    qint32  indexPosition;
-    quint64 oldDataOffset;
+    quint64 oldDataOffset;      // offsets in data nodes file
     quint64 newDataOffset;
 
-    keysCountType chunkCount;
+    keysCountType chunkCount;   // real indexes in the chunk
 
     quint64 indexesChunkOffset; // file position
+    qint32  indexPosition;      // position in the chunk
 
-    quint64 prevOffsetPtr;
+    quint64 prevOffsetPtr;      // chunks chain operations
     quint64 nextOffsetPtr;
 
-/*
-    egFinger<KeyType> fingersRootHeader; // (!) stored in the indexes file
-    egFinger<KeyType> currentFinger;
-    egFinger<KeyType> newFinger;         // to split chunks
-*/
-
-    int indexHeaderSize;
-    int oneIndexSize;
+    int oneIndexSize;           // KeyType deendent consts
     int indexChunkSize;
+
+    EgIndexStruct<KeyType>* indexPtr = nullptr;
 
     char* chunk;            // current chunk buffer
     char* zero_chunk;       // filled with 0
@@ -62,11 +62,8 @@ public:
     QByteArray indexBA;
 
     EgIndexes():
-         fingersTree(NULL)
-        ,indexHeaderSize(sizeof(quint64) * 2)
-        ,oneIndexSize(sizeof(KeyType) + sizeof(quint64))
-        ,indexChunkSize((egIndexesNamespace::egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2) + sizeof(keysCountType) + sizeof(quint64))
-            // chain neighbors offsets (prev, next), count, parent chunk offset
+         oneIndexSize(sizeof(KeyType) + sizeof(quint64)) // tail: chain neighbors offsets (prev, next), count, parent finger offset
+        ,indexChunkSize((egIndexesNamespace::egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2) + sizeof(keysCountType) + sizeof(quint64))          
         ,chunk(new char[indexChunkSize])
         ,zero_chunk(new char[indexChunkSize])
         ,new_chunk(new char[indexChunkSize])
@@ -85,10 +82,11 @@ public:
     static bool CompareLT (KeyType& currentIndex, KeyType& theKey) {return (currentIndex < theKey);}
     static bool CompareLE (KeyType& currentIndex, KeyType& theKey) {return (currentIndex <= theKey);}
 
-    void PrintIndexesChunk(char* theChunk, const QString& theMessage);
+    void PrintIndexesChunk(char* theChunk, const QString& theMessage);  // debug
 
     int OpenIndexFilesToUpdate(const QString& IndexFileName);
     int OpenIndexFilesToRead(const QString& IndexFileName);
+    int OpenIndexFileToCheck(const QString& IndexFilePath); // debug
 
     void CloseIndexFiles();
     void RemoveIndexFiles(const QString& IndexFileName);
@@ -100,14 +98,26 @@ public:
     void StoreRootHeader();
 
     // int StoreFingerOffset(quint64 fingerOffset);
-    int StoreFingerOffset(quint64 chunkOffset, quint64 fingerOffset);
+    int StoreFingerOffset(quint64 chunkOffset, quint64 fingerOffset);   // update finger backptr
 
-    void LoadIndexChunk(char *chunkPtr);
-    int StoreIndexChunk(char* chunkPtr);
-    int StoreIndexChunk(quint64 chunkOffset, char* chunkPtr);
+    void LoadIndexChunk(char *chunkPtr);    // by indexesChunkOffset
+    void LoadIndexChunk();                  // loads to indexBA.data()
+
+    int StoreIndexChunk(const char *chunkPtr);
+    // int StoreIndexChunk(quint64 chunkOffset, char* chunkPtr);
 
     int FindIndexPosition(QDataStream &localIndexesStream); // FIXME obsolete
     int InsertToIndexChunk();
+
+    inline void ReadIndexValues(QDataStream &localIndexesStream, int indexPosition, EgIndexStruct<KeyType>& indexStruct);
+    inline void WriteIndexValues(QDataStream &localIndexesStream, int indexPosition, EgIndexStruct<KeyType>& indexStruct);
+
+    inline void ReadIndexOnly(QDataStream &localIndexesStream, int indexPosition, KeyType& currentIndex);
+    inline void UpdateChunkCount(QDataStream &localIndexesStream, keysCountType newCount);
+
+    int InsertInsideIndexChunk(QDataStream &localIndexesStream);
+
+    inline void MoveTailToInsert(char* chunkPtr, int indexPosition);
 
     int SplitIndexChunk(QDataStream &localIndexStream);
     int AppendIndexChunk(QDataStream &localIndexStream);

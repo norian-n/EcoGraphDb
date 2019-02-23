@@ -146,13 +146,13 @@ int main() // int argc, char *argv[])
     testEgDataNodesType.Connect(graphDB, "test");
     // testEgDataNodesType.metaInfo.PrintMetaInfo();
 
-    // return 0; // FIXME STUB
-
     tmpRes = egDbTests.testEgDataNodesTypeBasicNodeOps(testEgDataNodesType);
     res = res && tmpRes;
 
     tmpRes = egDbTests.testEgDataNodesTypeBasicLoadStore(testEgDataNodesType);
     res = res && tmpRes;
+
+    // return 0; // FIXME STUB
 
     tmpRes = egDbTests.testEgDataNodesTypeDelNode(testEgDataNodesType);
     res = res && tmpRes;

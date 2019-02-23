@@ -129,12 +129,15 @@ template <typename KeyType> void EgIndexFiles<KeyType>::AddIndex()
     else
     {
         // indexChunks.LoadRootHeader();
-        fingersTree.FindIndexChunkToInsert();
+        fingersTree.FindIndexChunkToInsert();   // FIXME check if no finger
         // fingersTree.FindIndexChunkToInsert();
+
+        // qDebug()  << "Key: " << theIndex << " , offset: " << dataOffset << FN;
 
         // qDebug() << "finger to insert key: " << hex << (int) indexChunks.theKey << ", offset: " << hex << (int) indexChunks.indexesChunkOffset << FN;
 
         indexChunks.InsertToIndexChunk();
+
     }
 }
 

@@ -117,7 +117,7 @@ int EgServerConnection::SendCommand(const CommandIdType command, const QString &
 int EgServerConnection::RemoteStoreFieldDesc(QByteArray* field_descs, QByteArray* control_descs)
 {
         // get/set egDataNodesTypeID
-    /*
+    */ /*
     if (RemoteGetOdbId())
     {
         qDebug() << FN << "RemoteGetOdbId got an error";
@@ -190,7 +190,7 @@ int EgServerConnection::RemoteLoadFieldDesc(QByteArray* field_descs, QByteArray*
     qint16 a_size = 0;
 
         // get/set egDataNodesTypeID
-    /*if (RemoteGetOdbId())
+    */ /*if (RemoteGetOdbId())
     {
         qDebug() << FN << "RemoteGetOdbId got an error";
         return -1;

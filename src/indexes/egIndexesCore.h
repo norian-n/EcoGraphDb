@@ -15,7 +15,7 @@ typedef quint16 fingersLevelType;
 
 namespace egIndexesNamespace
 {
-
+    const int indexHeaderSize = sizeof(quint64) * 2;    // header of index file
     const keysCountType egChunkVolume = 4;              // keys in chunk
 
 } // egIndexesNamespace

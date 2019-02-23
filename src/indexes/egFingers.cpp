@@ -196,18 +196,42 @@ template <typename KeyType> int EgFingers<KeyType>::OpenFingerFileToRead(const Q
 
     if (!fingerFile.exists())
     {
-        qDebug() << FN << "file doesn't exist " << IndexFileName + ".odf";
+        qDebug() << "file doesn't exist " << IndexFileName + ".odf" << FN;
         return -1;
     }
 
     if (!fingerFile.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
     {
-        qDebug() << FN << "can't open finger file " << fingerFile.fileName();
+        qDebug() << "can't open finger file " << fingerFile.fileName() << FN;
         return -2;
     }
 
     return 0;
 }
+
+
+template <typename KeyType> int EgFingers<KeyType>::OpenFingerFileToCheck(const QString& IndexFilePath)
+{
+    fingerFile.close();
+
+    fingerFile.setFileName(IndexFilePath);
+    fingerStream.setDevice(&fingerFile);
+
+    if (!fingerFile.exists())
+    {
+        qDebug() << "file doesn't exist " << IndexFileName << FN;
+        return -1;
+    }
+
+    if (!fingerFile.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
+    {
+        qDebug() << FN << "can't open finger file " << fingerFile.fileName() << FN;
+        return -2;
+    }
+
+    return 0;
+}
+
 
 template <typename KeyType> void EgFingers<KeyType>::CloseIndexFiles()
 {
@@ -292,7 +316,7 @@ template <typename KeyType> inline void EgFingers<KeyType>::InitFingersChunk()
     localFingersStream << (KeyType) indexChunks-> theKey;               // min
     localFingersStream << (KeyType) indexChunks-> theKey;               // max
     localFingersStream << (keysCountType) 1;    // count
-    localFingersStream << (quint64) indexChunks-> indexHeaderSize; // indexes chunk offset // indexChunks-> indexesChunkOffset; // theFinger.chunkOffset;
+    localFingersStream << (quint64) indexHeaderSize; // first indexes chunk offset // indexChunks-> indexesChunkOffset; // theFinger.chunkOffset;
 
     // qDebug() << fingersBA.toHex() << FN;
 
@@ -306,7 +330,10 @@ template <typename KeyType> inline void EgFingers<KeyType>::InitFingersChunk()
 template <typename KeyType> int EgFingers<KeyType>::StoreFingersChunk(quint64 fingersChunkOffset, char* chunkPtr)
 {
     fingerStream.device()->seek(fingersChunkOffset);
-    fingerStream.writeRawData(chunkPtr, fingersChunkSize);
+    // fingerStream.writeRawData(chunkPtr, fingersChunkSize);
+
+        // int res =
+    fingerStream.device()->write(chunkPtr, fingersChunkSize);
 
     // qDebug() << "fingersChunkOffset" << hex << (int) fingersChunkOffset << FN;
 
@@ -606,6 +633,31 @@ template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetFirst(QDa
     return 0;
 }
 
+
+template <typename KeyType> int EgFingers<KeyType>::FindFingerInChunkToInsert(QDataStream &localFingersStream)
+{
+    int fingerPosition = parentFinger.itemsCount - 1; // last finger first
+
+    if (parentFinger.itemsCount == 0)  // no fingers, corrupted structure FIXME process
+        return -1;
+
+        // read last finger
+    currentFinger.myOffset = fingerPosition*oneFingerSize;
+    ReadFinger(localFingersStream, currentFinger);
+
+    fingerPosition--;
+
+        // go left until appropriate finger
+    while ((fingerPosition >= 0) && (indexChunks-> theKey < currentFinger.minKey))
+    {
+        currentFinger.myOffset = fingerPosition*oneFingerSize;
+        ReadFinger(localFingersStream, currentFinger);
+
+        fingerPosition--;
+    }
+
+    return 0;
+}
 
 template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetLast(QDataStream &localFingersStream, bool isExactEqual)
 {
@@ -1011,7 +1063,9 @@ template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkToInsert()
 
         // qDebug() << "myLevel = " << currentFinger.myLevel << FN;
 
-        res = FindNextLevelOffsetLast(localFingersStream, true);  // get currentFinger
+        // res = FindNextLevelOffsetLast(localFingersStream, true);  // get currentFinger
+
+        res = FindFingerInChunkToInsert(localFingersStream);
 
         currentFinger.myChunkOffset = parentFinger.nextChunkOffset; // shortcut (???)
 

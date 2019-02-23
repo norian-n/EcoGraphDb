@@ -457,7 +457,7 @@ inline void EgDataFiles::LocalAddObjects(const QMap<EgDataNodeIdType, EgDataNode
         // walk add list QMap<EgDataNodeIDtype, EgDataNode*>::iterator
     for (auto addIter = addedDataNodes.begin(); addIter != addedDataNodes.end(); ++addIter)
     {
-        // qDebug() << FN << "Adding object" << (int) addIter.value()-> dataNodeID << " on offset" << hex << (int) dat.device()-> pos();
+        // qDebug() << "Adding object" << (int) addIter.value()-> dataNodeID << " on offset" << hex << (int) dat.device()-> pos() << FN;
 
         primIndexFiles-> dataOffset = dat.device()-> pos();
         addIter.value()-> dataFileOffset = primIndexFiles-> dataOffset;    // save offset;
@@ -475,6 +475,8 @@ inline void EgDataFiles::LocalAddObjects(const QMap<EgDataNodeIdType, EgDataNode
         {
             if (indexFiles.contains(indIter.key()))
             {
+                // qDebug() << "Adding index" << addIter.value()-> dataFields[indIter.value().fieldNum].toInt() << " on offset" << hex << (int) primIndexFiles-> dataOffset << FN;
+
                 indexFiles[indIter.key()]-> setIndex(addIter.value()-> dataFields[indIter.value().fieldNum]); // TODO - calc index of QVariant
                 indexFiles[indIter.key()]-> setDataOffset(primIndexFiles-> dataOffset);
                 indexFiles[indIter.key()]-> AddIndex();

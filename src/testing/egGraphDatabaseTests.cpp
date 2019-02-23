@@ -133,6 +133,7 @@ bool EgGraphDatabaseTests::testEgDataNodesTypeUpdateNode(EgDataNodesType& testDa
 bool EgGraphDatabaseTests::testEgDataNodesTypeBasicLoadStore(EgDataNodesType& testDataNodes)
 {
     testDataNodes.StoreData();
+
     testDataNodes.LoadAllNodes();
 
     // qDebug() <<  "dataNodes count = " << testDataNodes.dataNodes.count() << FN;

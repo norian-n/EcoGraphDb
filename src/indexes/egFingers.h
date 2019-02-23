@@ -99,6 +99,8 @@ public:
     int OpenFingerFileToUpdate(const QString& IndexFileName);
     int OpenFingerFileToRead(const QString& IndexFileName);
 
+    int OpenFingerFileToCheck(const QString& IndexFilePath); // full path
+
     void CloseIndexFiles();
     void RemoveIndexFiles(const QString& IndexFileName);
 
@@ -117,6 +119,7 @@ public:
     // int SelectClosestFingerToInsert(QDataStream &localFingersStream);
 
     int FindIndexChunkToInsert();
+    int FindFingerInChunkToInsert(QDataStream &localFingersStream);
 
     int UpdateFingerAfterInsert();
 

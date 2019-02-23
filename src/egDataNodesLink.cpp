@@ -211,11 +211,11 @@ int EgDataNodesLinkType::LoadLinkedNodes(EgDataNodeIdType fromNodeID)
     if (! linksStorage-> IndexOffsets.isEmpty())
         res = linksStorage-> LocalFiles-> LocalLoadData(linksStorage-> IndexOffsets, linksStorage-> dataNodes);
 
-    qDebug() << linkName << " Links count: " << linksStorage-> dataNodes.count() << FN;
+    // qDebug() << linkName << " Links count: " << linksStorage-> dataNodes.count() << FN;
 
-    qDebug() << linkName << " Next node ID:" << linksStorage-> metaInfo.nextNodeID << FN;
+    // qDebug() << linkName << " Next node ID:" << linksStorage-> metaInfo.nextNodeID << FN;
 
-    linksStorage-> PrintObjData();
+    // linksStorage-> PrintObjData();
 
     return res;
 }
