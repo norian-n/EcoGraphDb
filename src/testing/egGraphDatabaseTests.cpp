@@ -11,7 +11,7 @@
 
 #include "egGraphDatabaseTests.h"
 
-bool EgGraphDatabaseTests::testEgDataNodeTypeMetaInfo(EgDataNodeTypeMetaInfo& egDataNodeTypeMetaInfo)
+bool EgGraphDatabaseTests::testEgDataNodeTypeMetaInfo(EgDataNodeTypeExtraInfo& egDataNodeTypeMetaInfo)
 {
         // create meta-info
     egDataNodeTypeMetaInfo.AddDataField("name");
@@ -43,7 +43,7 @@ bool EgGraphDatabaseTests::testEgDataNodeTypeMetaInfo(EgDataNodeTypeMetaInfo& eg
 }
 
 
-bool EgGraphDatabaseTests::testEgDataNode(EgDataNodeTypeMetaInfo& egDataNodeTypeMetaInfo)
+bool EgGraphDatabaseTests::testEgDataNode(EgDataNodeTypeExtraInfo& egDataNodeTypeMetaInfo)
 {
     EgDataNode dataNode(egDataNodeTypeMetaInfo);
 

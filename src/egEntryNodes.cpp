@@ -18,7 +18,7 @@ EgEntryNodes::EgEntryNodes(EgDataNodesType* theNodesType):
 {
     //  metaInfo.myECoGraphDB
 
-    entryStorage-> metaInfo.useEntryNodes = false; // no recursion
+    entryStorage-> metaInfo.typeSettings.useEntryNodes = false; // no recursion
 }
 
 EgEntryNodes::~EgEntryNodes()

@@ -11,7 +11,7 @@
 #define EGINDEXESTESTS_H
 
 #include "indexes/egIndexesFiles.h"
-#include "egMetaInfo.h"
+#include "egExtraInfo.h"
 
 #include <QtDebug>
 

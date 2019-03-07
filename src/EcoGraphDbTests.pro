@@ -16,7 +16,6 @@ TEMPLATE = app
 
 
 SOURCES += \
-    egMetaInfo.cpp \
     egDataNode.cpp \
     egDataNodesType.cpp \
     egDataClient.cpp \
@@ -36,7 +35,8 @@ SOURCES += \
     egNamedAttributes.cpp \
     egNodesLocation.cpp \
     egGUIconnect.cpp \
-    testing/egNamedAttributesTests.cpp
+    testing/egNamedAttributesTests.cpp \
+    egExtraInfo.cpp
 
 HEADERS += \
     testing/egIndexesTests.h \

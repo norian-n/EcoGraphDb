@@ -12,7 +12,7 @@
 
 #include <QDir>
 
-#include "egMetaInfo.h"
+#include "egExtraInfo.h"
 #include "egDataNodesType.h"
 
 #ifdef EG_LIB_BUILD   // library build switch, define it in project or egCore.h
@@ -36,11 +36,11 @@ public:
     int locationFieldsCreated = 0;
 
         // node type creation-time temporary info
-    EgDataNodeTypeMetaInfo* metaInfo = nullptr;
-    EgDataNodeTypeMetaInfo* GUIcontrolsMetaInfo  = nullptr;
-    EgDataNodeTypeMetaInfo* entryNodesMetaInfo  = nullptr;
-    EgDataNodeTypeMetaInfo* locationMetaInfo = nullptr;
-    EgDataNodeTypeMetaInfo* attributesMetaInfo = nullptr;
+    EgDataNodeTypeExtraInfo* extraInfo = nullptr;
+    EgDataNodeTypeExtraInfo* GUIcontrolsExtraInfo  = nullptr;
+    EgDataNodeTypeExtraInfo* entryNodesExtraInfo  = nullptr;
+    EgDataNodeTypeExtraInfo* locationExtraInfo = nullptr;
+    EgDataNodeTypeExtraInfo* attributesExtraInfo = nullptr;
 
     // EgRemoteConnect*  connection = nullptr;     // connection data (nullptr means local files)
 
@@ -64,19 +64,23 @@ public:
     int  CreateLinksMetaInfo();
     int  LoadLinksMetaInfo();
 
-    inline void ClearMetaInfo(EgDataNodeTypeMetaInfo* metaInfo);
+    bool CheckNodeTypesMetaInfoLocal();
+    int  CreateNodeTypesMetaInfo();
 
-    int CreateNodeType(QString typeName, EgNodeTypeSettings& typeSettings, const QString& serverAddress = QString());
+    inline void ClearMetaInfo(EgDataNodeTypeExtraInfo* extraInfo);
 
-    int AddDataField(QString fieldName, bool uint32index = false);    // add field descriptor, no GUI control data
-    int AddLocationField(QString fieldName, bool uint32index = false);
+    int CreateNodeType(const QString& typeName, EgNodeTypeSettings& typeSettings, const QString& serverAddress = QString());
 
-    int AddDataField(QString fieldName, EgIndexSettings indexSettings);    // add field descriptor, no GUI control data
-    int AddLocationField(QString fieldName, EgIndexSettings indexSettings);
+    int AddDataField(const QString &fieldName, bool uint32index = false);    // add field descriptor, no GUI control data
+    int AddLocationField(const QString &fieldName, bool uint32index = false);
+
+    int AddDataField(const QString &fieldName, EgIndexSettings indexSettings);    // add field descriptor, no GUI control data
+    int AddLocationField(const QString &fieldName, EgIndexSettings indexSettings);
 
     int CommitNodeType();
 
-    int AddLinkType(QString linkName, QString firstDataNodeType, QString secondDataNodeType);
+    int AddDataNodeType(const QString& typeName);
+    int AddLinkType(const QString& linkName, const QString& firstDataNodeType, const QString& secondDataNodeType);
 
     // int StoreAllLinks();
     // int LoadAllLinks(); // load all links to memory - debug use only

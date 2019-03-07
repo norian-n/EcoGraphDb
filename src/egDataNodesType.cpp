@@ -95,7 +95,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
     if (! res)
         res = myDB.Attach(this, serverAddress);  // TODO FIXME implement double-check files
 
-    if (metaInfo.useLocation)
+    if (metaInfo.typeSettings.useLocation)
     {
         // qDebug()  << "Connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
 
@@ -107,7 +107,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
             qDebug()  << "Can't connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
     }
 
-    if (metaInfo.useNamedAttributes)
+    if (metaInfo.typeSettings.useNamedAttributes)
     {
         // qDebug()  << "Connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
 
@@ -119,7 +119,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
             qDebug()  << "Can't connect named attributes info " << nodeTypeName + EgDataNodesNamespace::egAttributesFileName << FN;
     }
 
-    if (metaInfo.useEntryNodes)
+    if (metaInfo.typeSettings.useEntryNodes)
     {
         // qDebug()  << "Connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
 
@@ -133,7 +133,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
 
     GUI = new EgDataNodesGUIsupport(this); // needed for basic UI interaction
 
-    if (metaInfo.useGUIsettings) // FIXME server
+    if (metaInfo.typeSettings.useGUIsettings) // FIXME server
     {
         int guires = GUI-> LoadSimpleControlDesc();
 
@@ -143,7 +143,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
 
 
         // init special data node
-    notFound.metaInfo = &metaInfo;    
+    notFound.extraInfo = &metaInfo;
     notFound.dataFields.clear();
 
     for (int i = 0; i < metaInfo.dataFields.count(); i++)
@@ -222,7 +222,7 @@ int EgDataNodesType::ConnectServiceNodeType(EgGraphDatabase& myDB, const QString
     }
 
         // init special data node
-    notFound.metaInfo = &metaInfo;
+    notFound.extraInfo = &metaInfo;
     notFound.dataFields.clear();
 
     for (int i = 0; i < metaInfo.dataFields.count(); i++)
@@ -584,7 +584,7 @@ int EgDataNodesType::AddDataNode(EgDataNode& tmpObj)
         // set next available ID FIXME : thread safe
     tmpObj.dataNodeID = metaInfo.nextNodeID++;
     tmpObj.isAdded = true;
-    tmpObj.metaInfo = &metaInfo;
+    tmpObj.extraInfo = &metaInfo;
 
         // copy to map and then add to pointers list
     dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, tmpObj);
@@ -604,7 +604,7 @@ int EgDataNodesType::AddDataNode(QList<QVariant>& myData)
     tmpObj.dataNodeID = metaInfo.nextNodeID++;
     tmpObj.dataFields = myData;
     tmpObj.isAdded = true;
-    tmpObj.metaInfo = &metaInfo;
+    tmpObj.extraInfo = &metaInfo;
 
         // copy to map and then add to pointers list
     dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, tmpObj);
@@ -622,7 +622,7 @@ int EgDataNodesType::AddDataNode(QList<QVariant>& myData, EgDataNodeIdType& newI
     tmpObj.dataNodeID = metaInfo.nextNodeID++;
     tmpObj.dataFields = myData;
     tmpObj.isAdded = true;
-    tmpObj.metaInfo = &metaInfo;
+    tmpObj.extraInfo = &metaInfo;
 
         // copy to map and then add to pointers list
     dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, tmpObj);
@@ -645,7 +645,7 @@ int EgDataNodesType::AddHardLinked(QList<QVariant>& myData, EgDataNodeIdType nod
 
     tmpObj.dataFields = myData;
     tmpObj.isAdded = true;
-    tmpObj.metaInfo = &metaInfo;
+    tmpObj.extraInfo = &metaInfo;
 
         // copy to map and then add to pointers list
     dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, tmpObj);

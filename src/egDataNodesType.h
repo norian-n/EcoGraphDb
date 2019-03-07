@@ -11,7 +11,7 @@
 #define EG_DATA_NODES_TYPE_H
 
 #include "egDataNode.h"
-#include "egMetaInfo.h"
+#include "egExtraInfo.h"
 #include "egLocalFiles.h"
 
 #include "egGUIconnect.h"
@@ -48,7 +48,7 @@ public:
     EgDataFiles*  LocalFiles = nullptr;             // data files support functionality
     EgIndexConditionsTree* index_tree = nullptr;    // indexed fields operations
 
-    EgDataNodeTypeMetaInfo metaInfo;                // general data nodes type info
+    EgDataNodeTypeExtraInfo metaInfo;                // general data nodes type info
 
     EgDataNode notFound;                            // dummy data node
 

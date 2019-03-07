@@ -18,21 +18,16 @@
 class EgGraphDatabase;
 class EgServerConnection;
 
-class EgDataNodeTypeMetaInfo
+class EgDataNodeTypeExtraInfo
 {
 public:
-    // EgDataNodeIDtype typeID;            // data class ID
+    // EgDataNodeIDtype typeID;             // data class ID
     QString typeName;
 
-    EgDataNodeIdType nodesCount = 0;          // data objects count
-    EgDataNodeIdType nextNodeID = 1;         // next available data object ID
+    EgDataNodeIdType nodesCount = 0;        // data objects count
+    EgDataNodeIdType nextNodeID = 1;        // next available data object ID
 
-        // copy of EgNodeTypeSettings fields
-    bool useEntryNodes = false;         // start points for graph operations
-    bool useLocation = false;           // locations info in separate nodes type, hardlinked by ID
-    bool useNamedAttributes = false;    // named attributes/properties in separate nodes type
-    bool useLinks = false;
-    bool useGUIsettings = false;
+    EgNodeTypeSettings typeSettings;
 
     EgGraphDatabase* myECoGraphDB = nullptr;      // peer database
 
@@ -51,16 +46,23 @@ public:
     QDataStream localMetaInfoStream;
     QDataStream* serverStream;
 
-    EgDataNodeTypeMetaInfo(): typeName("Error_no_type_name") {}
-    EgDataNodeTypeMetaInfo(QString a_typeName) : typeName(a_typeName) {}
+    EgDataNodeTypeExtraInfo(): typeName("Error_no_type_name") {}
+    EgDataNodeTypeExtraInfo(const QString& a_typeName) : typeName(a_typeName)
+    {
+        typeSettings.useEntryNodes = false;
+        typeSettings.useLocation = false;
+        typeSettings.useNamedAttributes = false;
+        typeSettings.useLinks = false;
+        typeSettings.useGUIsettings = false;
+    }
 
-    ~EgDataNodeTypeMetaInfo();
+    ~EgDataNodeTypeExtraInfo();
 
     void Clear() {nodesCount = 0; nextNodeID = 1; dataFields.clear(); nameToOrder.clear(); indexedFields.clear();}
 
-    void AddDataField(QString fieldName, bool indexed = false);    // add field descriptor, no GUI control data
+    void AddDataField(const QString& fieldName, bool indexed = false);    // add field descriptor, no GUI control data
 
-    void AddDataField(QString fieldName, EgIndexSettings indexSettings);
+    void AddDataField(const QString& fieldName, EgIndexSettings indexSettings);
 
     int  LocalStoreMetaInfo();          // save to file or server
     int  LocalLoadMetaInfo();           // load from file or server
@@ -83,8 +85,8 @@ public:
 QDataStream& operator << (QDataStream& dStream, EgNodeTypeSettings& typeSettings);    // transfer and file operations
 QDataStream& operator >> (QDataStream& dStream, EgNodeTypeSettings& typeSettings);    // transfer and file operations
 
-QDataStream& operator << (QDataStream& dStream, EgDataNodeTypeMetaInfo& metaInfo);
-QDataStream& operator >> (QDataStream& dStream, EgDataNodeTypeMetaInfo& metaInfo);
+QDataStream& operator << (QDataStream& dStream, EgDataNodeTypeExtraInfo& metaInfo);
+QDataStream& operator >> (QDataStream& dStream, EgDataNodeTypeExtraInfo& metaInfo);
 
 
 #endif // EG_META_INFO_H

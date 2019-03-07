@@ -13,7 +13,6 @@
 #include <QDir>
 #include <QVariant>
 
-// #include "egMetaInfo.h"
 #include "egIndexes.h"
 #include "egFingers.h"
 

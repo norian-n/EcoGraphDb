@@ -43,6 +43,35 @@ int EgDataNodesLinkType::AddLink (EgDataNodeIdType fromNodeID, EgDataNodeIdType 
     return 0;
 }
 
+int EgDataNodesLinkType::Connect(EgGraphDatabase& myDB, const QString& linkTypeName,  const QString &serverAddress)
+{
+        // check if already connected FIXME implement reconnect
+    if (isConnected)
+    {
+        // qDebug()  << "Warning: attempt to connect again data link type: " << linkTypeName << FN;
+
+        return 1;
+    }
+/*
+        // get nodes types from database
+    if (! myDB.getNodesTypesOfLink(linkTypeName))
+    {
+        // qDebug()  << "Error: can't find data nodes type of link type: " << linkTypeName << FN;
+
+        return -1;
+    }
+*/
+        // connect links storage
+    int res = linksStorage-> ConnectServiceNodeType(myDB,
+                                     QString(linkTypeName + EgDataNodesLinkNamespace::egLinkFileNamePostfix),
+                                     serverAddress);
+
+    if (! res)
+      isConnected = true;
+
+    return res;
+}
+
 int EgDataNodesLinkType::DeleteLink (EgDataNodeIdType linkNodeID)
 {
         // FIXME check

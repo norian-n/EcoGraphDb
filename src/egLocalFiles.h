@@ -17,7 +17,7 @@
 #include <QDir>
 
 // class DataObjects;
-#include "egMetaInfo.h"
+#include "egExtraInfo.h"
 #include "indexes/egIndexesFiles.h"
 
 // templates instances to make linker happy
@@ -78,7 +78,7 @@ class EgDataFiles // Data Files operations
 {
 public:
 
-    EgDataNodeTypeMetaInfo* metaInfo;
+    EgDataNodeTypeExtraInfo* metaInfo;
 
     QDir dir;
 
@@ -107,7 +107,7 @@ public:
 
     bool CheckMetaInfoFile(); // check if files exists and not empty
 
-    int Init(EgDataNodeTypeMetaInfo& a_metaInfo); // set names and indexes control
+    int Init(EgDataNodeTypeExtraInfo& a_metaInfo); // set names and indexes control
 
     int LocalOpenFilesToRead();
     int LocalOpenFilesToUpdate();

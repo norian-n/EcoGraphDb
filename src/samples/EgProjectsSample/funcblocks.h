@@ -63,6 +63,10 @@ private:
     // EgGraphDatabase graphDB;
 
     EgDataNodesType Funcblocks;
+
+    EgDataNodesLinkType funcblocksTree;
+    EgDataNodesLinkType funcblocksOfProject;
+
     // EgDataNodesType Projects;
 
     // EgDataNodesType Statuses;

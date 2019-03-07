@@ -272,7 +272,7 @@ inline QStandardItem* EgDataNodesGUIsupport::AddNodeToModelTree(QStandardItem* p
         // check if GUI info loaded
     if (basicControlDescs.isEmpty())
     {
-        qDebug() << "GUI info not loaded for node type " << dataNode->metaInfo-> typeName << FN;
+        qDebug() << "GUI info not loaded for node type " << dataNode->extraInfo-> typeName << FN;
         return NULL;
     }
 

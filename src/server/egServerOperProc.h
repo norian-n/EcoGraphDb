@@ -40,7 +40,7 @@ public:
     CommandIdType commandID;
     QString nodeTypeName;
 
-    EgDataNodeTypeMetaInfo metaInfo;
+    EgDataNodeTypeExtraInfo metaInfo;
 
     EgDataFiles localFiles;
 

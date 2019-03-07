@@ -33,7 +33,7 @@ public:
 
     EgFingers<KeyType>* fingersTree = nullptr;    // tree to find key chunk
 
-    KeyType theKey;             // current index key
+    KeyType theKey;             // index key to process
 
     quint64 oldDataOffset;      // offsets in data nodes file
     quint64 newDataOffset;
@@ -106,13 +106,13 @@ public:
     int StoreIndexChunk(const char *chunkPtr);
     // int StoreIndexChunk(quint64 chunkOffset, char* chunkPtr);
 
-    int FindIndexPosition(QDataStream &localIndexesStream); // FIXME obsolete
+    int FindIndexPositionToInsert(QDataStream &localIndexesStream);
     int InsertToIndexChunk();
 
-    inline void ReadIndexValues(QDataStream &localIndexesStream, int indexPosition, EgIndexStruct<KeyType>& indexStruct);
-    inline void WriteIndexValues(QDataStream &localIndexesStream, int indexPosition, EgIndexStruct<KeyType>& indexStruct);
+    inline void ReadIndexValues(QDataStream &localIndexesStream, EgIndexStruct<KeyType>& indexStruct);
+    inline void WriteIndexValues(QDataStream &localIndexesStream, EgIndexStruct<KeyType>& indexStruct);
 
-    inline void ReadIndexOnly(QDataStream &localIndexesStream, int indexPosition, KeyType& currentIndex);
+    inline void ReadIndexOnly(QDataStream &localIndexesStream, KeyType& currentIndex);
     inline void UpdateChunkCount(QDataStream &localIndexesStream, keysCountType newCount);
 
     int InsertInsideIndexChunk(QDataStream &localIndexesStream);

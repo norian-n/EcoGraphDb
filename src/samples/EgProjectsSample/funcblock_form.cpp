@@ -19,7 +19,7 @@ FuncblockForm::FuncblockForm(QWidget *parent): QWidget(parent)
 void FuncblockForm::initFuncBlock()
 {
         // set field descriptors
-    theFuncBlock.metaInfo = &(FuncBlocks-> metaInfo);
+    theFuncBlock.extraInfo = &(FuncBlocks-> metaInfo);
         // init combos
     // Owners->  GUI.FillComboBox(ui->ownerBox);
     // Statuses-> GUI.FillComboBox(ui->statusBox);

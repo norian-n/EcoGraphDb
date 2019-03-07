@@ -7,13 +7,13 @@
  *
  */
 
-#include "egMetaInfo.h"
+#include "egExtraInfo.h"
 #include "egDataNodesType.h"
 #include "egDataClient.h"
 
 #include <QtDebug>
 
-EgDataNodeTypeMetaInfo::~EgDataNodeTypeMetaInfo()
+EgDataNodeTypeExtraInfo::~EgDataNodeTypeExtraInfo()
 {
     Clear();
     metaInfoFile.close();
@@ -22,7 +22,7 @@ EgDataNodeTypeMetaInfo::~EgDataNodeTypeMetaInfo()
         delete serverConnection;
 }
 
-void EgDataNodeTypeMetaInfo::AddDataField(QString fieldName, bool indexed)
+void EgDataNodeTypeExtraInfo::AddDataField(const QString& fieldName, bool indexed)
 {
     int order = dataFields.count();
 
@@ -45,7 +45,7 @@ void EgDataNodeTypeMetaInfo::AddDataField(QString fieldName, bool indexed)
     }
 }
 
-void EgDataNodeTypeMetaInfo::AddDataField(QString fieldName, EgIndexSettings indexSettings)
+void EgDataNodeTypeExtraInfo::AddDataField(const QString& fieldName, EgIndexSettings indexSettings)
 {
     int order = dataFields.count();
 
@@ -57,7 +57,7 @@ void EgDataNodeTypeMetaInfo::AddDataField(QString fieldName, EgIndexSettings ind
     indexedFields.insert(fieldName, indexSettings);
 }
 
-int  EgDataNodeTypeMetaInfo::OpenLocalStoreStream()
+int  EgDataNodeTypeExtraInfo::OpenLocalStoreStream()
 {
     QDir dir(QDir::current());
 
@@ -86,16 +86,16 @@ int  EgDataNodeTypeMetaInfo::OpenLocalStoreStream()
     return 0;
 }
 
-void EgDataNodeTypeMetaInfo::SendMetaInfoToStream(QDataStream& metaInfoStream)
+void EgDataNodeTypeExtraInfo::SendMetaInfoToStream(QDataStream& metaInfoStream)
 {
     metaInfoStream << nodesCount;  // data nodes (NOT field descriptors) count
     metaInfoStream << nextNodeID;   // incremental counter
 
-    metaInfoStream << useEntryNodes;
-    metaInfoStream << useLocation;
-    metaInfoStream << useNamedAttributes;
-    metaInfoStream << useLinks;
-    metaInfoStream << useGUIsettings;
+    metaInfoStream << typeSettings.useEntryNodes;
+    metaInfoStream << typeSettings.useLocation;
+    metaInfoStream << typeSettings.useNamedAttributes;
+    metaInfoStream << typeSettings.useLinks;
+    metaInfoStream << typeSettings.useGUIsettings;
 
     metaInfoStream << dataFields;  // field descriptors
     // dStream << indexedToOrder.keys();
@@ -115,7 +115,7 @@ void EgDataNodeTypeMetaInfo::SendMetaInfoToStream(QDataStream& metaInfoStream)
 }
 
 
-int EgDataNodeTypeMetaInfo::LocalStoreMetaInfo()
+int EgDataNodeTypeExtraInfo::LocalStoreMetaInfo()
 {
     int res = 0;
 
@@ -131,7 +131,7 @@ int EgDataNodeTypeMetaInfo::LocalStoreMetaInfo()
     return res;
 }
 
-int EgDataNodeTypeMetaInfo::LocalUpdateMetaInfo()
+int EgDataNodeTypeExtraInfo::LocalUpdateMetaInfo()
 {
     int res = 0;
 
@@ -147,7 +147,7 @@ int EgDataNodeTypeMetaInfo::LocalUpdateMetaInfo()
     return res;
 }
 
-int EgDataNodeTypeMetaInfo::ServerStoreMetaInfo()
+int EgDataNodeTypeExtraInfo::ServerStoreMetaInfo()
 {
     int res = 0;
 
@@ -167,7 +167,7 @@ int EgDataNodeTypeMetaInfo::ServerStoreMetaInfo()
     return res;
 }
 
-int EgDataNodeTypeMetaInfo::ServerUpdateMetaInfo()
+int EgDataNodeTypeExtraInfo::ServerUpdateMetaInfo()
 {
     int res = 0;
 
@@ -188,7 +188,7 @@ int EgDataNodeTypeMetaInfo::ServerUpdateMetaInfo()
 }
 
 
-int EgDataNodeTypeMetaInfo::ServerLoadMetaInfo()
+int EgDataNodeTypeExtraInfo::ServerLoadMetaInfo()
 {
     int res = 0;
 
@@ -212,7 +212,7 @@ int EgDataNodeTypeMetaInfo::ServerLoadMetaInfo()
     return res;
 }
 
-int EgDataNodeTypeMetaInfo::OpenLocalLoadStream()
+int EgDataNodeTypeExtraInfo::OpenLocalLoadStream()
 {
         // open file
     metaInfoFile.setFileName("egdb/" + typeName + ".ddt");
@@ -229,7 +229,7 @@ int EgDataNodeTypeMetaInfo::OpenLocalLoadStream()
     return 0;
 }
 
-int EgDataNodeTypeMetaInfo::LoadMetaInfoFromStream(QDataStream& metaInfoStream)
+int EgDataNodeTypeExtraInfo::LoadMetaInfoFromStream(QDataStream& metaInfoStream)
 {
     // QList<QString> indexedFieldsLocal;
 
@@ -238,11 +238,11 @@ int EgDataNodeTypeMetaInfo::LoadMetaInfoFromStream(QDataStream& metaInfoStream)
     metaInfoStream >> nodesCount;  // data nodes (NOT field descriptors) count
     metaInfoStream >> nextNodeID;   // incremental counter
 
-    metaInfoStream >> useEntryNodes;
-    metaInfoStream >> useLocation;
-    metaInfoStream >> useNamedAttributes;
-    metaInfoStream >> useLinks;
-    metaInfoStream >> useGUIsettings;
+    metaInfoStream >> typeSettings.useEntryNodes;
+    metaInfoStream >> typeSettings.useLocation;
+    metaInfoStream >> typeSettings.useNamedAttributes;
+    metaInfoStream >> typeSettings.useLinks;
+    metaInfoStream >> typeSettings.useGUIsettings;
 
     metaInfoStream  >> dataFields;  // field descriptors
     // metaInfoStream  >> indexedFieldsLocal;
@@ -275,7 +275,7 @@ int EgDataNodeTypeMetaInfo::LoadMetaInfoFromStream(QDataStream& metaInfoStream)
     return 0;
 }
 
-int EgDataNodeTypeMetaInfo::LocalLoadMetaInfo()
+int EgDataNodeTypeExtraInfo::LocalLoadMetaInfo()
 {
     int res = 0;
 
@@ -289,7 +289,7 @@ int EgDataNodeTypeMetaInfo::LocalLoadMetaInfo()
     return res;
 }
 
-void EgDataNodeTypeMetaInfo::PrintMetaInfo()
+void EgDataNodeTypeExtraInfo::PrintMetaInfo()
 {
      qDebug() << FN << "\nType name:" << typeName << " Obj Count:" << nodesCount << " Next ID:" << nextNodeID;
 
@@ -332,16 +332,16 @@ QDataStream& operator >> (QDataStream& dStream, EgNodeTypeSettings& typeSettings
 }
 
 // store meta info
-QDataStream& operator << (QDataStream& metaInfoStream, EgDataNodeTypeMetaInfo &metaInfo)
+QDataStream& operator << (QDataStream& metaInfoStream, EgDataNodeTypeExtraInfo &metaInfo)
 {
     metaInfoStream << metaInfo.nodesCount;  // data nodes (NOT field descriptors) count
     metaInfoStream << metaInfo.nextNodeID;   // incremental counter
 
-    metaInfoStream << metaInfo.useEntryNodes;
-    metaInfoStream << metaInfo.useLocation;
-    metaInfoStream << metaInfo.useNamedAttributes;
-    metaInfoStream << metaInfo.useLinks;
-    metaInfoStream << metaInfo.useGUIsettings;
+    metaInfoStream << metaInfo.typeSettings.useEntryNodes;
+    metaInfoStream << metaInfo.typeSettings.useLocation;
+    metaInfoStream << metaInfo.typeSettings.useNamedAttributes;
+    metaInfoStream << metaInfo.typeSettings.useLinks;
+    metaInfoStream << metaInfo.typeSettings.useGUIsettings;
 
     metaInfoStream << metaInfo.dataFields;  // field descriptors
     // dStream << indexedToOrder.keys();
@@ -363,7 +363,7 @@ QDataStream& operator << (QDataStream& metaInfoStream, EgDataNodeTypeMetaInfo &m
 }
 
 // load meta info
-QDataStream& operator >> (QDataStream& metaInfoStream, EgDataNodeTypeMetaInfo& metaInfo)
+QDataStream& operator >> (QDataStream& metaInfoStream, EgDataNodeTypeExtraInfo& metaInfo)
 {
     // QList<QString> indexedFieldsLocal;
 
@@ -372,11 +372,11 @@ QDataStream& operator >> (QDataStream& metaInfoStream, EgDataNodeTypeMetaInfo& m
     metaInfoStream >> metaInfo.nodesCount;  // data nodes (NOT field descriptors) count
     metaInfoStream >> metaInfo.nextNodeID;   // incremental counter
 
-    metaInfoStream >> metaInfo.useEntryNodes;
-    metaInfoStream >> metaInfo.useLocation;
-    metaInfoStream >> metaInfo.useNamedAttributes;
-    metaInfoStream >> metaInfo.useLinks;
-    metaInfoStream >> metaInfo.useGUIsettings;
+    metaInfoStream >> metaInfo.typeSettings.useEntryNodes;
+    metaInfoStream >> metaInfo.typeSettings.useLocation;
+    metaInfoStream >> metaInfo.typeSettings.useNamedAttributes;
+    metaInfoStream >> metaInfo.typeSettings.useLinks;
+    metaInfoStream >> metaInfo.typeSettings.useGUIsettings;
 
     metaInfoStream  >> metaInfo.dataFields;  // field descriptors
     // metaInfoStream  >> indexedFieldsLocal;

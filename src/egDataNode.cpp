@@ -8,12 +8,12 @@
  */
 
 #include "egDataNode.h"
-#include "egMetaInfo.h"
+#include "egExtraInfo.h"
 
-EgDataNode::EgDataNode(EgDataNodeTypeMetaInfo& a_metaInfo):
-    metaInfo(&a_metaInfo)
+EgDataNode::EgDataNode(EgDataNodeTypeExtraInfo& a_extraInfo):
+    extraInfo(&a_extraInfo)
 {
-    for (int i = 0; i < a_metaInfo.dataFields.count(); i++)
+    for (int i = 0; i < a_extraInfo.dataFields.count(); i++)
         dataFields << QVariant();
 }
 
@@ -34,8 +34,8 @@ void EgDataNode::clear()
 
     isAdded = false;
 
-    if (metaInfo)
-        for (int i = 0; i < metaInfo-> dataFields.count(); i++)
+    if (extraInfo)
+        for (int i = 0; i < extraInfo-> dataFields.count(); i++)
             dataFields << QVariant();
 
     if (nodeLinks)
@@ -55,9 +55,9 @@ QVariant& EgDataNode::operator [] (QString& fieldName)
 {
     // static QVariant not_found("<Not found>"); // to return index error as QVariant.isNull()
 
-    if (metaInfo)
-        if (metaInfo-> nameToOrder.contains(fieldName))
-            return dataFields[metaInfo-> nameToOrder[fieldName]];
+    if (extraInfo)
+        if (extraInfo-> nameToOrder.contains(fieldName))
+            return dataFields[extraInfo-> nameToOrder[fieldName]];
 
     return egNotFound;
 }
@@ -67,9 +67,9 @@ QVariant& EgDataNode::operator [] (const char* fieldCharName)
     QString fieldName(fieldCharName);
     // static QVariant not_found("<Not found>"); // to return index error as QVariant.isNull()
 
-    if (metaInfo)
-        if (metaInfo-> nameToOrder.contains(fieldName))
-            return dataFields[metaInfo-> nameToOrder[fieldName]];
+    if (extraInfo)
+        if (extraInfo-> nameToOrder.contains(fieldName))
+            return dataFields[extraInfo-> nameToOrder[fieldName]];
 
     return egNotFound;
 }

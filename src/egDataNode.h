@@ -17,6 +17,8 @@
 
 namespace EgDataNodesNamespace
 {
+    const char* const egDataNodesTypesFileName("egDataNodesTypesMetaInfo");
+
     const char* const egDummyNodesType("egDummyNodesType");
     const char* const egDummyLinkType ("egDummyLinkType");
 
@@ -28,7 +30,7 @@ namespace EgDataNodesNamespace
 
 static QVariant egNotFound("<Not found>");
 
-class EgDataNodeTypeMetaInfo;
+class EgDataNodeTypeExtraInfo;
 
 struct EgExtendedLinkType
 {
@@ -66,13 +68,13 @@ public:
 
     bool isAdded {false};                               // is not stored yet
 
-    EgDataNodeTypeMetaInfo* metaInfo { nullptr };       // data type metainfo backlink
+    EgDataNodeTypeExtraInfo* extraInfo { nullptr };       // data type metainfo backlink
     EgDataNodeLinks* nodeLinks       { nullptr };       // links to other nodes if required
 
     QList<QVariant> dataFields;                         // data itself
 
     EgDataNode() {}
-    EgDataNode(EgDataNodeTypeMetaInfo& a_metaInfo);
+    EgDataNode(EgDataNodeTypeExtraInfo& a_extraInfo);
 
     ~EgDataNode();
 

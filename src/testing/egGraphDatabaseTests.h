@@ -10,7 +10,7 @@
 #ifndef EGGRAPHDATABASETESTS_H
 #define EGGRAPHDATABASETESTS_H
 
-#include "egMetaInfo.h"
+#include "egExtraInfo.h"
 #include "egDataNode.h"
 #include "egDataNodesType.h"
 #include "egGraphDatabase.h"
@@ -18,9 +18,9 @@
 class EgGraphDatabaseTests
 {
 public:
-    bool testEgDataNodeTypeMetaInfo(EgDataNodeTypeMetaInfo& egDataNodeTypeMetaInfo);
+    bool testEgDataNodeTypeMetaInfo(EgDataNodeTypeExtraInfo& egDataNodeTypeMetaInfo);
 
-    bool testEgDataNode(EgDataNodeTypeMetaInfo& egDataNodeTypeMetaInfo);
+    bool testEgDataNode(EgDataNodeTypeExtraInfo& egDataNodeTypeMetaInfo);
 
     bool testEgDataNodesTypeBasicNodeOps(EgDataNodesType& testDataNodes);
 

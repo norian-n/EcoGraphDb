@@ -45,7 +45,7 @@ bool EgDataFiles::CheckMetaInfoFile()
     return true;
 }
 
-int EgDataFiles::Init(EgDataNodeTypeMetaInfo& a_metaInfo)
+int EgDataFiles::Init(EgDataNodeTypeExtraInfo& a_metaInfo)
 {
     metaInfo = &a_metaInfo;
 
@@ -297,7 +297,7 @@ int EgDataFiles::LocalLoadDataNodes(const QSet<quint64> &dataOffsets, QList<EgDa
     EgDataNode tmpNode;
     int retCode = 0;
 
-    tmpNode.metaInfo = metaInfo;
+    tmpNode.extraInfo = metaInfo;
 
         // open data nodes file
     dat_file.setFileName("egdb/" + metaInfo-> typeName + ".dat");
@@ -364,7 +364,7 @@ int EgDataFiles::LocalLoadData(QSet<quint64>& dataOffsets, QMap<EgDataNodeIdType
     EgDataNode tmpNode2;
     int retCode = 0;
 
-    tmpNode2.metaInfo = metaInfo;
+    tmpNode2.extraInfo = metaInfo;
 
     dat_file.setFileName("egdb/" + metaInfo-> typeName + ".dat");
 
