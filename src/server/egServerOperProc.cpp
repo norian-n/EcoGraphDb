@@ -70,9 +70,9 @@ inline void EgServerOperProc::ReceiveIndexesTree(QDataStream& in)
     }
 }
 
-inline void EgServerOperProc::StoreMetaInfo(QDataStream& in)
+inline void EgServerOperProc::StoreExtraInfo(QDataStream& in)
 {
-    metaInfo.LoadMetaInfoFromStream(in);
+    extraInfo.LoadExtraInfoFromStream(in);
     // in >> metaInfo;
 
     QDir dir(QDir::current());
@@ -86,13 +86,13 @@ inline void EgServerOperProc::StoreMetaInfo(QDataStream& in)
         graphDB.CreateLinksMetaInfo();
     }
 
-    metaInfo.LocalStoreMetaInfo();
+    extraInfo.LocalStoreExtraInfo();
 }
 
-inline void EgServerOperProc::LoadMetaInfo(QDataStream& out)
+inline void EgServerOperProc::LoadExtraInfo(QDataStream& out)
 {
-    metaInfo.LocalLoadMetaInfo();
-    metaInfo.SendMetaInfoToStream(out);
+    extraInfo.LocalLoadExtraInfo();
+    extraInfo.SendExtraInfoToStream(out);
 
     // out << metaInfo;
 
@@ -238,7 +238,7 @@ void EgServerOperProc::processCommand()
 
     qDebug() << "commandID = " << hex << commandID << ", nodeTypeName = " << nodeTypeName;
 
-    metaInfo.typeName = nodeTypeName;
+    extraInfo.typeName = nodeTypeName;
 
     egDbMutexSpace::masterMutex.lock();
 
@@ -265,18 +265,18 @@ void EgServerOperProc::processCommand()
     {
     case opcode_store_metainfo: // store metainfo on server
 
-        StoreMetaInfo(in);
+        StoreExtraInfo(in);
         break;
 
     case opcode_load_metainfo: // load metainfo from server
 
-        LoadMetaInfo(out);
+        LoadExtraInfo(out);
         break;
 
     case opcode_store_data: // store data nodes changes on server
 
-        metaInfo.LocalLoadMetaInfo();
-        localFiles.Init(metaInfo);
+        extraInfo.LocalLoadExtraInfo();
+        localFiles.Init(extraInfo);
 
         localFiles.LocalOpenFilesToUpdate();
 
@@ -290,8 +290,8 @@ void EgServerOperProc::processCommand()
 
     case opcode_load_all_data: // load metainfo from server
 
-        metaInfo.LocalLoadMetaInfo();
-        localFiles.Init(metaInfo);
+        extraInfo.LocalLoadExtraInfo();
+        localFiles.Init(extraInfo);
 
         LoadDataNodes(out);
 
@@ -309,8 +309,8 @@ void EgServerOperProc::processCommand()
         if (rootNodeID && indexNodes.count())
         {
 
-            metaInfo.LocalLoadMetaInfo();
-            localFiles.Init(metaInfo);
+            extraInfo.LocalLoadExtraInfo();
+            localFiles.Init(extraInfo);
 
             index_tree = new EgIndexConditionsTree();
             rootIndexCondition.BuildTreeFromMap(indexNodes, rootNodeID);

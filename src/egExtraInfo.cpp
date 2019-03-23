@@ -10,16 +10,17 @@
 #include "egExtraInfo.h"
 #include "egDataNodesType.h"
 #include "egDataClient.h"
+#include "egGraphDatabase.h"
 
 #include <QtDebug>
 
 EgDataNodeTypeExtraInfo::~EgDataNodeTypeExtraInfo()
 {
     Clear();
-    metaInfoFile.close();
+    extraInfoFile.close();
 
-    if (serverConnection)
-        delete serverConnection;
+    // if (serverConnection)
+    //    delete serverConnection;
 }
 
 void EgDataNodeTypeExtraInfo::AddDataField(const QString& fieldName, bool indexed)
@@ -73,12 +74,12 @@ int  EgDataNodeTypeExtraInfo::OpenLocalStoreStream()
     // qDebug()  << dir.entryList() << FN;
 
         // open file
-    metaInfoFile.setFileName("egdb/" + typeName + ".ddt");
-    localMetaInfoStream.setDevice(&metaInfoFile);
+    extraInfoFile.setFileName("egdb/" + typeName + ".ddt");
+    localExtraInfoStream.setDevice(&extraInfoFile);
 
-    if (!metaInfoFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    if (!extraInfoFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
     {
-        qDebug() << "can't open " << metaInfoFile.fileName() << " file" << FN;
+        qDebug() << "can't open " << extraInfoFile.fileName() << " file" << FN;
 
         return -1;
     }
@@ -86,127 +87,91 @@ int  EgDataNodeTypeExtraInfo::OpenLocalStoreStream()
     return 0;
 }
 
-void EgDataNodeTypeExtraInfo::SendMetaInfoToStream(QDataStream& metaInfoStream)
+void EgDataNodeTypeExtraInfo::SendExtraInfoToStream(QDataStream& extraInfoStream)
 {
-    metaInfoStream << nodesCount;  // data nodes (NOT field descriptors) count
-    metaInfoStream << nextNodeID;   // incremental counter
+    extraInfoStream << nodesCount;  // data nodes (NOT field descriptors) count
+    extraInfoStream << nextNodeID;   // incremental counter
 
-    metaInfoStream << typeSettings.useEntryNodes;
-    metaInfoStream << typeSettings.useLocation;
-    metaInfoStream << typeSettings.useNamedAttributes;
-    metaInfoStream << typeSettings.useLinks;
-    metaInfoStream << typeSettings.useGUIsettings;
+    extraInfoStream << typeSettings.useEntryNodes;
+    extraInfoStream << typeSettings.useLocation;
+    extraInfoStream << typeSettings.useNamedAttributes;
+    extraInfoStream << typeSettings.useLinks;
+    extraInfoStream << typeSettings.useGUIsettings;
 
-    metaInfoStream << dataFields;  // field descriptors
+    extraInfoStream << dataFields;  // field descriptors
     // dStream << indexedToOrder.keys();
 
-    metaInfoStream << (quint32) indexedFields.size();
+    extraInfoStream << (quint32) indexedFields.size();
 
     for (auto indIter = indexedFields.begin(); indIter != indexedFields.end(); ++indIter)
     {
         // qDebug() << indIter.key() << " " << indIter.value().fieldNum << FN;
 
-        metaInfoStream << indIter.key();
-        metaInfoStream << indIter.value().fieldNum;
-        metaInfoStream << indIter.value().indexSize;
-        metaInfoStream << indIter.value().isSigned;
-        metaInfoStream << indIter.value().functionID;
+        extraInfoStream << indIter.key();
+        extraInfoStream << indIter.value().fieldNum;
+        extraInfoStream << indIter.value().indexSize;
+        extraInfoStream << indIter.value().isSigned;
+        extraInfoStream << indIter.value().functionID;
     }
 }
 
 
-int EgDataNodeTypeExtraInfo::LocalStoreMetaInfo()
+int EgDataNodeTypeExtraInfo::LocalStoreExtraInfo()
 {
     int res = 0;
 
     res = OpenLocalStoreStream();
 
     if (! res)
-        SendMetaInfoToStream(localMetaInfoStream);
+        SendExtraInfoToStream(localExtraInfoStream);
 
         // localMetaInfoStream << *this;
 
-    metaInfoFile.close();
+    extraInfoFile.close();
 
     return res;
 }
 
-int EgDataNodeTypeExtraInfo::LocalUpdateMetaInfo()
+int EgDataNodeTypeExtraInfo::ServerStoreExtraInfo()
 {
     int res = 0;
 
-    res = OpenLocalStoreStream();
+    if (myECoGraphDB-> serverConnection)
+        res = myECoGraphDB-> serverConnection->OpenStoreStream(opcode_store_metainfo, myECoGraphDB-> serverStream, typeName);
 
     if (! res)
-        SendMetaInfoToStream(localMetaInfoStream);
-
-        // localMetaInfoStream << *this;
-
-    metaInfoFile.close();
-
-    return res;
-}
-
-int EgDataNodeTypeExtraInfo::ServerStoreMetaInfo()
-{
-    int res = 0;
-
-    if (serverConnection)
-        res = serverConnection->OpenStoreStream(opcode_store_metainfo, serverStream, typeName);
-
-    if (! res)
-        SendMetaInfoToStream(*serverStream);
+        SendExtraInfoToStream(*(myECoGraphDB-> serverStream));
 
         // *serverStream << *this;
 
     if (! res)
-        res = serverConnection-> WaitForSending();
+        res = myECoGraphDB-> serverConnection-> WaitForSending();
 
-    serverConnection-> Disconnect();
-
-    return res;
-}
-
-int EgDataNodeTypeExtraInfo::ServerUpdateMetaInfo()
-{
-    int res = 0;
-
-    if (serverConnection)
-        res = serverConnection->OpenStoreStream(opcode_store_metainfo, serverStream, typeName);
-
-    if (! res)
-        SendMetaInfoToStream(*serverStream);
-
-        // *serverStream << *this;
-
-    if (! res)
-        res = serverConnection-> WaitForSending();
-
-    serverConnection-> Disconnect();
+    myECoGraphDB-> serverConnection-> Disconnect();
 
     return res;
 }
 
 
-int EgDataNodeTypeExtraInfo::ServerLoadMetaInfo()
+int EgDataNodeTypeExtraInfo::ServerLoadExtraInfo()
 {
     int res = 0;
 
-    if (serverConnection)
-        res = serverConnection-> OpenLoadStream(opcode_load_metainfo, serverStream, typeName);
+    if (myECoGraphDB-> serverConnection)
+        res = myECoGraphDB-> serverConnection-> OpenLoadStream(opcode_load_metainfo, myECoGraphDB-> serverStream, typeName);
 
     if (! res)
-        res = serverConnection-> WaitForSending(); // command
+        res = myECoGraphDB-> serverConnection-> WaitForSending(); // command
 
     // qDebug << serverConnection-> tcpSocket.state() << "" << ; WaitForReadyRead
 
     if (! res)
-        res = serverConnection-> WaitForReadyRead();
+        res = myECoGraphDB-> serverConnection-> WaitForReadyRead();
 
     if (! res)
-        res = LoadMetaInfoFromStream(*serverStream);
+        res = LoadExtraInfoFromStream(*(myECoGraphDB-> serverStream));
 
-    serverConnection-> Disconnect();
+    myECoGraphDB-> serverConnection-> Disconnect();
 
 
     return res;
@@ -215,10 +180,10 @@ int EgDataNodeTypeExtraInfo::ServerLoadMetaInfo()
 int EgDataNodeTypeExtraInfo::OpenLocalLoadStream()
 {
         // open file
-    metaInfoFile.setFileName("egdb/" + typeName + ".ddt");
-    localMetaInfoStream.setDevice(&metaInfoFile);
+    extraInfoFile.setFileName("egdb/" + typeName + ".ddt");
+    localExtraInfoStream.setDevice(&extraInfoFile);
 
-    if (!metaInfoFile.open(QIODevice::ReadOnly))
+    if (!extraInfoFile.open(QIODevice::ReadOnly))
     {
         // if (! typeName.contains(EgDataNodesNamespace::egGUIfileName))
         qDebug() << FN << "can't open " << typeName + ".ddt" << " file";
@@ -229,37 +194,37 @@ int EgDataNodeTypeExtraInfo::OpenLocalLoadStream()
     return 0;
 }
 
-int EgDataNodeTypeExtraInfo::LoadMetaInfoFromStream(QDataStream& metaInfoStream)
+int EgDataNodeTypeExtraInfo::LoadExtraInfoFromStream(QDataStream& extraInfoStream)
 {
     // QList<QString> indexedFieldsLocal;
 
     Clear(); // init metainfo
 
-    metaInfoStream >> nodesCount;  // data nodes (NOT field descriptors) count
-    metaInfoStream >> nextNodeID;   // incremental counter
+    extraInfoStream >> nodesCount;  // data nodes (NOT field descriptors) count
+    extraInfoStream >> nextNodeID;   // incremental counter
 
-    metaInfoStream >> typeSettings.useEntryNodes;
-    metaInfoStream >> typeSettings.useLocation;
-    metaInfoStream >> typeSettings.useNamedAttributes;
-    metaInfoStream >> typeSettings.useLinks;
-    metaInfoStream >> typeSettings.useGUIsettings;
+    extraInfoStream >> typeSettings.useEntryNodes;
+    extraInfoStream >> typeSettings.useLocation;
+    extraInfoStream >> typeSettings.useNamedAttributes;
+    extraInfoStream >> typeSettings.useLinks;
+    extraInfoStream >> typeSettings.useGUIsettings;
 
-    metaInfoStream  >> dataFields;  // field descriptors
+    extraInfoStream  >> dataFields;  // field descriptors
     // metaInfoStream  >> indexedFieldsLocal;
 
     quint32 theSize = 0;
     EgIndexSettings theSettings;
     QString theName;
 
-    metaInfoStream >> theSize;
+    extraInfoStream >> theSize;
 
     for (quint32 i = 0; i < theSize; i++)
     {
-        metaInfoStream  >> theName;
-        metaInfoStream  >> theSettings.fieldNum;
-        metaInfoStream  >> theSettings.indexSize;
-        metaInfoStream  >> theSettings.isSigned;
-        metaInfoStream  >> theSettings.functionID;
+        extraInfoStream  >> theName;
+        extraInfoStream  >> theSettings.fieldNum;
+        extraInfoStream  >> theSettings.indexSize;
+        extraInfoStream  >> theSettings.isSigned;
+        extraInfoStream  >> theSettings.functionID;
 
         // qDebug() << theName << " " << theSettings.fieldNum << FN;
 
@@ -275,21 +240,21 @@ int EgDataNodeTypeExtraInfo::LoadMetaInfoFromStream(QDataStream& metaInfoStream)
     return 0;
 }
 
-int EgDataNodeTypeExtraInfo::LocalLoadMetaInfo()
+int EgDataNodeTypeExtraInfo::LocalLoadExtraInfo()
 {
     int res = 0;
 
     res = OpenLocalLoadStream();
 
     if (! res)
-        res = LoadMetaInfoFromStream(localMetaInfoStream);
+        res = LoadExtraInfoFromStream(localExtraInfoStream);
 
-    metaInfoFile.close();
+    extraInfoFile.close();
 
     return res;
 }
 
-void EgDataNodeTypeExtraInfo::PrintMetaInfo()
+void EgDataNodeTypeExtraInfo::PrintExtraInfo()
 {
      qDebug() << FN << "\nType name:" << typeName << " Obj Count:" << nodesCount << " Next ID:" << nextNodeID;
 

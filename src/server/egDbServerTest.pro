@@ -24,4 +24,4 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Q
 SOURCES += \
     main_test.cpp \
     ../egDataClient.cpp \
-    ../egMetaInfo.cpp
+    ../egExtraInfo.cpp

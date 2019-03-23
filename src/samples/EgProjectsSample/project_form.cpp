@@ -15,7 +15,7 @@ ProjectForm::ProjectForm(QWidget *parent): QWidget(parent)
 
 void ProjectForm::initProject()
 {
-    theProject.extraInfo = &(Projects-> metaInfo);
+    theProject.extraInfo = &(Projects-> extraInfo);
         // init combos
     Owners->  GUI-> FillComboBox(ui->ownerBox);
     Statuses-> GUI-> FillComboBox(ui->statusBox);

@@ -153,7 +153,7 @@ void MainWindow::FillTestData()
     for (int k = 0; k < Projects.FieldsCount(); k++) // init
         ins_values << QVariant();
 
-#define FIELD(name) metaInfo.nameToOrder[name]
+#define FIELD(name) extraInfo.nameToOrder[name]
 
     ins_values[Projects.FIELD("name")]        = "ECoGraphDB";
     ins_values[Projects.FIELD("description")] = "Exo Cortex Graph Database Project";
@@ -251,9 +251,26 @@ void MainWindow::FillTestData()
 
     Funcblocks.StoreData();
 
-    Funcblocks.ConnectLinkType("projects_funcblocks");
-    Funcblocks.ConnectLinkType("funcblocksTree");
+        // set links
+    funcblocksOfProject.Connect(graphDB, "projects_funcblocks");
+    funcblocksTree.Connect(graphDB, "funcblocksTree");
 
+    // Funcblocks.ConnectLinkType("projects_funcblocks");
+    // Funcblocks.ConnectLinkType("funcblocksTree");
+
+    funcblocksOfProject.AddLink(1,1);
+    funcblocksOfProject.AddLink(1,2);
+    funcblocksOfProject.AddLink(1,3);
+    funcblocksOfProject.AddLink(1,4);
+
+    funcblocksOfProject.StoreLinks();
+
+    funcblocksTree.AddLink(1,2);
+    funcblocksTree.AddLink(2,3);
+
+    funcblocksTree.StoreLinks();
+
+/*
         // set links
     Funcblocks.AddArrowLink("funcblocksTree", 1, Funcblocks, 2);
     Funcblocks.AddArrowLink("funcblocksTree", 2, Funcblocks, 3);
@@ -269,6 +286,7 @@ void MainWindow::FillTestData()
     Projects.AddArrowLink("projects_funcblocks", 1, Funcblocks, 4);
 
     Projects.StoreLinkType("projects_funcblocks");
+    */
 }
 
 // =============================================================================================

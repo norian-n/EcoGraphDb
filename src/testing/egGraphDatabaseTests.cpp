@@ -20,7 +20,7 @@ bool EgGraphDatabaseTests::testEgDataNodeTypeMetaInfo(EgDataNodeTypeExtraInfo& e
     // egDataNodeTypeMetaInfo.PrintMetaInfo();
 
         // store meta-info
-    egDataNodeTypeMetaInfo.LocalStoreMetaInfo();
+    egDataNodeTypeMetaInfo.LocalStoreExtraInfo();
 
         // clean up
     egDataNodeTypeMetaInfo.Clear();
@@ -28,7 +28,7 @@ bool EgGraphDatabaseTests::testEgDataNodeTypeMetaInfo(EgDataNodeTypeExtraInfo& e
     // egDataNodeTypeMetaInfo.PrintMetaInfo();
 
         // load meta-info
-    egDataNodeTypeMetaInfo.LocalLoadMetaInfo();
+    egDataNodeTypeMetaInfo.LocalLoadExtraInfo();
 
         // check result
     // egDataNodeTypeMetaInfo.PrintMetaInfo();
@@ -103,7 +103,7 @@ bool EgGraphDatabaseTests::testEgDataNodesTypeDelNode(EgDataNodesType& testDataN
     testDataNodes.DeleteDataNode(5);
 
     testDataNodes.StoreData();
-    testDataNodes.LoadAllNodes();
+    testDataNodes.LoadAllDataNodes();
 
     bool res = ((testDataNodes.deletedDataNodes.count() == 0) && (testDataNodes.dataNodes.count() == 7));
 
@@ -121,7 +121,7 @@ bool EgGraphDatabaseTests::testEgDataNodesTypeUpdateNode(EgDataNodesType& testDa
     testDataNodes.UpdateDataNode(updValues, 3);
 
     testDataNodes.StoreData();
-    testDataNodes.LoadAllNodes();
+    testDataNodes.LoadAllDataNodes();
 
     bool res = ((testDataNodes.updatedDataNodes.count() == 0) && (testDataNodes.dataNodes.count() == 7));
 
@@ -134,7 +134,7 @@ bool EgGraphDatabaseTests::testEgDataNodesTypeBasicLoadStore(EgDataNodesType& te
 {
     testDataNodes.StoreData();
 
-    testDataNodes.LoadAllNodes();
+    testDataNodes.LoadAllDataNodes();
 
     // qDebug() <<  "dataNodes count = " << testDataNodes.dataNodes.count() << FN;
 
@@ -235,7 +235,7 @@ bool EgGraphDatabaseTests::testEgLinksBasics(EgDataNodesType& testDataNodes)
     // testDataNodes.metaInfo.myECoGraphDB-> StoreAllLinks();
     // testDataNodes.metaInfo.myECoGraphDB-> LoadAllLinks();
 
-    bool res = (testDataNodes.metaInfo.myECoGraphDB-> linkTypes["testTree"].linksStorage-> dataNodes.count() == 3); // (graphDB.metaInfo->dataFields.count() == 2) // && (testDataNodes.dataNodes.count() == 8))
+    bool res = (testDataNodes.extraInfo.myECoGraphDB-> linkTypes["testTree"].linksStorage-> dataNodes.count() == 3); // (graphDB.metaInfo->dataFields.count() == 2) // && (testDataNodes.dataNodes.count() == 8))
 
     // qDebug() <<  "dataNodes count = " << testDataNodes.dataNodes.count() << FN;
 

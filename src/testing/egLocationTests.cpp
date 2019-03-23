@@ -75,7 +75,7 @@ bool EgLocationTests::testLoadLocationsData()
 
     testDataNodes.Connect(graphDB, "locations");
 
-    testDataNodes.LoadData("status", EQ, 2);
+    testDataNodes.LoadDataByIndexes("status", EQ, 2);
 
     // testDataNodes.LoadLocationsData();
 

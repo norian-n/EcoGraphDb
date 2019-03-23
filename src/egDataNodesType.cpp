@@ -48,7 +48,7 @@ EgDataNodesType::~EgDataNodesType()
         delete index_tree;
 }
 
-int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,  const QString &serverAddress) // connect to server
+int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName) // connect to server
 {
     int res = 0;
 
@@ -60,13 +60,12 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
         return 1;
     }
 
-    metaInfo.myECoGraphDB = &myDB;
-    metaInfo.typeName = nodeTypeName;
-    metaInfo.serverAddress = serverAddress;
+    extraInfo.myECoGraphDB = &myDB;
+    extraInfo.typeName = nodeTypeName;
 
-    if (serverAddress.isEmpty())
+    if (myDB.serverAddress.isEmpty())
     {
-        if (metaInfo.LocalLoadMetaInfo())
+        if (extraInfo.LocalLoadExtraInfo())
         {
             // if (! nodeTypeName.contains(EgDataNodesNamespace::egGUIfileName))
                 qDebug()  << "Can't load meta info of data nodes type " << nodeTypeName << FN;
@@ -74,15 +73,13 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
             res = -1;
         }
 
-        LocalFiles-> Init(metaInfo);
+        LocalFiles-> Init(extraInfo);
         index_tree = new EgIndexConditionsTree();
 
     }
     else
     {
-        metaInfo.serverConnection= new EgServerConnection(); // FIXME serverAddress
-
-        if (metaInfo.ServerLoadMetaInfo())
+        if (extraInfo.ServerLoadExtraInfo())
         {
             // if (! nodeTypeName.contains(EgDataNodesNamespace::egGUIfileName))
                 qDebug()  << "Can't load meta info of data nodes type " << nodeTypeName << FN;
@@ -91,63 +88,61 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName,
         }
     }
 
-        // connect to peer database controller
+                // connect to peer database controller
     if (! res)
-        res = myDB.Attach(this, serverAddress);  // TODO FIXME implement double-check files
+        res = myDB.AttachNodesType(this);  // TODO FIXME implement double-check files
 
-    if (metaInfo.typeSettings.useLocation)
+        // connect support node types
+    if (! res)
     {
-        // qDebug()  << "Connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
+        if (extraInfo.typeSettings.useLocation)
+        {
+            // qDebug()  << "Connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
 
-        locations = new EgDataNodesLocation(this);
+            locations = new EgDataNodesLocation(this);
 
-        int locres = locations->locationStorage-> ConnectServiceNodeType(myDB, nodeTypeName + EgDataNodesNamespace::egLocationFileName, serverAddress);
+            int locres = locations->locationStorage-> ConnectServiceNodeType(myDB, nodeTypeName + EgDataNodesNamespace::egLocationFileName);
 
-        if (locres)
-            qDebug()  << "Can't connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
+            if (locres)
+                qDebug()  << "Can't connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
+        }
+
+        if (extraInfo.typeSettings.useNamedAttributes)
+        {
+            // qDebug()  << "Connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
+
+            namedAttributes = new EgNamedAttributes(this);
+
+            int attrres = namedAttributes->namedAttributesStorage-> ConnectServiceNodeType(myDB, nodeTypeName + EgDataNodesNamespace::egAttributesFileName);
+
+            if (attrres)
+                qDebug()  << "Can't connect named attributes info " << nodeTypeName + EgDataNodesNamespace::egAttributesFileName << FN;
+        }
+
+        if (extraInfo.typeSettings.useEntryNodes)
+        {
+            // qDebug()  << "Connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
+
+            entryNodes = new EgEntryNodes(this);
+
+            int entres = entryNodes->entryStorage-> ConnectServiceNodeType(myDB, nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName);
+
+            if (entres)
+                qDebug()  << "Can't connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
+        }
+
+        GUI = new EgDataNodesGUIsupport(this); // needed for basic UI interaction
+
+        if (extraInfo.typeSettings.useGUIsettings) // FIXME server
+        {
+            int guires = GUI-> LoadSimpleControlDesc();
+
+            if (guires)
+                qDebug()  << "Can't load GUI settings of " << nodeTypeName << FN;
+        }
     }
 
-    if (metaInfo.typeSettings.useNamedAttributes)
-    {
-        // qDebug()  << "Connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
-
-        namedAttributes = new EgNamedAttributes(this);
-
-        int attrres = namedAttributes->namedAttributesStorage-> ConnectServiceNodeType(myDB, nodeTypeName + EgDataNodesNamespace::egAttributesFileName, serverAddress);
-
-        if (attrres)
-            qDebug()  << "Can't connect named attributes info " << nodeTypeName + EgDataNodesNamespace::egAttributesFileName << FN;
-    }
-
-    if (metaInfo.typeSettings.useEntryNodes)
-    {
-        // qDebug()  << "Connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
-
-        entryNodes = new EgEntryNodes(this);
-
-        int entres = entryNodes->entryStorage-> ConnectServiceNodeType(myDB, nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName, serverAddress);
-
-        if (entres)
-            qDebug()  << "Can't connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
-    }
-
-    GUI = new EgDataNodesGUIsupport(this); // needed for basic UI interaction
-
-    if (metaInfo.typeSettings.useGUIsettings) // FIXME server
-    {
-        int guires = GUI-> LoadSimpleControlDesc();
-
-        if (guires)
-            qDebug()  << "Can't load GUI settings of " << nodeTypeName << FN;
-    }
-
-
-        // init special data node
-    notFound.extraInfo = &metaInfo;
-    notFound.dataFields.clear();
-
-    for (int i = 0; i < metaInfo.dataFields.count(); i++)
-        notFound.dataFields << QVariant("<Not found>");
+    initNotFoundVirtualNode(); // init special data node
 
     if (! res)
         res = getMyLinkTypes(); // extract nodetype-specific link types from all link types
@@ -162,7 +157,7 @@ int EgDataNodesType::ConnectLinkType(const QString& linkTypeName)
 {
     if (! isConnected)
     {
-        qDebug()  << "Error: data nodes type " << metaInfo.typeName << " should be connected before link type: " << linkTypeName << FN;
+        qDebug()  << "Error: data nodes type " << extraInfo.typeName << " should be connected before link type: " << linkTypeName << FN;
 
         return -1;
     }
@@ -170,16 +165,15 @@ int EgDataNodesType::ConnectLinkType(const QString& linkTypeName)
         // find link
     if (! myLinkTypes.contains(linkTypeName))
     {
-        qDebug() << metaInfo.typeName << " : bad link type name: " << linkTypeName << FN;
+        qDebug() << extraInfo.typeName << " : bad link type name: " << linkTypeName << FN;
         return -1;
     }
 
-    return myLinkTypes[linkTypeName]->linksStorage-> ConnectServiceNodeType(*(metaInfo.myECoGraphDB),
-                                     QString(linkTypeName + EgDataNodesLinkNamespace::egLinkFileNamePostfix),
-                                     metaInfo.serverAddress);
+    return myLinkTypes[linkTypeName]->linksStorage-> ConnectServiceNodeType(*(extraInfo.myECoGraphDB),
+                                     QString(linkTypeName + EgDataNodesLinkNamespace::egLinkFileNamePostfix));
 }
 
-int EgDataNodesType::ConnectServiceNodeType(EgGraphDatabase& myDB, const QString& nodeTypeName, const QString &serverAddress) // connect to server
+int EgDataNodesType::ConnectServiceNodeType(EgGraphDatabase& myDB, const QString& nodeTypeName) // connect to server
 {
     int res = 0;
 
@@ -191,12 +185,12 @@ int EgDataNodesType::ConnectServiceNodeType(EgGraphDatabase& myDB, const QString
         return 1;
     }
 
-    metaInfo.myECoGraphDB = &myDB;
-    metaInfo.typeName = nodeTypeName;
+    extraInfo.myECoGraphDB = &myDB;
+    extraInfo.typeName = nodeTypeName;
 
-    if (serverAddress.isEmpty())
+    if (myDB.serverAddress.isEmpty())
     {
-        if (metaInfo.LocalLoadMetaInfo())
+        if (extraInfo.LocalLoadExtraInfo())
         {
             // if (! nodeTypeName.contains(EgDataNodesNamespace::egGUIfileName))
                 qDebug()  << "Can't load meta info of data nodes type " << nodeTypeName << FN;
@@ -204,15 +198,13 @@ int EgDataNodesType::ConnectServiceNodeType(EgGraphDatabase& myDB, const QString
             res = -1;
         }
 
-        LocalFiles-> Init(metaInfo);
+        LocalFiles-> Init(extraInfo);
         index_tree = new EgIndexConditionsTree();
 
     }
     else
     {
-        metaInfo.serverConnection= new EgServerConnection(); // FIXME serverAddress
-
-        if (metaInfo.ServerLoadMetaInfo())
+        if (extraInfo.ServerLoadExtraInfo())
         {
             // if (! nodeTypeName.contains(EgDataNodesNamespace::egGUIfileName))
                 qDebug()  << "Can't load meta info of data nodes type " << nodeTypeName << FN;
@@ -221,12 +213,7 @@ int EgDataNodesType::ConnectServiceNodeType(EgGraphDatabase& myDB, const QString
         }
     }
 
-        // init special data node
-    notFound.extraInfo = &metaInfo;
-    notFound.dataFields.clear();
-
-    for (int i = 0; i < metaInfo.dataFields.count(); i++)
-        notFound.dataFields << QVariant("<Not found>");
+    initNotFoundVirtualNode();
 
     if (! res)
         isConnected = true;
@@ -234,18 +221,28 @@ int EgDataNodesType::ConnectServiceNodeType(EgGraphDatabase& myDB, const QString
     return res;
 }
 
+inline void EgDataNodesType::initNotFoundVirtualNode()
+{
+        // init special data node
+    notFound.extraInfo = &extraInfo;
+    notFound.dataFields.clear();
+
+    for (int i = 0; i < extraInfo.dataFields.count(); i++)
+        notFound.dataFields << QVariant("<Not found>");
+}
+
 
 int EgDataNodesType::getMyLinkTypes()
 {
-    if (metaInfo.myECoGraphDB)
+    if (extraInfo.myECoGraphDB)
             // QMap<QString, EgDataNodesLinkType>::iterator
-        for (auto linksIter = metaInfo.myECoGraphDB-> linkTypes.begin(); linksIter != metaInfo.myECoGraphDB-> linkTypes.end(); ++linksIter)
+        for (auto linksIter = extraInfo.myECoGraphDB-> linkTypes.begin(); linksIter != extraInfo.myECoGraphDB-> linkTypes.end(); ++linksIter)
         {
              // qDebug() << "linksIter.key() = " << linksIter.key()
              //        << "linksIter.value().firstTypeName = " << linksIter.value().firstTypeName
              //        << "linksIter.value().secondTypeName = " << linksIter.value().secondTypeName << FN;
 
-            if ((linksIter.value().firstTypeName == metaInfo.typeName) || (linksIter.value().secondTypeName == metaInfo.typeName))
+            if ((linksIter.value().firstTypeName == extraInfo.typeName) || (linksIter.value().secondTypeName == extraInfo.typeName))
             {
                 myLinkTypes.insert(linksIter.key(), &(linksIter.value()));
 
@@ -277,7 +274,7 @@ EgDataNode& EgDataNodesType::operator [](EgDataNodeIdType objID)
     }
     else
     {
-        qDebug() << metaInfo.typeName << "- not found data node for ID = " << objID << FN;
+        qDebug() << extraInfo.typeName << "- not found data node for ID = " << objID << FN;
         return notFound;
     }
 }
@@ -290,7 +287,7 @@ int EgDataNodesType::AddArrowLink(const QString& linkName, EgDataNodeIdType from
 
     if ( ! myLinkTypes.contains(linkName))
     {
-        qDebug() << metaInfo.typeName << " : bad link name: " << linkName << FN;
+        qDebug() << extraInfo.typeName << " : bad link name: " << linkName << FN;
         return -1;
     }
 
@@ -400,7 +397,7 @@ void EgDataNodesType::ClearData()
     //    namedAttributes->namedAttributesStorage-> ClearData();
 }
 
-int EgDataNodesType::LoadAllNodes()
+int EgDataNodesType::LoadAllDataNodes()
 {
     int res = 0;
 
@@ -410,23 +407,23 @@ int EgDataNodesType::LoadAllNodes()
 
     // qDebug() << "IndexOffsets = " << IndexOffsets << FN;
 
-    if (metaInfo.serverConnection)
+    if (extraInfo.myECoGraphDB-> serverConnection)
     {
-        res = metaInfo.serverConnection-> OpenLoadStream(opcode_load_all_data, metaInfo.serverStream, metaInfo.typeName);
+        res = extraInfo.myECoGraphDB-> serverConnection-> OpenLoadStream(opcode_load_all_data, extraInfo.myECoGraphDB-> serverStream, extraInfo.typeName);
 
         if (! res)
         {
-            res = metaInfo.serverConnection-> WaitForSending(); // command
+            res = extraInfo.myECoGraphDB-> serverConnection-> WaitForSending(); // command
 
             // qDebug << serverConnection-> tcpSocket.state() << "" << ; WaitForReadyRead
 
             if (! res)
-                res = metaInfo.serverConnection-> WaitForReadyRead();
+                res = extraInfo.myECoGraphDB-> serverConnection-> WaitForReadyRead();
 
             if(! res)
-                LocalFiles-> ReceiveDataNodes(dataNodes, *(metaInfo.serverStream));
+                LocalFiles-> ReceiveDataNodes(dataNodes, *(extraInfo.myECoGraphDB-> serverStream));
 
-            metaInfo.serverConnection-> Disconnect();
+            extraInfo.myECoGraphDB-> serverConnection-> Disconnect();
         }
 
     }
@@ -458,23 +455,23 @@ int EgDataNodesType::AutoLoadAllData()
 
     IndexOffsets.clear();
 
-    if (metaInfo.serverConnection)
+    if (extraInfo.myECoGraphDB-> serverConnection)
     {
-        res = metaInfo.serverConnection-> OpenLoadStream(opcode_load_all_data, metaInfo.serverStream, metaInfo.typeName);
+        res = extraInfo.myECoGraphDB-> serverConnection-> OpenLoadStream(opcode_load_all_data, extraInfo.myECoGraphDB-> serverStream, extraInfo.typeName);
 
         if (! res)
         {
-            res = metaInfo.serverConnection-> WaitForSending(); // command
+            res = extraInfo.myECoGraphDB-> serverConnection-> WaitForSending(); // command
 
             // qDebug << serverConnection-> tcpSocket.state() << "" << ; WaitForReadyRead
 
             if (! res)
-                res = metaInfo.serverConnection-> WaitForReadyRead();
+                res = extraInfo.myECoGraphDB-> serverConnection-> WaitForReadyRead();
 
             if(! res)
-                LocalFiles-> ReceiveDataNodes(dataNodes, *(metaInfo.serverStream));
+                LocalFiles-> ReceiveDataNodes(dataNodes, *(extraInfo.myECoGraphDB-> serverStream));
 
-            metaInfo.serverConnection-> Disconnect();
+            extraInfo.myECoGraphDB-> serverConnection-> Disconnect();
         }
 
     }
@@ -491,13 +488,13 @@ int EgDataNodesType::AutoLoadAllData()
 
     // load secondary info
     if (locations && ! res)
-        locations->locationStorage-> LoadAllNodes();
+        locations->locationStorage-> LoadAllDataNodes();
 
     if (entryNodes && ! res)
-        entryNodes->entryStorage-> LoadAllNodes();
+        entryNodes->entryStorage-> LoadAllDataNodes();
 
     if (namedAttributes && ! res)
-        namedAttributes->namedAttributesStorage-> LoadAllNodes();
+        namedAttributes->namedAttributesStorage-> LoadAllDataNodes();
 
     return res;
 }
@@ -511,7 +508,7 @@ int EgDataNodesType::LoadLinkedData(QString linkName, EgDataNodeIdType fromNodeI
         // find link
     if (! myLinkTypes.contains(linkName))
     {
-        qDebug() << metaInfo.typeName << " : bad link name: " << linkName << FN;
+        qDebug() << extraInfo.typeName << " : bad link name: " << linkName << FN;
         return -1;
     }
 
@@ -569,7 +566,7 @@ int EgDataNodesType::LoadLocationsData()
 
 int EgDataNodesType::CompressData()
 {
-    if (metaInfo.serverConnection)
+    if (extraInfo.myECoGraphDB-> serverConnection)
        return -1; // return ConnectonClient->RemoteCompressData();  FIXME
     else
         return LocalFiles->LocalCompressData();
@@ -582,9 +579,9 @@ int EgDataNodesType::AddDataNode(EgDataNode& tmpObj)
     // qDebug() << "metaInfo.nextObjID = " << metaInfo.nextObjID << FN;
 
         // set next available ID FIXME : thread safe
-    tmpObj.dataNodeID = metaInfo.nextNodeID++;
+    tmpObj.dataNodeID = extraInfo.nextNodeID++;
     tmpObj.isAdded = true;
-    tmpObj.extraInfo = &metaInfo;
+    tmpObj.extraInfo = &extraInfo;
 
         // copy to map and then add to pointers list
     dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, tmpObj);
@@ -601,10 +598,10 @@ int EgDataNodesType::AddDataNode(QList<QVariant>& myData)
     EgDataNode tmpObj;
 
         // set next available ID FIXME : thread safe
-    tmpObj.dataNodeID = metaInfo.nextNodeID++;
+    tmpObj.dataNodeID = extraInfo.nextNodeID++;
     tmpObj.dataFields = myData;
     tmpObj.isAdded = true;
-    tmpObj.extraInfo = &metaInfo;
+    tmpObj.extraInfo = &extraInfo;
 
         // copy to map and then add to pointers list
     dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, tmpObj);
@@ -619,10 +616,10 @@ int EgDataNodesType::AddDataNode(QList<QVariant>& myData, EgDataNodeIdType& newI
     EgDataNode tmpObj;
 
         // set next available ID FIXME : thread safe
-    tmpObj.dataNodeID = metaInfo.nextNodeID++;
+    tmpObj.dataNodeID = extraInfo.nextNodeID++;
     tmpObj.dataFields = myData;
     tmpObj.isAdded = true;
-    tmpObj.extraInfo = &metaInfo;
+    tmpObj.extraInfo = &extraInfo;
 
         // copy to map and then add to pointers list
     dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, tmpObj);
@@ -641,11 +638,11 @@ int EgDataNodesType::AddHardLinked(QList<QVariant>& myData, EgDataNodeIdType nod
 
         // set next available ID FIXME : thread safe
     tmpObj.dataNodeID = nodeID;
-    metaInfo.nextNodeID = (metaInfo.nextNodeID >= nodeID) ?  metaInfo.nextNodeID+1 : nodeID;
+    extraInfo.nextNodeID = (extraInfo.nextNodeID >= nodeID) ?  extraInfo.nextNodeID+1 : nodeID;
 
     tmpObj.dataFields = myData;
     tmpObj.isAdded = true;
-    tmpObj.extraInfo = &metaInfo;
+    tmpObj.extraInfo = &extraInfo;
 
         // copy to map and then add to pointers list
     dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, tmpObj);
@@ -779,40 +776,40 @@ int EgDataNodesType::StoreData()
     if (! (addedDataNodes.isEmpty() && deletedDataNodes.isEmpty() && updatedDataNodes.isEmpty())) // not all are empty
     {
             // update metainfo
-        metaInfo.nodesCount += addedDataNodes.count() - deletedDataNodes.count();
+        extraInfo.nodesCount += addedDataNodes.count() - deletedDataNodes.count();
 
         // qDebug()  << "Nodes Type: " << metaInfo.typeName << " nextNodeID: " << metaInfo.nextNodeID << FN;
 
         // pack data and update index fields
-        if (metaInfo.serverConnection)
+        if (extraInfo.myECoGraphDB-> serverConnection)
         {
-            ret_val = metaInfo.ServerStoreMetaInfo();
+            ret_val = extraInfo.ServerStoreExtraInfo();
 
             if (! ret_val)
-                ret_val = metaInfo.serverConnection-> OpenStoreStream(opcode_store_data, metaInfo.serverStream, metaInfo.typeName);
+                ret_val = extraInfo.myECoGraphDB-> serverConnection-> OpenStoreStream(opcode_store_data, extraInfo.myECoGraphDB-> serverStream, extraInfo.typeName);
 
                 // send added nodes
             if (! ret_val)
             {
-                LocalFiles-> SendNodesToStream(addedDataNodes, *(metaInfo.serverStream));
+                LocalFiles-> SendNodesToStream(addedDataNodes, *(extraInfo.myECoGraphDB-> serverStream));
 
-                metaInfo.serverConnection-> WaitForSending();
+                extraInfo.myECoGraphDB-> serverConnection-> WaitForSending();
 
-                LocalFiles-> SendNodesToStream(deletedDataNodes, *(metaInfo.serverStream));
+                LocalFiles-> SendNodesToStream(deletedDataNodes, *(extraInfo.myECoGraphDB-> serverStream));
 
-                metaInfo.serverConnection-> WaitForSending();
+                extraInfo.myECoGraphDB-> serverConnection-> WaitForSending();
 
-                LocalFiles-> SendNodesToStream(updatedDataNodes, *(metaInfo.serverStream));
+                LocalFiles-> SendNodesToStream(updatedDataNodes, *(extraInfo.myECoGraphDB-> serverStream));
 
-                metaInfo.serverConnection-> WaitForSending();
+                extraInfo.myECoGraphDB-> serverConnection-> WaitForSending();
             }
 
 
-            metaInfo.serverConnection-> Disconnect();
+            extraInfo.myECoGraphDB-> serverConnection-> Disconnect();
         }
         else
         {
-            ret_val = metaInfo.LocalStoreMetaInfo();
+            ret_val = extraInfo.LocalStoreExtraInfo();
 
             if(! ret_val)
                 ret_val = LocalFiles-> LocalStoreData(addedDataNodes, deletedDataNodes, updatedDataNodes);
@@ -843,40 +840,40 @@ int EgDataNodesType::StoreData()
     return  ret_val;
 }
 
-int EgDataNodesType::LoadData(QString a_FieldName, int an_oper, QVariant a_value)
+int EgDataNodesType::LoadDataByIndexes(QString a_FieldName, int an_oper, QVariant a_value)
 {
     EgIndexCondition indexCondition(a_FieldName, an_oper, a_value);
 
-    return LoadData(indexCondition);
+    return LoadDataByIndexes(indexCondition);
 }
 
 
-int EgDataNodesType::LoadData(const EgIndexCondition &indexCondition)
+int EgDataNodesType::LoadDataByIndexes(const EgIndexCondition &indexCondition)
 {
     int res = 0;
 
     ClearData();
 
-    if (metaInfo.serverConnection)
+    if (extraInfo.myECoGraphDB-> serverConnection)
     {
-        res = metaInfo.serverConnection-> OpenStoreStream(opcode_load_selected_data, metaInfo.serverStream, metaInfo.typeName);
+        res = extraInfo.myECoGraphDB-> serverConnection-> OpenStoreStream(opcode_load_selected_data, extraInfo.myECoGraphDB-> serverStream, extraInfo.typeName);
 
         if (! res)
         {
-            index_tree-> TransferTreeSet(indexCondition.iTreeNode, *(metaInfo.serverStream));
+            index_tree-> TransferTreeSet(indexCondition.iTreeNode, *(extraInfo.myECoGraphDB-> serverStream));
 
-            res = metaInfo.serverConnection-> WaitForSending();
+            res = extraInfo.myECoGraphDB-> serverConnection-> WaitForSending();
 
             // qDebug << serverConnection-> tcpSocket.state() << "" << ; WaitForReadyRead
 
             if (! res)
-                res = metaInfo.serverConnection-> WaitForReadyRead();
+                res = extraInfo.myECoGraphDB-> serverConnection-> WaitForReadyRead();
 
             if(! res)
-                LocalFiles-> ReceiveDataNodes(dataNodes, metaInfo.serverConnection-> in);
+                LocalFiles-> ReceiveDataNodes(dataNodes, extraInfo.myECoGraphDB-> serverConnection-> in);
 
 
-            metaInfo.serverConnection-> Disconnect();
+            extraInfo.myECoGraphDB-> serverConnection-> Disconnect();
         }
     }
     else
@@ -981,7 +978,7 @@ int EgDataNodesType::StoreLinkType(QString linkName)
 {
     if (! myLinkTypes.contains(linkName))
     {
-        qDebug() << metaInfo.typeName << " - bad link name: " << linkName << FN;
+        qDebug() << extraInfo.typeName << " - bad link name: " << linkName << FN;
         return -1;
     }
 
@@ -995,7 +992,7 @@ int EgDataNodesType::LoadLinkType(QString linkName)
 {
     if (! myLinkTypes.contains(linkName))
     {
-        qDebug() << metaInfo.typeName << " - bad link name: " << linkName << FN;
+        qDebug() << extraInfo.typeName << " - bad link name: " << linkName << FN;
         return -1;
     }
 
@@ -1017,7 +1014,7 @@ int EgDataNodesType::AddEntryNode(EgDataNodeIdType entryNodeID)
     }
     else
     {
-        qDebug() << "Cant find data node ID of " << metaInfo.typeName << " " << hex << entryNodeID << FN;
+        qDebug() << "Cant find data node ID of " << extraInfo.typeName << " " << hex << entryNodeID << FN;
         qDebug() << dataNodes.keys() << FN;
         return -1;
     }

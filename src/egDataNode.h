@@ -68,8 +68,8 @@ public:
 
     bool isAdded {false};                               // is not stored yet
 
-    EgDataNodeTypeExtraInfo* extraInfo { nullptr };       // data type metainfo backlink
-    EgDataNodeLinks* nodeLinks       { nullptr };       // links to other nodes if required
+    EgDataNodeTypeExtraInfo* extraInfo { nullptr };     // data type extrainfo backlink
+    EgDataNodeLinks* nodeLinks         { nullptr };     // links to other nodes if required
 
     QList<QVariant> dataFields;                         // data itself
 

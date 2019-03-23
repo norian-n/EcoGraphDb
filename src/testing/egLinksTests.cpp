@@ -60,7 +60,7 @@ void EgLinksTests::testCreateLinks()
 
     testDataNodes.Connect(graphDB, "linksTest");
 
-    testDataNodes.LoadAllNodes();
+    testDataNodes.LoadAllDataNodes();
 
     testDataNodes.AddArrowLink("linksTestTree", 1, testDataNodes, 4);
     testDataNodes.AddArrowLink("linksTestTree", 1, testDataNodes, 6);
@@ -115,7 +115,7 @@ void EgLinksTests::testUpdateIndexedNodes()
 
     testDataNodes.Connect(graphDB, "linksTest");
 
-    testDataNodes.LoadAllNodes();
+    testDataNodes.LoadAllDataNodes();
 
     for (int i = 0; i < 110; i++)
     {
@@ -145,7 +145,7 @@ void EgLinksTests::testUpdateIndexedNodes()
     qDebug() << "testDataNodes.DataNodesCount GE = " << (int) testDataNodes.DataNodesCount() << FN ;
     */
 
-    testDataNodes.LoadData(IC("status", EQ, 2));
+    testDataNodes.LoadDataByIndexes(IC("status", EQ, 2));
 
     // qDebug() << testDataNodes.DataNodesCount() << FN;
 

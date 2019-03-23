@@ -22,7 +22,7 @@ HEADERS += indexes/egIndexesFiles.h \
     egGraphDatabase.h \
     egCore.h
 
-SOURCES += egMetaInfo.cpp \
+SOURCES += egExtraInfo.cpp \
     egDataNode.cpp \
     egDataNodesType.cpp \
     egDataClient.cpp \

@@ -75,7 +75,7 @@ int EgDataNodesGUIsupport::LoadSimpleControlDesc()
     // if (! controlDescs)
     //    controlDescs = new EgDataNodesType();
 
-    if (controlDescs-> ConnectServiceNodeType(*(primaryNodesType-> metaInfo.myECoGraphDB), primaryNodesType-> metaInfo.typeName + egGUIfileName, primaryNodesType-> metaInfo.serverAddress))
+    if (controlDescs-> ConnectServiceNodeType(*(primaryNodesType-> extraInfo.myECoGraphDB), primaryNodesType-> extraInfo.typeName + egGUIfileName))
     {
             // qDebug()  << "No control descs for dataNodeType " << primaryNodesType-> metaInfo.typeName + egGUIfileName << FN;
             return 1;
@@ -83,16 +83,16 @@ int EgDataNodesGUIsupport::LoadSimpleControlDesc()
 
     basicControlDescs.clear();
 
-    controlDescs-> LoadAllNodes();
+    controlDescs-> LoadAllDataNodes();
 
     // qDebug()  << "Control descs count = " << controlDescs-> dataNodes.count() << FN;
 
     for (QMap<EgDataNodeIdType, EgDataNode>::iterator nodesIter = controlDescs-> dataNodes.begin(); nodesIter != controlDescs-> dataNodes.end(); ++nodesIter)
     {
-        if (primaryNodesType-> metaInfo.nameToOrder.contains(nodesIter.value()["name"].toString()))
+        if (primaryNodesType-> extraInfo.nameToOrder.contains(nodesIter.value()["name"].toString()))
         {
             newDesc = EgBasicControlDesc(nodesIter.value());
-            newDesc.fieldIndex = primaryNodesType-> metaInfo.nameToOrder[nodesIter.value()["name"].toString()];
+            newDesc.fieldIndex = primaryNodesType-> extraInfo.nameToOrder[nodesIter.value()["name"].toString()];
             // newDesc.controlLabel = nodesIter.value()["label"].toString();
             // newDesc.controlDefWidth = nodesIter.value()["width"].toInt();
 
@@ -135,7 +135,7 @@ int EgDataNodesGUIsupport::AddSimpleControlDesc(QString fieldName, QString field
     // if (! CheckLocalGUIFile())      // FIXME server
     //    CreateDataNodesForControlDescs();
 
-    controlDescs-> Connect(*(primaryNodesType-> metaInfo.myECoGraphDB), primaryNodesType-> metaInfo.typeName + egGUIfileName);
+    controlDescs-> Connect(*(primaryNodesType-> extraInfo.myECoGraphDB), primaryNodesType-> extraInfo.typeName + egGUIfileName);
 
     addValues << fieldName << fieldLabel << fieldWidth;
 
@@ -314,7 +314,7 @@ int EgDataNodesGUIsupport::DataToModelTree(QStandardItemModel* model, QString li
 
     if (! primaryNodesType-> entryNodes)   // no entry nodes option
     {
-        qDebug()  << "Entry nodes not enabled for type: " << primaryNodesType->metaInfo.typeName << FN;
+        qDebug()  << "Entry nodes not enabled for type: " << primaryNodesType->extraInfo.typeName << FN;
         return -1;
     }
 
@@ -476,17 +476,17 @@ QVariant EgDataNodesGUIsupport::GetComboBoxID(QComboBox* my_box)
 
 int EgDataNodesGUIsupport::AddAutoSubstitute(const char* my_field, EgDataNodesType& ref_class, const char* ref_field)
 {
-    if (basicControlDescsOrder.contains(my_field) && ref_class.metaInfo.nameToOrder.contains(ref_field))
+    if (basicControlDescsOrder.contains(my_field) && ref_class.extraInfo.nameToOrder.contains(ref_field))
     {
         basicControlDescsOrder[my_field]-> AutoSubstClass = &ref_class;
-        basicControlDescsOrder[my_field]-> AutoSubstFieldIndex = ref_class.metaInfo.nameToOrder[ref_field];
+        basicControlDescsOrder[my_field]-> AutoSubstFieldIndex = ref_class.extraInfo.nameToOrder[ref_field];
 
         return 0;
     }
 
     qDebug() << "Bad field name, descriptors follow" << FN;
     qDebug() << basicControlDescsOrder << FN;
-    qDebug() << ref_class.metaInfo.nameToOrder << FN;
+    qDebug() << ref_class.extraInfo.nameToOrder << FN;
 
     return -1;
 }

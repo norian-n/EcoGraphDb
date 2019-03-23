@@ -19,7 +19,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     egServerEngine.cpp \
     main.cpp \
-    ../egMetaInfo.cpp \
+    ../egExtraInfo.cpp \
     ../egDataClient.cpp \
     ../indexes/egIndexesFiles.cpp \
     ../indexes/egIndexes.cpp \

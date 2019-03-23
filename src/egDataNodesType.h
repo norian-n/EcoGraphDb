@@ -48,7 +48,7 @@ public:
     EgDataFiles*  LocalFiles = nullptr;             // data files support functionality
     EgIndexConditionsTree* index_tree = nullptr;    // indexed fields operations
 
-    EgDataNodeTypeExtraInfo metaInfo;                // general data nodes type info
+    EgDataNodeTypeExtraInfo extraInfo;                // general data nodes type info
 
     EgDataNode notFound;                            // dummy data node
 
@@ -74,19 +74,21 @@ public:
         // basic operations
 
         // register node type at EgGraphDatabase, load metadata
-    int Connect(EgGraphDatabase& myDB, const QString& nodeTypeName, const QString& serverAddress = QString());
+    int Connect(EgGraphDatabase& myDB, const QString& nodeTypeName);
 
     int ConnectLinkType(const QString& linkTypeName);
 
         // minimal config, no type extensions, no gui, dont use it in apps
-    int ConnectServiceNodeType(EgGraphDatabase& myDB, const QString& nodeTypeName, const QString& serverAddress = QString());
+    int ConnectServiceNodeType(EgGraphDatabase& myDB, const QString& nodeTypeName);
+
+    inline void initNotFoundVirtualNode();
 
     void ClearData();                   // data nodes content and support data cleanup
 
-    int LoadData(QString a_FieldName, int an_oper, QVariant a_value); // single index condition ("odb_pit", EQ, projectID);
-    int LoadData(const EgIndexCondition &indexCondition);             // any index condition IC("owner", EQ, 2) &&  IC("status", EQ, 3)
+    int LoadDataByIndexes(QString a_FieldName, int an_oper, QVariant a_value); // single index condition ("odb_pit", EQ, projectID);
+    int LoadDataByIndexes(const EgIndexCondition &indexCondition);             // any index condition IC("owner", EQ, 2) &&  IC("status", EQ, 3)
 
-    int LoadAllNodes();                 // no locations, links, entry, GUI, etc.
+    int LoadAllDataNodes();                 // no locations, links, entry, GUI, etc.
     int LoadLinkedData(QString linkName, EgDataNodeIdType fromNodeID); // only nodes linked to this one
     // int LoadLocationsData();         // FIXME private, if not load all
 
@@ -137,7 +139,7 @@ public:
 
     int RemoveLocalFiles();       // total destruction
 
-    EgFieldIDtype FieldsCount()       { return metaInfo.dataFields.count(); }
+    EgFieldIDtype FieldsCount()       { return extraInfo.dataFields.count(); }
     EgFieldIDtype ModelFieldsCount()  { if (GUI) return GUI-> basicControlDescs.count(); else return 0; }
     EgDataNodeIdType DataNodesCount() { return dataNodes.count(); }
 

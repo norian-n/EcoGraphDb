@@ -15,8 +15,8 @@ EgServerConnection::EgServerConnection():
    out(&block, QIODevice::WriteOnly),
    serverAddress(QHostAddress(QHostAddress::LocalHost).toString())
 {
-    out.setVersion(QDataStream::Qt_4_0);    // FIXME version hardcoded
-    in.setVersion(QDataStream::Qt_4_0);
+    // out.setVersion(QDataStream::Qt_4_0);    // FIXME check version hardcoded
+    // in.setVersion(QDataStream::Qt_4_0);
 }
 
 
@@ -26,8 +26,8 @@ EgServerConnection::EgServerConnection(const QString& aServerAddress):
     out(&block, QIODevice::WriteOnly),
     serverAddress(aServerAddress)
 {
-    out.setVersion(QDataStream::Qt_4_0);    // FIXME version hardcoded
-    in.setVersion(QDataStream::Qt_4_0);
+    // out.setVersion(QDataStream::Qt_4_0);    // FIXME check version hardcoded
+    // in.setVersion(QDataStream::Qt_4_0);
 }
 
 

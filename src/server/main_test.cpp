@@ -10,8 +10,8 @@
 #include <QDebug>
 #include <QThread>
 
-#include "../EgDataClient.h"
-#include "../egMetaInfo.h"
+#include "../egDataClient.h"
+#include "../egExtraInfo.h"
 #include "../egDataNodesType.h"
 #include "../egGraphDatabase.h"
 
@@ -112,7 +112,7 @@ int main() // int argc, char *argv[])
     testType2.Connect(graphDB, "serverTestNodeType", "localhost");
 
     // QThread::msleep(200);
-    testType2.LoadData(IC("status", EQ, 8));
+    testType2.LoadDataByIndexes(IC("status", EQ, 8));
 
     //testType2.LoadAllNodes();
 

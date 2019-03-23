@@ -13,6 +13,12 @@
 
 using namespace EgDataNodesLinkNamespace;
 
+EgDataNodesLinkType::EgDataNodesLinkType():
+  linksStorage(new EgDataNodesType())
+{
+
+}
+
 EgDataNodesLinkType::EgDataNodesLinkType(EgGraphDatabase *theDatabase):
     egDatabase(theDatabase)
   , linksStorage(new EgDataNodesType())
@@ -30,11 +36,72 @@ EgDataNodesLinkType::~EgDataNodesLinkType()
 
 int EgDataNodesLinkType::AddLink (EgDataNodeIdType fromNodeID, EgDataNodeIdType toNodeID)
 {
+
     QList<QVariant> myData;
 
     myData << fromNodeID << toNodeID;
 
-    linksStorage-> AddDataNode(myData); // AddDataNode(EgDataNode& tmpObj)
+    linksStorage-> AddDataNode(myData);
+
+    /*
+    EgExtendedLinkType fwdLink, backLink;
+    QList<EgExtendedLinkType> newLinks;
+
+        // check if types connected
+    if (!firstType || !secondType)
+    {
+        qDebug() << linkName << " : data type(s) not connected to link type " << FN;
+
+        return -1;
+    }
+
+
+    if (firstType-> dataNodes.contains(fromNodeID) && secondType-> dataNodes.contains(toNodeID))
+    {
+            // fill new links info
+        fwdLink.dataNodeID = toNodeID;
+        fwdLink.dataNodePtr = &(secondType-> dataNodes[toNodeID]);
+
+        backLink.dataNodeID = fromNodeID;
+        backLink.dataNodePtr = &(firstType-> dataNodes[fromNodeID]);
+
+            // check/create links
+        if (! firstType-> dataNodes[fromNodeID].nodeLinks)
+          firstType-> dataNodes[fromNodeID].nodeLinks = new EgDataNodeLinks();
+
+        if (! secondType-> dataNodes[toNodeID].nodeLinks)
+          secondType-> dataNodes[toNodeID].nodeLinks = new EgDataNodeLinks();
+
+            // write fwd link
+        if (firstType-> dataNodes[fromNodeID].nodeLinks-> outLinks.contains(linkName))
+            firstType-> dataNodes[fromNodeID].nodeLinks-> outLinks[linkName].append(fwdLink);
+        else
+        {
+            newLinks.clear();
+            newLinks.append(fwdLink);
+
+            firstType-> dataNodes[fromNodeID].nodeLinks-> outLinks.insert(linkName, newLinks);
+        }
+
+            // FIXME RUNTIME SEGFAULT write back link
+        if (secondType-> dataNodes[toNodeID].nodeLinks-> outLinks.contains(linkName))
+            secondType-> dataNodes[toNodeID].nodeLinks-> outLinks[linkName].append(backLink);
+        else
+        {
+            newLinks.clear();
+            newLinks.append(backLink);
+
+            secondType-> dataNodes[toNodeID].nodeLinks-> outLinks.insert(linkName, newLinks);
+        }
+    }
+    else
+    {
+        qDebug() << "Link " << linkName << " of " << firstType->extraInfo.typeName << " link NOT added in memory for ID = " << fromNodeID << " to "
+                 << secondType->extraInfo.typeName << " " << toNodeID << FN;
+
+        // return -1;
+    }
+    */
 
     // qDebug() << linkName << ": link added " << fromNodeID << "to" <<  toNodeID << FN;
 
@@ -43,7 +110,7 @@ int EgDataNodesLinkType::AddLink (EgDataNodeIdType fromNodeID, EgDataNodeIdType 
     return 0;
 }
 
-int EgDataNodesLinkType::Connect(EgGraphDatabase& myDB, const QString& linkTypeName,  const QString &serverAddress)
+int EgDataNodesLinkType::Connect(EgGraphDatabase& myDB, const QString& linkTypeName)
 {
         // check if already connected FIXME implement reconnect
     if (isConnected)
@@ -61,10 +128,12 @@ int EgDataNodesLinkType::Connect(EgGraphDatabase& myDB, const QString& linkTypeN
         return -1;
     }
 */
+
+    linkName = linkTypeName;
+
         // connect links storage
     int res = linksStorage-> ConnectServiceNodeType(myDB,
-                                     QString(linkTypeName + EgDataNodesLinkNamespace::egLinkFileNamePostfix),
-                                     serverAddress);
+                                     QString(linkTypeName + EgDataNodesLinkNamespace::egLinkFileNamePostfix));
 
     if (! res)
       isConnected = true;
@@ -106,7 +175,7 @@ int EgDataNodesLinkType::LoadLinks()
         isConnected = true;
     }
 
-    linksStorage-> LoadAllNodes();
+    linksStorage-> LoadAllDataNodes();
 
     // qDebug() << linkName << " Links count: " << linksStorage-> dataNodes.count() << FN;
 
@@ -117,10 +186,10 @@ int EgDataNodesLinkType::LoadLinks()
 
 int EgDataNodesLinkType::ResolveNodeTypes()
 {
-    auto iterFirst = egDatabase-> connectedNodeTypes.find(firstTypeName);
-    auto iterSecond = egDatabase-> connectedNodeTypes.find(secondTypeName);
+    auto iterFirst = egDatabase-> attachedNodeTypes.find(firstTypeName);
+    auto iterSecond = egDatabase-> attachedNodeTypes.find(secondTypeName);
 
-    if (iterFirst != egDatabase-> connectedNodeTypes.end() && iterSecond != egDatabase-> connectedNodeTypes.end())
+    if (iterFirst != egDatabase-> attachedNodeTypes.end() && iterSecond != egDatabase-> attachedNodeTypes.end())
     {
         firstType = iterFirst.value();
         secondType = iterSecond.value();

@@ -21,7 +21,7 @@
 
 #include <QThread>
 
-#include "../egMetaInfo.h"
+#include "../egExtraInfo.h"
 #include "../egClientServer.h"
 #include "../egLocalFiles.h"
 #include "../indexes/egIndexConditions.h"

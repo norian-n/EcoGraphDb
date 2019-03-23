@@ -50,13 +50,13 @@ public:
     QString firstTypeName;
     QString secondTypeName;
 
-    EgDataNodesLinkType() {}  // required for debug purposes, don't use it ever
+    EgDataNodesLinkType();
 
     EgDataNodesLinkType(EgGraphDatabase* theDatabase);
 
     ~EgDataNodesLinkType();
 
-    int Connect(EgGraphDatabase &myDB, const QString& linkTypeName, const QString &serverAddress = QString());
+    int Connect(EgGraphDatabase &myDB, const QString& linkTypeName);
 
     int AddLink (EgDataNodeIdType fromNodeID, EgDataNodeIdType toNodeID);
     int DeleteLink (EgDataNodeIdType linkNodeID); // FIXME store linkNodeID or search

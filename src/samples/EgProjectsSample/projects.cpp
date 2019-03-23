@@ -104,7 +104,7 @@ ProjectsForm::ProjectsForm(QWidget *parent) :
 
     */
 
-    Projects.LoadAllNodes();
+    Projects.LoadAllDataNodes();
 
     refreshView();
 

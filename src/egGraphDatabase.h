@@ -44,21 +44,29 @@ public:
 
     // EgRemoteConnect*  connection = nullptr;     // connection data (nullptr means local files)
 
-    QDir dir;
-    QString currentServerAddress;
+        // server section
+    EgServerConnection* serverConnection = nullptr;
+    QDataStream* serverStream = nullptr;
+
+    QString serverAddress;
+
+    QDir dir; // FIXME move to local files
 
     // EgDataNodesType controlDescs;
 
-    QMap<QString, EgDataNodesLinkType>  linkTypes;
-    QMap<QString, EgDataNodesType*>  connectedNodeTypes;
+    QMap<QString, EgDataNodesLinkType>  linkTypes;  // loaded from file
+    QMap<QString, QString>  dataNodeTypes;          // loaded from file
+
+    QMap<QString, EgDataNodesType*>  attachedNodeTypes; // added via AttachNodesType() call
 
     EgGraphDatabase() {} // : isConnected(false), metaInfo(nullptr), locationMetaInfo(nullptr), attributesMetaInfo(nullptr), connection(nullptr) {}
 
     ~EgGraphDatabase(); //  { if (metaInfo) delete metaInfo; if (locationMetaInfo) delete locationMetaInfo; if (attributesMetaInfo) delete attributesMetaInfo; }
 
     // int CreateRemoteEgDb(); // FIXME - Remote on server
-    int Connect();
-    int Attach(EgDataNodesType* nType, const QString& serverAddress = QString());
+    // int Connect();
+
+    int AttachNodesType(EgDataNodesType* nType);
 
     bool CheckLinksMetaInfoLocal();
     int  CreateLinksMetaInfo();
@@ -66,10 +74,15 @@ public:
 
     bool CheckNodeTypesMetaInfoLocal();
     int  CreateNodeTypesMetaInfo();
+    int  LoadNodeTypesMetaInfo();
 
-    inline void ClearMetaInfo(EgDataNodeTypeExtraInfo* extraInfo);
+    int  AddDataNodeTypeMetaInfo(const QString& typeName);
 
-    int CreateNodeType(const QString& typeName, EgNodeTypeSettings& typeSettings, const QString& serverAddress = QString());
+    inline void ClearExtraInfo(EgDataNodeTypeExtraInfo* extraInfo);
+
+    // TODO : CreateServiceNodeType(const QString& typeName, const QString& serverAddress = QString())
+
+    int CreateNodeType(const QString& typeName, EgNodeTypeSettings& typeSettings, const QString& theServerAddress = QString());
 
     int AddDataField(const QString &fieldName, bool uint32index = false);    // add field descriptor, no GUI control data
     int AddLocationField(const QString &fieldName, bool uint32index = false);
@@ -79,7 +92,6 @@ public:
 
     int CommitNodeType();
 
-    int AddDataNodeType(const QString& typeName);
     int AddLinkType(const QString& linkName, const QString& firstDataNodeType, const QString& secondDataNodeType);
 
     // int StoreAllLinks();

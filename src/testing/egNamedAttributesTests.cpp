@@ -79,7 +79,7 @@ bool EgNamedAttributesTests::testLoadAttributes()
 
     testDataNodes.Connect(graphDB, "attributes");
 
-    testDataNodes.LoadData("status", EQ, 2);
+    testDataNodes.LoadDataByIndexes("status", EQ, 2);
 
     // testDataNodes.LoadLocationsData();
 

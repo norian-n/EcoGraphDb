@@ -18,7 +18,7 @@ EgEntryNodes::EgEntryNodes(EgDataNodesType* theNodesType):
 {
     //  metaInfo.myECoGraphDB
 
-    entryStorage-> metaInfo.typeSettings.useEntryNodes = false; // no recursion
+    entryStorage-> extraInfo.typeSettings.useEntryNodes = false; // no recursion
 }
 
 EgEntryNodes::~EgEntryNodes()
@@ -55,7 +55,7 @@ int EgEntryNodes::LoadEntryNodes()
 {
         // FIXME check if connected
 
-    entryStorage-> LoadAllNodes();
+    entryStorage-> LoadAllDataNodes();
 
     for (auto dataNodeIter = entryStorage-> dataNodes.begin(); dataNodeIter != entryStorage-> dataNodes.end(); ++dataNodeIter)
     {

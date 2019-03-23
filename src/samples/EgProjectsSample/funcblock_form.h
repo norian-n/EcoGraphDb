@@ -30,7 +30,7 @@ public:
     DataObjects* Statuses;
     DataObjects* Owners;
     */
-    EgDataNode newFuncBlock;
+    // EgDataNode newFuncBlock;
 
     EgDataNodesType* FuncBlocks;
     EgDataNode theFuncBlock; // update or delete

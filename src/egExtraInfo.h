@@ -30,30 +30,33 @@ public:
     EgNodeTypeSettings typeSettings;
 
     EgGraphDatabase* myECoGraphDB = nullptr;      // peer database
-
+/*
     QString serverAddress;
 
     EgServerConnection* serverConnection = nullptr;
+    QDataStream* serverStream = nullptr;
+    */
 
     QList<QString> dataFields;          // fields names of DataNodeType
 
     QHash<QString, int> nameToOrder;    // map field names to data list order (dont mesh up with data index)
-    // QHash<QString, int> indexedToOrder; // map indexed fields names to data list order (dont mesh up with data index)
     QHash<QString, EgIndexSettings> indexedFields; // map indexed fields names to structure
 
         // load & store support
-    QFile metaInfoFile;
-    QDataStream localMetaInfoStream;
-    QDataStream* serverStream;
+    QFile extraInfoFile;
+    QDataStream localExtraInfoStream;
+
 
     EgDataNodeTypeExtraInfo(): typeName("Error_no_type_name") {}
     EgDataNodeTypeExtraInfo(const QString& a_typeName) : typeName(a_typeName)
     {
+        /*
         typeSettings.useEntryNodes = false;
         typeSettings.useLocation = false;
         typeSettings.useNamedAttributes = false;
         typeSettings.useLinks = false;
         typeSettings.useGUIsettings = false;
+        */
     }
 
     ~EgDataNodeTypeExtraInfo();
@@ -64,21 +67,19 @@ public:
 
     void AddDataField(const QString& fieldName, EgIndexSettings indexSettings);
 
-    int  LocalStoreMetaInfo();          // save to file or server
-    int  LocalLoadMetaInfo();           // load from file or server
-    int  LocalUpdateMetaInfo();          // save to file or server
+    int  LocalStoreExtraInfo();          // save to file or server
+    int  LocalLoadExtraInfo();           // load from file or server
 
-    int  ServerStoreMetaInfo();          // save to file or server
-    int  ServerLoadMetaInfo();           // load from file or server
-    int  ServerUpdateMetaInfo();          // save to file or server
+    int  ServerStoreExtraInfo();          // save to file or server
+    int  ServerLoadExtraInfo();           // load from file or server
 
     int  OpenLocalStoreStream();      // save to local file
-    void SendMetaInfoToStream(QDataStream &metaInfoStream);
+    void SendExtraInfoToStream(QDataStream& extraInfoStream);
 
     int  OpenLocalLoadStream();      // load from local file
-    int  LoadMetaInfoFromStream(QDataStream& metaInfoStream);
+    int  LoadExtraInfoFromStream(QDataStream& extraInfoStream);
 
-    void PrintMetaInfo();               // debug print of field descriptions
+    void PrintExtraInfo();               // debug print of field descriptions
 
 };
 

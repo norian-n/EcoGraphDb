@@ -22,7 +22,7 @@
 #include <QtNetwork>
 
 
-#include "../egMetaInfo.h"
+#include "../egExtraInfo.h"
 #include "../egClientServer.h"
 #include "../egLocalFiles.h"
 #include "../indexes/egIndexConditions.h"
@@ -40,7 +40,7 @@ public:
     CommandIdType commandID;
     QString nodeTypeName;
 
-    EgDataNodeTypeExtraInfo metaInfo;
+    EgDataNodeTypeExtraInfo extraInfo;
 
     EgDataFiles localFiles;
 
@@ -65,8 +65,8 @@ public:
     inline void ReceiveNodesList(QList<EgDataNode>& dataNodes, QDataStream& in);
     inline void ReceiveIndexesTree(QDataStream& in);
 
-    inline void StoreMetaInfo(QDataStream &in);
-    inline void LoadMetaInfo(QDataStream &out);
+    inline void StoreExtraInfo(QDataStream &in);
+    inline void LoadExtraInfo(QDataStream &out);
 
     inline void AppendData(QDataStream& in);
     inline void DeleteData(QDataStream& in);
