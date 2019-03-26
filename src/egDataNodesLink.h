@@ -22,6 +22,15 @@ namespace EgDataNodesLinkNamespace
 class EgGraphDatabase;
 class EgDataNodesType;
 
+struct EgLinkNames
+{
+    QString linkName;
+
+    QString firstTypeName;
+    QString secondTypeName;
+};
+
+
 #ifdef EG_LIB_BUILD     // library build switch, define it in project or egCore.h
 
 #include "ecographdb_global.h"
@@ -45,10 +54,12 @@ public:
     EgDataNodesType* firstType {nullptr};
     EgDataNodesType* secondType {nullptr};
 
-    QString linkName;
+    EgLinkNames allLinkNames;
 
-    QString firstTypeName;
-    QString secondTypeName;
+    // QString linkName;
+
+    // QString firstTypeName;
+    // QString secondTypeName;
 
     EgDataNodesLinkType();
 

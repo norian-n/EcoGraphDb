@@ -64,7 +64,8 @@ public:
     ~EgGraphDatabase(); //  { if (metaInfo) delete metaInfo; if (locationMetaInfo) delete locationMetaInfo; if (attributesMetaInfo) delete attributesMetaInfo; }
 
     // int CreateRemoteEgDb(); // FIXME - Remote on server
-    // int Connect();
+
+    // int CheckServerConnection();
 
     int AttachNodesType(EgDataNodesType* nType);
 
@@ -82,7 +83,7 @@ public:
 
     // TODO : CreateServiceNodeType(const QString& typeName, const QString& serverAddress = QString())
 
-    int CreateNodeType(const QString& typeName, EgNodeTypeSettings& typeSettings, const QString& theServerAddress = QString());
+    int CreateNodeType(const QString& typeName, EgNodeTypeSettings& typeSettings);
 
     int AddDataField(const QString &fieldName, bool uint32index = false);    // add field descriptor, no GUI control data
     int AddLocationField(const QString &fieldName, bool uint32index = false);

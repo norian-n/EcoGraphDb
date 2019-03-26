@@ -242,7 +242,7 @@ int EgDataNodesType::getMyLinkTypes()
              //        << "linksIter.value().firstTypeName = " << linksIter.value().firstTypeName
              //        << "linksIter.value().secondTypeName = " << linksIter.value().secondTypeName << FN;
 
-            if ((linksIter.value().firstTypeName == extraInfo.typeName) || (linksIter.value().secondTypeName == extraInfo.typeName))
+            if ((linksIter.value().allLinkNames.firstTypeName == extraInfo.typeName) || (linksIter.value().allLinkNames.secondTypeName == extraInfo.typeName))
             {
                 myLinkTypes.insert(linksIter.key(), &(linksIter.value()));
 

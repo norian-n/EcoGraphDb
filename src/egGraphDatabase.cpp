@@ -70,6 +70,8 @@ bool EgGraphDatabase::CheckNodeTypesMetaInfoLocal()
 {
     // EgDataNodesType linksMetaInfo;
 
+    dir = QDir::current();
+
     if (dir.dirName() == "egdb")
     {
         qDebug() << "error: unexpected folder: " << dir.path() << FN;
@@ -210,13 +212,11 @@ inline void EgGraphDatabase::ClearExtraInfo(EgDataNodeTypeExtraInfo* metaInfo)
     }
 }
 
-int EgGraphDatabase::CreateNodeType(const QString& typeName,  EgNodeTypeSettings& typeSettings, const QString &theServerAddress)
+int EgGraphDatabase::CreateNodeType(const QString& typeName,  EgNodeTypeSettings& typeSettings)
 {
     // check/create DB metainfo
 
-    serverAddress = theServerAddress;
-
-    if (theServerAddress.isEmpty())
+    if (serverAddress.isEmpty())
     {
 
         dir = QDir::current();
@@ -235,18 +235,22 @@ int EgGraphDatabase::CreateNodeType(const QString& typeName,  EgNodeTypeSettings
             return 1;
         }
     }
+    else
+    {
+        // FIXME implement server metainfo update
+    }
 
         // init all
     if (extraInfo)
     {
         qDebug()  << "Warning: node type extra info exists, CommitNodeType() wasn't called properly before " << typeName << FN;
-        delete extraInfo;
+        ClearExtraInfo(extraInfo);
     }
+    else
+        extraInfo = new EgDataNodeTypeExtraInfo(typeName);
 
     fieldsCreated = 0;
     locationFieldsCreated = 0;
-
-    extraInfo = new EgDataNodeTypeExtraInfo(typeName);
 
         // store settings
     extraInfo-> typeSettings = typeSettings;
@@ -267,20 +271,6 @@ int EgGraphDatabase::CreateNodeType(const QString& typeName,  EgNodeTypeSettings
 
     if (typeSettings.useNamedAttributes)
         attributesExtraInfo = new EgDataNodeTypeExtraInfo(typeName + EgDataNodesNamespace::egAttributesFileName);
-
-    if (! theServerAddress.isEmpty())  // FIXME delete connections
-    {
-        extraInfo-> myECoGraphDB-> serverConnection= new EgServerConnection();
-
-        if (GUIcontrolsExtraInfo)
-            GUIcontrolsExtraInfo-> myECoGraphDB-> serverConnection= new EgServerConnection();
-        if (entryNodesExtraInfo)
-            entryNodesExtraInfo-> myECoGraphDB-> serverConnection= new EgServerConnection();
-        if (locationExtraInfo)
-            locationExtraInfo-> myECoGraphDB-> serverConnection= new EgServerConnection();
-        if (attributesExtraInfo)
-            attributesExtraInfo-> myECoGraphDB-> serverConnection= new EgServerConnection();
-    }
 
     return 0;
 }
@@ -430,7 +420,7 @@ int EgGraphDatabase::CommitNodeType()
     return 0;
 }
 
-int  EgGraphDatabase::AddLinkType(const QString& linkName, const QString& firstDataNodeType, const QString& secondDataNodeType)
+int  EgGraphDatabase::AddLinkType(const QString& theLinkName, const QString& firstDataNodeType, const QString& secondDataNodeType)
 {
     QList<QVariant> addValues;
     EgDataNodesType linksMetaInfo; // == LinkTypes
@@ -443,9 +433,9 @@ int  EgGraphDatabase::AddLinkType(const QString& linkName, const QString& firstD
     LoadLinksMetaInfo(); // re-read FIXME check if needed
 
             // check if link name exists  
-    if (linkTypes.contains(linkName))
+    if (linkTypes.contains(theLinkName))
     {
-        qDebug()  << "Link name alredy exists: " << linkName << FN;
+        qDebug()  << "Link name alredy exists: " << theLinkName << FN;
         return 1;
     }
 
@@ -464,7 +454,7 @@ int  EgGraphDatabase::AddLinkType(const QString& linkName, const QString& firstD
         // add new link type
     EgNodeTypeSettings typeSettings;
 
-    CreateNodeType(linkName + EgDataNodesLinkNamespace::egLinkFileNamePostfix, typeSettings);
+    CreateNodeType(theLinkName + EgDataNodesLinkNamespace::egLinkFileNamePostfix, typeSettings);
 
     AddDataField("from_node_id", isIndexed);
     AddDataField("to_node_id");                 // FIXME check if index required
@@ -478,18 +468,18 @@ int  EgGraphDatabase::AddLinkType(const QString& linkName, const QString& firstD
         return -1;
     }
 
-    addValues << linkName << firstDataNodeType << secondDataNodeType;
+    addValues << theLinkName << firstDataNodeType << secondDataNodeType;
 
     linksMetaInfo.AddDataNode(addValues);
     linksMetaInfo.StoreData();
 
     EgDataNodesLinkType* newLink = new EgDataNodesLinkType(this);
 
-    newLink-> linkName = linkName;
-    newLink-> firstTypeName = firstDataNodeType;
-    newLink-> secondTypeName = secondDataNodeType;
+    newLink-> allLinkNames.linkName = theLinkName;
+    newLink-> allLinkNames.firstTypeName = firstDataNodeType;
+    newLink-> allLinkNames.secondTypeName = secondDataNodeType;
 
-    linkTypes.insert(newLink-> linkName, *newLink);
+    linkTypes.insert(newLink-> allLinkNames.linkName, *newLink);
 
     return 0;
 
@@ -503,10 +493,11 @@ int  EgGraphDatabase::AddDataNodeTypeMetaInfo(const QString& typeName)
     if (typeName == EgDataNodesLinkNamespace::egLinkTypesFileName) // skip links metainfo
         return 1;
 
-    dir = QDir::current();
-
-    if(! CheckNodeTypesMetaInfoLocal())
-        CreateNodeTypesMetaInfo();
+    if (serverAddress.isEmpty()) // local files
+    {
+        if(! CheckNodeTypesMetaInfoLocal())
+            CreateNodeTypesMetaInfo();
+    }
 
     if (typesMetaInfoDatabase.ConnectServiceNodeType(*this, EgDataNodesNamespace::egDataNodesTypesFileName))
     {
@@ -536,9 +527,17 @@ int  EgGraphDatabase::AddDataNodeTypeMetaInfo(const QString& typeName)
 }
 
 /*
-int EgGraphDatabase::Connect()
+int EgGraphDatabase::CheckServerConnection()
 {
     int res = 0;    // TODO could be error id reference
+
+    if (! serverAddress.isEmpty())
+    {
+        // check if server online
+
+        // get metainfo
+
+    }
 
     if (! isConnected)
     {
@@ -556,21 +555,26 @@ int EgGraphDatabase::Connect()
 
 int EgGraphDatabase::AttachNodesType(EgDataNodesType* nType)
 {
-    // int res = 0;
+    bool res {false};
 
     if (! isConnected)
     {
         // qDebug()  << "egGraphDatabase is not connected, connect it prior data nodes types" << FN;
 
-        LoadNodeTypesMetaInfo();
+        res = (bool) LoadNodeTypesMetaInfo(); // 0 (i.e. false) is ok
 
-        if (! LoadLinksMetaInfo())
+        res = res || (bool) LoadLinksMetaInfo();
+
+        if (! res)
             isConnected = true;
     }
 
     if (nType)
     {
-        // qDebug() << "trying to attach: " << nType-> metaInfo.typeName << FN;
+        if (! dataNodeTypes.contains(nType-> extraInfo.typeName)) // FIXME check multi instances
+            qDebug() << "Integrity WARNING: dataNodeTypes doesn't contain " << nType-> extraInfo.typeName << FN;
+        // else
+        //    qDebug() << "dataNodeTypes contains " << nType-> extraInfo.typeName << FN;
 
         if (! attachedNodeTypes.contains(nType-> extraInfo.typeName)) // FIXME check multi instances
             attachedNodeTypes.insert(nType-> extraInfo.typeName, nType);
@@ -591,7 +595,7 @@ int EgGraphDatabase::LoadLinksMetaInfo()
 
         if (! dir.exists("egdb/" + QString(EgDataNodesLinkNamespace::egLinkTypesFileName) + ".dat"))
         {
-            qDebug()  << "EgDB connect error: Links meta info doesn't exist: " << EgDataNodesLinkNamespace::egLinkTypesFileName << ".dat" << FN;
+            qDebug()  << "eGraphDb connect error: Link types meta info doesn't exist: " << EgDataNodesLinkNamespace::egLinkTypesFileName << ".dat" << FN;
 
             return -1;
         }
@@ -615,13 +619,13 @@ int EgGraphDatabase::LoadLinksMetaInfo()
 
         newLink = new EgDataNodesLinkType(this);
 
-        newLink-> linkName = nodesIter.value()["linkTypeName"].toString();
-        newLink-> firstTypeName = nodesIter.value()["firstNodeType"].toString();
-        newLink-> secondTypeName = nodesIter.value()["secondNodeType"].toString();
+        newLink-> allLinkNames.linkName = nodesIter.value()["linkTypeName"].toString();
+        newLink-> allLinkNames.firstTypeName = nodesIter.value()["firstNodeType"].toString();
+        newLink-> allLinkNames.secondTypeName = nodesIter.value()["secondNodeType"].toString();
 
-        if (newLink-> linkName != QString(EgDataNodesNamespace::egDummyLinkType))
+        if (newLink-> allLinkNames.linkName != QString(EgDataNodesNamespace::egDummyLinkType))
         {
-            linkTypes.insert(newLink-> linkName, *newLink);
+            linkTypes.insert(newLink-> allLinkNames.linkName, *newLink);
 
             // qDebug()  << "Link added to EgGraphDatabase: " << newLink-> linkName << FN;
         }
