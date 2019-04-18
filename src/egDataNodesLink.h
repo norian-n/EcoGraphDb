@@ -35,41 +35,41 @@ struct EgLinkNames
 
 #include "ecographdb_global.h"
 
-class ECOGRAPHDBSHARED_EXPORT EgDataNodesLinkType
+class ECOGRAPHDBSHARED_EXPORT EgLinkType
 
 #else                   // not a library build
 
-class EgDataNodesLinkType
+class EgLinkType
 
 #endif
 
 // class EgDataNodesLinkType
 {
 public:
-    bool isConnected = false;
+    bool isConnected { false };
 
-    EgGraphDatabase* egDatabase  {nullptr};     // backlink to db
-    EgDataNodesType* linksStorage {nullptr};    // data nodes type for links
+    EgGraphDatabase* egDatabase   {nullptr};     // backlink to db
+    EgDataNodesType* linksStorage {nullptr};     // data nodes type for links
 
-    EgDataNodesType* firstType {nullptr};
-    EgDataNodesType* secondType {nullptr};
+    EgDataNodesType* fromType {nullptr};
+    EgDataNodesType* toType   {nullptr};
 
     EgLinkNames allLinkNames;
 
-    // QString linkName;
+    EgLinkType();
 
-    // QString firstTypeName;
-    // QString secondTypeName;
+    EgLinkType(EgGraphDatabase* theDatabase);
 
-    EgDataNodesLinkType();
+    ~EgLinkType();
 
-    EgDataNodesLinkType(EgGraphDatabase* theDatabase);
+    // int Connect(EgGraphDatabase &myDB, const QString& linkTypeName);
 
-    ~EgDataNodesLinkType();
+    int Connect(EgGraphDatabase &myDB, const QString& linkTypeName, EgDataNodesType& aFromType, EgDataNodesType& aToType);
 
-    int Connect(EgGraphDatabase &myDB, const QString& linkTypeName);
+    int AddArrowLink (EgDataNodeIdType fromNodeID, EgDataNodeIdType toNodeID);
 
-    int AddLink (EgDataNodeIdType fromNodeID, EgDataNodeIdType toNodeID);
+    int AddLinkToStorageOnly (EgDataNodeIdType fromNodeID, EgDataNodeIdType toNodeID);
+
     int DeleteLink (EgDataNodeIdType linkNodeID); // FIXME store linkNodeID or search
 
     int LoadLinks();
@@ -79,7 +79,7 @@ public:
 
     int ResolveNodeTypes();
 
-    int LoadLinkedNodes(EgDataNodeIdType fromNodeID);
+    int LoadLinkedNodesFrom(EgDataNodeIdType fromNodeID);
 
 };
 

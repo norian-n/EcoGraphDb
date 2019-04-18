@@ -118,11 +118,11 @@ void FuncBlocksForm::loadFuncblocks()
 
     Funcblocks.Connect(calleeForm-> graphDB, "funcblocks");
 
-    // funcblocksOfProject.Connect(calleeForm-> graphDB, "projects_funcblocks");
-    // funcblocksTree.Connect(calleeForm-> graphDB, "funcblocksTree");
+    funcblocksOfProject.Connect(calleeForm-> graphDB, "projects_funcblocks");
+    funcblocksTree.Connect(calleeForm-> graphDB, "funcblocksTree");
 
-    Funcblocks.ConnectLinkType("projects_funcblocks");
-    Funcblocks.ConnectLinkType("funcblocksTree");
+    // Funcblocks.ConnectLinkType("projects_funcblocks");
+    // Funcblocks.ConnectLinkType("funcblocksTree");
 
     // funcblocksOfProject.LoadLinkedNodes(projectID);
     // funcblocksTree.LoadLinksFromAllNodes();
@@ -226,9 +226,13 @@ void FuncBlocksForm::refreshView()
         // FIXME add links
 
 
-        calleeForm-> Projects.AddArrowLink("projects_funcblocks", projectID, Funcblocks, funcBlockForm-> FuncBlockID);
+        // calleeForm-> Projects.AddArrowLink("projects_funcblocks", projectID, Funcblocks, funcBlockForm-> FuncBlockID);
 
-        calleeForm-> Projects.StoreLinkType("projects_funcblocks");
+        funcblocksOfProject.AddArrowLink(projectID, funcBlockForm-> FuncBlockID);
+
+        funcblocksOfProject.StoreLinks();
+
+        // calleeForm-> Projects.StoreLinkType("projects_funcblocks");
 
         if (isTop)
         {
@@ -236,8 +240,10 @@ void FuncBlocksForm::refreshView()
         }
         else
         {
-            Funcblocks.AddArrowLink("funcblocksTree", Funcblocks.GUI-> model_current_item-> data(data_id).toInt(),
-                                    Funcblocks, funcBlockForm-> FuncBlockID);
+            // Funcblocks.AddArrowLink("funcblocksTree", Funcblocks.GUI-> model_current_item-> data(data_id).toInt(),
+            //                        Funcblocks, funcBlockForm-> FuncBlockID);
+
+            funcblocksTree.AddArrowLink(Funcblocks.GUI-> model_current_item-> data(data_id).toInt(), funcBlockForm-> FuncBlockID);
 
         }
 

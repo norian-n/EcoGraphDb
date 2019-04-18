@@ -18,6 +18,10 @@
 template <typename KeyType> class EgIndexesTests
 {
 public:
+
+
+
+
     // add first index / init
     bool testEgDataIndexAddFirst(EgIndexFiles<KeyType>& egIndexFiles);
 

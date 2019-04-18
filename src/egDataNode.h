@@ -80,6 +80,14 @@ public:
 
     void clear();
 
+    // TODO
+
+    // GetConnectedToIDs(QList<EgDataNodeIdType>& toIDs);
+    // GetConnectedFromIDs(QList<EgDataNodeIdType>& fromIDs);
+
+    // GetConnectedToPointers(QList<EgDataNode*>& toIDs);
+    // GetConnectedFromPointers(QList<EgDataNode*>& fromIDs);
+
     QVariant& operator [] (QString& fieldName);         // value by name 1
     QVariant& operator [] (const char* fieldCharName);  // value by name 2
 

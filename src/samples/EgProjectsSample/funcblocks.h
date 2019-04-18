@@ -64,8 +64,8 @@ private:
 
     EgDataNodesType Funcblocks;
 
-    EgDataNodesLinkType funcblocksTree;
-    EgDataNodesLinkType funcblocksOfProject;
+    EgLinkType funcblocksTree;
+    EgLinkType funcblocksOfProject;
 
     // EgDataNodesType Projects;
 

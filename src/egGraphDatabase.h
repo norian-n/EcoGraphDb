@@ -54,9 +54,10 @@ public:
 
     // EgDataNodesType controlDescs;
 
-    QMap<QString, EgDataNodesLinkType>  linkTypes;  // loaded from file
+    QMap<QString, EgLinkNames>  linkTypes;  // FIXME EgLinkNames loaded from file
     QMap<QString, QString>  dataNodeTypes;          // loaded from file
 
+    QMap<QString, EgLinkType*>  attachedLinkTypes;
     QMap<QString, EgDataNodesType*>  attachedNodeTypes; // added via AttachNodesType() call
 
     EgGraphDatabase() {} // : isConnected(false), metaInfo(nullptr), locationMetaInfo(nullptr), attributesMetaInfo(nullptr), connection(nullptr) {}
@@ -68,6 +69,7 @@ public:
     // int CheckServerConnection();
 
     int AttachNodesType(EgDataNodesType* nType);
+    int AttachLinksType(EgLinkType* linkType);
 
     bool CheckLinksMetaInfoLocal();
     int  CreateLinksMetaInfo();

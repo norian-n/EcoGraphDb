@@ -34,8 +34,11 @@ private:
     FingersTreeForm *sceneForm = nullptr;
 
     EgGraphDatabase graphDB;
+
     EgDataNodesType nodes;
     EgDataNodesType images;
+
+    EgLinkType links;
 
     void AddImages();
 

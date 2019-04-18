@@ -60,14 +60,24 @@ void EgLinksTests::testCreateLinks()
 
     testDataNodes.Connect(graphDB, "linksTest");
 
+    testTree.Connect(graphDB, "linksTestTree", testDataNodes, testDataNodes);
+
     testDataNodes.LoadAllDataNodes();
 
+    /*
     testDataNodes.AddArrowLink("linksTestTree", 1, testDataNodes, 4);
     testDataNodes.AddArrowLink("linksTestTree", 1, testDataNodes, 6);
     testDataNodes.AddArrowLink("linksTestTree", 4, testDataNodes, 7);
+    */
 
-    testDataNodes.StoreAllLinks();
-    testDataNodes.LoadAllLinks();
+    testTree.AddArrowLink(1, 4);
+    testTree.AddArrowLink(1, 6);
+    testTree.AddArrowLink(4, 7);
+
+    testTree.StoreLinks();
+
+    // testDataNodes.StoreAllLinks();
+    // testDataNodes.LoadAllLinks();
 }
 
 
@@ -82,7 +92,7 @@ bool EgLinksTests::testLinksTree()
 
     testCreateLinks();
 
-    bool res = (graphDB.linkTypes["linksTestTree"].linksStorage-> dataNodes.count() == 3);
+    bool res = (testTree.linksStorage-> dataNodes.count() == 3);
 
     testShowResult(res, FNS);
 

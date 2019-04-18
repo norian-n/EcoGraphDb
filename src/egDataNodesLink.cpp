@@ -13,13 +13,13 @@
 
 using namespace EgDataNodesLinkNamespace;
 
-EgDataNodesLinkType::EgDataNodesLinkType():
+EgLinkType::EgLinkType():
   linksStorage(new EgDataNodesType())
 {
 
 }
 
-EgDataNodesLinkType::EgDataNodesLinkType(EgGraphDatabase *theDatabase):
+EgLinkType::EgLinkType(EgGraphDatabase *theDatabase):
     egDatabase(theDatabase)
   , linksStorage(new EgDataNodesType())
 {
@@ -28,13 +28,24 @@ EgDataNodesLinkType::EgDataNodesLinkType(EgGraphDatabase *theDatabase):
 
 
 
-EgDataNodesLinkType::~EgDataNodesLinkType()
+EgLinkType::~EgLinkType()
 {
     if (linksStorage)
         delete linksStorage;
 }
 
-int EgDataNodesLinkType::AddLink (EgDataNodeIdType fromNodeID, EgDataNodeIdType toNodeID)
+
+int EgLinkType::AddLinkToStorageOnly (EgDataNodeIdType fromNodeID, EgDataNodeIdType toNodeID)
+{
+
+    QList<QVariant> myData;
+
+    myData << fromNodeID << toNodeID;
+
+    return linksStorage-> AddDataNode(myData);
+}
+
+int EgLinkType::AddArrowLink (EgDataNodeIdType fromNodeID, EgDataNodeIdType toNodeID)
 {
 
     QList<QVariant> myData;
@@ -43,65 +54,63 @@ int EgDataNodesLinkType::AddLink (EgDataNodeIdType fromNodeID, EgDataNodeIdType 
 
     linksStorage-> AddDataNode(myData);
 
-    /*
     EgExtendedLinkType fwdLink, backLink;
     QList<EgExtendedLinkType> newLinks;
 
         // check if types connected
-    if (!firstType || !secondType)
+    if (!fromType || !toType)
     {
-        qDebug() << linkName << " : data type(s) not connected to link type " << FN;
+        qDebug() << allLinkNames.linkName << " : data type(s) not connected to link type " << FN;
 
         return -1;
     }
 
 
-    if (firstType-> dataNodes.contains(fromNodeID) && secondType-> dataNodes.contains(toNodeID))
+    if (fromType-> dataNodes.contains(fromNodeID) && toType-> dataNodes.contains(toNodeID))
     {
             // fill new links info
         fwdLink.dataNodeID = toNodeID;
-        fwdLink.dataNodePtr = &(secondType-> dataNodes[toNodeID]);
+        fwdLink.dataNodePtr = &(toType-> dataNodes[toNodeID]);
 
         backLink.dataNodeID = fromNodeID;
-        backLink.dataNodePtr = &(firstType-> dataNodes[fromNodeID]);
+        backLink.dataNodePtr = &(fromType-> dataNodes[fromNodeID]);
 
             // check/create links
-        if (! firstType-> dataNodes[fromNodeID].nodeLinks)
-          firstType-> dataNodes[fromNodeID].nodeLinks = new EgDataNodeLinks();
+        if (! fromType-> dataNodes[fromNodeID].nodeLinks)
+          fromType-> dataNodes[fromNodeID].nodeLinks = new EgDataNodeLinks();
 
-        if (! secondType-> dataNodes[toNodeID].nodeLinks)
-          secondType-> dataNodes[toNodeID].nodeLinks = new EgDataNodeLinks();
+        if (! toType-> dataNodes[toNodeID].nodeLinks)
+          toType-> dataNodes[toNodeID].nodeLinks = new EgDataNodeLinks();
 
             // write fwd link
-        if (firstType-> dataNodes[fromNodeID].nodeLinks-> outLinks.contains(linkName))
-            firstType-> dataNodes[fromNodeID].nodeLinks-> outLinks[linkName].append(fwdLink);
+        if (fromType-> dataNodes[fromNodeID].nodeLinks-> outLinks.contains(allLinkNames.linkName))
+            fromType-> dataNodes[fromNodeID].nodeLinks-> outLinks[allLinkNames.linkName].append(fwdLink);
         else
         {
             newLinks.clear();
             newLinks.append(fwdLink);
 
-            firstType-> dataNodes[fromNodeID].nodeLinks-> outLinks.insert(linkName, newLinks);
+            fromType-> dataNodes[fromNodeID].nodeLinks-> outLinks.insert(allLinkNames.linkName, newLinks);
         }
 
             // FIXME RUNTIME SEGFAULT write back link
-        if (secondType-> dataNodes[toNodeID].nodeLinks-> outLinks.contains(linkName))
-            secondType-> dataNodes[toNodeID].nodeLinks-> outLinks[linkName].append(backLink);
+        if (toType-> dataNodes[toNodeID].nodeLinks-> outLinks.contains(allLinkNames.linkName))
+            toType-> dataNodes[toNodeID].nodeLinks-> outLinks[allLinkNames.linkName].append(backLink);
         else
         {
             newLinks.clear();
             newLinks.append(backLink);
 
-            secondType-> dataNodes[toNodeID].nodeLinks-> outLinks.insert(linkName, newLinks);
+            toType-> dataNodes[toNodeID].nodeLinks-> outLinks.insert(allLinkNames.linkName, newLinks);
         }
     }
     else
     {
-        qDebug() << "Link " << linkName << " of " << firstType->extraInfo.typeName << " link NOT added in memory for ID = " << fromNodeID << " to "
-                 << secondType->extraInfo.typeName << " " << toNodeID << FN;
+        qDebug() << "Link " << allLinkNames.linkName << " of " << fromType->extraInfo.typeName << " link NOT added in memory for ID = " << fromNodeID << " to "
+                 << toType->extraInfo.typeName << " " << toNodeID << FN;
 
         // return -1;
     }
-    */
 
     // qDebug() << linkName << ": link added " << fromNodeID << "to" <<  toNodeID << FN;
 
@@ -110,14 +119,14 @@ int EgDataNodesLinkType::AddLink (EgDataNodeIdType fromNodeID, EgDataNodeIdType 
     return 0;
 }
 
-int EgDataNodesLinkType::Connect(EgGraphDatabase& myDB, const QString& linkTypeName)
+int EgLinkType::Connect(EgGraphDatabase& myDB, const QString& linkTypeName, EgDataNodesType& aFromType, EgDataNodesType& aToType)
 {
         // check if already connected FIXME implement reconnect
     if (isConnected)
     {
-        // qDebug()  << "Warning: attempt to connect again data link type: " << linkTypeName << FN;
+        qDebug()  << "Error: attempt to connect again data link type: " << allLinkNames.linkName << " as " << linkTypeName << FN;
 
-        return 1;
+        return -1;
     }
 /*
         // get nodes types from database
@@ -130,6 +139,12 @@ int EgDataNodesLinkType::Connect(EgGraphDatabase& myDB, const QString& linkTypeN
 */
 
     allLinkNames.linkName = linkTypeName;
+    egDatabase = &myDB;
+
+    fromType = &aFromType;
+    toType = &aToType;
+
+    myDB.AttachLinksType(this); // FIXME aFromType, aToType check
 
         // connect links storage
     int res = linksStorage-> ConnectServiceNodeType(myDB,
@@ -141,7 +156,7 @@ int EgDataNodesLinkType::Connect(EgGraphDatabase& myDB, const QString& linkTypeN
     return res;
 }
 
-int EgDataNodesLinkType::DeleteLink (EgDataNodeIdType linkNodeID)
+int EgLinkType::DeleteLink (EgDataNodeIdType linkNodeID)
 {
         // FIXME check
 
@@ -150,7 +165,7 @@ int EgDataNodesLinkType::DeleteLink (EgDataNodeIdType linkNodeID)
     return 0;
 }
 
-int EgDataNodesLinkType::StoreLinks()
+int EgLinkType::StoreLinks()
 {
     if (! isConnected)
     {
@@ -166,7 +181,7 @@ int EgDataNodesLinkType::StoreLinks()
     return 0;
 }
 
-int EgDataNodesLinkType::LoadLinks()
+int EgLinkType::LoadLinks()
 {
     if (! isConnected)
     {
@@ -184,15 +199,15 @@ int EgDataNodesLinkType::LoadLinks()
     return 0;
 }
 
-int EgDataNodesLinkType::ResolveNodeTypes()
+int EgLinkType::ResolveNodeTypes()
 {
     auto iterFirst = egDatabase-> attachedNodeTypes.find(allLinkNames.firstTypeName);
     auto iterSecond = egDatabase-> attachedNodeTypes.find(allLinkNames.secondTypeName);
 
     if (iterFirst != egDatabase-> attachedNodeTypes.end() && iterSecond != egDatabase-> attachedNodeTypes.end())
     {
-        firstType = iterFirst.value();
-        secondType = iterSecond.value();
+        fromType = iterFirst.value();
+        toType = iterSecond.value();
 
         return 0;
     }
@@ -200,7 +215,7 @@ int EgDataNodesLinkType::ResolveNodeTypes()
     return 1;
 }
 
-int EgDataNodesLinkType::ResolveLinksToPointers()
+int EgLinkType::ResolveLinksToPointers()
 {
     EgDataNodeIdType fromNode, toNode;
     EgExtendedLinkType fwdLink, backLink;
@@ -223,17 +238,17 @@ int EgDataNodesLinkType::ResolveLinksToPointers()
 
         // qDebug() << "LinkName: " << allLinkNames.linkName << " From Node ID = " << fromNode << " To Node ID = " << toNode << FN;
 
-        if (firstType-> dataNodes.contains(fromNode) && secondType-> dataNodes.contains(toNode))
+        if (fromType-> dataNodes.contains(fromNode) && toType-> dataNodes.contains(toNode))
         {
                 // fill new links info
             fwdLink.dataNodeID = toNode;
-            fwdLink.dataNodePtr = &(secondType-> dataNodes[toNode]);
+            fwdLink.dataNodePtr = &(toType-> dataNodes[toNode]);
 
             if (! fwdLink.dataNodePtr-> nodeLinks)
                 fwdLink.dataNodePtr-> nodeLinks = new EgDataNodeLinks();
 
             backLink.dataNodeID = fromNode;
-            backLink.dataNodePtr = &(firstType-> dataNodes[fromNode]);
+            backLink.dataNodePtr = &(fromType-> dataNodes[fromNode]);
 
             if (! backLink.dataNodePtr-> nodeLinks)
                 backLink.dataNodePtr-> nodeLinks = new EgDataNodeLinks();
@@ -285,7 +300,7 @@ int EgDataNodesLinkType::ResolveLinksToPointers()
     return 0;
 }
 
-int EgDataNodesLinkType::LoadLinkedNodes(EgDataNodeIdType fromNodeID)
+int EgLinkType::LoadLinkedNodesFrom(EgDataNodeIdType fromNodeID)
 {
 
     int res = 0;

@@ -252,21 +252,21 @@ void MainWindow::FillTestData()
     Funcblocks.StoreData();
 
         // set links
-    funcblocksOfProject.Connect(graphDB, "projects_funcblocks");
-    funcblocksTree.Connect(graphDB, "funcblocksTree");
+    funcblocksOfProject.Connect(graphDB, "projects_funcblocks", Projects, Funcblocks);
+    funcblocksTree.Connect(graphDB, "funcblocksTree", Funcblocks, Funcblocks);
 
     // Funcblocks.ConnectLinkType("projects_funcblocks");
     // Funcblocks.ConnectLinkType("funcblocksTree");
 
-    funcblocksOfProject.AddLink(1,1);
-    funcblocksOfProject.AddLink(1,2);
-    funcblocksOfProject.AddLink(1,3);
-    funcblocksOfProject.AddLink(1,4);
+    funcblocksOfProject.AddArrowLink(1,1);
+    funcblocksOfProject.AddArrowLink(1,2);
+    funcblocksOfProject.AddArrowLink(1,3);
+    funcblocksOfProject.AddArrowLink(1,4);
 
     funcblocksOfProject.StoreLinks();
 
-    funcblocksTree.AddLink(1,2);
-    funcblocksTree.AddLink(2,3);
+    funcblocksTree.AddArrowLink(1,2);
+    funcblocksTree.AddArrowLink(2,3);
 
     funcblocksTree.StoreLinks();
 

@@ -36,7 +36,7 @@ public:
 
     bool testEgLinksCreate();
 
-    bool testEgLinksBasics(EgDataNodesType& testDataNodes);
+    // bool testEgLinksBasics(EgDataNodesType& testDataNodes);
 
     bool testEgEntryNodes(EgDataNodesType& testDataNodes);
 

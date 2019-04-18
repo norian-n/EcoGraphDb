@@ -473,13 +473,13 @@ int  EgGraphDatabase::AddLinkType(const QString& theLinkName, const QString& fir
     linksMetaInfo.AddDataNode(addValues);
     linksMetaInfo.StoreData();
 
-    EgDataNodesLinkType* newLink = new EgDataNodesLinkType(this);
+    EgLinkNames newLinkNames;
 
-    newLink-> allLinkNames.linkName = theLinkName;
-    newLink-> allLinkNames.firstTypeName = firstDataNodeType;
-    newLink-> allLinkNames.secondTypeName = secondDataNodeType;
+    newLinkNames.linkName = theLinkName;
+    newLinkNames.firstTypeName = firstDataNodeType;
+    newLinkNames.secondTypeName = secondDataNodeType;
 
-    linkTypes.insert(newLink-> allLinkNames.linkName, *newLink);
+    linkTypes.insert(theLinkName, newLinkNames);
 
     return 0;
 
@@ -571,7 +571,7 @@ int EgGraphDatabase::AttachNodesType(EgDataNodesType* nType)
 
     if (nType)
     {
-        if (! dataNodeTypes.contains(nType-> extraInfo.typeName)) // FIXME check multi instances
+        if (! dataNodeTypes.contains(nType-> extraInfo.typeName))
             qDebug() << "Integrity WARNING: dataNodeTypes doesn't contain " << nType-> extraInfo.typeName << FN;
         // else
         //    qDebug() << "dataNodeTypes contains " << nType-> extraInfo.typeName << FN;
@@ -583,9 +583,52 @@ int EgGraphDatabase::AttachNodesType(EgDataNodesType* nType)
     return 0;
 }
 
+int EgGraphDatabase::AttachLinksType(EgLinkType* linkType)
+{
+    bool res {false};
+
+    if (! isConnected)
+    {
+        // qDebug()  << "egGraphDatabase is not connected, connect it prior data nodes types" << FN;
+
+        res = (bool) LoadNodeTypesMetaInfo(); // 0 (i.e. false) is ok
+
+        res = res || (bool) LoadLinksMetaInfo();
+
+        if (! res)
+            isConnected = true;
+    }
+
+    if (linkType)
+    {
+        if (! linkTypes.contains(linkType-> allLinkNames.linkName))
+            qDebug() << "Integrity WARNING: linkTypes doesn't contain " << linkType-> allLinkNames.linkName << FN;
+        else
+        {
+            if (linkType-> fromType -> extraInfo.typeName != linkTypes[linkType-> allLinkNames.linkName].firstTypeName)
+                qDebug() << "Integrity WARNING: linksType " << linkType-> allLinkNames.linkName
+                         << " has bad data node type name: " << linkType-> fromType-> extraInfo.typeName
+                         << " instead of: " << linkTypes[linkType-> allLinkNames.linkName].firstTypeName << FN;
+
+            if (linkType-> toType-> extraInfo.typeName != linkTypes[linkType-> allLinkNames.linkName].secondTypeName)
+                qDebug() << "Integrity WARNING: linksType " << linkType-> allLinkNames.linkName
+                         << " has bad data node type name: " << linkType-> toType->extraInfo.typeName
+                         << " instead of: " << linkTypes[linkType-> allLinkNames.linkName].secondTypeName << FN;
+
+        }
+        //    qDebug() << "linkTypes contains " << linkType-> allLinkNames.linkName << FN;
+
+        if (! attachedLinkTypes.contains(linkType-> allLinkNames.linkName)) // FIXME check multi instances
+            attachedLinkTypes.insert(linkType-> allLinkNames.linkName, linkType);
+    }
+
+    return 0;
+}
+
+
 int EgGraphDatabase::LoadLinksMetaInfo()
 {
-    EgDataNodesLinkType* newLink;
+    EgLinkType* newLink;
     EgDataNodesType linksMetaInfo;
 
     if (serverAddress.isEmpty())
@@ -617,15 +660,24 @@ int EgGraphDatabase::LoadLinksMetaInfo()
     {
         // qDebug()  << "nodesIter.value().dataFields = " << nodesIter.value().dataFields << FN;
 
-        newLink = new EgDataNodesLinkType(this);
+        newLink = new EgLinkType(this);
 
         newLink-> allLinkNames.linkName = nodesIter.value()["linkTypeName"].toString();
         newLink-> allLinkNames.firstTypeName = nodesIter.value()["firstNodeType"].toString();
         newLink-> allLinkNames.secondTypeName = nodesIter.value()["secondNodeType"].toString();
 
-        if (newLink-> allLinkNames.linkName != QString(EgDataNodesNamespace::egDummyLinkType))
+
+
+
+        if (nodesIter.value()["linkTypeName"].toString() != QString(EgDataNodesNamespace::egDummyLinkType))
         {
-            linkTypes.insert(newLink-> allLinkNames.linkName, *newLink);
+            EgLinkNames newLinkNames;
+
+            newLinkNames.linkName = nodesIter.value()["linkTypeName"].toString();
+            newLinkNames.firstTypeName = nodesIter.value()["firstNodeType"].toString();
+            newLinkNames.secondTypeName = nodesIter.value()["secondNodeType"].toString();
+
+            linkTypes.insert(nodesIter.value()["linkTypeName"].toString(), newLinkNames);
 
             // qDebug()  << "Link added to EgGraphDatabase: " << newLink-> linkName << FN;
         }

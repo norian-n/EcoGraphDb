@@ -12,6 +12,9 @@ public:
     EgGraphDatabase graphDB;
     EgDataNodesType testDataNodes;
 
+    EgLinkType testTree;
+    // EgLinkType funcblocksOfProject;
+
     bool testLinksTree();
 
     void testCreateNodes();

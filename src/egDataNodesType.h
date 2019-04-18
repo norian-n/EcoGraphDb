@@ -52,7 +52,7 @@ public:
 
     EgDataNode notFound;                            // dummy data node
 
-    QMap <QString, EgDataNodesLinkType*>  myLinkTypes;
+    QMap <QString, EgLinkType*>  myLinkTypes;
 
     QSet <quint64> IndexOffsets;           // offsets returned by index tree, for index-based operations (AND, OR)
 
@@ -76,14 +76,9 @@ public:
         // register node type at EgGraphDatabase, load metadata
     int Connect(EgGraphDatabase& myDB, const QString& nodeTypeName);
 
-    int ConnectLinkType(const QString& linkTypeName);
+    // int ConnectLinkType(const QString& linkTypeName);
 
-        // minimal config, no type extensions, no gui, dont use it in apps
-    int ConnectServiceNodeType(EgGraphDatabase& myDB, const QString& nodeTypeName);
-
-    inline void initNotFoundVirtualNode();
-
-    void ClearData();                   // data nodes content and support data cleanup
+                 // data nodes content and support data cleanup
 
     int LoadDataByIndexes(QString a_FieldName, int an_oper, QVariant a_value); // single index condition ("odb_pit", EQ, projectID);
     int LoadDataByIndexes(const EgIndexCondition &indexCondition);             // any index condition IC("owner", EQ, 2) &&  IC("status", EQ, 3)
@@ -104,14 +99,6 @@ public:
     int AddDataNode(QList<QVariant>& myData, EgDataNodeIdType &newID); // return ID
     int AddDataNode(EgDataNode& tmpObj);
 
-    int AddHardLinked(QList<QVariant>& myData, EgDataNodeIdType nodeID);
-
-    int AddLocation(QList<QVariant>& locationData, EgDataNodeIdType nodeID);
-
-    int GetLocation(QList<QVariant>& locationData, EgDataNodeIdType nodeID);
-
-    // int AddLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype nodeID);
-
     int DeleteDataNode(EgDataNodeIdType nodeID);
 
     int UpdateDataNode(QList<QVariant>& my_data, EgDataNodeIdType nodeID);
@@ -119,19 +106,36 @@ public:
 
     EgDataNode &operator [](EgDataNodeIdType objID); // {return GetObjByID(obj_id);}
 
+    int AddLocation(QList<QVariant>& locationData, EgDataNodeIdType nodeID);
+    int GetLocation(QList<QVariant>& locationData, EgDataNodeIdType nodeID);
+
+    int AddEntryNode(EgDataNodeIdType entryNodeID); // e.g. tree root
+
+        // service nodes only
+
+    int ConnectServiceNodeType(EgGraphDatabase& myDB, const QString& nodeTypeName); // minimal config, no type extensions, no gui, dont use it in apps
+
+    inline void initNotFoundVirtualNode();
+
+    void ClearData();
+
+    int AddHardLinked(QList<QVariant>& myData, EgDataNodeIdType nodeID);
+
+/*
         // links
     int AddArrowLink(const QString &linkName, EgDataNodeIdType fromNode, EgDataNodesType& toType, EgDataNodeIdType toNode);
+
 
     int StoreAllLinks();
     int LoadAllLinks();
 
     int StoreLinkType(QString linkName);
     int LoadLinkType(QString linkName);
-    // int LoadLinkedIDsOnly(QString linkName); // TODO need connected type names map in the database
+
+    int LoadLinkedIDsOnly(QString linkName); // TODO need connected type names map in the database
 
     int getMyLinkTypes();         // load from myDB on connect
-
-    int AddEntryNode(EgDataNodeIdType entryNodeID); // e.g. tree root
+*/
 
         // service
     int CompressData();           // FIXME delete records marked as deleted

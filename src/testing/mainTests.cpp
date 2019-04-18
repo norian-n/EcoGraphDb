@@ -77,7 +77,7 @@ void cleanUpFiles()
 int main() // int argc, char *argv[])
 {
     bool res = true;
-    bool tmpRes;
+    bool tmpRes = false;
 
     EgGraphDatabaseTests egDbTests;
 
@@ -102,30 +102,6 @@ int main() // int argc, char *argv[])
 
     // return 0; // FIXME STUB
 
-        // indexes standalone
-
-    // EgIndexFiles<qint32> testIndexFiles("IndexesTests");
-    // EgIndexesTests<qint32> indexTests;
-
-    // return 0; // FIXME STUB
-
-    // res = res && indexTests.testEgDataIndexAddFirst(testIndexFiles);
-    // res = res && indexTests.testEgDataIndexDelFirst(testIndexFiles);
-
-    // res = res && indexTests.testEgDataInsertIndexes(testIndexFiles);
-    // res = res && indexTests.testEgDataDeleteAllIndexes(testIndexFiles);
-
-
-    // return 0; // FIXME STUB
-
-    // res = res && indexTests.testEgDataDeleteIndex(testIndexFiles);
-
-    // res = res && indexTests.testSelectOperations(testIndexFiles);
-
-    // return 0; // FIXME STUB
-
-
-
         // meta info standalone
     // EgDataNodeTypeMetaInfo egDataNodeTypeMetaInfo("MetaTest");
 
@@ -140,6 +116,32 @@ int main() // int argc, char *argv[])
 
     // tmpRes = egDbTests.testEgLinksCreate(); // special links module created
     // res = res && tmpRes;
+
+
+        // indexes standalone tests
+
+    EgIndexFiles<qint32> testIndexFiles("IndexesTests");
+    EgIndexesTests<qint32> indexTests;
+
+    // return 0; // FIXME STUB
+
+    // tmpRes = indexTests.testEgDataIndexAddFirst(testIndexFiles);
+    // res = res && tmpRes;
+
+    // tmpRes = indexTests.testEgDataIndexDelFirst(testIndexFiles);
+    // res = res && tmpRes;
+
+    tmpRes = indexTests.testEgDataInsertIndexes(testIndexFiles);
+    res = res && tmpRes;
+
+    tmpRes = indexTests.testSelectOperations(testIndexFiles);
+    res = res && tmpRes;
+
+    // tmpRes = indexTests.testEgDataDeleteAllIndexes(testIndexFiles);
+
+    // return 0; // FIXME STUB
+
+    // data nodes type
 
     // graphDB.Connect();
 

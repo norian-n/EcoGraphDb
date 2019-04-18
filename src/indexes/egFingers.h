@@ -61,7 +61,8 @@ public:
     egFinger<KeyType> currentFinger;
     egFinger<KeyType> newFinger;         // to split chunks
     egFinger<KeyType> parentFinger;
-    egFinger<KeyType> fingersRootHeader;
+
+    egFinger<KeyType> rootFinger;
 
     QList < egFinger<KeyType> > fingersChain;
 
@@ -90,29 +91,23 @@ public:
 
     ~EgFingers() { if (zeroFingersChunk) delete[] zeroFingersChunk; if (newFingersChunk) delete[] newFingersChunk; if (fingersChunk) delete[] fingersChunk;}
 
-    void PrintFingerInfo(egFinger<KeyType>& fingerInfo, const QString &theMessage);
-    void PrintFingersChunk(char* theFingersChunk, const QString& theMessage);
-    void PrintChunkInfo(quint64 fingersChunkOffset);
-
-    void PrintAllChunksInfo(const QString& theMessage);
-
     int OpenFingerFileToUpdate(const QString& IndexFileName);
     int OpenFingerFileToRead(const QString& IndexFileName);
 
     int OpenFingerFileToCheck(const QString& IndexFilePath); // full path
 
-    void CloseIndexFiles();
-    void RemoveIndexFiles(const QString& IndexFileName);
+    void CloseFingerFiles();
+    void RemoveFingerFiles(const QString& IndexFileName);
 
     void InitFingersChunk();
 
     void LoadFingersChunk(quint64 fingersChunkOffset);
     int StoreFingersChunk(quint64 fingersChunkOffset, char* chunkPtr);
 
-    void InitRootHeader();
+    void InitRootFinger();
 
-    void LoadRootHeader();              // meta-info of fingers tree, also for non-zero offset
-    void StoreRootHeader(bool minMaxOnly = false);
+    void LoadRootFinger();              // meta-info of fingers tree, also for non-zero offset
+    void StoreRootFinger(bool minMaxOnly = false);
 
     // int FindIndexChunkToInsert();
     // int FindNextLevelOffsetToInsert();
@@ -163,6 +158,14 @@ public:
     int FindNextLevelOffsetLast(QDataStream &localFingersStream, bool isExactEqual);
 
     int StoreParentOffset(quint64 fingersChunkOffset, quint64 parentFingerOffset);
+
+    // debug
+
+    void PrintFingerInfo(egFinger<KeyType>& fingerInfo, const QString &theMessage);
+    void PrintFingersChunk(char* theFingersChunk, const QString& theMessage);
+    void PrintChunkInfo(quint64 fingersChunkOffset);
+
+    void PrintAllChunksInfo(const QString& theMessage);
 
 };
 

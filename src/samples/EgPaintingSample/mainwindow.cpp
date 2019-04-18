@@ -109,14 +109,25 @@ void MainWindow::on_initButton_clicked()
     nodes.AddLocation(locValues, newID);
 
         // add links (graph edges)
-    nodes.ConnectLinkType("linktype");
+    // nodes.ConnectLinkType("linktype");
 
+    links.Connect(graphDB, "linktype", nodes, nodes);
+
+    /*
     nodes.AddArrowLink("linktype", 1, nodes, 2);
     nodes.AddArrowLink("linktype", 2, nodes, 3);
     nodes.AddArrowLink("linktype", 2, nodes, 4);
+    */
+
+    links.AddArrowLink(1,2);
+    links.AddArrowLink(1,2);
+    links.AddArrowLink(1,2);
 
     nodes.StoreData();
-    nodes.StoreAllLinks();
+
+    links.StoreLinks();
+
+    // nodes.StoreAllLinks();
 
     AddImages();
 

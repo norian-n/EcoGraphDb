@@ -220,7 +220,7 @@ bool EgGraphDatabaseTests::testEgLinksCreate()
     return res;
 }
 
-
+/*
 bool EgGraphDatabaseTests::testEgLinksBasics(EgDataNodesType& testDataNodes)
 {
 // Projects.AddArrowLink("detailLinkType", Projects[1], Detail[2]);
@@ -243,6 +243,7 @@ bool EgGraphDatabaseTests::testEgLinksBasics(EgDataNodesType& testDataNodes)
 
     return res;
 }
+*/
 
 
 bool EgGraphDatabaseTests::testEgEntryNodes(EgDataNodesType& testDataNodes)

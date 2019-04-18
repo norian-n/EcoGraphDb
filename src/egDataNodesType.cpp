@@ -144,8 +144,8 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName)
 
     initNotFoundVirtualNode(); // init special data node
 
-    if (! res)
-        res = getMyLinkTypes(); // extract nodetype-specific link types from all link types
+    // if (! res)
+    //    res = getMyLinkTypes(); // extract nodetype-specific link types from all link types
 
     if (! res)
         isConnected = true;
@@ -153,6 +153,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName)
     return res;
 }
 
+/*
 int EgDataNodesType::ConnectLinkType(const QString& linkTypeName)
 {
     if (! isConnected)
@@ -172,6 +173,7 @@ int EgDataNodesType::ConnectLinkType(const QString& linkTypeName)
     return myLinkTypes[linkTypeName]->linksStorage-> ConnectServiceNodeType(*(extraInfo.myECoGraphDB),
                                      QString(linkTypeName + EgDataNodesLinkNamespace::egLinkFileNamePostfix));
 }
+*/
 
 int EgDataNodesType::ConnectServiceNodeType(EgGraphDatabase& myDB, const QString& nodeTypeName) // connect to server
 {
@@ -231,7 +233,7 @@ inline void EgDataNodesType::initNotFoundVirtualNode()
         notFound.dataFields << QVariant("<Not found>");
 }
 
-
+/*
 int EgDataNodesType::getMyLinkTypes()
 {
     if (extraInfo.myECoGraphDB)
@@ -252,6 +254,7 @@ int EgDataNodesType::getMyLinkTypes()
 
     return 0;
 }
+*/
 
 
 void EgDataNodesType::SetLocalFilter(FilterFunctionType theFunction) // set filter callback - local data only
@@ -279,15 +282,27 @@ EgDataNode& EgDataNodesType::operator [](EgDataNodeIdType objID)
     }
 }
 
+
+/*
 int EgDataNodesType::AddArrowLink(const QString& linkName, EgDataNodeIdType fromNode, EgDataNodesType &toType, EgDataNodeIdType toNode)
 {
 
     EgExtendedLinkType fwdLink, backLink;
     QList<EgExtendedLinkType> newLinks;
 
+    */
+
+    /*
     if ( ! myLinkTypes.contains(linkName))
     {
         qDebug() << extraInfo.typeName << " : bad link name: " << linkName << FN;
+        return -1;
+    }
+    */
+
+ /*   if (! extraInfo.myECoGraphDB-> attachedLinkTypes.contains(linkName))
+    {
+        qDebug() << extraInfo.typeName << " : link type was not connected : " << linkName << FN;
         return -1;
     }
 
@@ -330,7 +345,7 @@ int EgDataNodesType::AddArrowLink(const QString& linkName, EgDataNodeIdType from
         }
             // add record to store links
 
-        myLinkTypes[linkName] -> AddLink(fromNode, toNode);
+        extraInfo.myECoGraphDB-> attachedLinkTypes[linkName] -> AddLinkToStorageOnly(fromNode, toNode);
 
         // qDebug() << "Link " << linkName << " added " << metaInfo.typeName << " " << fromNode << " to "
         //         << toType.metaInfo.typeName << " " <<  toNode << FN;
@@ -345,7 +360,7 @@ int EgDataNodesType::AddArrowLink(const QString& linkName, EgDataNodeIdType from
         return -1;
     }
 }
-
+*/
 
 
 
@@ -506,16 +521,26 @@ int EgDataNodesType::LoadLinkedData(QString linkName, EgDataNodeIdType fromNodeI
     ClearData();
 
         // find link
+    /*
     if (! myLinkTypes.contains(linkName))
     {
         qDebug() << extraInfo.typeName << " : bad link name: " << linkName << FN;
         return -1;
     }
+    */
 
         // load linked offsets
     // res = myLinkTypes[linkName]-> LoadLinkedNodes(IndexOffsets, fromNodeID); // FIXME
 
-    res = myLinkTypes[linkName]-> LoadLinkedNodes(fromNodeID);
+    if (! extraInfo.myECoGraphDB-> attachedLinkTypes.contains(linkName))
+    {
+        qDebug() << extraInfo.typeName << " : link type was not connected : " << linkName << FN;
+        return -1;
+    }
+
+    res = extraInfo.myECoGraphDB-> attachedLinkTypes[linkName]-> LoadLinkedNodesFrom(fromNodeID);
+
+    // res = myLinkTypes[linkName]-> LoadLinkedNodes(fromNodeID);
 
     // if (res)
     //    return res;
@@ -523,7 +548,7 @@ int EgDataNodesType::LoadLinkedData(QString linkName, EgDataNodeIdType fromNodeI
     IndexOffsets.clear();
 
         // iterate loaded links
-    for (auto Iter = myLinkTypes[linkName]->linksStorage-> dataNodes.begin(); Iter != myLinkTypes[linkName]->linksStorage-> dataNodes.end(); ++Iter)
+    for (auto Iter = extraInfo.myECoGraphDB-> attachedLinkTypes[linkName]->linksStorage-> dataNodes.begin(); Iter != extraInfo.myECoGraphDB-> attachedLinkTypes[linkName]->linksStorage-> dataNodes.end(); ++Iter)
         LocalFiles->primIndexFiles-> Load_EQ(IndexOffsets, Iter.value()["to_node_id"].toInt()); //
 
     // qDebug() << "IndexOffsets.count() = " << IndexOffsets.count() << FN;
@@ -958,9 +983,10 @@ int EgDataNodesType::PrintObjData() // debug print
     return 0;
 }
 
+/*
 int EgDataNodesType::StoreAllLinks()
 {
-    for (QMap <QString, EgDataNodesLinkType*>::iterator linksIter = myLinkTypes.begin(); linksIter != myLinkTypes.end(); ++linksIter)
+    for (QMap <QString, EgLinkType*>::iterator linksIter = myLinkTypes.begin(); linksIter != myLinkTypes.end(); ++linksIter)
         linksIter.value()-> StoreLinks();
 
     return 0;
@@ -968,12 +994,14 @@ int EgDataNodesType::StoreAllLinks()
 
 int EgDataNodesType::LoadAllLinks()
 {
-    for (QMap <QString, EgDataNodesLinkType*>::iterator linksIter = myLinkTypes.begin(); linksIter != myLinkTypes.end(); ++linksIter)
+    for (QMap <QString, EgLinkType*>::iterator linksIter = myLinkTypes.begin(); linksIter != myLinkTypes.end(); ++linksIter)
         linksIter.value()-> LoadLinks();
 
     return 0;
 }
+*/
 
+/*
 int EgDataNodesType::StoreLinkType(QString linkName)
 {
     if (! myLinkTypes.contains(linkName))
@@ -1000,6 +1028,7 @@ int EgDataNodesType::LoadLinkType(QString linkName)
 
     return 0;
 }
+*/
 
 int EgDataNodesType::AddEntryNode(EgDataNodeIdType entryNodeID)
 {

@@ -13,7 +13,7 @@
 template <typename KeyType> void EgIndexFiles<KeyType>::RemoveIndexFiles()
 {
     indexChunks.RemoveIndexFiles(IndexFileName);
-    fingersTree.RemoveIndexFiles(IndexFileName);
+    fingersTree.RemoveFingerFiles(IndexFileName);
 }
 
 template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToUpdate()
@@ -37,7 +37,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToUpdate()
     if (fingersTree.fingerStream.device()->size() && ! res) // is not empty FIXME check both files
     {
         // indexChunks.LoadRootHeader();
-        fingersTree.LoadRootHeader();
+        fingersTree.LoadRootFinger();
     }
     // else
     //   qDebug() << "Can't load Root Header " << FN;
@@ -66,7 +66,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToRead()
     if (res)    // error
     {
         indexChunks.CloseIndexFiles();
-        fingersTree.CloseIndexFiles();
+        fingersTree.CloseFingerFiles();
 
         // if (dir.dirName() == "egdb")
         //    dir.setCurrent("..");
@@ -79,7 +79,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToRead()
     if (fingersTree.fingerStream.device()->size()) // && indexChunks.indexStream.device()->size()) // is not empty
     {
         // indexChunks.LoadRootHeader();
-        fingersTree.LoadRootHeader();
+        fingersTree.LoadRootFinger();
     }
     // else
     //    qDebug() << "Can't load Root Header " << res << FN;
@@ -92,7 +92,7 @@ template <typename KeyType> void EgIndexFiles<KeyType>::CloseIndexFiles()
     // qDebug() << "In CloseIndexFiles()" << FN;
 
     indexChunks.CloseIndexFiles();
-    fingersTree.CloseIndexFiles();
+    fingersTree.CloseFingerFiles();
 
     // if (dir.dirName() == "egdb")
     //    dir.setCurrent("..");
@@ -115,11 +115,11 @@ template <typename KeyType> void EgIndexFiles<KeyType>::AddIndex()
         indexChunks.InitRootHeader();
         indexChunks.InitIndexChunk();
 
-        fingersTree.InitRootHeader();
+        fingersTree.InitRootFinger();
         fingersTree.InitFingersChunk();
 
         indexChunks.StoreRootHeader();
-        fingersTree.StoreRootHeader();
+        fingersTree.StoreRootFinger();
 
         indexChunks.StoreIndexChunk(indexChunks.chunk);
         fingersTree.StoreFingersChunk(fingersTree.rootHeaderSize, fingersTree.fingersChunk);
@@ -274,7 +274,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GT(QSet<quint64>& in
     if (! res)
         indexChunks.LoadDataByChunkUp(index_offsets, EgIndexes<KeyType>::CompareGT);
 
-    qDebug()  << "res = " << res << "index_offsets count = " << index_offsets.count() << FN;
+    // qDebug()  << "res = " << res << "index_offsets count = " << index_offsets.count() << FN;
 
     CloseIndexFiles();
 

@@ -45,7 +45,7 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataIndexDelFirs
 
 template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataInsertIndexes(EgIndexFiles<KeyType> &egIndexFiles)
 {
-    qDebug() <<  "Launch insertion" << FN;
+    // qDebug() <<  "Launch insertion" << FN;
 
     egIndexFiles.OpenIndexFilesToUpdate();
 

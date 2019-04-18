@@ -38,8 +38,8 @@ public:
     EgDataNodesType Owners;
     EgDataNodesType Funcblocks;
 
-    EgDataNodesLinkType funcblocksTree;
-    EgDataNodesLinkType funcblocksOfProject;
+    EgLinkType funcblocksTree;
+    EgLinkType funcblocksOfProject;
 
 protected:
     void closeEvent(QCloseEvent *event) Q_DECL_OVERRIDE;
