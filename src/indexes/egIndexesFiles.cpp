@@ -10,13 +10,149 @@
 #include "../egDataNodesType.h"
 #include "egIndexesFiles.h"
 
-template <typename KeyType> void EgIndexFiles<KeyType>::RemoveIndexFiles()
+template <typename KeyType> void EgIndexFiles<KeyType>::RemoveFiles()
 {
-    indexChunks.RemoveIndexFiles(IndexFileName);
-    fingersTree.RemoveFingerFiles(IndexFileName);
+    if (indexFile.isOpen())
+        indexFile.close();
+
+    indexFile.setFileName("egdb/" + IndexFileName + ".odx");
+    indexFile.remove();
+
+    if (fingerFile.isOpen())
+        fingerFile.close();
+
+    fingerFile.setFileName("egdb/" + IndexFileName + ".odf");
+    fingerFile.remove();
 }
 
-template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToUpdate()
+template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFileToUpdate(QDataStream& theIndexStream)
+{
+    indexFile.close();
+
+    indexFile.setFileName("egdb/" + IndexFileName + ".odx");
+
+    theIndexStream.setDevice(&indexFile);
+
+    if (!indexFile.open(QIODevice::ReadWrite)) // WriteOnly Append | QIODevice::Truncate
+    {
+        qDebug() << FN << "can't open index file " << indexFile.fileName();
+        return -1;
+    }
+
+    return 0;
+}
+
+template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFileToRead(QDataStream& theIndexStream)
+{
+    indexFile.close();
+
+    indexFile.setFileName("egdb/" + IndexFileName + ".odx");
+
+    if (!indexFile.exists())
+    {
+        qDebug() << "Error: file doesn't exist " << indexFile.fileName() << FN;
+        return -1;
+    }
+
+    theIndexStream.setDevice(&indexFile);
+
+    if (!indexFile.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
+    {
+        if (! IndexFileName.contains(EgDataNodesNamespace::egGUIfileName))
+            qDebug() << "Error: can't open index file " << indexFile.fileName() << FN;
+        return -2;
+    }
+
+    return 0;
+}
+
+template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFileToCheck(const QString& IndexFilePath, QDataStream& theIndexStream)
+{
+    indexFile.close();
+
+    indexFile.setFileName(IndexFilePath);
+
+    if (!indexFile.exists())
+    {
+        qDebug() << "Error: file doesn't exist " << IndexFilePath << FN;
+        return -1;
+    }
+
+    theIndexStream.setDevice(&indexFile);
+
+    if (!indexFile.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
+    {
+        qDebug() << "Error: can't open index file " << indexFile.fileName() << FN;
+        return -2;
+    }
+
+    return 0;
+}
+
+template <typename KeyType> int EgIndexFiles<KeyType>::OpenFingerFileToUpdate(QDataStream &theFingerStream)
+{
+    fingerFile.close();
+
+    fingerFile.setFileName("egdb/" + IndexFileName + ".odf");
+    theFingerStream.setDevice(&fingerFile);
+
+    if (!fingerFile.open(QIODevice::ReadWrite)) // WriteOnly Append | QIODevice::Truncate
+    {
+        qDebug() << FN << "can't open finger file " << fingerFile.fileName();
+        return -2;
+    }
+
+    return 0;
+}
+
+template <typename KeyType> int EgIndexFiles<KeyType>::OpenFingerFileToRead(QDataStream& theFingerStream)
+{
+    fingerFile.close();
+
+    fingerFile.setFileName("egdb/" + IndexFileName + ".odf");
+
+    if (!fingerFile.exists())
+    {
+        qDebug() << "file doesn't exist " << IndexFileName + ".odf" << FN;
+        return -1;
+    }
+
+    theFingerStream.setDevice(&fingerFile);
+
+    if (!fingerFile.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
+    {
+        qDebug() << "can't open finger file " << fingerFile.fileName() << FN;
+        return -2;
+    }
+
+    return 0;
+}
+
+
+template <typename KeyType> int EgIndexFiles<KeyType>::OpenFingerFileToCheck(const QString& IndexFilePath, QDataStream &theFingerStream)
+{
+    fingerFile.close();
+
+    fingerFile.setFileName(IndexFilePath);
+
+    if (!fingerFile.exists())
+    {
+        qDebug() << "file doesn't exist " << IndexFileName << FN;
+        return -1;
+    }
+
+    theFingerStream.setDevice(&fingerFile);
+
+    if (!fingerFile.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
+    {
+        qDebug() << FN << "can't open finger file " << fingerFile.fileName() << FN;
+        return -2;
+    }
+
+    return 0;
+}
+
+template <typename KeyType> int EgIndexFiles<KeyType>::OpenFilesToUpdate()
 {
     // qDebug() << "IndexFileName = " << IndexFileName << FN;
 
@@ -28,11 +164,10 @@ template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToUpdate()
         return -1;
     }
 
-
-    int res = indexChunks.OpenIndexFilesToUpdate(IndexFileName);
-    res += fingersTree.OpenFingerFileToUpdate(IndexFileName);
-
     fingersTree.IndexFileName = IndexFileName;
+
+    int res = OpenIndexFileToUpdate(indexChunks.indexStream);
+    res    += OpenFingerFileToUpdate(fingersTree.fingerStream);
 
     if (fingersTree.fingerStream.device()->size() && ! res) // is not empty FIXME check both files
     {
@@ -45,9 +180,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToUpdate()
     return res;
 }
 
-
-
-template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToRead()
+template <typename KeyType> int EgIndexFiles<KeyType>::OpenFilesToRead()
 {
     // qDebug() << "In OpenIndexFilesToRead()" << FN;
 
@@ -60,21 +193,20 @@ template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToRead()
         return -1;
     }
 
-    int res = indexChunks.OpenIndexFilesToRead(IndexFileName);
-    res += fingersTree.OpenFingerFileToRead(IndexFileName);
+    fingersTree.IndexFileName = IndexFileName;
+
+    int res = OpenIndexFileToRead(indexChunks.indexStream);
+    res    += OpenFingerFileToRead(fingersTree.fingerStream);
 
     if (res)    // error
     {
-        indexChunks.CloseIndexFiles();
-        fingersTree.CloseFingerFiles();
+        CloseFiles();
 
         // if (dir.dirName() == "egdb")
         //    dir.setCurrent("..");
 
         return res;
     }
-
-    fingersTree.IndexFileName = IndexFileName;
 
     if (fingersTree.fingerStream.device()->size()) // && indexChunks.indexStream.device()->size()) // is not empty
     {
@@ -87,15 +219,10 @@ template <typename KeyType> int EgIndexFiles<KeyType>::OpenIndexFilesToRead()
     return res;
 }
 
-template <typename KeyType> void EgIndexFiles<KeyType>::CloseIndexFiles()
+template <typename KeyType> void EgIndexFiles<KeyType>::CloseFiles()
 {
-    // qDebug() << "In CloseIndexFiles()" << FN;
-
-    indexChunks.CloseIndexFiles();
-    fingersTree.CloseFingerFiles();
-
-    // if (dir.dirName() == "egdb")
-    //    dir.setCurrent("..");
+    indexFile.close();
+    fingerFile.close();
 }
 
 
@@ -197,7 +324,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::DeleteIndex(bool isPrimar
 
 template <typename KeyType> int EgIndexFiles<KeyType>::LoadAllDataOffsets(QSet<quint64>& dataOffsets)
 {
-    int res = OpenIndexFilesToRead();
+    int res = OpenFilesToRead();
 
     if (res)    // error
         return res;
@@ -206,14 +333,14 @@ template <typename KeyType> int EgIndexFiles<KeyType>::LoadAllDataOffsets(QSet<q
 
     indexChunks.LoadAllData(dataOffsets);
 
-    CloseIndexFiles();
+    CloseFiles();
 
     return res;
 }
 
 template <typename KeyType> int EgIndexFiles<KeyType>::Load_EQ(QSet<quint64>& index_offsets, KeyType Key)
 {
-    int res = OpenIndexFilesToRead();
+    int res = OpenFilesToRead();
 
     if (res)    // error
         return res;
@@ -230,7 +357,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_EQ(QSet<quint64>& in
     if (! res)  // ok
         indexChunks.LoadDataByChunkEqual(index_offsets);
 
-    CloseIndexFiles();
+    CloseFiles();
 
     return res;
 }
@@ -238,7 +365,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_EQ(QSet<quint64>& in
 
 template <typename KeyType> int EgIndexFiles<KeyType>::Load_GE(QSet<quint64>& index_offsets, KeyType Key)
 {
-    int res = OpenIndexFilesToRead();
+    int res = OpenFilesToRead();
 
     if (res)    // error
         return res;
@@ -254,14 +381,14 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GE(QSet<quint64>& in
     if (! res)  // ok
         indexChunks.LoadDataByChunkUp(index_offsets, EgIndexes<KeyType>::CompareGE);
 
-    CloseIndexFiles();
+    CloseFiles();
 
     return res;
 }
 
 template <typename KeyType> int EgIndexFiles<KeyType>::Load_GT(QSet<quint64>& index_offsets, KeyType Key)
 {
-    int res = OpenIndexFilesToRead();
+    int res = OpenFilesToRead();
 
     if (res)    // error
         return res;
@@ -276,14 +403,14 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GT(QSet<quint64>& in
 
     // qDebug()  << "res = " << res << "index_offsets count = " << index_offsets.count() << FN;
 
-    CloseIndexFiles();
+    CloseFiles();
 
     return res;
 }
 
 template <typename KeyType> int EgIndexFiles<KeyType>::Load_LE(QSet<quint64>& index_offsets, KeyType Key)
 {
-    int res = OpenIndexFilesToRead();
+    int res = OpenFilesToRead();
 
     if (res)    // error
         return res;
@@ -296,14 +423,14 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LE(QSet<quint64>& in
     if (! res)
         indexChunks.LoadDataByChunkDown(index_offsets, EgIndexes<KeyType>::CompareLE);
 
-    CloseIndexFiles();
+    CloseFiles();
 
     return res;
 }
 
 template <typename KeyType> int EgIndexFiles<KeyType>::Load_LT(QSet<quint64>& index_offsets, KeyType Key)
 {
-    int res = OpenIndexFilesToRead();
+    int res = OpenFilesToRead();
 
     if (res)    // error
         return res;
@@ -318,7 +445,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LT(QSet<quint64>& in
 
     // qDebug()  << "res = " << res << "index_offsets count = " << index_offsets.count() << FN;
 
-    CloseIndexFiles();
+    CloseFiles();
 
     return res;
 }

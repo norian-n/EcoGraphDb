@@ -125,18 +125,18 @@ int main() // int argc, char *argv[])
 
     // return 0; // FIXME STUB
 
-    // tmpRes = indexTests.testEgDataIndexAddFirst(testIndexFiles);
-    // res = res && tmpRes;
+    tmpRes = indexTests.testEgDataIndexAddFirst(testIndexFiles);
+    res = res && tmpRes;
 
     // tmpRes = indexTests.testEgDataIndexDelFirst(testIndexFiles);
     // res = res && tmpRes;
-
+/*
     tmpRes = indexTests.testEgDataInsertIndexes(testIndexFiles);
     res = res && tmpRes;
 
     tmpRes = indexTests.testSelectOperations(testIndexFiles);
     res = res && tmpRes;
-
+*/
     // tmpRes = indexTests.testEgDataDeleteAllIndexes(testIndexFiles);
 
     // return 0; // FIXME STUB

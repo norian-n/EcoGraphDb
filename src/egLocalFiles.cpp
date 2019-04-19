@@ -175,13 +175,13 @@ inline int EgDataFiles::LocalOpenFilesToRead()
         // primary index
 
     // QString IndexFileName = metaInfo-> typeName + "_odb_pit"; // FIXME const
-    primIndexFiles-> OpenIndexFilesToRead();
+    primIndexFiles-> OpenFilesToRead();
 
         // other indexes files QHash<QString, EgIndexFiles<qint32>*>::iterator
     for (auto indexesIter = indexFiles.begin(); indexesIter != indexFiles.end(); ++indexesIter)
     {
         // IndexFileName = metaInfo-> typeName + "_" + indexesIter.key();
-        indexesIter.value()-> OpenIndexFilesToRead();
+        indexesIter.value()-> OpenFilesToRead();
     }
 
     return 0;
@@ -225,13 +225,13 @@ inline int EgDataFiles::LocalOpenFilesToUpdate()
         // primary index
 
     // QString IndexFileName = metaInfo-> typeName + "_odb_pit"; // FIXME const
-    primIndexFiles-> OpenIndexFilesToUpdate();
+    primIndexFiles-> OpenFilesToUpdate();
 
         // other indexes files QHash<QString, EgIndexFiles<qint32>*>::iterator
     for (auto indexesIter = indexFiles.begin(); indexesIter != indexFiles.end(); ++indexesIter)
     {
         // IndexFileName = metaInfo-> typeName + "_" + indexesIter.key();
-        indexesIter.value()-> OpenIndexFilesToUpdate();
+        indexesIter.value()-> OpenFilesToUpdate();
     }
 
     return 0;
@@ -244,11 +244,11 @@ void EgDataFiles::LocalCloseFiles()
     ddt_file.close();
     dat_file.close();
 
-    primIndexFiles-> CloseIndexFiles();
+    primIndexFiles-> CloseFiles();
 
         // other indexes files QHash<QString, EgIndexFiles<qint32>*>::iterator
     for (auto indexesIter = indexFiles.begin(); indexesIter != indexFiles.end(); ++indexesIter)
-        indexesIter.value()-> CloseIndexFiles();
+        indexesIter.value()-> CloseFiles();
 
     // if (dir.dirName() == "egdb")
     //    dir.setCurrent("..");

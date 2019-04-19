@@ -28,7 +28,7 @@ public:
 
     EgIndexes<KeyType>* indexChunks;
 
-    QString IndexFileName;
+    QString IndexFileName; // for debug messages
 
     // quint64 fingersChunkOffset; // finger file position
 
@@ -66,9 +66,7 @@ public:
 
     QList < egFinger<KeyType> > fingersChain;
 
-        // files and streams
-    QFile fingerFile;
-    QDataStream fingerStream;
+    QDataStream fingerStream; // file operations
 
     QByteArray fingersBA;
 
@@ -90,14 +88,6 @@ public:
     }
 
     ~EgFingers() { if (zeroFingersChunk) delete[] zeroFingersChunk; if (newFingersChunk) delete[] newFingersChunk; if (fingersChunk) delete[] fingersChunk;}
-
-    int OpenFingerFileToUpdate(const QString& IndexFileName);
-    int OpenFingerFileToRead(const QString& IndexFileName);
-
-    int OpenFingerFileToCheck(const QString& IndexFilePath); // full path
-
-    void CloseFingerFiles();
-    void RemoveFingerFiles(const QString& IndexFileName);
 
     void InitFingersChunk();
 

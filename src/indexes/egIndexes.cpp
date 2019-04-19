@@ -13,85 +13,11 @@
 
 using namespace egIndexesNamespace;
 
-template <typename KeyType> void EgIndexes<KeyType>::RemoveIndexFiles(const QString& IndexFileName)
-{
-    if (indexFile.isOpen())
-        indexFile.close();
-
-    indexFile.setFileName("egdb/" + IndexFileName + ".odx");
-    indexFile.remove();
-}
-
 template <typename KeyType> void EgIndexes<KeyType>::PrintIndexesChunk(char* theChunk, const QString &theMessage)
 {
     qDebug() << QByteArray(theChunk, indexChunkSize).toHex() << theMessage;
 }
 
-template <typename KeyType> int EgIndexes<KeyType>::OpenIndexFilesToUpdate(const QString& IndexFileName)
-{
-    indexFile.close();
-
-    indexFile.setFileName("egdb/" + IndexFileName + ".odx");
-    indexStream.setDevice(&indexFile);
-
-    if (!indexFile.open(QIODevice::ReadWrite)) // WriteOnly Append | QIODevice::Truncate
-    {
-        qDebug() << FN << "can't open index file " << indexFile.fileName();
-        return -1;
-    }
-
-    return 0;
-}
-
-template <typename KeyType> int EgIndexes<KeyType>::OpenIndexFilesToRead(const QString& IndexFileName)
-{
-    indexFile.close();
-
-    indexFile.setFileName("egdb/" + IndexFileName + ".odx");
-    indexStream.setDevice(&indexFile);
-
-    if (!indexFile.exists())
-    {
-        qDebug() << "Error: file doesn't exist " << IndexFileName + ".odx" << FN;
-        return -1;
-    }
-
-    if (!indexFile.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
-    {
-        if (! IndexFileName.contains(EgDataNodesNamespace::egGUIfileName))
-            qDebug() << "Error: can't open index file " << indexFile.fileName() << FN;
-        return -2;
-    }
-
-    return 0;
-}
-
-template <typename KeyType> int EgIndexes<KeyType>::OpenIndexFileToCheck(const QString& IndexFilePath)
-{
-    indexFile.close();
-
-    indexFile.setFileName(IndexFilePath);
-    indexStream.setDevice(&indexFile);
-
-    if (!indexFile.exists())
-    {
-        qDebug() << "Error: file doesn't exist " << IndexFilePath << FN;
-        return -1;
-    }
-
-    if (!indexFile.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
-    {
-        qDebug() << "Error: can't open index file " << indexFile.fileName() << FN;
-        return -2;
-    }
-
-    return 0;
-}
-
-template <typename KeyType> void EgIndexes<KeyType>::CloseIndexFiles()
-{
-    indexFile.close();
-}
 
 template <typename KeyType> inline void EgIndexes<KeyType>::InitIndexChunk()
 {
@@ -628,9 +554,9 @@ template <typename KeyType> int EgIndexes<KeyType>::FindPosByKeyFirst(QDataStrea
         // min/max lookup
     if ((theKey >  fingersTree-> currentFinger.maxKey)|| (fingersTree-> currentFinger.itemsCount <= 0))
     {
-        qDebug() << "ERROR bad finger of " << indexFile.fileName() << " for Key = " << theKey << FN;
+        qDebug() << "ERROR bad finger of " << fingersTree-> IndexFileName << " for Key = " << theKey << FN;
 
-        fingersTree->PrintFingerInfo(fingersTree-> currentFinger, "currentFinger");
+        fingersTree-> PrintFingerInfo(fingersTree-> currentFinger, "currentFinger");
         return -1; // error
     }
 
@@ -1292,10 +1218,10 @@ template <typename KeyType> void EgIndexes<KeyType>::DeleteIndex(bool isPrimary)
             RemoveChunkFromChain();
         }
         else
-            qDebug() << "Bad indexes count at " << indexFile.fileName() << " Key = " << hex << (int) theKey << " Offset = " << hex << (int) oldDataOffset << FN;
+            qDebug() << "Bad indexes count at " << fingersTree-> IndexFileName << " Key = " << hex << (int) theKey << " Offset = " << hex << (int) oldDataOffset << FN;
     }
     else
-        qDebug() << "Indexes chunk not found " << indexFile.fileName() << " Key = " << hex << (int) theKey << " Offset = " << hex << (int) oldDataOffset << FN;
+        qDebug() << "Indexes chunk not found " << fingersTree-> IndexFileName << " Key = " << hex << (int) theKey << " Offset = " << hex << (int) oldDataOffset << FN;
 
 }
 

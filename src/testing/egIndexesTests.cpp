@@ -11,7 +11,7 @@
 
 template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataIndexAddFirst(EgIndexFiles<KeyType> &egIndexFiles)
 {
-    egIndexFiles.OpenIndexFilesToUpdate();
+    egIndexFiles.OpenFilesToUpdate();
 
     egIndexFiles.theIndex  = 0x1; // 0x6144;
     egIndexFiles.dataOffset = 0xabcd01;
@@ -21,14 +21,14 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataIndexAddFirs
     // egIndexFiles.LoadFingersChunk();
     // egIndexFiles.LoadIndexChunk();
 
-    egIndexFiles.CloseIndexFiles();
+    egIndexFiles.CloseFiles();
 
     return true;
 }
 
 template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataIndexDelFirst(EgIndexFiles<KeyType> &egIndexFiles)
 {
-    egIndexFiles.OpenIndexFilesToUpdate();
+    egIndexFiles.OpenFilesToUpdate();
 
     egIndexFiles.theIndex  = 0x1; // 0x6144;
     egIndexFiles.dataOffset = 0xabcd01;
@@ -38,7 +38,7 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataIndexDelFirs
     // egIndexFiles.LoadFingersChunk();
     // egIndexFiles.LoadIndexChunk();
 
-    egIndexFiles.CloseIndexFiles();
+    egIndexFiles.CloseFiles();
 
     return true;
 }
@@ -47,7 +47,7 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataInsertIndexe
 {
     // qDebug() <<  "Launch insertion" << FN;
 
-    egIndexFiles.OpenIndexFilesToUpdate();
+    egIndexFiles.OpenFilesToUpdate();
 
     for (int i= 0; i < 23; i++) // 14 23 19
     {
@@ -67,14 +67,14 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataInsertIndexe
 
     // egIndexFiles.fingersTree.PrintAllChunksInfo("After insert");
 
-    egIndexFiles.CloseIndexFiles();
+    egIndexFiles.CloseFiles();
 
     return true;
 }
 
 template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataDeleteAllIndexes(EgIndexFiles<KeyType> &egIndexFiles)
 {
-    egIndexFiles.OpenIndexFilesToUpdate();
+    egIndexFiles.OpenFilesToUpdate();
 
     for (int i= 0; i < 22; i++) // 14 23 19
     {
@@ -94,7 +94,7 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataDeleteAllInd
 
     // egIndexFiles.fingersTree.PrintAllChunksInfo("After delete");
 
-    egIndexFiles.CloseIndexFiles();
+    egIndexFiles.CloseFiles();
 
     return true;
 }
@@ -148,7 +148,7 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testSelectOperations(E
 
 template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataDeleteIndex(EgIndexFiles<KeyType> &egIndexFiles)
 {
-    egIndexFiles.OpenIndexFilesToUpdate();
+    egIndexFiles.OpenFilesToUpdate();
 
     egIndexFiles.theIndex  = 0x1; // 0x6144;
     egIndexFiles.dataOffset = 0xabcd01;
@@ -158,7 +158,7 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataDeleteIndex(
     // egIndexFiles.LoadFingersChunk();
     // egIndexFiles.LoadIndexChunk();
 
-    egIndexFiles.CloseIndexFiles();
+    egIndexFiles.CloseFiles();
 
     return true;
 }

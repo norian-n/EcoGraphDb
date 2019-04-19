@@ -51,13 +51,11 @@ public:
 
     EgIndexStruct<KeyType>* indexPtr = nullptr;
 
-    char* chunk;            // current chunk buffer
-    char* zero_chunk;       // filled with 0
-    char* new_chunk;        // new chunk buffer to split
+    char* chunk;                // current chunk buffer
+    char* zero_chunk;           // filled with 0
+    char* new_chunk;            // new chunk buffer to split
 
-        // files and streams
-    QFile indexFile;
-    QDataStream indexStream;
+    QDataStream indexStream;    // file operations
 
     QByteArray indexBA;
 
@@ -81,15 +79,6 @@ public:
     static bool CompareGE (KeyType& currentIndex, KeyType& theKey) {return (currentIndex >= theKey);}
     static bool CompareLT (KeyType& currentIndex, KeyType& theKey) {return (currentIndex < theKey);}
     static bool CompareLE (KeyType& currentIndex, KeyType& theKey) {return (currentIndex <= theKey);}
-
-    void PrintIndexesChunk(char* theChunk, const QString& theMessage);  // debug
-
-    int OpenIndexFilesToUpdate(const QString& IndexFileName);
-    int OpenIndexFilesToRead(const QString& IndexFileName);
-    int OpenIndexFileToCheck(const QString& IndexFilePath); // debug
-
-    void CloseIndexFiles();
-    void RemoveIndexFiles(const QString& IndexFileName);
 
     void InitIndexChunk();
 
@@ -144,6 +133,8 @@ public:
     int DeleteDataOffset(QDataStream &localIndexStream);
 
     void RemoveChunkFromChain();
+
+    void PrintIndexesChunk(char* theChunk, const QString& theMessage);  // debug
 };
 
 #endif // EG_INDEXES3_H

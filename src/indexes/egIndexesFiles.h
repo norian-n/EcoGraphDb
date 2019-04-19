@@ -29,11 +29,21 @@ public:
     virtual void setDataOffset(quint64 ) = 0;
     virtual void setNewOffset(quint64 ) = 0;
 
-    virtual int OpenIndexFilesToUpdate() = 0;
-    virtual int OpenIndexFilesToRead() = 0;
+    virtual int OpenIndexFileToUpdate(QDataStream& theIndexStream) = 0;
+    virtual int OpenIndexFileToRead(QDataStream& theIndexStream) = 0;
 
-    virtual void CloseIndexFiles() = 0;
-    virtual void RemoveIndexFiles() = 0;
+    virtual int OpenIndexFileToCheck(const QString& IndexFilePath, QDataStream& theIndexStream) = 0;
+
+    virtual int OpenFingerFileToUpdate(QDataStream& theFingerStream) = 0;
+    virtual int OpenFingerFileToRead(QDataStream& theFingerStream) = 0;
+
+    virtual int OpenFingerFileToCheck(const QString& FingerFilePath, QDataStream& theFingerStream) = 0; // full path
+
+    virtual void CloseFiles() = 0;
+    virtual void RemoveFiles() = 0;
+
+    virtual int OpenFilesToUpdate() = 0;
+    virtual int OpenFilesToRead() = 0;
 
     virtual void AddIndex() = 0;
     virtual int UpdateIndex(bool isChanged, bool isPrimary) = 0;
@@ -64,6 +74,9 @@ public:
 
     QDir dir;
 
+    QFile indexFile;
+    QFile fingerFile;
+
     QString IndexFileName;
 
     EgIndexFiles() = delete; // constructor with IndexFileName only
@@ -89,11 +102,22 @@ public:
     void setDataOffset(quint64 theDataOffset) { dataOffset = theDataOffset; }
     void setNewOffset(quint64 theNewOffset)   { newOffset = theNewOffset; }
 
-    int OpenIndexFilesToUpdate();
-    int OpenIndexFilesToRead();
+    int OpenIndexFileToUpdate(QDataStream& theIndexStream);
+    int OpenIndexFileToRead(QDataStream& theIndexStream);
 
-    void CloseIndexFiles();
-    void RemoveIndexFiles();
+    int OpenIndexFileToCheck(const QString& IndexFilePath, QDataStream& theIndexStream); // debug, full path
+
+    int OpenFingerFileToUpdate(QDataStream& theFingerStream);
+    int OpenFingerFileToRead(QDataStream& theFingerStream);
+
+    int OpenFingerFileToCheck(const QString& FingerFilePath, QDataStream& theFingerStream); // full path
+
+    void CloseFiles();
+    void RemoveFiles();
+
+    int OpenFilesToUpdate();
+    int OpenFilesToRead();
+
 
         // single node operations
     void AddIndex();
