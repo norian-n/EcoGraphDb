@@ -40,7 +40,7 @@ public:
 
     keysCountType chunkCount;   // real indexes in the chunk
 
-    quint64 indexesChunkOffset; // file position
+    quint64 indexesChunkOffset; // file position for chain connect
     qint32  indexPosition;      // position in the chunk
 
     quint64 prevOffsetPtr;      // chunks chain operations
@@ -49,6 +49,7 @@ public:
     int oneIndexSize;           // KeyType deendent consts
     int indexChunkSize;
 
+    EgIndexStruct<KeyType>  indexData;
     EgIndexStruct<KeyType>* indexPtr = nullptr;
 
     char* chunk;                // current chunk buffer
@@ -88,18 +89,19 @@ public:
 
     // int StoreFingerOffset(quint64 fingerOffset);
     int StoreFingerOffset(quint64 chunkOffset, quint64 fingerOffset);   // update finger backptr
+    int GetFingerOffset(quint64& fingerOffset);
 
-    void LoadIndexChunk(char *chunkPtr);    // by indexesChunkOffset
-    void LoadIndexChunk();                  // loads to indexBA.data()
+    int LoadIndexChunk(char *chunkPtr, quint64 chunkOffset);    // by indexesChunkOffset
+    int LoadIndexChunk();        // default: loads fingersTree-> currentFinger.nextChunkOffset to indexBA.data()
 
-    int StoreIndexChunk(const char *chunkPtr);
-    // int StoreIndexChunk(quint64 chunkOffset, char* chunkPtr);
+    int StoreIndexChunk(const char *chunkPtr, const quint64 nextChunkOffset);
+    inline int StoreIndexChunk();       // default: indexBA.constData() to fingersTree-> currentFinger.nextChunkOffset
 
     int FindIndexPositionToInsert(QDataStream &localIndexesStream);
     int InsertToIndexChunk();
 
     inline void ReadIndexValues(QDataStream &localIndexesStream, EgIndexStruct<KeyType>& indexStruct);
-    inline void WriteIndexValues(QDataStream &localIndexesStream, EgIndexStruct<KeyType>& indexStruct);
+    inline void WriteIndexValues(QDataStream &localIndexesStream, EgIndexStruct<KeyType>& indexStruct, int position);
 
     inline void ReadIndexOnly(QDataStream &localIndexesStream, KeyType& currentIndex);
     inline void UpdateChunkCount(QDataStream &localIndexesStream, keysCountType newCount);
@@ -127,9 +129,9 @@ public:
     int FindIndexByDataOffset(QDataStream &localIndexStream, bool isPrimary);
 
     void UpdateIndex(bool isPrimary = false);
-    void DeleteIndex(bool isPrimary = false);
+    int DeleteIndex(bool isPrimary = false);
 
-    int UpdateDataOffset(QDataStream &localIndexStream);
+    int UpdateDataOffset();
     int DeleteDataOffset(QDataStream &localIndexStream);
 
     void RemoveChunkFromChain();

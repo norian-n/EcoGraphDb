@@ -212,7 +212,7 @@ inline void EgServerOperProc::UpdateData(QDataStream& in)
     // qDebug()  << "updateNodes.count(): " << updateNodes.count() << FN ;
 
     if (updateNodes.count() > 0)
-        localFiles.LocalModifyNodes(updateNodes);
+        localFiles.LocalModifyNodesList(updateNodes);
 }
 
 void EgServerOperProc::processCommand()

@@ -31,8 +31,8 @@ template <typename KeyType> struct egFinger
 
     fingersLevelType myLevel;   // 0 - just above index chunk
 
-    quint64 myOffset;           // finger position in current chunk
-    quint64 myChunkOffset;      // file offset of current chunk -> parent
+    quint64 myOffsetInChunk {0};       // finger position in current chunk
+    quint64 myChunkOffset {0};  // file offset of current chunk -> parent
 };
 
 

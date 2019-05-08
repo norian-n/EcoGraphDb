@@ -111,41 +111,51 @@ int main() // int argc, char *argv[])
 
         // baisc functionality
 
-    tmpRes = egDbTests.testEgGraphDatabaseCreate();
-    res = res && tmpRes;
-
     // tmpRes = egDbTests.testEgLinksCreate(); // special links module created
     // res = res && tmpRes;
 
 
         // indexes standalone tests
 
+    QDir mydir = QDir::current();
+
+    // qDebug() << "Path: " << mydir.path() << FN;
+
+    if (! mydir.exists("egdb"))
+        mydir.mkdir("egdb");
+
     EgIndexFiles<qint32> testIndexFiles("IndexesTests");
     EgIndexesTests<qint32> indexTests;
-
-    // return 0; // FIXME STUB
 
     tmpRes = indexTests.testEgDataIndexAddFirst(testIndexFiles);
     res = res && tmpRes;
 
-    // tmpRes = indexTests.testEgDataIndexDelFirst(testIndexFiles);
-    // res = res && tmpRes;
-/*
+    tmpRes = indexTests.testEgDataIndexDelFirst(testIndexFiles);
+    res = res && tmpRes;
+
     tmpRes = indexTests.testEgDataInsertIndexes(testIndexFiles);
     res = res && tmpRes;
 
+    // return 0; // FIXME STUB
+
+
     tmpRes = indexTests.testSelectOperations(testIndexFiles);
     res = res && tmpRes;
-*/
+
     // tmpRes = indexTests.testEgDataDeleteAllIndexes(testIndexFiles);
 
-    // return 0; // FIXME STUB
+
 
     // data nodes type
 
     // graphDB.Connect();
+/*
+    tmpRes = egDbTests.testEgGraphDatabaseCreate();
+    res = res && tmpRes;
 
-    testEgDataNodesType.Connect(graphDB, "test");
+    tmpRes = testEgDataNodesType.Connect(graphDB, "test");
+    res = res && tmpRes;
+
     // testEgDataNodesType.metaInfo.PrintMetaInfo();
 
     tmpRes = egDbTests.testEgDataNodesTypeBasicNodeOps(testEgDataNodesType);
@@ -171,13 +181,15 @@ int main() // int argc, char *argv[])
 
     tmpRes = egDbTests.testEgEntryNodes(testEgDataNodesType);
     res = res && tmpRes;
-
+*/
     // return 0; // FIXME STUB
 
     EgLinksTests linksTests;
 
     tmpRes = linksTests.testLinksTree();
     res = res && tmpRes;
+
+    return 0; // FIXME STUB
 
     EgLocationTests locTests;
 

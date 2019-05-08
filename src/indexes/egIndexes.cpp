@@ -35,11 +35,9 @@ template <typename KeyType> inline void EgIndexes<KeyType>::InitIndexChunk()
     localIndexStream << (keysCountType) 1;
 
         // parent finger offset
-    localIndexStream << (quint64) fingersTree-> rootHeaderSize;
+    // localIndexStream << (quint64) fingersTree-> rootHeaderSize;
 
     memcpy(chunk, indexBA.constData(), indexChunkSize);
-
-    indexesChunkOffset = indexHeaderSize;
 }
 
 
@@ -93,59 +91,72 @@ template <typename KeyType> int EgIndexes<KeyType>::StoreFingerOffset(quint64 ch
 }
 
 
-template <typename KeyType> int EgIndexes<KeyType>::StoreIndexChunk(const char* chunkPtr)
+template <typename KeyType> int EgIndexes<KeyType>::GetFingerOffset(quint64& fingerOffset)
+{
+    QDataStream localIndexStream(&indexBA, QIODevice::ReadWrite);
+
+    localIndexStream.device()->seek(egChunkVolume * oneIndexSize + sizeof(quint64) * 2 + sizeof(keysCountType));
+    localIndexStream >> fingerOffset;
+
+    // qDebug() << "fingerOffset = " << hex << (int) fingerOffset << FN;
+
+    return 0;
+}
+
+template <typename KeyType> int EgIndexes<KeyType>::StoreIndexChunk(const char* chunkPtr, const quint64 chunkOffset)
 {
     // PrintIndexesChunk(indexBA.data(), "chunk to save " + FNS);
 
-    indexStream.device()->seek(indexesChunkOffset);
+    indexStream.device()-> seek(chunkOffset); // FIXME check result in paranoid mode
 
-    // qDebug() << "seek result = " << seekRes << "indexesChunkOffset = " << hex << (int) indexesChunkOffset << FN;
-    // qDebug() << "indexesChunkOffset = " << hex << (int) indexesChunkOffset << " , pos: " << hex << (int) indexStream.device()-> pos() << FN;
+    // qDebug() << "seek result = " << seekRes << "fingersTree-> currentFinger.nextChunkOffset = " << hex << (int) fingersTree-> currentFinger.nextChunkOffset << FN;
+    // qDebug() << "fingersTree-> currentFinger.nextChunkOffset = " << hex << (int) fingersTree-> currentFinger.nextChunkOffset << " , pos: " << hex << (int) indexStream.device()-> pos() << FN;
 
-    int res = indexStream.device()->write(chunkPtr, indexChunkSize);
-
+    // int res =
+    return indexStream.device()-> write(chunkPtr, indexChunkSize);
+/*
     if (res < 0)
     {
        qDebug() << "write() returns " << res << " , pos: " << indexStream.device()-> pos() << " " << indexStream.device()->errorString() << FN;
 
        return -1;
     }
-
-    return 0;
+*/
+    // return 0;
 }
 
-/*
-template <typename KeyType> int EgIndexes<KeyType>::StoreIndexChunk(quint64 chunkOffset, char* chunkPtr)
+
+template <typename KeyType> inline int EgIndexes<KeyType>::StoreIndexChunk()
+{
+    indexStream.device()-> seek(fingersTree-> currentFinger.nextChunkOffset); // FIXME check result in paranoid mode
+
+    return indexStream.device()-> write(indexBA.constData(), indexChunkSize);
+}
+
+template <typename KeyType> int EgIndexes<KeyType>::LoadIndexChunk()
+{
+    indexStream.device()->seek(fingersTree-> currentFinger.nextChunkOffset);
+
+    // if (! indexStream.device()->seek(fingersTree-> currentFinger.nextChunkOffset)) // FIXME implement paranoid mode
+    //    qDebug() << "ERROR: bad position of fingersTree-> currentFinger.nextChunkOffset = " << hex << fingersTree-> currentFinger.nextChunkOffset << FN;
+
+    // if (! fingersTree-> currentFinger.nextChunkOffset)
+    //    qDebug() << "ERROR: zero fingersTree-> currentFinger.nextChunkOffset" << FN;
+
+    return indexStream.readRawData(indexBA.data(), indexChunkSize);
+}
+
+template <typename KeyType> inline int EgIndexes<KeyType>::LoadIndexChunk(char* chunkPtr, quint64 chunkOffset)
 {
     indexStream.device()->seek(chunkOffset);
-    indexStream.writeRawData(chunkPtr, indexChunkSize);
 
-    // qDebug() << "indexesChunkOffset = " << hex << (int) indexesChunkOffset << FN;
+    // if (! indexStream.device()->seek(fingersTree-> currentFinger.nextChunkOffset)) // FIXME implement paranoid mode
+    //    qDebug() << "ERROR: bad position of fingersTree-> currentFinger.nextChunkOffset = " << hex << fingersTree-> currentFinger.nextChunkOffset << FN;
 
-    return 0; // FIXME
-}
-*/
+    // if (! fingersTree-> currentFinger.nextChunkOffset)
+    //    qDebug() << "ERROR: zero fingersTree-> currentFinger.nextChunkOffset" << FN;
 
-template <typename KeyType> inline void EgIndexes<KeyType>::LoadIndexChunk()
-{
-    if (! indexStream.device()->seek(indexesChunkOffset))
-        qDebug() << "ERROR: bad position of indexesChunkOffset = " << hex << indexesChunkOffset << FN;
-
-    if (! indexesChunkOffset)
-        qDebug() << "ERROR: zero indexesChunkOffset" << FN;
-
-    indexStream.readRawData(indexBA.data(), indexChunkSize);
-}
-
-template <typename KeyType> inline void EgIndexes<KeyType>::LoadIndexChunk(char* chunkPtr)
-{
-    if (! indexStream.device()->seek(indexesChunkOffset))
-        qDebug() << "ERROR: bad position of indexesChunkOffset = " << hex << indexesChunkOffset << FN;
-
-    if (! indexesChunkOffset)
-        qDebug() << "ERROR: zero indexesChunkOffset" << FN;
-
-    indexStream.readRawData(chunkPtr, indexChunkSize);
+    return indexStream.readRawData(chunkPtr, indexChunkSize);
 }
 
 template <typename KeyType> inline void EgIndexes<KeyType>::MoveTailToInsert(char* chunkPtr, int indexPosition)
@@ -169,9 +180,9 @@ template <typename KeyType> inline void EgIndexes<KeyType>::ReadIndexOnly(QDataS
     localIndexesStream >> currentIndex;
 }
 
-template <typename KeyType> inline void EgIndexes<KeyType>::WriteIndexValues(QDataStream &localIndexesStream, EgIndexStruct<KeyType>& indexStruct)
+template <typename KeyType> inline void EgIndexes<KeyType>::WriteIndexValues(QDataStream &localIndexesStream, EgIndexStruct<KeyType>& indexStruct, int position)
 {
-    localIndexesStream.device()->seek(indexPosition*oneIndexSize);
+    localIndexesStream.device()->seek(position*oneIndexSize);
     localIndexesStream << indexStruct.indexKey;
     localIndexesStream << indexStruct.dataOffset;
 }
@@ -188,26 +199,14 @@ template <typename KeyType> int EgIndexes<KeyType>::InsertInsideIndexChunk(QData
 {
     FindIndexPositionToInsert(localIndexesStream); // sets indexPosition
 
-    // qDebug() << "currentIndex = " << (int) currentIndex << ", theKey = " << (int) theKey << FN;
-    // qDebug() << "indexPosition = " << indexPosition << ", itemsCount = " << fingersTree-> currentFinger.itemsCount << FN;
-
     if (indexPosition < fingersTree-> currentFinger.itemsCount) // not last
-    {
-        // memcpy(chunk, indexBA.data(), indexChunkSize);
         MoveTailToInsert(indexBA.data(), indexPosition);
-        // memcpy(indexBA.data(), chunk, indexChunkSize);
-    }
-
-    // qDebug() << "indexPosition = " << indexPosition << ", itemsCount = " << fingersTree-> currentFinger.itemsCount << FN;
-    // qDebug() << "theKey = " << (int) theKey << ", oldDataOffset = " << hex << (int) oldDataOffset << FN;
 
             // write index key and offset
-    EgIndexStruct<KeyType> indexData;
-
     indexData.indexKey = theKey;
     indexData.dataOffset = oldDataOffset;
 
-    WriteIndexValues(localIndexesStream, indexData);
+    WriteIndexValues(localIndexesStream, indexData, indexPosition);
 
     return 0;
 }
@@ -243,23 +242,18 @@ template <typename KeyType> int EgIndexes<KeyType>::InsertToIndexChunk()
 
     QDataStream localIndexStream(&indexBA, QIODevice::ReadWrite);
 
-    LoadIndexChunk(indexBA.data());
+    LoadIndexChunk(); // fingersTree-> currentFinger.nextChunkOffset to indexBA.data()
 
     // fingersTree-> PrintFingerInfo(fingersTree-> currentFinger);
 
     if (fingersTree-> currentFinger.itemsCount < egChunkVolume) // chunk has empty space
     {
-
         InsertInsideIndexChunk(localIndexStream);
-
         UpdateChunkCount(localIndexStream, fingersTree-> currentFinger.itemsCount + 1);
 
-        // PrintIndexesChunk(indexBA.data(), "chunk after insert " + FNS);
-
-        StoreIndexChunk(indexBA.constData());
+        StoreIndexChunk(); // indexBA.data() to fingersTree-> currentFinger.nextChunkOffset
 
             // update fingers
-        fingersTree-> UpdateFingerAfterInsert();
         fingersTree-> UpdateFingersChainAfterInsert();
     }
     else    // overflow - append or split chunk
@@ -270,6 +264,8 @@ template <typename KeyType> int EgIndexes<KeyType>::InsertToIndexChunk()
             SplitIndexChunk(localIndexStream);
     }
 
+    // PrintIndexesChunk(indexBA.data(), "chunk after insert " + FNS);
+
     return 0;
 }
 
@@ -278,6 +274,7 @@ template <typename KeyType> int EgIndexes<KeyType>::SplitIndexChunk(QDataStream&
     // KeyType minKey, maxKey;
 
     fingersTree-> newFinger.nextChunkOffset = indexStream.device()->size(); // append to the end of indexes file
+    fingersTree-> newFinger.myLevel = 0;
 
     // indexPosition = FindIndexPosition(localIndexStream);
 
@@ -316,7 +313,7 @@ template <typename KeyType> int EgIndexes<KeyType>::SplitIndexChunk(QDataStream&
 
         memcpy(indexBA.data(), chunk, indexChunkSize);
 
-        // write index key and offset
+            // write index key and offset
         localIndexStream.device()->seek(indexPosition*oneIndexSize);
         localIndexStream << theKey;
         localIndexStream << oldDataOffset;
@@ -444,10 +441,9 @@ template <typename KeyType> int EgIndexes<KeyType>::SplitIndexChunk(QDataStream&
     // PrintIndexesChunk(new_chunk, "new chunk before save " + FNS);
 
         // save both chunks
-    indexesChunkOffset = fingersTree-> currentFinger.nextChunkOffset;
-    StoreIndexChunk(chunk);
-    indexesChunkOffset = fingersTree-> newFinger.nextChunkOffset;
-    StoreIndexChunk(new_chunk);
+    StoreIndexChunk(chunk, fingersTree-> currentFinger.nextChunkOffset);
+
+    StoreIndexChunk(new_chunk, fingersTree-> newFinger.nextChunkOffset);
 
         // update fingers tree
     fingersTree-> UpdateFingersChainAfterSplit(); // false);
@@ -458,20 +454,18 @@ template <typename KeyType> int EgIndexes<KeyType>::SplitIndexChunk(QDataStream&
 
 template <typename KeyType> int EgIndexes<KeyType>::AppendIndexChunk(QDataStream& localIndexStream)
 {
+
+        // set new finger
     fingersTree-> newFinger.nextChunkOffset = indexStream.device()->size(); // append to the end of indexes file
 
+    fingersTree-> newFinger.myLevel    = 0;
     fingersTree-> newFinger.itemsCount = 1;
-    fingersTree-> newFinger.minKey = theKey;
-    fingersTree-> newFinger.maxKey = theKey;
 
-        // update index chain pointers and counters
-
-    // qDebug() << "current chunk " << hex << (int) fingersTree-> currentFinger.nextChunkOffset
-    //         << " ,next chunk "  << hex << (int) fingersTree-> newFinger.nextChunkOffset << FN;
+    fingersTree-> newFinger.minKey     = theKey;
+    fingersTree-> newFinger.maxKey     = theKey;
 
         // get old next ptr
     localIndexStream.device()->seek(egChunkVolume * oneIndexSize + sizeof(quint64));
-    // localIndexStream >> prevOffsetPtr;
     localIndexStream >> nextOffsetPtr;
 
     // qDebug() << "current next ptr =  " << hex << (int) fingersTree-> newFinger.nextChunkOffset << " ,prev ptr =  " << hex << (int) prevOffsetPtr << FN;
@@ -488,21 +482,16 @@ template <typename KeyType> int EgIndexes<KeyType>::AppendIndexChunk(QDataStream
     }
 
         // save old chunk
-    indexesChunkOffset = fingersTree-> currentFinger.nextChunkOffset;
-    StoreIndexChunk(indexBA.data());
+    StoreIndexChunk();
 
         // fill new chunk data
     memcpy(indexBA.data(), zero_chunk, indexChunkSize);
 
         // write index key and offset
-    EgIndexStruct<KeyType> indexData;
-
     indexData.indexKey   = theKey;
     indexData.dataOffset = oldDataOffset;
 
-    indexPosition = 0;
-
-    WriteIndexValues(localIndexStream, indexData);
+    WriteIndexValues(localIndexStream, indexData, 0);
 
         // update pointers & count
     localIndexStream.device()->seek(egChunkVolume * oneIndexSize);
@@ -511,8 +500,7 @@ template <typename KeyType> int EgIndexes<KeyType>::AppendIndexChunk(QDataStream
 
     UpdateChunkCount(localIndexStream, 1);
 
-    indexesChunkOffset = fingersTree-> newFinger.nextChunkOffset;
-    StoreIndexChunk(indexBA.data());
+    StoreIndexChunk(indexBA.data(), fingersTree-> newFinger.nextChunkOffset);
 
         // update fingers tree
     fingersTree-> UpdateFingersChainAfterSplit(); // true);
@@ -749,12 +737,12 @@ template <typename KeyType> void EgIndexes<KeyType>::LoadAllData(QSet<quint64>& 
 {
         // get first index offset from header
     indexStream.device()->seek(0);
-    indexStream >> indexesChunkOffset;
+    indexStream >> fingersTree-> currentFinger.nextChunkOffset;
 
         // load chunk
     QDataStream localIndexStream(&indexBA, QIODevice::ReadWrite);
 
-    LoadIndexChunk(indexBA.data());
+    LoadIndexChunk(); // fingersTree-> currentFinger.nextChunkOffset to indexBA.data()
 
     indexPosition = 0;
 
@@ -768,7 +756,7 @@ template <typename KeyType> void EgIndexes<KeyType>::LoadDataByChunkUp(QSet<quin
 {
     QDataStream localIndexStream(&indexBA, QIODevice::ReadWrite);
 
-    LoadIndexChunk(indexBA.data());
+    LoadIndexChunk(); // indexBA.data()
 
     indexPosition = FindPosByKeyFirst(localIndexStream, myCompareFunc);
 
@@ -804,8 +792,7 @@ template <typename KeyType> void EgIndexes<KeyType>::LoadDataUp(QSet<quint64>& i
 
     while (nextOffsetPtr)
     {
-        indexesChunkOffset = nextOffsetPtr;
-        LoadIndexChunk(indexBA.data());
+        LoadIndexChunk(indexBA.data(), nextOffsetPtr);
 
             // get chunk items count
         localIndexStream.device()->seek((egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2));
@@ -842,7 +829,7 @@ template <typename KeyType> int EgIndexes<KeyType>::LoadDataByChunkDown(QSet<qui
 
     QDataStream localIndexStream(&indexBA, QIODevice::ReadWrite);
 
-    LoadIndexChunk(indexBA.data());
+    LoadIndexChunk(); // indexBA.data()
 
     // qDebug() << "indexBA =  " << indexBA.toHex() << FN;
 
@@ -872,8 +859,7 @@ template <typename KeyType> int EgIndexes<KeyType>::LoadDataByChunkDown(QSet<qui
 
     while (prevOffsetPtr)
     {
-        indexesChunkOffset = prevOffsetPtr;
-        LoadIndexChunk(indexBA.data());
+        LoadIndexChunk(indexBA.data(), prevOffsetPtr);
 
             // get chunk items count
         localIndexStream.device()->seek((egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2));
@@ -911,52 +897,19 @@ template <typename KeyType> void EgIndexes<KeyType>::LoadDataByChunkEqual(QSet<q
     bool firstChunk = true;
 
     QDataStream localIndexStream(&indexBA, QIODevice::ReadWrite);
-/*
-    LoadIndexChunk(indexBA.data());
 
-    // memcpy(indexBA.data(), chunk, indexChunkSize);
-
-    // qDebug() << "indexBA =  " << indexBA.toHex() << FN;
-
-    indexPosition = FindPosByKeyFirst(localIndexStream, CompareGE); // FIXME
-
-    // qDebug() << "pos =  " << indexPosition << FN;
-
-    do
-    {
-        localIndexStream.device()->seek(indexPosition*oneIndexSize);
-        localIndexStream >> currentIndex;
-        localIndexStream >> dataOffset;
-
-        if (currentIndex == theKey)
-            index_offsets.insert(dataOffset);
-        else
-            keyOutOfRange = true;
-
-        indexPosition++;
-    }
-    while ((! keyOutOfRange) && (indexPosition < fingersTree-> currentFinger.itemsCount));
-
-    // keyOutOfRange &= isExact; // if (! keyOutOfRange)
-    // {
-        // get next chunk
-    localIndexStream.device()->seek((egChunkVolume * oneIndexSize) + (sizeof(quint64)));
-    localIndexStream >> nextChunkPtr;
-    */
-
-    nextChunkPtr =  indexesChunkOffset;
+    nextChunkPtr =  fingersTree-> currentFinger.nextChunkOffset;
 
     // qDebug() << "nextChunkPtr =  " << hex << (int) nextChunkPtr  << " , chunkCount =  " << hex << (int) chunkCount << FN;
 
     while (nextChunkPtr && (! keyOutOfRange))
     {
-        indexesChunkOffset = nextChunkPtr;
-        LoadIndexChunk(indexBA.data());
-        // memcpy(indexBA.data(), chunk, indexChunkSize);
+        LoadIndexChunk(indexBA.data(), nextChunkPtr);
 
         if (firstChunk)
         {
            indexPosition = FindPosByKeyFirst(localIndexStream, CompareGE);
+
            if (indexPosition < 0)
               indexPosition = 0;    // FIXME
 
@@ -1006,26 +959,24 @@ template <typename KeyType> int EgIndexes<KeyType>::FindIndexByDataOffset(QDataS
     KeyType currentIndex;
     quint64 dataOffset;
 
-    quint64 nextChunkPtr;
+    // quint64 nextChunkPtr;
 
     bool keyOutOfRange = false;
     bool firstChunk = true;
 
     // QDataStream localIndexStream(&indexBA, QIODevice::ReadWrite);
 
-    LoadIndexChunk(indexBA.data());
-
-    // memcpy(indexBA.data(), chunk, indexChunkSize);
+    LoadIndexChunk(); // indexBA.data()
 
     // qDebug() << "theKey =  " << hex << (int) theKey  << " , oldDataOffset =  " << hex << (int) oldDataOffset << FN;
 
     // qDebug() << "indexBA =  " << indexBA.toHex() << FN;
 
-    nextChunkPtr =  indexesChunkOffset;
+    // nextChunkPtr =  fingersTree-> currentFinger.nextChunkOffset;
 
     // qDebug() << "nextChunkPtr =  " << hex << (int) nextChunkPtr  << " , chunkCount =  " << hex << (int) chunkCount << FN;
 
-    while (nextChunkPtr && (! keyOutOfRange))
+    while (fingersTree-> currentFinger.nextChunkOffset && (! keyOutOfRange))
     {
         // memcpy(indexBA.data(), chunk, indexChunkSize);
 
@@ -1084,24 +1035,19 @@ template <typename KeyType> int EgIndexes<KeyType>::FindIndexByDataOffset(QDataS
 
             // get next chunk ptr
         localIndexStream.device()->seek((egChunkVolume * oneIndexSize) + (sizeof(quint64)));
-        localIndexStream >> nextChunkPtr;
+        localIndexStream >> fingersTree-> currentFinger.nextChunkOffset;
 
-        if (nextChunkPtr)
-        {
-            indexesChunkOffset = nextChunkPtr;
-            LoadIndexChunk(indexBA.data());
-        }
+        if (fingersTree-> currentFinger.nextChunkOffset)
+            LoadIndexChunk(); // to indexBA.data()
     }
 
     return 1; // not found
 }
 
-template <typename KeyType> int EgIndexes<KeyType>::UpdateDataOffset(QDataStream &localIndexStream)
+template <typename KeyType> int EgIndexes<KeyType>::UpdateDataOffset()
 {
-    localIndexStream.device()->seek(indexPosition*oneIndexSize + sizeof(KeyType));
-    localIndexStream << newDataOffset;
-
-    StoreIndexChunk(indexBA.data());
+    indexStream.device()->seek(fingersTree-> currentFinger.nextChunkOffset + indexPosition*oneIndexSize + sizeof(KeyType));
+    indexStream << newDataOffset;
 
     return 0;
 }
@@ -1134,7 +1080,7 @@ template <typename KeyType> int EgIndexes<KeyType>::DeleteDataOffset(QDataStream
     fingersTree-> minValueChanged = false;
     fingersTree-> maxValueChanged = false;
 
-        // get new min/max
+        // get new min/max FIXME remove it
     if (indexPosition == 0)
     {
         fingersTree-> minValueChanged = true;
@@ -1157,7 +1103,7 @@ template <typename KeyType> int EgIndexes<KeyType>::DeleteDataOffset(QDataStream
     // qDebug() << "chunk after memmove " << indexBA.toHex() << FN;
 
         // save
-    StoreIndexChunk(indexBA.data());
+    StoreIndexChunk();
 
     return 0;
 }
@@ -1169,13 +1115,13 @@ template <typename KeyType> void EgIndexes<KeyType>::UpdateIndex(bool isPrimary)
     // qDebug() << "theKey = " << theKey << ", IndexFileName = " << fingersTree-> IndexFileName << FN;
 
     if (FindIndexByDataOffset(localIndexStream, isPrimary) == 0) // index found
-        UpdateDataOffset(localIndexStream);
+        UpdateDataOffset();
     else
         qDebug() << "Index to update not found, theKey = " << theKey << ", IndexFileName = " << fingersTree-> IndexFileName << FN;
 
 }
 
-template <typename KeyType> void EgIndexes<KeyType>::DeleteIndex(bool isPrimary)
+template <typename KeyType> int EgIndexes<KeyType>::DeleteIndex(bool isPrimary)
 {
     QDataStream localIndexStream(&indexBA, QIODevice::ReadWrite);
 
@@ -1193,13 +1139,13 @@ template <typename KeyType> void EgIndexes<KeyType>::DeleteIndex(bool isPrimary)
 
         if (chunkCount > 1)
         {
-            DeleteDataOffset(localIndexStream); // count decrase
+            DeleteDataOffset(localIndexStream); // count decrease
 
             // qDebug() << "chunkCount 2 =  " << hex << (int) chunkCount << FN;
             // qDebug() << "fingersTree-> currentFingerOffset " << hex << (int) fingersTree-> currentFingerOffset << FN;
 
             fingersTree-> currentKeysCount = chunkCount;
-            fingersTree-> UpdateFingerCountAfterDelete();
+            fingersTree-> UpdateFingerCountAfterDelete(); // by fingersTree-> currentFingerOffset
 
             if (fingersTree-> minValueChanged)
                 fingersTree-> UpdateMinValueUp();
@@ -1211,7 +1157,8 @@ template <typename KeyType> void EgIndexes<KeyType>::DeleteIndex(bool isPrimary)
 
             // qDebug() << "fingersTree-> currentFingerOffset " << hex << (int) fingersTree-> currentFingerOffset << FN;
 
-            fingersTree-> DeleteParentFinger(); // probably recursive
+            if (fingersTree-> DeleteParentFinger() == 1) // last index
+                return 1; // delete files
 
             // fingersTree-> PrintAllChunksInfo("After finger delete" + FNS);
 
@@ -1223,6 +1170,7 @@ template <typename KeyType> void EgIndexes<KeyType>::DeleteIndex(bool isPrimary)
     else
         qDebug() << "Indexes chunk not found " << fingersTree-> IndexFileName << " Key = " << hex << (int) theKey << " Offset = " << hex << (int) oldDataOffset << FN;
 
+    return 0;
 }
 
 
@@ -1231,11 +1179,11 @@ template <typename KeyType> void EgIndexes<KeyType>::RemoveChunkFromChain()
     quint64 prevChunkPtr, nextChunkPtr;
 
         // get pointers
-    indexStream.device()->seek(indexesChunkOffset + egChunkVolume * oneIndexSize);
+    indexStream.device()->seek(fingersTree-> currentFinger.nextChunkOffset + egChunkVolume * oneIndexSize);
     indexStream >> prevChunkPtr;
     indexStream >> nextChunkPtr;
 
-    //qDebug() << "indexesChunkOffset = " << hex << (int) indexesChunkOffset <<
+    //qDebug() << "fingersTree-> currentFinger.nextChunkOffset = " << hex << (int) fingersTree-> currentFinger.nextChunkOffset <<
     //            ", nextChunkPtr = " << hex << (int) nextChunkPtr <<
     //            ", prevChunkPtr = " << hex << (int) prevChunkPtr << FN;
 
@@ -1257,7 +1205,7 @@ template <typename KeyType> void EgIndexes<KeyType>::RemoveChunkFromChain()
         indexStream << prevChunkPtr;
     }
 
-    StoreIndexChunk(zero_chunk);
+    StoreIndexChunk(zero_chunk, fingersTree-> currentFinger.nextChunkOffset);
 
     // TODO add to vacant chunks chain
 

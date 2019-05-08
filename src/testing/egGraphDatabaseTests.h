@@ -18,6 +18,8 @@
 class EgGraphDatabaseTests
 {
 public:
+    EgGraphDatabase graphDB;
+
     bool testEgDataNodeTypeMetaInfo(EgDataNodeTypeExtraInfo& egDataNodeTypeMetaInfo);
 
     bool testEgDataNode(EgDataNodeTypeExtraInfo& egDataNodeTypeMetaInfo);

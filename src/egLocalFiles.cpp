@@ -676,7 +676,7 @@ inline int EgDataFiles::LocalModifyObjects(const QMap<EgDataNodeIdType, EgDataNo
     return 0;
 }
 
-int EgDataFiles::LocalModifyNodes(const QList<EgDataNode> &updatedDataNodes)
+int EgDataFiles::LocalModifyNodesList(const QList<EgDataNode> &updatedDataNodes)
 {
     EgDataNode tmpNode;
 

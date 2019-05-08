@@ -13,11 +13,31 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataIndexAddFirs
 {
     egIndexFiles.OpenFilesToUpdate();
 
-    egIndexFiles.theIndex  = 0x1; // 0x6144;
+    egIndexFiles.theIndex  = 0x1;
     egIndexFiles.dataOffset = 0xabcd01;
 
     egIndexFiles.AddIndex();
+/*
+    egIndexFiles.theIndex  = 0x2;
+    egIndexFiles.dataOffset = 0xabcd02;
 
+    egIndexFiles.AddIndex();
+
+    egIndexFiles.theIndex  = 0x3;
+    egIndexFiles.dataOffset = 0xabcd03;
+
+    egIndexFiles.AddIndex();
+
+    egIndexFiles.theIndex  = 0x4;
+    egIndexFiles.dataOffset = 0xabcd04;
+
+    egIndexFiles.AddIndex();
+
+    egIndexFiles.theIndex  = 0x5;
+    egIndexFiles.dataOffset = 0xabcd05;
+
+    egIndexFiles.AddIndex();
+*/
     // egIndexFiles.LoadFingersChunk();
     // egIndexFiles.LoadIndexChunk();
 
@@ -49,7 +69,7 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataInsertIndexe
 
     egIndexFiles.OpenFilesToUpdate();
 
-    for (int i= 0; i < 23; i++) // 14 23 19
+    for (int i= 0; i < 23; i++) // 23
     {
         /*if (i % 2)
         {
@@ -76,7 +96,7 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataDeleteAllInd
 {
     egIndexFiles.OpenFilesToUpdate();
 
-    for (int i= 0; i < 22; i++) // 14 23 19
+    for (int i= 0; i < 23; i++) // 14 23 19
     {
         /* if (i % 2)
         {

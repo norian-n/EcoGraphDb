@@ -138,7 +138,7 @@ public:
         // server-side store
     void LocalAddNodes(const QList<EgDataNode>& addedDataNodes);
     void LocalDeleteNodes(const QList<EgDataNode>&  deletedDataNodes);
-    int  LocalModifyNodes(const QList<EgDataNode>&  updatedDataNodes);
+    int  LocalModifyNodesList(const QList<EgDataNode>&  updatedDataNodes);
 
         // client-side transfers
     void SendNodesToStream(QMap<EgDataNodeIdType, EgDataNode*>&  dataNodesMap, QDataStream &nodesStream);

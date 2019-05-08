@@ -163,7 +163,6 @@ bool EgGraphDatabaseTests::testEgDataNodesTypeGUIDescriptors(EgDataNodesType& te
 
 bool EgGraphDatabaseTests::testEgGraphDatabaseCreate()
 {
-    EgGraphDatabase graphDB;
     EgNodeTypeSettings typeSettings;
 
     // graphDB.CreateEgDb();
@@ -206,7 +205,6 @@ bool EgGraphDatabaseTests::testEgGraphDatabaseCreate()
 
 bool EgGraphDatabaseTests::testEgLinksCreate()
 {
-    EgGraphDatabase graphDB;
 
     // graphDB.CreateEgDb();
 

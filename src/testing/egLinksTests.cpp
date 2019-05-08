@@ -41,7 +41,7 @@ void EgLinksTests::testCreateNodes()
 
     testDataNodes.Connect(graphDB, "linksTest");
 
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 10; i++)
     {
         addValues.clear();
         addValues << QVariant("linksTestName_" + QVariant(i+1).toString()) << QVariant(1);
@@ -127,7 +127,7 @@ void EgLinksTests::testUpdateIndexedNodes()
 
     testDataNodes.LoadAllDataNodes();
 
-    for (int i = 0; i < 110; i++)
+    for (int i = 0; i < 18; i++)
     {
         // update node index
 
