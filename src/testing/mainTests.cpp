@@ -138,22 +138,19 @@ int main() // int argc, char *argv[])
 
     // return 0; // FIXME STUB
 
-
     tmpRes = indexTests.testSelectOperations(testIndexFiles);
     res = res && tmpRes;
 
     // tmpRes = indexTests.testEgDataDeleteAllIndexes(testIndexFiles);
 
-
-
     // data nodes type
 
     // graphDB.Connect();
-/*
+
     tmpRes = egDbTests.testEgGraphDatabaseCreate();
     res = res && tmpRes;
 
-    tmpRes = testEgDataNodesType.Connect(graphDB, "test");
+    tmpRes = ! (bool) testEgDataNodesType.Connect(graphDB, "test");
     res = res && tmpRes;
 
     // testEgDataNodesType.metaInfo.PrintMetaInfo();
@@ -181,7 +178,7 @@ int main() // int argc, char *argv[])
 
     tmpRes = egDbTests.testEgEntryNodes(testEgDataNodesType);
     res = res && tmpRes;
-*/
+
     // return 0; // FIXME STUB
 
     EgLinksTests linksTests;
@@ -189,7 +186,7 @@ int main() // int argc, char *argv[])
     tmpRes = linksTests.testLinksTree();
     res = res && tmpRes;
 
-    return 0; // FIXME STUB
+    // return 0; // FIXME STUB
 
     EgLocationTests locTests;
 
@@ -204,13 +201,16 @@ int main() // int argc, char *argv[])
 
     EgNamedAttributesTests attrTests;
 
-    attrTests.testCreateAttributes();
+    tmpRes = attrTests.testCreateAttributes();
+    res = res && tmpRes;
 
     tmpRes = attrTests.testAddAttributes();
     res = res && tmpRes;
 
     tmpRes = attrTests.testLoadAttributes();
     res = res && tmpRes;
+
+    // qDebug() << res;
 
     if (res)
         qDebug() << "\nAll tests PASSED\n";

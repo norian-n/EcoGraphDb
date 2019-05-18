@@ -277,7 +277,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::UpdateIndex(bool isChange
         indexChunks.UpdateIndex(isPrimary);
     else
     {
-        if (indexChunks.DeleteIndex(isPrimary) == 1) // last index
+        if (indexChunks.DeleteIndex(isPrimary) == 1) // last index, recreate everything
         {
             RemoveFiles();
             indexChunks.theKey = newIndex;

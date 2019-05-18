@@ -906,7 +906,7 @@ int EgDataNodesType::LoadDataByIndexes(const EgIndexCondition &indexCondition)
 
         index_tree-> CalcTreeSet(indexCondition.iTreeNode, IndexOffsets, LocalFiles);
 
-        // qDebug() << FN << "IndexOffsets.count() = " << IndexOffsets.count();
+        // qDebug() << "IndexOffsets.count() = " << IndexOffsets.count() << FN;
 
         if (! IndexOffsets.isEmpty())
         {

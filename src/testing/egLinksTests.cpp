@@ -127,10 +127,9 @@ void EgLinksTests::testUpdateIndexedNodes()
 
     testDataNodes.LoadAllDataNodes();
 
-    for (int i = 0; i < 18; i++)
+            // update nodes
+    for (int i = 0; i < 20; i++) // 18 20
     {
-        // update node index
-
         testDataNodes[i+1]["status"] = 2;
         testDataNodes.UpdateDataNode(i+1);
     }
@@ -159,7 +158,7 @@ void EgLinksTests::testUpdateIndexedNodes()
 
     // qDebug() << testDataNodes.DataNodesCount() << FN;
 
-    bool res = (testDataNodes.DataNodesCount() == 110);
+    bool res = (testDataNodes.DataNodesCount() == 20);
 
     testShowResult(res, FNS);
 

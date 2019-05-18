@@ -1217,6 +1217,16 @@ template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkLast(bool isEx
 }
 
 
+template <typename KeyType> int EgFingers<KeyType>::GetFingerByOffset()
+{
+    // PrintFingerInfo(currentFinger, "currentFinger " + FNS );
+
+    currentFinger.myOffsetInChunk = (updatedFingerOffset-rootHeaderSize) % fingersChunkSize;
+    currentFinger.myChunkOffset = updatedFingerOffset - currentFinger.myOffsetInChunk;
+
+    return 0;
+}
+
 template <typename KeyType> int EgFingers<KeyType>::UpdateCurrentFingerAfterInsert()
 {
     // PrintFingerInfo(currentFinger, "currentFinger before " + FNS );
@@ -1427,19 +1437,19 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingerAfterDelete()
 */
 
 
-template <typename KeyType> int EgFingers<KeyType>::UpdateFingerCountAfterDelete()
+template <typename KeyType> int EgFingers<KeyType>::UpdateFingerCountAfterDelete(keysCountType newKeysCount)
 {
     if (rootFinger.myLevel == 0) // only root
     {
         fingerStream.device()->seek(sizeof(KeyType) * 2 + sizeof(fingersLevelType));
-        fingerStream << currentKeysCount;
+        fingerStream << newKeysCount;
 
         return 0;
     }
 
         // update keys count, decremented by indexes
     fingerStream.device()->seek(currentFingerOffset + sizeof(KeyType) * 2);
-    fingerStream << currentKeysCount;
+    fingerStream << newKeysCount;
 
     return 0;
 }
@@ -1970,6 +1980,7 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterSplit
 
         StoreRootFinger();
 
+            // backptrs to first 2 fingers in chunk
         indexChunks-> StoreFingerOffset(currentFinger.nextChunkOffset, rootHeaderSize);             // FIXME check
         indexChunks-> StoreFingerOffset(newFinger.nextChunkOffset, rootHeaderSize + oneFingerSize); // FIXME check
 
@@ -2000,7 +2011,7 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterSplit
         }
         else
         {
-            appendMode = (indexChunks-> theKey >= parentFinger.maxKey);
+            appendMode = (indexChunks-> theKey >= parentFinger.maxKey); // FIXME check
 
             if (appendMode)
                 AppendFingersChunk(localFingersStream);
@@ -2300,8 +2311,8 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateParentsOffsets2(QDataS
             // write actual backlink
         if (myLocalLevel > 0)
             StoreParentOffset(nextLevelOffset, myChunkOffset + i * oneFingerSize);
-
-        // indexChunks-> StoreFingerOffset(nextLevelOffset, myChunkOffset + i * oneFingerSize);
+        else
+            indexChunks-> StoreFingerOffset(nextLevelOffset, myChunkOffset + i * oneFingerSize);
     }
 
     return 0;

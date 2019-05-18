@@ -38,7 +38,7 @@ bool EgNamedAttributesTests::testCreateAttributes()
 
     // testShowResult(res, FNS);
 
-    return 0;
+    return true;
 }
 
 bool EgNamedAttributesTests::testAddAttributes()

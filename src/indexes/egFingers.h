@@ -54,6 +54,9 @@ public:
     quint64 parentFingerOffset;
     quint64 currentFingerOffset;
 
+    bool fingerIsMoved;             //
+    quint64 updatedFingerOffset;    // to restore currentFinger from indexes
+
     quint64 fingersChunkOffset;
 
     keysCountType currentKeysCount;
@@ -110,6 +113,8 @@ public:
 
     inline int FindFingerInChunkToInsert(QDataStream &localFingersStream);
 
+    int  GetFingerByOffset();    // get by updatedFingerOffset if fingerIsMoved by indexes
+
     int UpdateCurrentFingerAfterInsert();
 
     int UpdateFingersChainAfterInsert();    
@@ -117,7 +122,7 @@ public:
 
     int UpdateFingersChainAfterDelete(); // FIXME check if needed
 
-    int UpdateFingerCountAfterDelete();
+    int UpdateFingerCountAfterDelete(keysCountType newKeysCount);
 
     int UpdateMinValueUp();
     int UpdateMaxValueUp();

@@ -26,6 +26,14 @@ template <typename KeyType> struct EgIndexStruct
     quint64 dataOffset;
 };
 
+/*
+struct EgIndexChunkChainLinks
+{
+    quint64 prevOffsetPtr;      // chunks chain operations
+    quint64 nextOffsetPtr;
+};
+*/
+
 template <typename KeyType> class EgIndexes
 {
 
@@ -38,7 +46,7 @@ public:
     quint64 oldDataOffset;      // offsets in data nodes file
     quint64 newDataOffset;
 
-    keysCountType chunkCount;   // real indexes in the chunk
+    keysCountType chunkCount;   // indexes count in the chunk for chain opers
 
     quint64 indexesChunkOffset; // file position for chain connect
     qint32  indexPosition;      // position in the chunk
@@ -60,6 +68,8 @@ public:
 
     QByteArray indexBA;
 
+    QDataStream* localStream {nullptr};
+
     EgIndexes():
          oneIndexSize(sizeof(KeyType) + sizeof(quint64)) // tail: chain neighbors offsets (prev, next), count, parent finger offset
         ,indexChunkSize((egIndexesNamespace::egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2) + sizeof(keysCountType) + sizeof(quint64))          
@@ -68,10 +78,12 @@ public:
         ,new_chunk(new char[indexChunkSize])
     {
         memset(zero_chunk, 0, indexChunkSize);
-        indexBA.resize(indexChunkSize);
+        indexBA.resize(indexChunkSize + oneIndexSize);
+        localStream = new QDataStream(&indexBA, QIODevice::ReadWrite);
     }
 
-    ~EgIndexes() { if (zero_chunk) delete[] zero_chunk; if (chunk) delete[] chunk; if (new_chunk) delete[] new_chunk;}
+    ~EgIndexes() { if (zero_chunk) delete[] zero_chunk; if (chunk) delete[] chunk; if (new_chunk) delete[] new_chunk;
+                 if (localStream) delete localStream;}
                  // qDebug()  << "EgIndexes destructor called ";}
 
     typedef bool (*CompareFunctionType) (KeyType&, KeyType&);
@@ -89,7 +101,9 @@ public:
 
     // int StoreFingerOffset(quint64 fingerOffset);
     int StoreFingerOffset(quint64 chunkOffset, quint64 fingerOffset);   // update finger backptr
+
     int GetFingerOffset(quint64& fingerOffset);
+    int GetChainPointers(quint64& fwdPtr, quint64& backPtr);
 
     int LoadIndexChunk(char *chunkPtr, quint64 chunkOffset);    // by indexesChunkOffset
     int LoadIndexChunk();        // default: loads fingersTree-> currentFinger.nextChunkOffset to indexBA.data()
@@ -106,7 +120,7 @@ public:
     inline void ReadIndexOnly(QDataStream &localIndexesStream, KeyType& currentIndex);
     inline void UpdateChunkCount(QDataStream &localIndexesStream, keysCountType newCount);
 
-    int InsertInsideIndexChunk(QDataStream &localIndexesStream);
+    inline int InsertInsideIndexChunk(QDataStream &localIndexesStream);
 
     inline void MoveTailToInsert(char* chunkPtr, int indexPosition);
 
