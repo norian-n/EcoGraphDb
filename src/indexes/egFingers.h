@@ -23,19 +23,13 @@ template <typename KeyType> class EgFingers // Data Objects link / autolink supp
 {
 public:
 
-    // typedef bool (*CompareFunctionType) (KeyType&, KeyType&);
-    // static bool CompareEQ (KeyType& key1, KeyType& key2) {return (key1 == key2);}
+    const int rootHeaderSize = sizeof(KeyType) * 2 + sizeof(fingersLevelType) + sizeof(keysCountType) + sizeof(quint64);
+    const int oneFingerSize = sizeof(KeyType) * 2 + sizeof(keysCountType) + sizeof(quint64);  // last is next chunk offset
+    const int fingersChunkSize = egIndexesNamespace::egChunkVolume * oneFingerSize + sizeof(quint64) + sizeof(fingersLevelType); // parent chunk offset
 
-    EgIndexes<KeyType>* indexChunks;
+    EgIndexes<KeyType>* indexChunks {nullptr};  // set by IndexesFiles interface class
 
-    QString IndexFileName; // for debug messages
-
-    // quint64 fingersChunkOffset; // finger file position
-
-    // int rootHeaderSize;
-    int rootHeaderSize;
-    int oneFingerSize;
-    int fingersChunkSize;
+    QString IndexFileName; // copy for debug messages
 
     int posToInsert;
 
@@ -54,7 +48,7 @@ public:
     quint64 parentFingerOffset;
     quint64 currentFingerOffset;
 
-    bool fingerIsMoved;             //
+    // bool fingerIsMoved;             // index chunk changed
     quint64 updatedFingerOffset;    // to restore currentFinger from indexes
 
     quint64 fingersChunkOffset;
@@ -69,28 +63,23 @@ public:
 
     QList < egFinger<KeyType> > fingersChain;
 
-    QDataStream fingerStream; // file operations
+    QDataStream fingerStream;           // file operations
 
-    QByteArray fingersBA;
+    QByteArray   fingersBA;             // chunk stream operations
+    QDataStream* localStream {nullptr};
 
     EgFingers():
-         indexChunks(NULL)
-        //  rootHeaderSize(sizeof(KeyType) * 2 + sizeof(egIndexes3Namespace::fingersLevelType) + sizeof(egIndexes3Namespace::keysCountType) + sizeof(quint64))
-        // ,fingersHeaderSize(sizeof(KeyType) * 2 + sizeof(egIndexes3Namespace::fingersCountType) + sizeof(egIndexes3Namespace::fingersLevelType))
-        ,rootHeaderSize(sizeof(KeyType) * 2 + sizeof(fingersLevelType) + sizeof(keysCountType) + sizeof(quint64))
-        ,oneFingerSize(sizeof(KeyType) * 2 + sizeof(keysCountType) + sizeof(quint64)) // next chunk offset
-        ,fingersChunkSize(/*fingersHeaderSize + */(egIndexesNamespace::egChunkVolume * oneFingerSize) + sizeof(quint64) + sizeof(fingersLevelType)) // parent chunk offset, level
-
-        ,fingersChunk(new char[fingersChunkSize])
+         fingersChunk(new char[fingersChunkSize])
         ,zeroFingersChunk(new char[fingersChunkSize])
         ,newFingersChunk(new char[fingersChunkSize])
     {
         memset(zeroFingersChunk, 0, fingersChunkSize);
-        // qDebug() << FN << "zeroFingersChunk size = " << sizeof(zeroFingersChunk);
-        fingersBA.resize(fingersChunkSize);
+        fingersBA.resize(fingersChunkSize+oneFingerSize);
+        localStream = new QDataStream(&fingersBA, QIODevice::ReadWrite);
     }
 
-    ~EgFingers() { if (zeroFingersChunk) delete[] zeroFingersChunk; if (newFingersChunk) delete[] newFingersChunk; if (fingersChunk) delete[] fingersChunk;}
+
+    ~EgFingers() { if (localStream) delete localStream; if (zeroFingersChunk) delete[] zeroFingersChunk; if (newFingersChunk) delete[] newFingersChunk; if (fingersChunk) delete[] fingersChunk;}
 
     void InitRootFinger();
 
@@ -143,11 +132,11 @@ public:
 
     inline void MoveTailToInsert(char* chunkPtr, int fingerPosition, int fingersToMove);
 
-    int InsertSplittedFinger2(QDataStream &localFingersStream);
+    int InsertSplittedFinger(QDataStream &localFingersStream);
 
     int SplitFingersChunk2(QDataStream &localFingersStream);
-    int InsertNewFinger2(QDataStream &localFingersStream, char* theChunk, int posToInsert, int itemsCount);
-    int UpdateParentsOffsets2(QDataStream &localFingersStream, char* theChunk, quint64 myChunkOffset,  int posToInsert, int itemsCount, fingersLevelType myLocalLevel);
+    int InsertNewFinger(QDataStream &localFingersStream, char* theChunk, int posToInsert, int itemsCount);
+    int UpdateParentsOffsets(QDataStream &localFingersStream, char* theChunk, quint64 myChunkOffset,  int posToInsert, int itemsCount, fingersLevelType myLocalLevel);
 
     void UpdateMinMax(QDataStream& localFingersStream, egFinger<KeyType>& theFinger, char* theChunk);
 

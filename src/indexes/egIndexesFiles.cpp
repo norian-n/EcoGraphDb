@@ -228,7 +228,7 @@ template <typename KeyType> void EgIndexFiles<KeyType>::CloseFiles()
 
 template <typename KeyType> void EgIndexFiles<KeyType>::AddIndex()
 {
-
+        // have to set this fields to use indexes
     indexChunks.theKey = theIndex;
     indexChunks.oldDataOffset = dataOffset;
 
@@ -240,14 +240,13 @@ template <typename KeyType> void EgIndexFiles<KeyType>::AddIndex()
     {
         // qDebug()  << "index" << theIndex << "empty file, calling AppendNewChunk()" << FN;
 
-        indexChunks.InitRootHeader();
-        indexChunks.InitIndexChunk();
-
         fingersTree.InitRootFinger();
         fingersTree.StoreRootFinger();
 
+        indexChunks.InitIndexChunk();
+
         indexChunks.StoreRootHeader();
-        indexChunks.StoreIndexChunk(indexChunks.chunk, egIndexesNamespace::indexHeaderSize);
+        indexChunks.StoreIndexChunk(indexChunks.indexBA.data(), egIndexesNamespace::indexHeaderSize);
 
         return;
     }
@@ -261,6 +260,7 @@ template <typename KeyType> void EgIndexFiles<KeyType>::AddIndex()
 
 template <typename KeyType> int EgIndexFiles<KeyType>::UpdateIndex(bool isChanged, bool isPrimary)
 {
+            // have to set this fields to use indexes
     indexChunks.theKey = theIndex;
     indexChunks.oldDataOffset = dataOffset;
     indexChunks.newDataOffset = newOffset;
@@ -277,24 +277,24 @@ template <typename KeyType> int EgIndexFiles<KeyType>::UpdateIndex(bool isChange
         indexChunks.UpdateIndex(isPrimary);
     else
     {
-        if (indexChunks.DeleteIndex(isPrimary) == 1) // last index, recreate everything
+        if (indexChunks.DeleteIndex(isPrimary) == 1) // last index, recreate
         {
             RemoveFiles();
             indexChunks.theKey = newIndex;
             indexChunks.oldDataOffset = newOffset;
 
-            indexChunks.InitRootHeader();
-            indexChunks.InitIndexChunk();
-
             fingersTree.InitRootFinger();
             fingersTree.StoreRootFinger();
 
+            indexChunks.InitIndexChunk();
+
             indexChunks.StoreRootHeader();
-            indexChunks.StoreIndexChunk(indexChunks.chunk, egIndexesNamespace::indexHeaderSize);
+            indexChunks.StoreIndexChunk(indexChunks.indexBA.data(), egIndexesNamespace::indexHeaderSize);
 
             return 0;
         }
 
+                // have to set this fields to use indexes
         indexChunks.theKey = newIndex;
         indexChunks.oldDataOffset = newOffset;
 
@@ -313,7 +313,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::UpdateIndex(bool isChange
 
 template <typename KeyType> int EgIndexFiles<KeyType>::DeleteIndex(bool isPrimary)
 {
-
+        // have to set this fields to use indexes
     indexChunks.theKey = theIndex;
     indexChunks.oldDataOffset = dataOffset;
 
@@ -384,6 +384,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GE(QSet<quint64>& in
     if (res)    // error
         return res;
 
+        // have to set this field to use indexes
     indexChunks.theKey   = Key;
 
     res = fingersTree.FindIndexChunkFirst(true); // FIXME - process borders
@@ -403,6 +404,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GT(QSet<quint64>& in
     if (res)    // error
         return res;
 
+        // have to set this field to use indexes
     indexChunks.theKey = Key;
 
     res = fingersTree.FindIndexChunkLast(false); // FIXME - process borders
@@ -424,6 +426,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LE(QSet<quint64>& in
     if (res)    // error
         return res;
 
+            // have to set this field to use indexes
     indexChunks.theKey   = Key;
 
     res = fingersTree.FindIndexChunkLast(true); // FIXME - process borders
@@ -443,6 +446,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LT(QSet<quint64>& in
     if (res)    // error
         return res;
 
+            // have to set this field to use indexes
     indexChunks.theKey = Key;
 
     res = fingersTree.FindIndexChunkFirst(false); // FIXME - process borders
