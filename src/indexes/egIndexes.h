@@ -88,42 +88,41 @@ public:
     int StoreIndexChunk(const char *chunkPtr, const quint64 nextChunkOffset);
     inline int StoreIndexChunk();       // default: indexBA.constData() to fingersTree-> currentFinger.nextChunkOffset
 
-    int FindIndexPositionToInsert(QDataStream &localIndexesStream);
+    int FindIndexPositionToInsert();
     int InsertToIndexChunk();
 
-    inline void ReadIndexValues(QDataStream &localIndexesStream, EgIndexStruct<KeyType>& indexStruct);
-    inline void WriteIndexValues(QDataStream &localIndexesStream, EgIndexStruct<KeyType>& indexStruct, int position);
+    inline void ReadIndexValues(EgIndexStruct<KeyType>& indexStruct);
+    inline void WriteIndexValues(EgIndexStruct<KeyType>& indexStruct, int position);
 
-    inline void ReadIndexOnly(QDataStream &localIndexesStream, KeyType& currentIndex);
-    inline void UpdateChunkCount(QDataStream &localIndexesStream, keysCountType newCount);
+    inline void ReadIndexOnly(KeyType& currentIndex);
+    inline void UpdateChunkCount(keysCountType newCount);
 
-    inline int InsertInsideIndexChunk(QDataStream &localIndexesStream);
+    inline int InsertInsideIndexChunk();
 
     inline void MoveTailToInsert(char* chunkPtr, int indexPosition);
 
-    int SplitIndexChunk(QDataStream &localIndexStream);
-    int AppendIndexChunk(QDataStream &localIndexStream);
+    int SplitIndexChunk();
+    int AppendIndexChunk();
 
         // load data nodes
-    int FindPosByKeyFirst(QDataStream &localIndexesStream, CompareFunctionType myCompareFunc);
-    int FindPosByKeyLast(QDataStream &localIndexesStream, CompareFunctionType myCompareFunc);
+    int FindPosByKeyFirst(CompareFunctionType myCompareFunc);
+    int FindPosByKeyLast(CompareFunctionType myCompareFunc);
 
     void LoadAllData(QSet<quint64>& index_offsets);
-
-    void LoadDataUp(QSet<quint64>& index_offsets, QDataStream &localIndexStream);
+    void LoadDataUp(QSet<quint64>& index_offsets);
 
     void LoadDataByChunkUp(QSet<quint64>& index_offsets, CompareFunctionType myCompareFunc);
     int LoadDataByChunkDown(QSet<quint64>& index_offsets, CompareFunctionType myCompareFunc);
 
     void LoadDataByChunkEqual(QSet<quint64>& index_offsets);
 
-    int FindIndexByDataOffset(QDataStream &localIndexStream, bool isPrimary);
+    int FindIndexByDataOffset(bool isPrimary);
 
     void UpdateIndex(bool isPrimary = false);
     int DeleteIndex(bool isPrimary = false);
 
     int UpdateDataOffset();
-    int DeleteDataOffset(QDataStream &localIndexStream);
+    int DeleteDataOffset();
 
     void RemoveChunkFromChain();
 

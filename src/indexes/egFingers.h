@@ -49,7 +49,6 @@ public:
     quint64 currentFingerOffset;
 
     // bool fingerIsMoved;             // index chunk changed
-    quint64 updatedFingerOffset;    // to restore currentFinger from indexes
 
     quint64 fingersChunkOffset;
 
@@ -89,7 +88,7 @@ public:
 
     void InitFingersChunk();
 
-    int LoadFingersChunk(quint64 fingersChunkOffset);
+    inline int LoadFingersChunk(); // default: to fingersBA.data() from parentFinger.nextChunkOffset
     int LoadFingersChunk(char* chunkPtr, const quint64 fingersChunkOffset);
 
     int StoreFingersChunk(quint64 fingersChunkOffset, char* chunkPtr);
@@ -100,9 +99,9 @@ public:
 
     int FindIndexChunkToInsert();
 
-    inline int FindFingerInChunkToInsert(QDataStream &localFingersStream);
+    inline int FindFingerInChunkToInsert();
 
-    int  GetFingerByOffset();    // get by updatedFingerOffset if fingerIsMoved by indexes
+    int  GetFingerByOffset(quint64 updatedFingerOffset);    // get by updatedFingerOffset if fingerIsMoved by indexes
 
     int UpdateCurrentFingerAfterInsert();
 
@@ -116,38 +115,42 @@ public:
     int UpdateMinValueUp();
     int UpdateMaxValueUp();
 
+    int  DeleteParentFinger2();
     int  DeleteParentFinger();
 
+    void DeleteSpecificFinger2(keysCountType keysCount);
     void DeleteSpecificFinger();
     void DeleteFingersChunk(quint64 fingersChunkOffset);
 
-    inline void ReadFinger  (QDataStream &localFingersStream, egFinger<KeyType>& theFinger);
+    void ReadFinger  (QDataStream &localFingersStream, egFinger<KeyType>& theFinger);
     inline void WriteFinger (QDataStream &localFingersStream, egFinger<KeyType>& theFinger);
 
     inline void UpdateTheFingerMinMax(egFinger<KeyType>& theFinger);
 
     // int InsertSplittedFinger(QDataStream &localFingersStream);
     // int SplitFingersChunk(QDataStream &localFingersStream);
-    void AddNewRootChunk(QDataStream &localFingersStream);
+    void AddNewRootChunk();
 
     inline void MoveTailToInsert(char* chunkPtr, int fingerPosition, int fingersToMove);
 
-    int InsertSplittedFinger(QDataStream &localFingersStream);
+    int InsertSplittedFinger();
 
-    int SplitFingersChunk2(QDataStream &localFingersStream);
-    int InsertNewFinger(QDataStream &localFingersStream, char* theChunk, int posToInsert, int itemsCount);
-    int UpdateParentsOffsets(QDataStream &localFingersStream, char* theChunk, quint64 myChunkOffset,  int posToInsert, int itemsCount, fingersLevelType myLocalLevel);
+    int SplitFingersChunk2();
 
-    void UpdateMinMax(QDataStream& localFingersStream, egFinger<KeyType>& theFinger, char* theChunk);
+    int SplitFingersChunk(QDataStream &localFingersStream);
+    int InsertNewFinger(int posToInsert, int itemsCount);
+    int UpdateBackptrOffsets(quint64 myChunkOffset,  int posToInsert, int itemsCount, fingersLevelType myLocalLevel);
 
-    int AppendFingersChunk(QDataStream &localFingersStream);
+    void UpdateMinMax(egFinger<KeyType>& theFinger);
+
+    int AppendFingersChunk();
 
     int FindIndexChunkFirst(bool isExactEqual); // CompareFunctionType myCompareFunc
-    int FindNextLevelOffsetFirst(QDataStream &localFingersStream, bool isExactEqual);
+    int FindNextLevelOffsetFirst(bool isExactEqual);
 
     int FindIndexChunkLast(bool isExactEqual); // CompareFunctionType myCompareFunc
     // int FindNextLevelOffsetLast(bool isExact);
-    int FindNextLevelOffsetLast(QDataStream &localFingersStream, bool isExactEqual);
+    int FindNextLevelOffsetLast(bool isExactEqual);
 
     int StoreParentOffset(quint64 fingersChunkOffset, quint64 parentFingerOffset);
     int GetParentOffset(QDataStream &localFingersStream, quint64& parentFingerOffset); // debug
