@@ -190,7 +190,7 @@ inline void EgServerOperProc::AppendData(QDataStream& in)
     // qDebug()  << "addNodes.count(): " << addNodes.count() << FN ;
 
     if (addNodes.count() > 0)
-        localFiles.LocalAddNodes(addNodes);
+        localFiles.LocalAddNodesList(addNodes);
 }
 
 inline void EgServerOperProc::DeleteData(QDataStream& in)
@@ -201,7 +201,7 @@ inline void EgServerOperProc::DeleteData(QDataStream& in)
     // qDebug()  << "deleteNodes.count(): " << deleteNodes.count() << FN ;
 
     if (deleteNodes.count() > 0)
-        localFiles.LocalDeleteNodes(deleteNodes);
+        localFiles.LocalDeleteNodesList(deleteNodes);
 }
 
 inline void EgServerOperProc::UpdateData(QDataStream& in)

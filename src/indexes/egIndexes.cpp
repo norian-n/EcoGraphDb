@@ -271,7 +271,7 @@ template <typename KeyType> int EgIndexes<KeyType>::SplitIndexChunk()
     // PrintIndexesChunk(indexBA.data(), "new_chunk " + FNS);
 
         // update fingers tree
-    fingersTree-> UpdateFingersChainAfterSplit(); // false);
+    fingersTree-> UpdateFingersChainAfterSplit();
 
     return 0;
 }
@@ -279,8 +279,7 @@ template <typename KeyType> int EgIndexes<KeyType>::SplitIndexChunk()
 
 template <typename KeyType> int EgIndexes<KeyType>::AppendIndexChunk()
 {
-
-        // set new finger
+        // setup new finger
     fingersTree-> newFinger.nextChunkOffset = indexStream.device()->size(); // append to the end of indexes file
 
     fingersTree-> newFinger.myLevel    = 0;
@@ -299,12 +298,9 @@ template <typename KeyType> int EgIndexes<KeyType>::AppendIndexChunk()
     localStream->device()->seek(egChunkVolume * oneIndexSize + sizeof(quint64));
     *localStream << fingersTree-> newFinger.nextChunkOffset;
 
-        // save old chunk
-    StoreIndexChunk();
+    StoreIndexChunk(); // save old chunk by currentFinger
 
-        // fill new chunk data
-    memset(indexBA.data(), 0, indexChunkSize);
-    // memcpy(indexBA.data(), zero_chunk, indexChunkSize);
+    memset(indexBA.data(), 0, indexChunkSize); // empty new chunk
 
         // write index key and offset
     indexData.indexKey   = theKey;
@@ -312,14 +308,14 @@ template <typename KeyType> int EgIndexes<KeyType>::AppendIndexChunk()
 
     WriteIndexValues(indexData, 0);
 
-        // update pointers & count
+        // update chain pointers & count
     localStream->device()->seek(egChunkVolume * oneIndexSize);
     *localStream << fingersTree-> currentFinger.nextChunkOffset;        // prev ptr
     *localStream << nextOffsetPtr;                                      // stored next ptr
 
     UpdateChunkCount(1);
 
-    StoreIndexChunk(indexBA.data(), fingersTree-> newFinger.nextChunkOffset);
+    StoreIndexChunk(indexBA.data(), fingersTree-> newFinger.nextChunkOffset); // new chunk
 
     if (nextOffsetPtr) // update next chunk in chain
     {
@@ -328,7 +324,7 @@ template <typename KeyType> int EgIndexes<KeyType>::AppendIndexChunk()
     }
 
         // update fingers tree
-    fingersTree-> UpdateFingersChainAfterSplit(); // true);
+    fingersTree-> UpdateFingersChainAfterSplit();
 
     return 0;
 }
@@ -678,7 +674,7 @@ template <typename KeyType> void EgIndexes<KeyType>::LoadDataByChunkEqual(QSet<q
 
         if (firstChunk)
         {
-           indexPosition = FindPosByKeyFirst(CompareGE);
+           indexPosition = FindPosByKeyFirst(CompareGE);  // Index >= Key
 
            if (indexPosition < 0)
               indexPosition = 0;    // FIXME
@@ -908,7 +904,7 @@ template <typename KeyType> int EgIndexes<KeyType>::DeleteIndex(bool isPrimary)
         }
         else if (chunkCount == 1) // last index, delete finger by fingersTree-> currentFingerOffset
         {
-            if (fingersTree-> DeleteParentFinger2() == 1) // last index
+            if (fingersTree-> DeleteParentFinger() == 1) // last index
                 return 1; // delete files
 
             RemoveChunkFromChain();

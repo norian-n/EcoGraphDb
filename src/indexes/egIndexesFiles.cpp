@@ -237,9 +237,8 @@ template <typename KeyType> void EgIndexFiles<KeyType>::AddIndex()
 
         // check for empty file
     if ( ! indexChunks.indexStream.device()->size() ) // is empty
-    {
-        // qDebug()  << "index" << theIndex << "empty file, calling AppendNewChunk()" << FN;
-
+    {       
+            // add first index and root finger
         fingersTree.InitRootFinger();
         fingersTree.StoreRootFinger();
 
@@ -250,11 +249,10 @@ template <typename KeyType> void EgIndexFiles<KeyType>::AddIndex()
 
         return;
     }
-    else
+    else    // indexes ain't empty
     {
-        fingersTree.FindIndexChunkToInsert();   // FIXME check if no finger
-
-        indexChunks.InsertToIndexChunk();
+        fingersTree.FindIndexChunkToInsert();   // FIXME check if no finger in paranoid mode
+        indexChunks.InsertToIndexChunk();       // FIXME check if can't insert in paranoid mode
     }
 }
 
@@ -319,7 +317,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::DeleteIndex(bool isPrimar
 
     // qDebug() << "Delete index file name:  " << IndexFileName << FN;
 
-    if (fingersTree.FindIndexChunkFirst(true))
+    if (fingersTree.FindIndexChunkFirst(true)) // true means exact equal
     {
         qDebug() << "IndexChunk not found " << FN;
         return -1;
@@ -331,6 +329,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::DeleteIndex(bool isPrimar
         return 0;
     }
 
+        // side effect: get actual index offset if primary index - FIXME check
     if (isPrimary)
         dataOffset = indexChunks.oldDataOffset;
 

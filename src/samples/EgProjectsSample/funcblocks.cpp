@@ -118,8 +118,8 @@ void FuncBlocksForm::loadFuncblocks()
 
     Funcblocks.Connect(calleeForm-> graphDB, "funcblocks");
 
-    funcblocksOfProject.Connect(calleeForm-> graphDB, "projects_funcblocks");
-    funcblocksTree.Connect(calleeForm-> graphDB, "funcblocksTree");
+    funcblocksOfProject.Connect(calleeForm-> graphDB, "projects_funcblocks", calleeForm-> Projects, Funcblocks);
+    funcblocksTree.Connect(calleeForm-> graphDB, "funcblocksTree", Funcblocks, Funcblocks);
 
     // Funcblocks.ConnectLinkType("projects_funcblocks");
     // Funcblocks.ConnectLinkType("funcblocksTree");

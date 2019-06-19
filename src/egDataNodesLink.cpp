@@ -144,6 +144,9 @@ int EgLinkType::Connect(EgGraphDatabase& myDB, const QString& linkTypeName, EgDa
     fromType = &aFromType;
     toType = &aToType;
 
+    allLinkNames.firstTypeName  = aFromType.extraInfo.typeName;
+    allLinkNames.secondTypeName = aToType.extraInfo.typeName;
+
     myDB.AttachLinksType(this); // FIXME aFromType, aToType check
 
         // connect links storage
@@ -222,12 +225,13 @@ int EgLinkType::ResolveLinksToPointers()
 
     QList<EgExtendedLinkType> newLinks;
 
-    if (ResolveNodeTypes())
-    {
-        qDebug() << "EgDataNodesType not found: " << allLinkNames.firstTypeName << " or " << allLinkNames.secondTypeName << FN;
+    if (! fromType || ! toType)
+        if (ResolveNodeTypes()) // bad ret code
+        {
+            qDebug() << "EgDataNodesType not found: " << allLinkNames.firstTypeName << " or " << allLinkNames.secondTypeName << FN;
 
-        return -1;
-    }
+            return -1;
+        }
 
         // iterate loaded links
     for (auto Iter = linksStorage-> dataNodes.begin(); Iter != linksStorage-> dataNodes.end(); ++Iter)

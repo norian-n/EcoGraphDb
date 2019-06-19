@@ -108,6 +108,8 @@ void MainWindow::on_initButton_clicked()
 
     nodes.AddLocation(locValues, newID);
 
+    nodes.StoreData();
+
         // add links (graph edges)
     // nodes.ConnectLinkType("linktype");
 
@@ -120,10 +122,8 @@ void MainWindow::on_initButton_clicked()
     */
 
     links.AddArrowLink(1,2);
-    links.AddArrowLink(1,2);
-    links.AddArrowLink(1,2);
-
-    nodes.StoreData();
+    links.AddArrowLink(2,3);
+    links.AddArrowLink(2,4);
 
     links.StoreLinks();
 

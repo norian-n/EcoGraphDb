@@ -45,11 +45,11 @@ bool EgDataFiles::CheckMetaInfoFile()
     return true;
 }
 
-int EgDataFiles::Init(EgDataNodeTypeExtraInfo& a_metaInfo)
+int EgDataFiles::Init(EgDataNodeTypeExtraInfo& an_extraInfo)
 {
-    metaInfo = &a_metaInfo;
+    metaInfo = &an_extraInfo;
 
-    primIndexFiles = new EgIndexFiles<qint32>(a_metaInfo.typeName + "_odb_pit"); // FIXME no literal
+    primIndexFiles = new EgIndexFiles<qint32>(an_extraInfo.typeName + "_odb_pit"); // FIXME no literal
 
         // clean up QHash<QString, EgIndexFilesBase*>::iterator
     for (auto indexesIter = indexFiles.begin(); indexesIter != indexFiles.end(); ++indexesIter)
@@ -58,10 +58,6 @@ int EgDataFiles::Init(EgDataNodeTypeExtraInfo& a_metaInfo)
 
     indexFiles.clear();
 
-    // qDebug() << FN << "metaInfo-> indexedToOrder.count() =" << metaInfo-> indexedToOrder.count();
-
-        // add indexes files classes QHash<QString, EgIndexSettings> ::iterator
-    // for (auto metaInfoIter = metaInfo-> indexedToOrder.begin(); metaInfoIter != metaInfo-> indexedToOrder.end(); ++metaInfoIter)
     EgIndexFilesBase* newIndexFiles = nullptr;
 
     for (auto metaInfoIter = metaInfo-> indexedFields.begin(); metaInfoIter != metaInfo-> indexedFields.end(); ++metaInfoIter)
@@ -70,76 +66,40 @@ int EgDataFiles::Init(EgDataNodeTypeExtraInfo& a_metaInfo)
         switch (metaInfoIter.value().indexSize) {
 
         case 1:
-                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<float>(a_metaInfo.typeName + "_" + metaInfoIter.key()));
+                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<float>(an_extraInfo.typeName + "_" + metaInfoIter.key()));
             break;
 
         case 2:
-                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<double>(a_metaInfo.typeName + "_" + metaInfoIter.key()));
+                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<double>(an_extraInfo.typeName + "_" + metaInfoIter.key()));
             break;
 
         case 32:
             if (metaInfoIter.value().isSigned)
-                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<qint32>(a_metaInfo.typeName + "_" + metaInfoIter.key()));
+                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<qint32>(an_extraInfo.typeName + "_" + metaInfoIter.key()));
             else
-                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<quint32>(a_metaInfo.typeName + "_" + metaInfoIter.key()));
+                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<quint32>(an_extraInfo.typeName + "_" + metaInfoIter.key()));
             break;
 
         case 64:
             if (metaInfoIter.value().isSigned)
-                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<qint64>(a_metaInfo.typeName + "_" + metaInfoIter.key()));
+                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<qint64>(an_extraInfo.typeName + "_" + metaInfoIter.key()));
             else
-                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<quint64>(a_metaInfo.typeName + "_" + metaInfoIter.key()));
+                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<quint64>(an_extraInfo.typeName + "_" + metaInfoIter.key()));
             break;
 
         default:
-                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<qint32>(a_metaInfo.typeName + "_" + metaInfoIter.key()));
+                newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<qint32>(an_extraInfo.typeName + "_" + metaInfoIter.key()));
             break;
         }
-
-
-        // qDebug() << FN << indIter.key() << newIndexFiles;
-
-        // newIndexFiles = static_cast<EgIndexFilesBase*> (new EgIndexFiles<qint32>(a_metaInfo.typeName + "_" + metaInfoIter.key()));
 
         if (newIndexFiles)
             indexFiles.insert(metaInfoIter.key(),  newIndexFiles);
     }
 
-        // check if files exists
-/*
-    int res = LocalOpenFiles(); // FIXME just check if exist + indexes
-
-    if (! res)
-        LocalCloseFiles();
-*/
-
     return 0; //res;
 
     // qDebug() << FN << "indexFiles.count() =" << indexFiles.count();
 }
-
-/*
-inline void EgDataFiles::AppendNewData(QDataStream& dat, QList<EgPackedDataNode*>& a_list)
-{
-    QList<EgPackedDataNode*>::iterator cur_obj;
-        // append to data file
-    dat.device()-> seek(dat.device()-> size());
-    // qDebug() << FN << "a_list.count() =" << a_list.count();
-        // walk add list
-    cur_obj = a_list.begin();
-    while (cur_obj != a_list.end())
-    {
-        // qDebug() << FN << "Adding object" << (int)(*cur_obj)-> OBJ_ID << " on offset" << hex << (int) dat.device()-> pos();
-        (*cur_obj)-> newOffset = dat.device()-> pos();    // save offset
-
-            // write to data file
-        dat << (*cur_obj)-> OBJ_ID; // (EgDataNodeIDtype)
-        dat << (*cur_obj)-> bar;    // (QByteArray&)
-
-        cur_obj++;
-    }
-}
-*/
 
 inline int EgDataFiles::LocalOpenFilesToRead()
 {
@@ -329,8 +289,6 @@ int EgDataFiles::LocalLoadDataNodes(const QSet<quint64> &dataOffsets, QList<EgDa
             qDebug() << FN <<  "Can't seek data file, pos =" << hex << (int) *offsets_iter;
             retCode = -2;
             continue;
-            // dat_file.close();
-            // return -2;
         }
             // read data
         tmpNode.dataFields.clear();
@@ -340,11 +298,7 @@ int EgDataFiles::LocalLoadDataNodes(const QSet<quint64> &dataOffsets, QList<EgDa
 
         tmpNode.dataFileOffset = *offsets_iter;
 
-        // qDebug() << FN <<  "tmpNode2.dataNodeID =" << tmpNode2.dataNodeID;
-
-        // TODO FIXME : implement local filter here
-
-
+            // implement local filter here
         if (FilterCallback)
             if (! FilterCallback(tmpNode, filterValues))
                 continue;
@@ -395,8 +349,6 @@ int EgDataFiles::LocalLoadData(QSet<quint64>& dataOffsets, QMap<EgDataNodeIdType
             qDebug() << FN <<  "Can't seek data file, pos =" << hex << (int) *offsets_iter;
             retCode = -2;
             continue;
-            // dat_file.close();
-            // return -2;
         }
             // read data
         tmpNode2.dataFields.clear();
@@ -405,19 +357,13 @@ int EgDataFiles::LocalLoadData(QSet<quint64>& dataOffsets, QMap<EgDataNodeIdType
 
         tmpNode2.dataFileOffset = *offsets_iter;
 
-        // qDebug() << FN <<  "tmpNode2.dataNodeID =" << tmpNode2.dataNodeID;
-
-        // TODO FIXME : implement local filter here
-
-
+            // implement local filter here
         if (FilterCallback)
             if (! FilterCallback(tmpNode2, filterValues))
                 continue;
 
         dataNodesMap.insert(tmpNode2.dataNodeID, tmpNode2);
     }
-
-    // qDebug() << FN <<  "dataNodesMap.count() =" << dataNodesMap.count();
 
     dat_file.close();
 
@@ -429,18 +375,18 @@ int EgDataFiles::LocalStoreData(QMap<EgDataNodeIdType, EgDataNode*>&  addedDataN
     if (LocalOpenFilesToUpdate())
         return -1;
 
-        // process deleted objects
+        // process deleted nodes
     if (! deletedDataNodes.isEmpty())
         // LocalDeleteObjects(deletedDataNodes);
-        LocalDeleteNodes(deletedDataNodes.values());
+        LocalDeleteNodesList(deletedDataNodes.values());
 
-        // process updated objects
+        // process updated nodes
     if (! updatedDataNodes.isEmpty())
-        LocalModifyObjects(updatedDataNodes);
+        LocalModifyNodesMap(updatedDataNodes);
 
-        // add new records
+        // add new
     if (! addedDataNodes.isEmpty())
-        LocalAddObjects(addedDataNodes);
+        LocalAddNodesMap(addedDataNodes);
 
         // close files
     LocalCloseFiles();
@@ -450,7 +396,7 @@ int EgDataFiles::LocalStoreData(QMap<EgDataNodeIdType, EgDataNode*>&  addedDataN
     return 0;
 }
 
-inline void EgDataFiles::LocalAddObjects(const QMap<EgDataNodeIdType, EgDataNode *> &addedDataNodes)
+inline void EgDataFiles::LocalAddNodesMap(const QMap<EgDataNodeIdType, EgDataNode *> &addedDataNodes)
 {
     dat.device()-> seek(dat.device()-> size());
 
@@ -462,6 +408,7 @@ inline void EgDataFiles::LocalAddObjects(const QMap<EgDataNodeIdType, EgDataNode
         primIndexFiles-> dataOffset = dat.device()-> pos();
         addIter.value()-> dataFileOffset = primIndexFiles-> dataOffset;    // save offset;
 
+            // store data node
         dat << addIter.value()-> dataNodeID;
         dat << addIter.value()-> dataFields;
 
@@ -482,13 +429,13 @@ inline void EgDataFiles::LocalAddObjects(const QMap<EgDataNodeIdType, EgDataNode
                 indexFiles[indIter.key()]-> AddIndex();
             }
             else
-                qDebug() << FN << "Index not found: " << indIter.key();
+                qDebug() << "Index not found: " << indIter.key() << FN;
 
         }
     }
 }
 
-void EgDataFiles::LocalAddNodes(const QList<EgDataNode>&  addedDataNodes)
+void EgDataFiles::LocalAddNodesList(const QList<EgDataNode>&  addedDataNodes)
 {
     dat.device()-> seek(dat.device()-> size());
 
@@ -500,6 +447,7 @@ void EgDataFiles::LocalAddNodes(const QList<EgDataNode>&  addedDataNodes)
         primIndexFiles-> dataOffset = dat.device()-> pos();
         addIter.dataFileOffset = primIndexFiles-> dataOffset;    // save offset;
 
+            // store data node
         dat << addIter.dataNodeID;
         dat << addIter.dataFields;;
 
@@ -518,7 +466,7 @@ void EgDataFiles::LocalAddNodes(const QList<EgDataNode>&  addedDataNodes)
                 indexFiles[indIter.key()]-> AddIndex();
             }
             else
-                qDebug() << FN << "Index not found: " << indIter.key();
+                qDebug() << "Index not found: " << indIter.key() << FN;
 
         }
     }
@@ -548,37 +496,7 @@ void EgDataFiles::SendNodesToStream(QMap<EgDataNodeIdType, EgDataNode>&  dataNod
     }
 }
 
-/*
-inline void EgDataFiles::LocalDeleteObjects(QMap<EgDataNodeIDtype, EgDataNode>& deletedDataNodes)
-{
-    for (QMap<EgDataNodeIDtype, EgDataNode>::iterator delIter = deletedDataNodes.begin(); delIter != deletedDataNodes.end(); ++delIter)
-    {
-        // qDebug() << FN << "Del object ID = " << (int) delIter.value().dataNodeID << " with offset" << hex << (int) delIter.value().dataFileOffset;
-
-            // del primary index
-        primIndexFiles-> theIndex = delIter.value().dataNodeID;
-        primIndexFiles-> dataOffset = delIter.value().dataFileOffset;
-        primIndexFiles-> DeleteIndex(true);   // SIDE estimate old offset stored here
-
-            // del other indexes
-        // for (QHash<QString, int> ::iterator indIter = metaInfo-> indexedToOrder.begin(); indIter != metaInfo-> indexedToOrder.end(); ++indIter)
-        for (auto indIter = metaInfo-> indexedFields.begin(); indIter != metaInfo-> indexedFields.end(); ++indIter)
-        {
-            if (indexFiles.contains(indIter.key()))
-            {
-                indexFiles[indIter.key()]-> setIndex(delIter.value().dataFields[indIter.value().fieldNum]); // TODO - calc index of QVariant
-                indexFiles[indIter.key()]-> setDataOffset(primIndexFiles-> dataOffset);
-                indexFiles[indIter.key()]-> DeleteIndex(false);
-            }
-            else
-                qDebug() << FN << "Index not found: " << indIter.key();
-
-        }
-    }
-}
-*/
-
-void EgDataFiles::LocalDeleteNodes(const QList<EgDataNode>&  deletedDataNodes)
+void EgDataFiles::LocalDeleteNodesList(const QList<EgDataNode>&  deletedDataNodes)
 {
     for (auto delIter : deletedDataNodes)
     {
@@ -600,14 +518,14 @@ void EgDataFiles::LocalDeleteNodes(const QList<EgDataNode>&  deletedDataNodes)
                 indexFiles[indIter.key()]-> DeleteIndex(false);
             }
             else
-                qDebug() << FN << "Index not found: " << indIter.key();
+                qDebug() << "Index not found: " << indIter.key() << FN;
 
         }
     }
 }
 
 
-inline int EgDataFiles::LocalModifyObjects(const QMap<EgDataNodeIdType, EgDataNode*>&  updatedDataNodes)
+inline int EgDataFiles::LocalModifyNodesMap(const QMap<EgDataNodeIdType, EgDataNode*>&  updatedDataNodes)
 {
     EgDataNode tmpNode;
 
@@ -749,7 +667,9 @@ int EgDataFiles::LocalCompressData() // FIXME TODO copy all except deleted recor
 {
     // select all
 
-    // add to new file
+    // delete data files and indexes
+
+    // add data as new items
 
     return 0;
 }

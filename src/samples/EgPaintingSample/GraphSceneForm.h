@@ -107,6 +107,8 @@ public:
     EgDataNodesType nodes;
     EgDataNodesType images;
 
+    EgLinkType linktype;
+
     QMap <EgDataNodeIdType, QPixmap> imagesPix;
 
     bool firstNodeStored = false;

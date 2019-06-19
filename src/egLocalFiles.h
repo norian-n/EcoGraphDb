@@ -82,45 +82,31 @@ public:
 
     QDir dir;
 
-    QFile ddt_file;                             // meta info file
+    QFile ddt_file;                                 // meta info file
     QDataStream ddt;
 
-    QFile dat_file;                             // data file
+    QFile dat_file;                                 // data file
     QDataStream dat;
 
-    EgIndexFiles<qint32>* primIndexFiles;                   // primary index files
-    QHash<QString, EgIndexFilesBase*> indexFiles;       // other indexes files
+    EgIndexFiles<qint32>* primIndexFiles;           // primary index files
+    QHash<QString, EgIndexFilesBase*> indexFiles;   // other indexes files
 
-    FilterFunctionType FilterCallback;
-
-        // filter callback support
+            // filter callback support
+    FilterFunctionType FilterCallback {nullptr};
     QList <QVariant> filterValues;                  // values for custom filter function parameters
 
-    // EgDataNode tmpNode;                          // for data load and indexes update
-
-    EgDataFiles() : /*indexes(new EgIndex()),*/ FilterCallback(nullptr) { /*indexes->LocalFiles = this;*/ }
-    // EgDataFiles(const EgDataNodesType* my_class);
+    EgDataFiles() {} // : /*indexes(new EgIndex()),*/ FilterCallback(nullptr) { /*indexes->LocalFiles = this;*/ }
 
     ~EgDataFiles();
 
-    // void Init(QString& FileNameBase, EgFieldDescriptors* a_FD);
-
     bool CheckMetaInfoFile(); // check if files exists and not empty
 
-    int Init(EgDataNodeTypeExtraInfo& a_metaInfo); // set names and indexes control
+    int Init(EgDataNodeTypeExtraInfo& an_extraInfo); // set names and indexes control
 
     int LocalOpenFilesToRead();
     int LocalOpenFilesToUpdate();
 
     void LocalCloseFiles();
-
-    // int LocalStoreMetaInfo(EgDataNodeTypeMetaInfo& metaInfo);
-    // int LocalLoadMetaInfo(EgDataNodeTypeMetaInfo& metaInfo);
-
-        // field descriptors
-
-    // int LocalStoreFieldDesc(QByteArray* field_descs, QByteArray* control_descs);
-    // int LocalLoadFieldDesc(QByteArray* field_descs, QByteArray* control_descs, EgDataNodeIDtype& obj_count, EgDataNodeIDtype& next_obj_id);
 
         // load&store data operations
     int LocalLoadData(QSet<quint64>& dataOffsets, QMap<EgDataNodeIdType, EgDataNode>& dataNodesMap);
@@ -131,14 +117,15 @@ public:
     int LocalStoreData(QMap<EgDataNodeIdType, EgDataNode*>&  addedDataNodes, QMap<EgDataNodeIdType, EgDataNode>& deletedDataNodes, QMap<EgDataNodeIdType, EgDataNode*>&  updatedDataNodes);
 
         // local (non-server) store
-    // inline void LocalDeleteObjects(QMap<EgDataNodeIDtype, EgDataNode>& deletedDataNodes); // same as server-side
-    inline void LocalAddObjects(const QMap<EgDataNodeIdType, EgDataNode*>&  addedDataNodes);
-    inline int LocalModifyObjects(const QMap<EgDataNodeIdType, EgDataNode *> &updatedDataNodes);
+    inline void LocalAddNodesMap(const QMap<EgDataNodeIdType, EgDataNode*>&  addedDataNodes);
+    inline int LocalModifyNodesMap(const QMap<EgDataNodeIdType, EgDataNode *> &updatedDataNodes);
 
         // server-side store
-    void LocalAddNodes(const QList<EgDataNode>& addedDataNodes);
-    void LocalDeleteNodes(const QList<EgDataNode>&  deletedDataNodes);
+    void LocalAddNodesList(const QList<EgDataNode>& addedDataNodes);
     int  LocalModifyNodesList(const QList<EgDataNode>&  updatedDataNodes);
+
+        // both
+    void LocalDeleteNodesList(const QList<EgDataNode>&  deletedDataNodes);
 
         // client-side transfers
     void SendNodesToStream(QMap<EgDataNodeIdType, EgDataNode*>&  dataNodesMap, QDataStream &nodesStream);
@@ -146,12 +133,8 @@ public:
 
     int LocalCompressData();             // FIXME TODO delete data or move to archive
 
-        // internal operations
-    // inline void AppendNewData(QDataStream& dat, QList<EgPackedDataNode*>& a_list);
-
         // service
     int RemoveLocalFiles();      // burn it
-
 };
 
 #endif // EG_LOCAL_FILES_H

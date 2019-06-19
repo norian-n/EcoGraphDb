@@ -139,16 +139,17 @@ void FingersTreeForm::LoadGraph()
     // qDebug() << "Before connect" << FN;
 
     nodes.Connect(graphDB, "locations");
-    nodes.ConnectLinkType("linktype");
+    linktype.Connect(graphDB, "linktype", nodes, nodes);
+
 
     // qDebug() << "Data loading" << FN;
 
     nodes.AutoLoadAllData();
 
-    // qDebug() << "Loaded" << FN;
+    linktype.LoadLinks();
+    linktype.ResolveLinksToPointers();
 
-    nodes.LoadLinkType("linktype");
-    nodes.myLinkTypes["linktype"]-> ResolveLinksToPointers();
+    // qDebug() << "Loaded" << FN;
 
     QList<QVariant> locValues;
 
@@ -227,13 +228,15 @@ void FingersTreeForm::LoadGraph()
             // get linked nodes
         if (dataNodeIter.nodeLinks && (! dataNodeIter.nodeLinks-> outLinks.empty())) // value()
         {
+            // qDebug() << "dataNodeIter.nodeLinks-> outLinks : "  << dataNodeIter.nodeLinks-> outLinks.count();
+
                 // QList<EgExtendedLinkType>::iterator
             // for (auto linksIter  = dataNodeIter.value().nodeLinks-> outLinks["linktype"].begin();
             //          linksIter != dataNodeIter.value().nodeLinks-> outLinks["linktype"].end(); ++linksIter)
 
             for (auto const& linksIter : dataNodeIter.nodeLinks-> outLinks["linktype"])
             {
-                // qDebug()  << "Dst node ID = " << (*linksIter).dataNodePtr-> dataNodeID << FN;
+                // qDebug()  << "Dst node ID = " << linksIter.dataNodePtr-> dataNodeID << FN;
 
                 nodes.GetLocation(locValues, linksIter.dataNodePtr-> dataNodeID);
 
@@ -385,7 +388,7 @@ void MyGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent)
 
         // qDebug() << "from node: " <<  theItem-> data(0).toInt() << " to node: " <<  theDestItem-> data(0).toInt();
 
-        myForm-> nodes.AddArrowLink("linktype", theItem-> data(0).toInt(), myForm-> nodes, theDestItem-> data(0).toInt());
+        myForm-> linktype.AddArrowLink(theItem-> data(0).toInt(), theDestItem-> data(0).toInt());
     }
 
     isPressed = false;
@@ -520,5 +523,5 @@ void FingersTreeForm::on_loadButton_clicked()
 void FingersTreeForm::on_saveButton_clicked()
 {
     nodes.StoreData();
-    nodes.StoreAllLinks();
+    linktype.StoreLinks();
 }
