@@ -30,7 +30,7 @@ EgDataNodesType::~EgDataNodesType()
     /*
     if (locationNodesType)
     {
-        // qDebug()  << "Delete location info " << metaInfo.typeName + EgDataNodesNamespace::egLocationFileName << FN;
+        // EG_LOG_STUB  << "Delete location info " << metaInfo.typeName + EgDataNodesNamespace::egLocationFileName << FN;
 
         delete locationNodesType;
     }
@@ -55,7 +55,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName)
         // check if already connected FIXME implement reconnect
     if (isConnected)
     {
-        // qDebug()  << "Warning: attempt to connect again data nodes type: " << nodeTypeName << FN;
+        // EG_LOG_STUB  << "Warning: attempt to connect again data nodes type: " << nodeTypeName << FN;
 
         return 1;
     }
@@ -68,7 +68,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName)
         if (extraInfo.LocalLoadExtraInfo())
         {
             // if (! nodeTypeName.contains(EgDataNodesNamespace::egGUIfileName))
-                qDebug()  << "Can't load meta info of data nodes type " << nodeTypeName << FN;
+                EG_LOG_STUB  << "Can't load meta info of data nodes type " << nodeTypeName << FN;
 
             res = -1;
         }
@@ -82,7 +82,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName)
         if (extraInfo.ServerLoadExtraInfo())
         {
             // if (! nodeTypeName.contains(EgDataNodesNamespace::egGUIfileName))
-                qDebug()  << "Can't load meta info of data nodes type " << nodeTypeName << FN;
+                EG_LOG_STUB  << "Can't load meta info of data nodes type " << nodeTypeName << FN;
 
             res = -1;
         }
@@ -97,38 +97,38 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName)
     {
         if (extraInfo.typeSettings.useLocation)
         {
-            // qDebug()  << "Connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
+            // EG_LOG_STUB  << "Connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
 
             locations = new EgDataNodesLocation(this);
 
             int locres = locations->locationStorage-> ConnectServiceNodeType(myDB, nodeTypeName + EgDataNodesNamespace::egLocationFileName);
 
             if (locres)
-                qDebug()  << "Can't connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
+                EG_LOG_STUB  << "Can't connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
         }
 
         if (extraInfo.typeSettings.useNamedAttributes)
         {
-            // qDebug()  << "Connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
+            // EG_LOG_STUB  << "Connect location info " << nodeTypeName + EgDataNodesNamespace::egLocationFileName << FN;
 
             namedAttributes = new EgNamedAttributes(this);
 
             int attrres = namedAttributes->namedAttributesStorage-> ConnectServiceNodeType(myDB, nodeTypeName + EgDataNodesNamespace::egAttributesFileName);
 
             if (attrres)
-                qDebug()  << "Can't connect named attributes info " << nodeTypeName + EgDataNodesNamespace::egAttributesFileName << FN;
+                EG_LOG_STUB  << "Can't connect named attributes info " << nodeTypeName + EgDataNodesNamespace::egAttributesFileName << FN;
         }
 
         if (extraInfo.typeSettings.useEntryNodes)
         {
-            // qDebug()  << "Connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
+            // EG_LOG_STUB  << "Connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
 
             entryNodes = new EgEntryNodes(this);
 
             int entres = entryNodes->entryStorage-> ConnectServiceNodeType(myDB, nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName);
 
             if (entres)
-                qDebug()  << "Can't connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
+                EG_LOG_STUB  << "Can't connect entry nodes " << nodeTypeName + EgDataNodesNamespace::egEntryNodesFileName << FN;
         }
 
         GUI = new EgDataNodesGUIsupport(this); // needed for basic UI interaction
@@ -138,7 +138,7 @@ int EgDataNodesType::Connect(EgGraphDatabase& myDB, const QString& nodeTypeName)
             int guires = GUI-> LoadSimpleControlDesc();
 
             if (guires)
-                qDebug()  << "Can't load GUI settings of " << nodeTypeName << FN;
+                EG_LOG_STUB  << "Can't load GUI settings of " << nodeTypeName << FN;
         }
     }
 
@@ -158,7 +158,7 @@ int EgDataNodesType::ConnectLinkType(const QString& linkTypeName)
 {
     if (! isConnected)
     {
-        qDebug()  << "Error: data nodes type " << extraInfo.typeName << " should be connected before link type: " << linkTypeName << FN;
+        EG_LOG_STUB  << "Error: data nodes type " << extraInfo.typeName << " should be connected before link type: " << linkTypeName << FN;
 
         return -1;
     }
@@ -166,7 +166,7 @@ int EgDataNodesType::ConnectLinkType(const QString& linkTypeName)
         // find link
     if (! myLinkTypes.contains(linkTypeName))
     {
-        qDebug() << extraInfo.typeName << " : bad link type name: " << linkTypeName << FN;
+        EG_LOG_STUB << extraInfo.typeName << " : bad link type name: " << linkTypeName << FN;
         return -1;
     }
 
@@ -182,7 +182,7 @@ int EgDataNodesType::ConnectServiceNodeType(EgGraphDatabase& myDB, const QString
         // check if already connected FIXME implement reconnect
     if (isConnected)
     {
-        // qDebug()  << "Warning: attempt to connect again data nodes type: " << nodeTypeName << FN;
+        // EG_LOG_STUB  << "Warning: attempt to connect again data nodes type: " << nodeTypeName << FN;
 
         return 1;
     }
@@ -195,7 +195,7 @@ int EgDataNodesType::ConnectServiceNodeType(EgGraphDatabase& myDB, const QString
         if (extraInfo.LocalLoadExtraInfo())
         {
             // if (! nodeTypeName.contains(EgDataNodesNamespace::egGUIfileName))
-                qDebug()  << "Can't load meta info of data nodes type " << nodeTypeName << FN;
+                EG_LOG_STUB  << "Can't load meta info of data nodes type " << nodeTypeName << FN;
 
             res = -1;
         }
@@ -209,7 +209,7 @@ int EgDataNodesType::ConnectServiceNodeType(EgGraphDatabase& myDB, const QString
         if (extraInfo.ServerLoadExtraInfo())
         {
             // if (! nodeTypeName.contains(EgDataNodesNamespace::egGUIfileName))
-                qDebug()  << "Can't load meta info of data nodes type " << nodeTypeName << FN;
+                EG_LOG_STUB  << "Can't load meta info of data nodes type " << nodeTypeName << FN;
 
             res = -1;
         }
@@ -240,7 +240,7 @@ int EgDataNodesType::getMyLinkTypes()
             // QMap<QString, EgDataNodesLinkType>::iterator
         for (auto linksIter = extraInfo.myECoGraphDB-> linkTypes.begin(); linksIter != extraInfo.myECoGraphDB-> linkTypes.end(); ++linksIter)
         {
-             // qDebug() << "linksIter.key() = " << linksIter.key()
+             // EG_LOG_STUB << "linksIter.key() = " << linksIter.key()
              //        << "linksIter.value().firstTypeName = " << linksIter.value().firstTypeName
              //        << "linksIter.value().secondTypeName = " << linksIter.value().secondTypeName << FN;
 
@@ -248,7 +248,7 @@ int EgDataNodesType::getMyLinkTypes()
             {
                 myLinkTypes.insert(linksIter.key(), &(linksIter.value()));
 
-                // qDebug() << "Node type : " << metaInfo.typeName << "added link " << linksIter.key() << FN;
+                // EG_LOG_STUB << "Node type : " << metaInfo.typeName << "added link " << linksIter.key() << FN;
             }
         }
 
@@ -277,7 +277,7 @@ EgDataNode& EgDataNodesType::operator [](EgDataNodeIdType objID)
     }
     else
     {
-        qDebug() << extraInfo.typeName << "- not found data node for ID = " << objID << FN;
+        EG_LOG_STUB << extraInfo.typeName << "- not found data node for ID = " << objID << FN;
         return notFound;
     }
 }
@@ -295,14 +295,14 @@ int EgDataNodesType::AddArrowLink(const QString& linkName, EgDataNodeIdType from
     /*
     if ( ! myLinkTypes.contains(linkName))
     {
-        qDebug() << extraInfo.typeName << " : bad link name: " << linkName << FN;
+        EG_LOG_STUB << extraInfo.typeName << " : bad link name: " << linkName << FN;
         return -1;
     }
     */
 
  /*   if (! extraInfo.myECoGraphDB-> attachedLinkTypes.contains(linkName))
     {
-        qDebug() << extraInfo.typeName << " : link type was not connected : " << linkName << FN;
+        EG_LOG_STUB << extraInfo.typeName << " : link type was not connected : " << linkName << FN;
         return -1;
     }
 
@@ -347,14 +347,14 @@ int EgDataNodesType::AddArrowLink(const QString& linkName, EgDataNodeIdType from
 
         extraInfo.myECoGraphDB-> attachedLinkTypes[linkName] -> AddLinkToStorageOnly(fromNode, toNode);
 
-        // qDebug() << "Link " << linkName << " added " << metaInfo.typeName << " " << fromNode << " to "
+        // EG_LOG_STUB << "Link " << linkName << " added " << metaInfo.typeName << " " << fromNode << " to "
         //         << toType.metaInfo.typeName << " " <<  toNode << FN;
 
         return 0;
     }
     else
     {
-        // qDebug() << "Link " << linkName << " of " << metaInfo.typeName << " link NOT added for ID = " << fromNode << " to "
+        // EG_LOG_STUB << "Link " << linkName << " of " << metaInfo.typeName << " link NOT added for ID = " << fromNode << " to "
         //         << toType.metaInfo.typeName << " " << toNode << FN;
 
         return -1;
@@ -420,7 +420,7 @@ int EgDataNodesType::LoadAllDataNodes()
 
     IndexOffsets.clear();
 
-    // qDebug() << "IndexOffsets = " << IndexOffsets << FN;
+    // EG_LOG_STUB << "IndexOffsets = " << IndexOffsets << FN;
 
     if (extraInfo.myECoGraphDB-> serverConnection)
     {
@@ -494,7 +494,7 @@ int EgDataNodesType::AutoLoadAllData()
     {
         LocalFiles-> primIndexFiles -> LoadAllDataOffsets(IndexOffsets);
 
-        // qDebug() << "IndexOffsets = " << IndexOffsets << FN;
+        // EG_LOG_STUB << "IndexOffsets = " << IndexOffsets << FN;
 
         if (! IndexOffsets.isEmpty())
             res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
@@ -524,7 +524,7 @@ int EgDataNodesType::LoadLinkedData(QString linkName, EgDataNodeIdType fromNodeI
     /*
     if (! myLinkTypes.contains(linkName))
     {
-        qDebug() << extraInfo.typeName << " : bad link name: " << linkName << FN;
+        EG_LOG_STUB << extraInfo.typeName << " : bad link name: " << linkName << FN;
         return -1;
     }
     */
@@ -534,7 +534,7 @@ int EgDataNodesType::LoadLinkedData(QString linkName, EgDataNodeIdType fromNodeI
 
     if (! extraInfo.myECoGraphDB-> attachedLinkTypes.contains(linkName))
     {
-        qDebug() << extraInfo.typeName << " : link type was not connected : " << linkName << FN;
+        EG_LOG_STUB << extraInfo.typeName << " : link type was not connected : " << linkName << FN;
         return -1;
     }
 
@@ -551,7 +551,7 @@ int EgDataNodesType::LoadLinkedData(QString linkName, EgDataNodeIdType fromNodeI
     for (auto Iter = extraInfo.myECoGraphDB-> attachedLinkTypes[linkName]->linksStorage-> dataNodes.begin(); Iter != extraInfo.myECoGraphDB-> attachedLinkTypes[linkName]->linksStorage-> dataNodes.end(); ++Iter)
         LocalFiles->primIndexFiles-> Load_EQ(IndexOffsets, Iter.value()["to_node_id"].toInt()); //
 
-    // qDebug() << "IndexOffsets.count() = " << IndexOffsets.count() << FN;
+    // EG_LOG_STUB << "IndexOffsets.count() = " << IndexOffsets.count() << FN;
 
     if (! IndexOffsets.isEmpty())
         res = LocalFiles-> LocalLoadData(IndexOffsets, dataNodes);
@@ -601,7 +601,7 @@ int EgDataNodesType::AddDataNode(EgDataNode& tmpObj)
 {
     QMap<EgDataNodeIdType, EgDataNode>::iterator dataNodesIter;
 
-    // qDebug() << "metaInfo.nextObjID = " << metaInfo.nextObjID << FN;
+    // EG_LOG_STUB << "metaInfo.nextObjID = " << metaInfo.nextObjID << FN;
 
         // set next available ID FIXME : thread safe
     tmpObj.dataNodeID = extraInfo.nextNodeID++;
@@ -612,7 +612,7 @@ int EgDataNodesType::AddDataNode(EgDataNode& tmpObj)
     dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, tmpObj);
     addedDataNodes.insert(tmpObj.dataNodeID, &(dataNodesIter.value()));
 
-    // qDebug() << "tmpObj.dataNodeID = " << tmpObj.dataNodeID << FN;
+    // EG_LOG_STUB << "tmpObj.dataNodeID = " << tmpObj.dataNodeID << FN;
 
     return 0;
 }
@@ -697,7 +697,7 @@ int EgDataNodesType::AddLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype
     }
     else
     {
-        qDebug()  << "Can't add location, location type does not exist for " << metaInfo.typeName << FN;
+        EG_LOG_STUB  << "Can't add location, location type does not exist for " << metaInfo.typeName << FN;
 
         return -1;
     }
@@ -711,7 +711,7 @@ int EgDataNodesType::DeleteDataNode(EgDataNodeIdType nodeID)
     dataNodesIter = dataNodes.find(nodeID);
     if (dataNodesIter == dataNodes.end())
     {
-        qDebug()  << "Not found data node by ID to modify: " << nodeID << FN;
+        EG_LOG_STUB  << "Not found data node by ID to modify: " << nodeID << FN;
         return -1;
     }
 
@@ -732,7 +732,7 @@ int EgDataNodesType::DeleteDataNode(EgDataNodeIdType nodeID)
         deletedDataNodes.insert(dataNodesIter.key(), dataNodesIter.value());
         dataNodes.erase(dataNodesIter);
 
-        // qDebug()  << "deletedDataNodes count " << deletedDataNodes.count() << FN;
+        // EG_LOG_STUB  << "deletedDataNodes count " << deletedDataNodes.count() << FN;
     }
 
     return 0;
@@ -746,7 +746,7 @@ int EgDataNodesType::UpdateDataNode(QList<QVariant>& myData, EgDataNodeIdType no
     dataNodesIter = dataNodes.find(nodeID);
     if (dataNodesIter == dataNodes.end())
     {
-        qDebug() << FN << "Not found Node ID to modify: " << nodeID;
+        EG_LOG_STUB << FN << "Not found Node ID to modify: " << nodeID;
         return -1;
     }
 
@@ -774,7 +774,7 @@ int EgDataNodesType::UpdateDataNode(EgDataNodeIdType nodeID)
     dataNodesIter = dataNodes.find(nodeID);
     if (dataNodesIter == dataNodes.end())
     {
-        qDebug() << FN << "Not found Node ID to modify: " << nodeID;
+        EG_LOG_STUB << FN << "Not found Node ID to modify: " << nodeID;
         return -1;
     }
 
@@ -803,7 +803,7 @@ int EgDataNodesType::StoreData()
             // update metainfo
         extraInfo.nodesCount += addedDataNodes.count() - deletedDataNodes.count();
 
-        // qDebug()  << "Nodes Type: " << metaInfo.typeName << " nextNodeID: " << metaInfo.nextNodeID << FN;
+        // EG_LOG_STUB  << "Nodes Type: " << metaInfo.typeName << " nextNodeID: " << metaInfo.nextNodeID << FN;
 
         // pack data and update index fields
         if (extraInfo.myECoGraphDB-> serverConnection)
@@ -860,7 +860,7 @@ int EgDataNodesType::StoreData()
             namedAttributes->namedAttributesStorage-> StoreData();
     }
     else
-        qDebug()  << "ERROR: got non-zero error code from subfunction, changes not saved " << FN;
+        EG_LOG_STUB  << "ERROR: got non-zero error code from subfunction, changes not saved " << FN;
 
     return  ret_val;
 }
@@ -906,7 +906,7 @@ int EgDataNodesType::LoadDataByIndexes(const EgIndexCondition &indexCondition)
 
         index_tree-> CalcTreeSet(indexCondition.iTreeNode, IndexOffsets, LocalFiles);
 
-        // qDebug() << "IndexOffsets.count() = " << IndexOffsets.count() << FN;
+        // EG_LOG_STUB << "IndexOffsets.count() = " << IndexOffsets.count() << FN;
 
         if (! IndexOffsets.isEmpty())
         {
@@ -936,13 +936,13 @@ int EgDataNodesType::PrintObjData() // debug print
 {
     for (auto sendIter = dataNodes.begin(); sendIter != dataNodes.end(); ++sendIter)
     {
-        // qDebug() << "Sending node " << (int) addIter.value()-> dataNodeID << FN ;
+        // EG_LOG_STUB << "Sending node " << (int) addIter.value()-> dataNodeID << FN ;
 
-        qDebug() << sendIter.key() ; // <<  sendIter.value();
+        EG_LOG_STUB << sendIter.key() ; // <<  sendIter.value();
 
         for (auto fieldsIter = sendIter.value().dataFields.begin(); fieldsIter != sendIter.value().dataFields.end(); ++fieldsIter)
         {
-            qDebug() << *fieldsIter; // <<  sendIter.value();
+            EG_LOG_STUB << *fieldsIter; // <<  sendIter.value();
         }
     }
 
@@ -957,24 +957,24 @@ int EgDataNodesType::PrintObjData() // debug print
     cur_desc = FD.field_desc_list.begin();
     while (cur_desc != FD.field_desc_list.end())
     {
-        qDebug() << FN << "Field # " << i << " " << (*cur_desc).field_name;
+        EG_LOG_STUB << FN << "Field # " << i << " " << (*cur_desc).field_name;
         cur_desc++;
         i++;
     }
-    qDebug() << FN << "ObjectsCount() = " << ObjectsCount();
+    EG_LOG_STUB << FN << "ObjectsCount() = " << ObjectsCount();
 
-    qDebug() << FN << "obj_count = " << obj_count;
-    qDebug() << FN << "next_obj_id = " << next_obj_id;
+    EG_LOG_STUB << FN << "obj_count = " << obj_count;
+    EG_LOG_STUB << FN << "next_obj_id = " << next_obj_id;
         // print data
     cur_obj = dobj_map.begin();
     while (cur_obj != dobj_map.end())
     {
-        qDebug() << FN << "OBJ_ID = " << (*cur_obj).OBJ_ID;
-        // qDebug() << FN << "data_obj_size = " << (*cur_obj).data_obj_size;
+        EG_LOG_STUB << FN << "OBJ_ID = " << (*cur_obj).OBJ_ID;
+        // EG_LOG_STUB << FN << "data_obj_size = " << (*cur_obj).data_obj_size;
         cur_field = cur_obj.value().data_fields.begin();
         while (cur_field != cur_obj.value().data_fields.end())
         {
-            qDebug() << FN << (*cur_field).toString();// str;
+            EG_LOG_STUB << FN << (*cur_field).toString();// str;
             cur_field++;
         }
         cur_obj++;
@@ -1006,7 +1006,7 @@ int EgDataNodesType::StoreLinkType(QString linkName)
 {
     if (! myLinkTypes.contains(linkName))
     {
-        qDebug() << extraInfo.typeName << " - bad link name: " << linkName << FN;
+        EG_LOG_STUB << extraInfo.typeName << " - bad link name: " << linkName << FN;
         return -1;
     }
 
@@ -1020,7 +1020,7 @@ int EgDataNodesType::LoadLinkType(QString linkName)
 {
     if (! myLinkTypes.contains(linkName))
     {
-        qDebug() << extraInfo.typeName << " - bad link name: " << linkName << FN;
+        EG_LOG_STUB << extraInfo.typeName << " - bad link name: " << linkName << FN;
         return -1;
     }
 
@@ -1043,8 +1043,8 @@ int EgDataNodesType::AddEntryNode(EgDataNodeIdType entryNodeID)
     }
     else
     {
-        qDebug() << "Cant find data node ID of " << extraInfo.typeName << " " << hex << entryNodeID << FN;
-        qDebug() << dataNodes.keys() << FN;
+        EG_LOG_STUB << "Cant find data node ID of " << extraInfo.typeName << " " << hex << entryNodeID << FN;
+        EG_LOG_STUB << dataNodes.keys() << FN;
         return -1;
     }
 }

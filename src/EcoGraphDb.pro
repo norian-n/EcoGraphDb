@@ -20,7 +20,9 @@ HEADERS += indexes/egIndexesFiles.h \
     egNodesLocation.h \\
     ecographdb_global.h \
     egGraphDatabase.h \
-    egCore.h
+    egCore.h \
+    egLogging.h \
+    postbox.h
 
 SOURCES += egExtraInfo.cpp \
     egDataNode.cpp \
@@ -36,7 +38,8 @@ SOURCES += egExtraInfo.cpp \
     egEntryNodes.cpp \
     egNamedAttributes.cpp \
     egNodesLocation.cpp \
-    egGUIconnect.cpp
+    egGUIconnect.cpp \
+    egLogging.cpp
 
 unix {
     target.path = /usr/lib

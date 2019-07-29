@@ -60,7 +60,7 @@ int EgLinkType::AddArrowLink (EgDataNodeIdType fromNodeID, EgDataNodeIdType toNo
         // check if types connected
     if (!fromType || !toType)
     {
-        qDebug() << allLinkNames.linkName << " : data type(s) not connected to link type " << FN;
+        EG_LOG_STUB << allLinkNames.linkName << " : data type(s) not connected to link type " << FN;
 
         return -1;
     }
@@ -106,15 +106,15 @@ int EgLinkType::AddArrowLink (EgDataNodeIdType fromNodeID, EgDataNodeIdType toNo
     }
     else
     {
-        qDebug() << "Link " << allLinkNames.linkName << " of " << fromType->extraInfo.typeName << " link NOT added in memory for ID = " << fromNodeID << " to "
+        EG_LOG_STUB << "Link " << allLinkNames.linkName << " of " << fromType->extraInfo.typeName << " link NOT added in memory for ID = " << fromNodeID << " to "
                  << toType->extraInfo.typeName << " " << toNodeID << FN;
 
         // return -1;
     }
 
-    // qDebug() << linkName << ": link added " << fromNodeID << "to" <<  toNodeID << FN;
+    // EG_LOG_STUB << linkName << ": link added " << fromNodeID << "to" <<  toNodeID << FN;
 
-    // qDebug() << allLinkNames.linkName << " Next link node ID " << linksStorage->metaInfo.nextNodeID << FN;
+    // EG_LOG_STUB << allLinkNames.linkName << " Next link node ID " << linksStorage->metaInfo.nextNodeID << FN;
 
     return 0;
 }
@@ -124,7 +124,7 @@ int EgLinkType::Connect(EgGraphDatabase& myDB, const QString& linkTypeName, EgDa
         // check if already connected FIXME implement reconnect
     if (isConnected)
     {
-        qDebug()  << "Error: attempt to connect again data link type: " << allLinkNames.linkName << " as " << linkTypeName << FN;
+        EG_LOG_STUB  << "Error: attempt to connect again data link type: " << allLinkNames.linkName << " as " << linkTypeName << FN;
 
         return -1;
     }
@@ -132,7 +132,7 @@ int EgLinkType::Connect(EgGraphDatabase& myDB, const QString& linkTypeName, EgDa
         // get nodes types from database
     if (! myDB.getNodesTypesOfLink(linkTypeName))
     {
-        // qDebug()  << "Error: can't find data nodes type of link type: " << linkTypeName << FN;
+        // EG_LOG_STUB  << "Error: can't find data nodes type of link type: " << linkTypeName << FN;
 
         return -1;
     }
@@ -177,7 +177,7 @@ int EgLinkType::StoreLinks()
         isConnected = true;
     }
 
-    // qDebug() << allLinkNames.linkName << " Added links count: " << linksStorage->addedDataNodes.count() << FN;
+    // EG_LOG_STUB << allLinkNames.linkName << " Added links count: " << linksStorage->addedDataNodes.count() << FN;
 
     linksStorage-> StoreData();
 
@@ -193,9 +193,9 @@ int EgLinkType::LoadLinks()
         isConnected = true;
     }
 
-    linksStorage-> LoadAllDataNodes();
+    linksStorage-> LoadAllDataNodes(); // FIXME check if links already loaded
 
-    // qDebug() << allLinkNames.linkName << " Links count: " << linksStorage-> dataNodes.count() << FN;
+    // EG_LOG_STUB << allLinkNames.linkName << " Links count: " << linksStorage-> dataNodes.count() << FN;
 
     // linksStorage-> PrintObjData();
 
@@ -228,7 +228,7 @@ int EgLinkType::ResolveLinksToPointers()
     if (! fromType || ! toType)
         if (ResolveNodeTypes()) // bad ret code
         {
-            qDebug() << "EgDataNodesType not found: " << allLinkNames.firstTypeName << " or " << allLinkNames.secondTypeName << FN;
+            EG_LOG_STUB << "EgDataNodesType not found: " << allLinkNames.firstTypeName << " or " << allLinkNames.secondTypeName << FN;
 
             return -1;
         }
@@ -240,7 +240,7 @@ int EgLinkType::ResolveLinksToPointers()
         fromNode = Iter.value()["from_node_id"].toInt();
         toNode = Iter.value()["to_node_id"].toInt();
 
-        // qDebug() << "LinkName: " << allLinkNames.linkName << " From Node ID = " << fromNode << " To Node ID = " << toNode << FN;
+        // EG_LOG_STUB << "LinkName: " << allLinkNames.linkName << " From Node ID = " << fromNode << " To Node ID = " << toNode << FN;
 
         if (fromType-> dataNodes.contains(fromNode) && toType-> dataNodes.contains(toNode))
         {
@@ -262,7 +262,7 @@ int EgLinkType::ResolveLinksToPointers()
             {
                 backLink.dataNodePtr->nodeLinks-> outLinks[allLinkNames.linkName].append(fwdLink);
 
-                // qDebug() << "Out links added " << backLink.dataNodePtr->nodeLinks-> outLinks[allLinkNames.linkName].count() << FN;
+                // EG_LOG_STUB << "Out links added " << backLink.dataNodePtr->nodeLinks-> outLinks[allLinkNames.linkName].count() << FN;
             }
             else
             {
@@ -271,7 +271,7 @@ int EgLinkType::ResolveLinksToPointers()
 
                 backLink.dataNodePtr->nodeLinks-> outLinks.insert(allLinkNames.linkName, newLinks);
 
-                // qDebug() << "Out links created " << backLink.dataNodePtr->nodeLinks-> outLinks[allLinkNames.linkName].count() << FN;
+                // EG_LOG_STUB << "Out links created " << backLink.dataNodePtr->nodeLinks-> outLinks[allLinkNames.linkName].count() << FN;
             }
 
                 // write back link to inLinks
@@ -287,15 +287,15 @@ int EgLinkType::ResolveLinksToPointers()
                 fwdLink.dataNodePtr->nodeLinks-> inLinks.insert(allLinkNames.linkName, newLinks);
             }
 
-            // qDebug() << "Link " << allLinkNames.linkName << " added " << firstType-> metaInfo.typeName << " " << fromNode << " to "
+            // EG_LOG_STUB << "Link " << allLinkNames.linkName << " added " << firstType-> metaInfo.typeName << " " << fromNode << " to "
             //          << secondType-> metaInfo.typeName << " " <<  toNode << FN;
 
-            // qDebug() << "Nodes Type " << firstType-> metaInfo.typeName << " out links count = " << backLink.dataNodePtr->nodeLinks-> outLinks[allLinkNames.linkName].count() << FN;
+            // EG_LOG_STUB << "Nodes Type " << firstType-> metaInfo.typeName << " out links count = " << backLink.dataNodePtr->nodeLinks-> outLinks[allLinkNames.linkName].count() << FN;
 
         }
         else
         {
-            // qDebug() << "Link " << allLinkNames.linkName << " of " << firstType-> metaInfo.typeName << " link NOT added for ID = " << fromNode << " to "
+            // EG_LOG_STUB << "Link " << allLinkNames.linkName << " of " << firstType-> metaInfo.typeName << " link NOT added for ID = " << fromNode << " to "
             //         << secondType-> metaInfo.typeName << " " << toNode << FN;
         }
 
@@ -328,9 +328,9 @@ int EgLinkType::LoadLinkedNodesFrom(EgDataNodeIdType fromNodeID)
     if (! linksStorage-> IndexOffsets.isEmpty())
         res = linksStorage-> LocalFiles-> LocalLoadData(linksStorage-> IndexOffsets, linksStorage-> dataNodes);
 
-    // qDebug() << allLinkNames.linkName << " Links count: " << linksStorage-> dataNodes.count() << FN;
+    // EG_LOG_STUB << allLinkNames.linkName << " Links count: " << linksStorage-> dataNodes.count() << FN;
 
-    // qDebug() << allLinkNames.linkName << " Next node ID:" << linksStorage-> metaInfo.nextNodeID << FN;
+    // EG_LOG_STUB << allLinkNames.linkName << " Next node ID:" << linksStorage-> metaInfo.nextNodeID << FN;
 
     // linksStorage-> PrintObjData();
 

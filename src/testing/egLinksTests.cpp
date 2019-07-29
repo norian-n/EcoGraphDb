@@ -11,6 +11,11 @@
 
 void EgLinksTests::testCreateNodes()
 {
+    bool res {false};
+
+    if(res) // DUMMY
+        EG_LOG_STUB << FN;
+
     // EgGraphDatabase graphDB;
     // EgDataNodesType testDataNodes;
     QList<QVariant> addValues;

@@ -108,11 +108,12 @@ void FingersTreeForm::LoadGraph()
     theItem-> setIcon(pixMap);
 
     ui->tableWidget-> setItem(0, 0, theItem);
-    */
+
 
     QBrush circleBrush = QBrush(QColor(0xa6, 0xce, 0x39)); // gradient
     QPen circlePen = QPen(Qt::black);
     circlePen.setWidth(1);
+    */
 
     QPen linkPen = QPen(Qt::darkGreen);
     linkPen.setWidth(2);

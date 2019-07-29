@@ -68,7 +68,7 @@ int EgDataNodesGUIsupport::LoadSimpleControlDesc()
 
     if (!dat_file.exists())
     {
-        // qDebug() << FN << "file  doesn't exist" << dataNodesType-> metaInfo.typeName + egGUIfileName + ".dat";
+        // EG_LOG_STUB << FN << "file  doesn't exist" << dataNodesType-> metaInfo.typeName + egGUIfileName + ".dat";
         return -1;
     }
 */
@@ -77,7 +77,7 @@ int EgDataNodesGUIsupport::LoadSimpleControlDesc()
 
     if (controlDescs-> ConnectServiceNodeType(*(primaryNodesType-> extraInfo.myECoGraphDB), primaryNodesType-> extraInfo.typeName + egGUIfileName))
     {
-            // qDebug()  << "No control descs for dataNodeType " << primaryNodesType-> metaInfo.typeName + egGUIfileName << FN;
+            // EG_LOG_STUB  << "No control descs for dataNodeType " << primaryNodesType-> metaInfo.typeName + egGUIfileName << FN;
             return 1;
     }
 
@@ -85,7 +85,7 @@ int EgDataNodesGUIsupport::LoadSimpleControlDesc()
 
     controlDescs-> LoadAllDataNodes();
 
-    // qDebug()  << "Control descs count = " << controlDescs-> dataNodes.count() << FN;
+    // EG_LOG_STUB  << "Control descs count = " << controlDescs-> dataNodes.count() << FN;
 
     for (QMap<EgDataNodeIdType, EgDataNode>::iterator nodesIter = controlDescs-> dataNodes.begin(); nodesIter != controlDescs-> dataNodes.end(); ++nodesIter)
     {
@@ -96,13 +96,13 @@ int EgDataNodesGUIsupport::LoadSimpleControlDesc()
             // newDesc.controlLabel = nodesIter.value()["label"].toString();
             // newDesc.controlDefWidth = nodesIter.value()["width"].toInt();
 
-            // qDebug()  << "Control desc added " << newDesc.fieldIndex << FN;
+            // EG_LOG_STUB  << "Control desc added " << newDesc.fieldIndex << FN;
 
             basicControlDescs.append(newDesc);
             basicControlDescsOrder.insert(nodesIter.value()["name"].toString(), &(basicControlDescs.last()));
         }
         else
-            qDebug()  << "Bad control desc field name " << nodesIter.value()["name"].toString() << FN;
+            EG_LOG_STUB  << "Bad control desc field name " << nodesIter.value()["name"].toString() << FN;
     }
 
 
@@ -117,7 +117,7 @@ bool EgDataNodesGUIsupport::CheckLocalGUIFile()
 
     if (!ddt_file.exists())
     {
-        // qDebug() << "file doesn't exist' " << dataNodesType-> metaInfo.typeName + egGUIfileName + ".ddt" << FN ;
+        // EG_LOG_STUB << "file doesn't exist' " << dataNodesType-> metaInfo.typeName + egGUIfileName + ".ddt" << FN ;
         return false;
     }
 
@@ -183,7 +183,7 @@ int EgDataNodesGUIsupport::ModifyRowOfModel(QStandardItemModel* model)
     if (model->item(model_current_row,0)-> data(data_status).toInt() == isUnchanged) // not added or already modified
         model->item(model_current_row,0)-> setData(QVariant(isModified), data_status); // mark as modified
 
-    // qDebug() << FN << "Model data changed at row " << current_row; //  << "," << bottomRight.row();
+    // EG_LOG_STUB << FN << "Model data changed at row " << current_row; //  << "," << bottomRight.row();
 
     return 0;
 }
@@ -253,12 +253,12 @@ void EgDataNodesGUIsupport::DataToModel(QStandardItemModel* model)
             }
         }
 
-        // qDebug() << model->rowCount() << FN;
+        // EG_LOG_STUB << model->rowCount() << FN;
 
         items[0]->setData(QVariant(isUnchanged), data_status);                 // loaded data status
         items[0]->setData(QVariant(dataNodeIter.value().dataNodeID), data_id);  // ID
 
-        // qDebug() << dataNodeIter.value().dataNodeID << FN;
+        // EG_LOG_STUB << dataNodeIter.value().dataNodeID << FN;
 
         model-> appendRow(items);
         // parentItem-> appendRow(items);
@@ -272,7 +272,7 @@ inline QStandardItem* EgDataNodesGUIsupport::AddNodeToModelTree(QStandardItem* p
         // check if GUI info loaded
     if (basicControlDescs.isEmpty())
     {
-        qDebug() << "GUI info not loaded for node type " << dataNode->extraInfo-> typeName << FN;
+        EG_LOG_STUB << "GUI info not loaded for node type " << dataNode->extraInfo-> typeName << FN;
         return NULL;
     }
 
@@ -314,20 +314,20 @@ int EgDataNodesGUIsupport::DataToModelTree(QStandardItemModel* model, QString li
 
     if (! primaryNodesType-> entryNodes)   // no entry nodes option
     {
-        qDebug()  << "Entry nodes not enabled for type: " << primaryNodesType->extraInfo.typeName << FN;
+        EG_LOG_STUB  << "Entry nodes not enabled for type: " << primaryNodesType->extraInfo.typeName << FN;
         return -1;
     }
 
         // iterate entry nodes
     for (auto Iter = primaryNodesType->entryNodes-> entryNodesList.begin(); Iter != primaryNodesType->entryNodes-> entryNodesList.end(); ++Iter)
     {
-        // qDebug()  << "Entry node ID = " << Iter.key() << FN;
+        // EG_LOG_STUB  << "Entry node ID = " << Iter.key() << FN;
 
             // check if node loaded
         if (! primaryNodesType-> dataNodes.contains(*Iter))
         {
-            // qDebug()  << "Entry node ID not found in dataNodesType-> dataNodes " << Iter.key() << FN;
-            // qDebug()  << dataNodesType-> dataNodes.keys() << FN;
+            // EG_LOG_STUB  << "Entry node ID not found in dataNodesType-> dataNodes " << Iter.key() << FN;
+            // EG_LOG_STUB  << dataNodesType-> dataNodes.keys() << FN;
 
             continue;
         }
@@ -350,7 +350,7 @@ int EgDataNodesGUIsupport::DataToModelTree(QStandardItemModel* model, QString li
         {
             for (QList<EgExtendedLinkType>::iterator Iter2 = entryNodePtr-> nodeLinks-> outLinks[linkName].begin(); Iter2 != entryNodePtr-> nodeLinks-> outLinks[linkName].end(); ++Iter2)
             {
-                // qDebug()  << "branch node ID = " << (*Iter2).dataNodePtr-> dataNodeID << FN;
+                // EG_LOG_STUB  << "branch node ID = " << (*Iter2).dataNodePtr-> dataNodeID << FN;
 
                 newItem = AddNodeToModelTree(parentItem, (*Iter2).dataNodePtr);
 
@@ -360,7 +360,7 @@ int EgDataNodesGUIsupport::DataToModelTree(QStandardItemModel* model, QString li
                     buildNode.dataNode = (*Iter2).dataNodePtr;
                     buildNode.modelItem = newItem;
 
-                    // qDebug()  << "new buildNode ID = " << buildNode.dataNode-> dataNodeID
+                    // EG_LOG_STUB  << "new buildNode ID = " << buildNode.dataNode-> dataNodeID
                     //           << "ptr = " << hex << (int) buildNode.dataNode << FN;
 
                     buildNodes.append(buildNode);
@@ -375,7 +375,7 @@ int EgDataNodesGUIsupport::DataToModelTree(QStandardItemModel* model, QString li
             buildNode = buildNodes.first();
             buildNodes.pop_front();
 
-            // qDebug()  << "build node ID = " << buildNode.dataNode-> dataNodeID << FN;
+            // EG_LOG_STUB  << "build node ID = " << buildNode.dataNode-> dataNodeID << FN;
 
             parentItem = buildNode.modelItem;
 
@@ -384,7 +384,7 @@ int EgDataNodesGUIsupport::DataToModelTree(QStandardItemModel* model, QString li
             for (QList<EgExtendedLinkType>::iterator Iter3 = buildNode.dataNode-> nodeLinks-> outLinks[linkName].begin(); Iter3 != buildNode.dataNode-> nodeLinks-> outLinks[linkName].end(); ++Iter3)
             {
 
-                // qDebug()  << "subbranch node ID = " << (*Iter3).dataNodePtr-> dataNodeID << FN;
+                // EG_LOG_STUB  << "subbranch node ID = " << (*Iter3).dataNodePtr-> dataNodeID << FN;
 
                 newItem = AddNodeToModelTree(parentItem, (*Iter3).dataNodePtr);
 
@@ -395,7 +395,7 @@ int EgDataNodesGUIsupport::DataToModelTree(QStandardItemModel* model, QString li
                     buildNode2.dataNode = (*Iter3).dataNodePtr;
                     buildNode2.modelItem = newItem;
 
-                    // qDebug()  << "new buildNode ID = " << buildNode2.dataNode-> dataNodeID
+                    // EG_LOG_STUB  << "new buildNode ID = " << buildNode2.dataNode-> dataNodeID
                     //          << "ptr = " << hex << (int) buildNode2.dataNode << FN;
 
                     buildNodes.append(buildNode2);
@@ -413,14 +413,14 @@ int EgDataNodesGUIsupport::DataFromModel(QStandardItemModel* model) // get from 
 
     if (basicControlDescs.size() != model->columnCount())
     {
-        qDebug()  << "ERROR: column counts of model and data node desc not match" << FN;
+        EG_LOG_STUB  << "ERROR: column counts of model and data node desc not match" << FN;
         return -1;
     }
 
         // scan model
     for (int row = 0; row < model-> rowCount(); ++row)
     {
-        // qDebug() << FN << "Status of model row " << row << " is " << model->item(row,0)->data(DATA_STATUS).toInt();
+        // EG_LOG_STUB << FN << "Status of model row " << row << " is " << model->item(row,0)->data(DATA_STATUS).toInt();
 
         if (model->item(row,0)->data(data_status).toInt() == isAdded) // added data row
         {
@@ -484,9 +484,9 @@ int EgDataNodesGUIsupport::AddAutoSubstitute(const char* my_field, EgDataNodesTy
         return 0;
     }
 
-    qDebug() << "Bad field name, descriptors follow" << FN;
-    qDebug() << basicControlDescsOrder << FN;
-    qDebug() << ref_class.extraInfo.nameToOrder << FN;
+    EG_LOG_STUB << "Bad field name, descriptors follow" << FN;
+    EG_LOG_STUB << basicControlDescsOrder << FN;
+    EG_LOG_STUB << ref_class.extraInfo.nameToOrder << FN;
 
     return -1;
 }

@@ -89,7 +89,7 @@ EgIndexCondition::EgIndexCondition(QString a_FieldName, QString str_oper, QVaria
     else if (str_oper == strNE)
         iTreeNode-> oper = NE;
     else
-        qDebug() << "Bad operation code: " << str_oper << FN;
+        EG_LOG_STUB << "Bad operation code: " << str_oper << FN;
 
 }
 
@@ -145,7 +145,7 @@ int EgIndexConditionsTree::TransferTreeSet(EgIndexNode* rootNode, QDataStream& d
 {
     if (rootNode)
     {
-        // qDebug() << "rootNode-> subnodesCount+1: " << rootNode-> subnodesCount+1 << " nodeID: " << rootNode-> nodeID << FN;
+        // EG_LOG_STUB << "rootNode-> subnodesCount+1: " << rootNode-> subnodesCount+1 << " nodeID: " << rootNode-> nodeID << FN;
 
         d_stream << rootNode-> subnodesCount+1;
         d_stream << rootNode-> nodeID;
@@ -158,7 +158,7 @@ int EgIndexConditionsTree::TransferTreeSet(EgIndexNode* rootNode, QDataStream& d
 
 void EgIndexConditionsTree::RecursiveTransfer(EgIndexNode* branch, QDataStream& d_stream)
 {
-    // qDebug() << "Transfer  tree index " << branch->FieldName << (int) branch-> oper << " " << branch->value << FN;
+    // EG_LOG_STUB << "Transfer  tree index " << branch->FieldName << (int) branch-> oper << " " << branch->value << FN;
 
     if (! branch)
         return;
@@ -170,7 +170,7 @@ void EgIndexConditionsTree::RecursiveTransfer(EgIndexNode* branch, QDataStream& 
 
     d_stream << *branch;
 
-    // qDebug() << FN << branch->my_set;
+    // EG_LOG_STUB << FN << branch->my_set;
 }
 
 void EgIndexConditionsTree::RecursiveClear(EgIndexNode* branch)
@@ -201,7 +201,7 @@ void EgIndexConditionsTree::RecursiveClearSets(EgIndexNode* branch)
 
 void EgIndexConditionsTree::RecursiveCalc(EgIndexNode* branch,   EgDataFiles*  LocalFiles)
 {
-    // qDebug() << "Select tree index " << branch->FieldName << (int) branch-> oper << FN;
+    // EG_LOG_STUB << "Select tree index " << branch->FieldName << (int) branch-> oper << FN;
 
     if (! branch)
         return;
@@ -220,7 +220,7 @@ void EgIndexConditionsTree::RecursiveCalc(EgIndexNode* branch,   EgDataFiles*  L
         }
         else
         {
-            qDebug() << "Index not found: " << branch->FieldName << FN;
+            EG_LOG_STUB << "Index not found: " << branch->FieldName << FN;
             return;
         }
 
@@ -262,7 +262,7 @@ void EgIndexConditionsTree::RecursiveCalc(EgIndexNode* branch,   EgDataFiles*  L
         }
     }
 
-    // qDebug() << branch->my_set << FN;
+    // EG_LOG_STUB << branch->my_set << FN;
 }
 
 void EgIndexCondition::AddNode(EgIndexNode* parent, EgIndexNode* new_node, bool is_left)
@@ -304,7 +304,7 @@ int EgIndexCondition::BuildTreeFromMap(QMap<EgIndexNodeIDtype, EgIndexNode>& ind
     {
         iTreeNode = nullptr;
 
-        qDebug() << "Root node ID not found: " << rootID << FN;
+        EG_LOG_STUB << "Root node ID not found: " << rootID << FN;
         return -1;
     }
 

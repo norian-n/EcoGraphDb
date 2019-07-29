@@ -36,7 +36,8 @@ SOURCES += \
     egNodesLocation.cpp \
     egGUIconnect.cpp \
     testing/egNamedAttributesTests.cpp \
-    egExtraInfo.cpp
+    egExtraInfo.cpp \
+    egLogging.cpp
 
 HEADERS += \
     testing/egIndexesTests.h \
@@ -47,4 +48,5 @@ HEADERS += \
     testing/egLocationTests.h \
     egNamedAttributes.h \
     egNodesLocation.h \
-    testing/egNamedAttributesTests.h
+    testing/egNamedAttributesTests.h \
+    egLogging.h

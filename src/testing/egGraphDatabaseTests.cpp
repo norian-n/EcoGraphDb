@@ -13,6 +13,11 @@
 
 bool EgGraphDatabaseTests::testEgDataNodeTypeMetaInfo(EgDataNodeTypeExtraInfo& egDataNodeTypeMetaInfo)
 {
+    bool res {false};
+
+    if(res) // DUMMY
+        EG_LOG_STUB << FN;
+
         // create meta-info
     egDataNodeTypeMetaInfo.AddDataField("name");
     egDataNodeTypeMetaInfo.AddDataField("status", true);
@@ -33,7 +38,7 @@ bool EgGraphDatabaseTests::testEgDataNodeTypeMetaInfo(EgDataNodeTypeExtraInfo& e
         // check result
     // egDataNodeTypeMetaInfo.PrintMetaInfo();
 
-    bool res = ((egDataNodeTypeMetaInfo.dataFields.count() == 2)
+    res = ((egDataNodeTypeMetaInfo.dataFields.count() == 2)
                 && (egDataNodeTypeMetaInfo.nameToOrder.count() == 2)
                 && (egDataNodeTypeMetaInfo.indexedFields.count() == 1));
 

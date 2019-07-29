@@ -15,23 +15,23 @@ using namespace egIndexesNamespace;
 
 template <typename KeyType> void EgFingers<KeyType>::PrintFingerInfo(egFinger<KeyType>& fingerInfo, const QString &theMessage)
 {
-    qDebug() << "indexes: " << IndexFileName << theMessage;
-    qDebug() << "fingerInfo.minKey = " << hex << (int) fingerInfo.minKey;
-    qDebug() << "fingerInfo.maxKey = " << hex << (int) fingerInfo.maxKey;
-    qDebug() << "fingerInfo.myLevel = " << hex << (int) fingerInfo.myLevel;
-    qDebug() << "fingerInfo.itemsCount = " << hex << (int) fingerInfo.itemsCount;
+    EG_LOG_STUB << "indexes: " << IndexFileName << theMessage;
+    EG_LOG_STUB << "fingerInfo.minKey = " << hex << (int) fingerInfo.minKey;
+    EG_LOG_STUB << "fingerInfo.maxKey = " << hex << (int) fingerInfo.maxKey;
+    EG_LOG_STUB << "fingerInfo.myLevel = " << hex << (int) fingerInfo.myLevel;
+    EG_LOG_STUB << "fingerInfo.itemsCount = " << hex << (int) fingerInfo.itemsCount;
 
-    qDebug() << "fingerInfo.nextChunkOffset = " << hex << (int) fingerInfo.nextChunkOffset;
-    qDebug() << "fingerInfo.myOffset = " << hex << (int) fingerInfo.myOffsetInChunk;
-    qDebug() << "fingerInfo.myChunkOffset = " << hex << (int) fingerInfo.myChunkOffset;
+    EG_LOG_STUB << "fingerInfo.nextChunkOffset = " << hex << (int) fingerInfo.nextChunkOffset;
+    EG_LOG_STUB << "fingerInfo.myOffset = " << hex << (int) fingerInfo.myOffsetInChunk;
+    EG_LOG_STUB << "fingerInfo.myChunkOffset = " << hex << (int) fingerInfo.myChunkOffset;
 
-    // qDebug() << "fingerInfo.fingersCount = " << hex << (int) fingerInfo.fingersCount;
-    // qDebug() << "fingerInfo.myLevel = " << hex << (int) fingerInfo.myLevel << endl;
+    // EG_LOG_STUB << "fingerInfo.fingersCount = " << hex << (int) fingerInfo.fingersCount;
+    // EG_LOG_STUB << "fingerInfo.myLevel = " << hex << (int) fingerInfo.myLevel << endl;
 }
 
 template <typename KeyType> void EgFingers<KeyType>::PrintFingersChunk(char* theFingersChunk, const QString &theMessage)
 {
-    qDebug() << QByteArray(theFingersChunk, fingersChunkSize).toHex() << theMessage;
+    EG_LOG_STUB << QByteArray(theFingersChunk, fingersChunkSize).toHex() << theMessage;
 }
 
 
@@ -68,16 +68,16 @@ template <typename KeyType> void EgFingers<KeyType>::PrintChunkInfo(quint64 fing
 
     // TODO get real min/max keys by count
 
-    qDebug() << "myChunkOffset = " << hex << (int) fingersChunkOffset
+    EG_LOG_STUB << "myChunkOffset = " << hex << (int) fingersChunkOffset
              << ", parentNextOffset = " << hex << (int) parentNextOffset;
 
-    qDebug() << "Parent: minKey = " << hex << (int) minParent
+    EG_LOG_STUB << "Parent: minKey = " << hex << (int) minParent
              << ", maxKey = " << hex << (int) maxParent
              << ", itemsCount = " << (int) parentKeysCount;
 
-    qDebug() << "myLevel = " << (int) myLevel;
+    EG_LOG_STUB << "myLevel = " << (int) myLevel;
 
-    qDebug() << "parentFingerOffset = " << hex << (int) parentFingerOffset << endl;
+    EG_LOG_STUB << "parentFingerOffset = " << hex << (int) parentFingerOffset << endl;
 
 }
 
@@ -101,7 +101,7 @@ template <typename KeyType> void EgFingers<KeyType>::PrintAllChunksInfo(const QS
 
     // PrintFingerInfo(fingersRootHeader, "fingersRootHeader");
 
-    // qDebug() << "nextOffset = " << hex << (int) nextOffset << FN;
+    // EG_LOG_STUB << "nextOffset = " << hex << (int) nextOffset << FN;
 
     chunksList.append(nextOffset);
 
@@ -112,7 +112,7 @@ template <typename KeyType> void EgFingers<KeyType>::PrintAllChunksInfo(const QS
             fingerStream.device()->seek(nextOffset + i * oneFingerSize + sizeof(KeyType)*2 + sizeof(keysCountType));
             fingerStream >> branchOffset;
 
-            // qDebug() << "nextOffset = " << hex << (int) nextOffset << "branchOffset = " << hex << (int) branchOffset << FN;
+            // EG_LOG_STUB << "nextOffset = " << hex << (int) nextOffset << "branchOffset = " << hex << (int) branchOffset << FN;
 
             branchesList.append(branchOffset);
         }
@@ -123,7 +123,7 @@ template <typename KeyType> void EgFingers<KeyType>::PrintAllChunksInfo(const QS
         nextOffset = branchesList.first();
         branchesList.pop_front();
 
-        // qDebug() << "nextOffset = " << hex << (int) nextOffset << FN;
+        // EG_LOG_STUB << "nextOffset = " << hex << (int) nextOffset << FN;
 
         chunksList.append(nextOffset);
 
@@ -146,7 +146,7 @@ template <typename KeyType> void EgFingers<KeyType>::PrintAllChunksInfo(const QS
                 fingerStream.device()->seek(nextOffset + i * oneFingerSize + sizeof(KeyType)*2 + sizeof(keysCountType));
                 fingerStream >> branchOffset;
 
-                // qDebug() << "nextOffset = " << hex << (int) nextOffset << "branchOffset = " << hex << (int) branchOffset << FN;
+                // EG_LOG_STUB << "nextOffset = " << hex << (int) nextOffset << "branchOffset = " << hex << (int) branchOffset << FN;
 
                 branchesList.append(branchOffset);
             }
@@ -154,7 +154,7 @@ template <typename KeyType> void EgFingers<KeyType>::PrintAllChunksInfo(const QS
     }
 
         // print list
-    qDebug() << theMessage;
+    EG_LOG_STUB << theMessage;
 
     for(QList<quint64>::iterator chunksIterator = chunksList.begin(); chunksIterator != chunksList.end(); ++chunksIterator)
         PrintChunkInfo(*chunksIterator);
@@ -172,6 +172,9 @@ template <typename KeyType> void EgFingers<KeyType>::InitRootFinger()
 
     rootFinger.nextChunkOffset = indexHeaderSize;
 
+    if(rootFinger.myLevel) // DUMMY
+        EG_LOG_STUB << FN;
+
     // rootFinger.myChunkOffset = 0;
     // rootFinger.myOffset = 0;
 }
@@ -179,8 +182,8 @@ template <typename KeyType> void EgFingers<KeyType>::InitRootFinger()
 
 template <typename KeyType> void EgFingers<KeyType>::LoadRootFinger()
 {
-    // qDebug() << "fingerFile.fileName() = " << fingerFile.fileName() << FN;
-    // qDebug() << "fingerFile size = " << fingerStream.device()->size() << FN;
+    // EG_LOG_STUB << "fingerFile.fileName() = " << fingerFile.fileName() << FN;
+    // EG_LOG_STUB << "fingerFile size = " << fingerStream.device()->size() << FN;
 
     fingerStream.device()-> seek(0);
 
@@ -242,7 +245,7 @@ template <typename KeyType> int EgFingers<KeyType>::StoreFingersChunk(quint64 fi
         // int res =
     fingerStream.device()->write(chunkPtr, fingersChunkSize);
 
-    // qDebug() << "fingersChunkOffset" << hex << (int) fingersChunkOffset << FN;
+    // EG_LOG_STUB << "fingersChunkOffset" << hex << (int) fingersChunkOffset << FN;
 
     return 0; // FIXME
 }
@@ -252,7 +255,7 @@ template <typename KeyType> int EgFingers<KeyType>::StoreParentOffset(quint64 fi
     fingerStream.device()->seek(fingersChunkOffset + egChunkVolume * oneFingerSize);
     fingerStream << parentFingerOffset;
 
-    // qDebug() << "fingersChunkOffset" << hex << (int) fingersChunkOffset << ", parentFingerOffset" << hex << (int) parentFingerOffset << FN;
+    // EG_LOG_STUB << "fingersChunkOffset" << hex << (int) fingersChunkOffset << ", parentFingerOffset" << hex << (int) parentFingerOffset << FN;
 
     return 0; // FIXME
 }
@@ -262,7 +265,7 @@ template <typename KeyType> int EgFingers<KeyType>::GetParentOffset(quint64& par
     localStream->device()-> seek(egChunkVolume * oneFingerSize);
     *localStream >> parentFingerOffset;
 
-    // qDebug() << "fingerOffset = " << hex << (int) fingerOffset << FN;
+    // EG_LOG_STUB << "fingerOffset = " << hex << (int) fingerOffset << FN;
 
     return 0;
 }
@@ -336,7 +339,7 @@ template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetFirst(boo
         return 0;
     }
 
-    // qDebug() << "indexChunks-> theKey = " << indexChunks-> theKey << "fingerPosition = " << fingerPosition << FN;
+    // EG_LOG_STUB << "indexChunks-> theKey = " << indexChunks-> theKey << "fingerPosition = " << fingerPosition << FN;
 
     currentFinger.myOffsetInChunk = fingerPosition*oneFingerSize;
     ReadFinger(*localStream, currentFinger);
@@ -354,7 +357,7 @@ template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetFirst(boo
             {
                 fingerPosition ++;
 
-                // qDebug() << "fingerPosition = " << fingerPosition << FN;
+                // EG_LOG_STUB << "fingerPosition = " << fingerPosition << FN;
 
                 currentFinger.myOffsetInChunk = fingerPosition*oneFingerSize;
                 ReadFinger(*localStream, currentFinger);
@@ -515,7 +518,7 @@ template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetLast(bool
         return 0;
     }
 
-    // qDebug() << "fingerPosition = " << fingerPosition << FN;
+    // EG_LOG_STUB << "fingerPosition = " << fingerPosition << FN;
 
     currentFinger.myOffsetInChunk = fingerPosition*oneFingerSize;
     ReadFinger(*localStream, currentFinger);
@@ -647,7 +650,7 @@ template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkToInsert()
         localStream->device()-> seek(egChunkVolume * oneFingerSize + sizeof(quint64));
         *localStream >> currentFinger.myLevel;
 
-        // qDebug() << "myLevel = " << currentFinger.myLevel << FN;
+        // EG_LOG_STUB << "myLevel = " << currentFinger.myLevel << FN;
 
         res = FindFingerInChunkToInsert(); // *localStream
 
@@ -660,7 +663,7 @@ template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkToInsert()
     }
     while ((currentFinger.myLevel > 0) && (res >= 0));
 
-    // qDebug() << "theKey = " << hex << (int) indexChunks-> theKey << FN;
+    // EG_LOG_STUB << "theKey = " << hex << (int) indexChunks-> theKey << FN;
 
     // PrintFingerInfo(parentFinger, "parentFinger " + FNS);
     // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
@@ -713,7 +716,7 @@ template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkFirst(bool isE
         localStream->device()-> seek(egChunkVolume * oneFingerSize + sizeof(quint64));
         *localStream >> currentFinger.myLevel;
 
-        // qDebug() << "myLevel = " << currentFinger.myLevel << FN;
+        // EG_LOG_STUB << "myLevel = " << currentFinger.myLevel << FN;
 
         res = FindNextLevelOffsetFirst(isExactEqual);  // get currentFinger, uses localStream
 
@@ -1082,7 +1085,7 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterDelet
                 break;
             }
 
-            // qDebug() << "newMaxValue = " << newMaxValue << FN;
+            // EG_LOG_STUB << "newMaxValue = " << newMaxValue << FN;
         }
         else if (minValueChanged)
         {
@@ -1101,7 +1104,7 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterDelet
                 break;
             }
 
-            // qDebug() << "newMinValue = " << newMinValue << FN;
+            // EG_LOG_STUB << "newMinValue = " << newMinValue << FN;
         }
         else
         {
@@ -1111,7 +1114,7 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterDelet
         }
     }   // while
 
-        // qDebug() << "parentFingerOffset = " << parentFingerOffset << FN;
+        // EG_LOG_STUB << "parentFingerOffset = " << parentFingerOffset << FN;
 
         // check / update root header
     if(! parentFingerOffset)
@@ -1144,7 +1147,7 @@ template <typename KeyType> inline void EgFingers<KeyType>::DeleteSpecificFinger
     localStream->device()-> seek(egChunkVolume * oneFingerSize + sizeof(quint64));
     *localStream >> myLocalLevel;
 
-    // qDebug() << "keysCount = " << keysCount << ", fingerPosition = " << fingerPosition << ", myLocalLevel = " << myLocalLevel << FN;
+    // EG_LOG_STUB << "keysCount = " << keysCount << ", fingerPosition = " << fingerPosition << ", myLocalLevel = " << myLocalLevel << FN;
 
     // PrintFingersChunk(fingersBA.data(), "fingers chunk before delete " + FNS);
 
@@ -1208,7 +1211,7 @@ template <typename KeyType> int EgFingers<KeyType>::DeleteParentFinger() // recu
         PrintFingerInfo(parentFinger, "parentFinger " + FNS);
         PrintFingerInfo(currentFinger, "currentFinger " + FNS);
 
-        qDebug() << "currentFingerOffset " << hex << (int) currentFingerOffset
+        EG_LOG_STUB << "currentFingerOffset " << hex << (int) currentFingerOffset
                  << " , parentFingerOffset " << hex << (int) parentFingerOffset
                  << " , currentKeysCount = " << currentKeysCount << FN;
 */
@@ -1368,7 +1371,7 @@ template <typename KeyType> inline void EgFingers<KeyType>::WriteFinger(QDataStr
 
 template <typename KeyType> inline void EgFingers<KeyType>::MoveTailToInsert(char* chunkPtr, int fingerPosition, int fingersToMove)
 {
-    // qDebug() << "fingerPosition = " << fingerPosition << ", fingersToMove = " << fingersToMove  << FN;
+    // EG_LOG_STUB << "fingerPosition = " << fingerPosition << ", fingersToMove = " << fingersToMove  << FN;
     memmove (chunkPtr + (fingerPosition+1)*oneFingerSize, chunkPtr + fingerPosition*oneFingerSize, fingersToMove*oneFingerSize);
     // PrintFingersChunk(chunkPtr, "chunk after tail move " + FNS);
 }
@@ -1387,7 +1390,7 @@ template <typename KeyType> int EgFingers<KeyType>::InsertSplittedFinger()
 
     InsertNewFinger(posToInsert, parentFinger.itemsCount); // to localStream
 
-    // qDebug() << "backlink = " << hex << currentFinger.myChunkOffset + posToInsert*oneFingerSize << ", newFinger.nextChunkOffset = " << hex << newFinger.nextChunkOffset << FN;
+    // EG_LOG_STUB << "backlink = " << hex << currentFinger.myChunkOffset + posToInsert*oneFingerSize << ", newFinger.nextChunkOffset = " << hex << newFinger.nextChunkOffset << FN;
 
         // update backlinks
     // if (currentFinger.myLevel == 0)
@@ -1453,7 +1456,7 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateBackptrOffsets( quint6
 {
     quint64 nextLevelOffset;
 
-    // qDebug() << "posToInsert = " << posToInsert << ", myLocalLevel = " << myLocalLevel << ", itemsCount = " << itemsCount << FN;
+    // EG_LOG_STUB << "posToInsert = " << posToInsert << ", myLocalLevel = " << myLocalLevel << ", itemsCount = " << itemsCount << FN;
 
         // update parent backlinks for shifted fingers
     for (int i = posToInsert; i < itemsCount; i++)
@@ -1462,7 +1465,7 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateBackptrOffsets( quint6
         localStream->device()-> seek(i * oneFingerSize + sizeof(KeyType)*2 + sizeof(keysCountType));
         *localStream >> nextLevelOffset;
 
-            // qDebug() << "i = " << i << ", nextLevelOffset = " << hex << (int) nextLevelOffset
+            // EG_LOG_STUB << "i = " << i << ", nextLevelOffset = " << hex << (int) nextLevelOffset
             //         << ", myChunkOffset = " << hex << (int) myChunkOffset << FN;
 
             // write actual backlink
@@ -1497,7 +1500,7 @@ template <typename KeyType> int EgFingers<KeyType>::SplitFingersChunk()
         // insert new finger next to current
     posToInsert = currentFinger.myOffsetInChunk/oneFingerSize + 1;
 
-    // qDebug() << "posToInsert = " << posToInsert << ", fingersCount = " << parentFinger.itemsCount << FN;
+    // EG_LOG_STUB << "posToInsert = " << posToInsert << ", fingersCount = " << parentFinger.itemsCount << FN;
 
     if (posToInsert < parentFinger.itemsCount) // not last
         // memmove (fingersBA.data() + (posToInsert+1)*oneFingerSize, fingersBA.data() + posToInsert*oneFingerSize,

@@ -64,14 +64,14 @@ int  EgDataNodeTypeExtraInfo::OpenLocalStoreStream()
 
     if (dir.dirName() == "egdb")
     {
-        qDebug() << "error: unexpected folder: " << dir.path() << FN;
+        EG_LOG_STUB << "error: unexpected folder: " << dir.path() << FN;
 
         return -1;
     }
 
-    // qDebug()  << "dir name: " << dir.dirName() << FN;
-    // qDebug()  << "dir current path: " << dir.currentPath() << FN;
-    // qDebug()  << dir.entryList() << FN;
+    // EG_LOG_STUB  << "dir name: " << dir.dirName() << FN;
+    // EG_LOG_STUB  << "dir current path: " << dir.currentPath() << FN;
+    // EG_LOG_STUB  << dir.entryList() << FN;
 
         // open file
     extraInfoFile.setFileName("egdb/" + typeName + ".ddt");
@@ -79,7 +79,7 @@ int  EgDataNodeTypeExtraInfo::OpenLocalStoreStream()
 
     if (!extraInfoFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
     {
-        qDebug() << "can't open " << extraInfoFile.fileName() << " file" << FN;
+        EG_LOG_STUB << "can't open " << extraInfoFile.fileName() << " file" << FN;
 
         return -1;
     }
@@ -105,7 +105,7 @@ void EgDataNodeTypeExtraInfo::SendExtraInfoToStream(QDataStream& extraInfoStream
 
     for (auto indIter = indexedFields.begin(); indIter != indexedFields.end(); ++indIter)
     {
-        // qDebug() << indIter.key() << " " << indIter.value().fieldNum << FN;
+        // EG_LOG_STUB << indIter.key() << " " << indIter.value().fieldNum << FN;
 
         extraInfoStream << indIter.key();
         extraInfoStream << indIter.value().fieldNum;
@@ -186,7 +186,7 @@ int EgDataNodeTypeExtraInfo::OpenLocalLoadStream()
     if (!extraInfoFile.open(QIODevice::ReadOnly))
     {
         // if (! typeName.contains(EgDataNodesNamespace::egGUIfileName))
-        qDebug() << FN << "can't open " << typeName + ".ddt" << " file";
+        EG_LOG_STUB << FN << "can't open " << typeName + ".ddt" << " file";
 
         return -1;
     }
@@ -226,7 +226,7 @@ int EgDataNodeTypeExtraInfo::LoadExtraInfoFromStream(QDataStream& extraInfoStrea
         extraInfoStream  >> theSettings.isSigned;
         extraInfoStream  >> theSettings.functionID;
 
-        // qDebug() << theName << " " << theSettings.fieldNum << FN;
+        // EG_LOG_STUB << theName << " " << theSettings.fieldNum << FN;
 
         indexedFields.insert(theName, theSettings);
     }
@@ -256,21 +256,21 @@ int EgDataNodeTypeExtraInfo::LocalLoadExtraInfo()
 
 void EgDataNodeTypeExtraInfo::PrintExtraInfo()
 {
-     qDebug() << FN << "\nType name:" << typeName << " Obj Count:" << nodesCount << " Next ID:" << nextNodeID;
+     EG_LOG_STUB << FN << "\nType name:" << typeName << " Obj Count:" << nodesCount << " Next ID:" << nextNodeID;
 
-     qDebug() << "Fields:";
-     qDebug() << dataFields;
+     EG_LOG_STUB << "Fields:";
+     EG_LOG_STUB << dataFields;
 
-     qDebug() << "Fields order:";
+     EG_LOG_STUB << "Fields order:";
      for (auto curDesc = nameToOrder.begin(); curDesc != nameToOrder.end(); ++curDesc)
-         qDebug() << curDesc.value() << " " << curDesc.key();
+         EG_LOG_STUB << curDesc.value() << " " << curDesc.key();
 
-     // qDebug() << "Indexes order:";
-     // qDebug() << indexedFields;
+     // EG_LOG_STUB << "Indexes order:";
+     // EG_LOG_STUB << indexedFields;
 
-     qDebug() << "Indexes order:";
+     EG_LOG_STUB << "Indexes order:";
      // for (auto curDesc = indexedToOrder.begin(); curDesc != indexedToOrder.end(); ++curDesc)
-     //    qDebug() << curDesc.value() << " " << curDesc.key();
+     //    EG_LOG_STUB << curDesc.value() << " " << curDesc.key();
 }
 
 
@@ -315,7 +315,7 @@ QDataStream& operator << (QDataStream& metaInfoStream, EgDataNodeTypeExtraInfo &
 
     for (auto indIter = metaInfo.indexedFields.begin(); indIter != metaInfo.indexedFields.end(); ++indIter)
     {
-        // qDebug() << indIter.key() << " " << indIter.value().fieldNum << FN;
+        // EG_LOG_STUB << indIter.key() << " " << indIter.value().fieldNum << FN;
 
         metaInfoStream << indIter.key();
         metaInfoStream << indIter.value().fieldNum;
@@ -360,7 +360,7 @@ QDataStream& operator >> (QDataStream& metaInfoStream, EgDataNodeTypeExtraInfo& 
         metaInfoStream  >> theSettings.isSigned;
         metaInfoStream  >> theSettings.functionID;
 
-        // qDebug() << theName << " " << theSettings.fieldNum << FN;
+        // EG_LOG_STUB << theName << " " << theSettings.fieldNum << FN;
 
         metaInfo.indexedFields.insert(theName, theSettings);
     }

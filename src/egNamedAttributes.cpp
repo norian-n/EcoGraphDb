@@ -77,6 +77,9 @@ int EgNamedAttributes::LoadNamedAttributes()
 {
     int res = 0;
 
+    if(res) // DUMMY
+        EG_LOG_STUB << FN;
+
     namedAttributesStorage-> ClearData();
 
     namedAttributesStorage-> IndexOffsets.clear();

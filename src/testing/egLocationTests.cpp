@@ -11,6 +11,11 @@
 
 bool EgLocationTests::testCreateLocations()
 {
+    bool res {false};
+
+    if(res) // DUMMY
+        EG_LOG_STUB << FN;
+
     EgNodeTypeSettings typeSettings;
 
     typeSettings.useLocation = true;
@@ -24,7 +29,7 @@ bool EgLocationTests::testCreateLocations()
 
     graphDB.CommitNodeType();
 
-    bool res = (graphDB.locationFieldsCreated == 3); // x,y,imageType
+    res = (graphDB.locationFieldsCreated == 3); // x,y,imageType
 
     testShowResult(res, FNS);
 

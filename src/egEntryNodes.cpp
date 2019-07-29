@@ -37,7 +37,7 @@ int EgEntryNodes::AddEntryNode (EgDataNodeIdType nodeID)
 
     entryStorage-> StoreData();
 
-    // qDebug() << "nodeID added " << nodeID << FN;
+    // EG_LOG_STUB << "nodeID added " << nodeID << FN;
 
     return 0;
 }
@@ -61,8 +61,8 @@ int EgEntryNodes::LoadEntryNodes()
     {
         if (nodesType->dataNodes.contains(dataNodeIter.key()))
             entryNodesList.append(dataNodeIter.key());
-        // else
-        //    qDebug()  << "Can't find the data node ID of entry: " << dataNodeIter.key() << FN;
+        else
+            EG_LOG_STUB  << "Can't find the data node ID of entry: " << dataNodeIter.key() << FN;
     }
 
     return 0;
@@ -86,7 +86,7 @@ int EgEntryNodes::AddEntryNode(EgDataNodesType& egType, EgDataNode& entryNode)
 
         if (! dir.exists("egdb"))
         {
-            qDebug()  << "Can't find the egdb dir " << FN;
+            EG_LOG_STUB  << "Can't find the egdb dir " << FN;
             return -1;
         }
 
@@ -94,7 +94,7 @@ int EgEntryNodes::AddEntryNode(EgDataNodesType& egType, EgDataNode& entryNode)
 
         if (!dat_file.open(QIODevice::ReadWrite)) // WriteOnly Append | QIODevice::Truncate
         {
-            qDebug() << "can't open file " << egType.metaInfo.typeName + ".ent" << FN;
+            EG_LOG_STUB << "can't open file " << egType.metaInfo.typeName + ".ent" << FN;
             return -1;
         }
 
@@ -105,7 +105,7 @@ int EgEntryNodes::AddEntryNode(EgDataNodesType& egType, EgDataNode& entryNode)
             // walk add list
         // for (QMap<EgDataNodeIDtype, EgDataNode*>::iterator Iter = entryNodes.begin(); Iter != entryNodes.end(); ++Iter)
         // {
-            // qDebug() << "Adding link" << (int) addIter.key() << (int) addIter.value() << " on offset" << hex << (int) dat.device()-> pos() << FN;
+            // EG_LOG_STUB << "Adding link" << (int) addIter.key() << (int) addIter.value() << " on offset" << hex << (int) dat.device()-> pos() << FN;
 
         dat << entryNode.dataNodeID; // Iter.key();
             // dat << addIter.value();
@@ -132,7 +132,7 @@ int EgEntryNodes::StoreEntryNodes(EgDataNodesType& egType)
 
     if (! dir.exists("egdb"))
     {
-        qDebug()  << "can't find the egdb dir " << FN;
+        EG_LOG_STUB  << "can't find the egdb dir " << FN;
         return -1;
     }
 
@@ -140,7 +140,7 @@ int EgEntryNodes::StoreEntryNodes(EgDataNodesType& egType)
 
     if (!dat_file.open(QIODevice::WriteOnly | QIODevice::Truncate)) // WriteOnly Append | QIODevice::Truncate
     {
-        qDebug() << "can't open file " << egType.metaInfo.typeName + ".ent" << FN;
+        EG_LOG_STUB << "can't open file " << egType.metaInfo.typeName + ".ent" << FN;
         return -1;
     }
 
@@ -151,7 +151,7 @@ int EgEntryNodes::StoreEntryNodes(EgDataNodesType& egType)
         // walk add list
     for (QMap<EgDataNodeIDtype, EgDataNode*>::iterator Iter = entryNodes.begin(); Iter != entryNodes.end(); ++Iter)
     {
-        // qDebug() << "Adding link" << (int) addIter.key() << (int) addIter.value() << " on offset" << hex << (int) dat.device()-> pos() << FN;
+        // EG_LOG_STUB << "Adding link" << (int) addIter.key() << (int) addIter.value() << " on offset" << hex << (int) dat.device()-> pos() << FN;
 
         dat << Iter.key();
         // dat << addIter.value();
@@ -174,7 +174,7 @@ int EgEntryNodes::LoadEntryNodes(EgDataNodesType& egType)
 
      if (! dir.exists("egdb"))
      {
-         qDebug()  << "can't find the egdb dir " << FN;
+         EG_LOG_STUB  << "can't find the egdb dir " << FN;
          return -1;
      }
 
@@ -182,13 +182,13 @@ int EgEntryNodes::LoadEntryNodes(EgDataNodesType& egType)
 
      if ( ! dat_file.exists())
      {
-         // qDebug() << FN << "file doesn't exist " << IndexFileName + ".odx";
+         // EG_LOG_STUB << FN << "file doesn't exist " << IndexFileName + ".odx";
          return 1;
      }
 
      if (!dat_file.open(QIODevice::ReadOnly)) // WriteOnly Append | QIODevice::Truncate
      {
-         qDebug() << "can't open file " << "egdb/" + egType.metaInfo.typeName + ".ent" << FN;
+         EG_LOG_STUB << "can't open file " << "egdb/" + egType.metaInfo.typeName + ".ent" << FN;
          return -1;
      }
 
@@ -202,8 +202,8 @@ int EgEntryNodes::LoadEntryNodes(EgDataNodesType& egType)
              entryNodesMap.insert(entryNodeID, &(egType.dataNodes[entryNodeID]));
          else
          {
-             // qDebug()  << "Entry node ID not found in egType.dataNodes " << entryNodeID << FN;
-             // qDebug()  << egType.dataNodes.keys() << FN;
+             // EG_LOG_STUB  << "Entry node ID not found in egType.dataNodes " << entryNodeID << FN;
+             // EG_LOG_STUB  << egType.dataNodes.keys() << FN;
 
              continue;
          }

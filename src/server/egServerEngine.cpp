@@ -34,7 +34,7 @@ EgDbTcpServer::EgDbTcpServer(QObject *parent)
 
 void EgDbTcpServer::incomingConnection(qintptr socketDescriptor)
 {
-    // qDebug() << "incomingConnection() called" << FN;
+    // EG_LOG_STUB << "incomingConnection() called" << FN;
 
     EgDbServerThread *thread = new EgDbServerThread(socketDescriptor, this);
 
@@ -69,11 +69,11 @@ void EgDbServerThread::run()
     operProcessor-> createSocket();
 
     if (! operProcessor->clientConnection-> setSocketDescriptor(socketDescriptor)) {
-        qDebug()  << "Socket descriptor error " << FN ;
+        EG_LOG_STUB  << "Socket descriptor error " << FN ;
         return;
     }
 
-    // qDebug()  << "Thread started " << FN ;
+    // EG_LOG_STUB  << "Thread started " << FN ;
 
     operProcessor-> processCommand();
 }
@@ -86,7 +86,7 @@ void EgServerEngine::processRequest()
 
     // CommandIdType command_id;
 
-    // qDebug() << "processRequest() called";
+    // EG_LOG_STUB << "processRequest() called";
 /*
     clientConnection = tcpServer->nextPendingConnection();
 
@@ -103,8 +103,8 @@ void EgServerEngine::run()
     // if (!tcpServer-> listen(QHostAddress::LocalHost, server_port))
     if (! customServer.listen(QHostAddress::LocalHost, server_port))
     {
-        // qDebug() << "Unable to start the server: " << tcpServer-> errorString();
-        qDebug() << "Unable to start the server: " << customServer.errorString();
+        // EG_LOG_STUB << "Unable to start the server: " << tcpServer-> errorString();
+        EG_LOG_STUB << "Unable to start the server: " << customServer.errorString();
 
         return;
     }
@@ -113,7 +113,7 @@ void EgServerEngine::run()
 
     // QString ipAddress = QHostAddress(QHostAddress::LocalHost).toString(); << ipAddress
 
-    // qDebug() << "The egDb server is running on"  << " port " << tcpServer-> serverPort();
-    qDebug() << "The egDb server is running on"  << " port " << customServer.serverPort();
+    // EG_LOG_STUB << "The egDb server is running on"  << " port " << tcpServer-> serverPort();
+    EG_LOG_STUB << "The egDb server is running on"  << " port " << customServer.serverPort();
 }
 

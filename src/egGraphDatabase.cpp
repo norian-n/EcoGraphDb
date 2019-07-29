@@ -32,7 +32,7 @@ bool EgGraphDatabase::CheckLinksMetaInfoLocal()
 
     if (dir.dirName() == "egdb")
     {
-        qDebug() << "error: unexpected folder: " << dir.path() << FN;
+        EG_LOG_STUB << "error: unexpected folder: " << dir.path() << FN;
 
         return false;
     }
@@ -40,7 +40,7 @@ bool EgGraphDatabase::CheckLinksMetaInfoLocal()
         // check folder and ddt file
     if (! dir.exists(QString("egdb/") + EgDataNodesLinkNamespace::egLinkTypesFileName + ".ddt"))
     {
-        // qDebug()  << "No egDb meta info found: " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
+        // EG_LOG_STUB  << "No egDb meta info found: " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
 
         return false;   // no db/metainfo
     }
@@ -48,7 +48,7 @@ bool EgGraphDatabase::CheckLinksMetaInfoLocal()
         // check folder and dat file
     if (! dir.exists(QString("egdb/") + EgDataNodesLinkNamespace::egLinkTypesFileName + ".dat"))
     {
-        // qDebug()  << "No egDb meta info found: " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
+        // EG_LOG_STUB  << "No egDb meta info found: " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
 
         return false;   // no db/metainfo
     }
@@ -57,7 +57,7 @@ bool EgGraphDatabase::CheckLinksMetaInfoLocal()
         // try to connect
     if (linksMetaInfo.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName))
     {
-        // qDebug()  << "No egDb meta info connected: " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
+        // EG_LOG_STUB  << "No egDb meta info connected: " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
 
         return false;   // no db/metainfo
     }
@@ -74,7 +74,7 @@ bool EgGraphDatabase::CheckNodeTypesMetaInfoLocal()
 
     if (dir.dirName() == "egdb")
     {
-        qDebug() << "error: unexpected folder: " << dir.path() << FN;
+        EG_LOG_STUB << "error: unexpected folder: " << dir.path() << FN;
 
         return false;
     }
@@ -82,7 +82,7 @@ bool EgGraphDatabase::CheckNodeTypesMetaInfoLocal()
         // check folder and ddt file
     if (! dir.exists(QString("egdb/") + EgDataNodesNamespace::egDataNodesTypesFileName + ".ddt"))
     {
-        // qDebug()  << "No egDb meta info found: " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
+        // EG_LOG_STUB  << "No egDb meta info found: " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
 
         return false;   // no db/metainfo
     }
@@ -90,7 +90,7 @@ bool EgGraphDatabase::CheckNodeTypesMetaInfoLocal()
         // check folder and dat file
     if (! dir.exists(QString("egdb/") + EgDataNodesNamespace::egDataNodesTypesFileName + ".dat"))
     {
-        // qDebug()  << "No egDb meta info found: " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
+        // EG_LOG_STUB  << "No egDb meta info found: " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
 
         return false;   // no db/metainfo
     }
@@ -99,7 +99,7 @@ bool EgGraphDatabase::CheckNodeTypesMetaInfoLocal()
         // try to connect
     if (linksMetaInfo.Connect(*this, EgDataNodesLinkNamespace::egLinkTypesFileName))
     {
-        // qDebug()  << "No egDb meta info connected: " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
+        // EG_LOG_STUB  << "No egDb meta info connected: " << EgDataNodesLinkNamespace::egLinkTypesFileName << FN;
 
         return false;   // no db/metainfo
     }
@@ -114,7 +114,7 @@ int EgGraphDatabase::CreateNodeTypesMetaInfo()
 
     if (dir.dirName() == "egdb")
     {
-        qDebug() << "error: unexpected folder: " << dir.path() << FN;
+        EG_LOG_STUB << "error: unexpected folder: " << dir.path() << FN;
 
         return false;
     }
@@ -157,7 +157,7 @@ int EgGraphDatabase::CreateLinksMetaInfo()
 
     if (dir.dirName() == "egdb")
     {
-        qDebug() << "error: unexpected folder: " << dir.path() << FN;
+        EG_LOG_STUB << "error: unexpected folder: " << dir.path() << FN;
 
         return false;
     }
@@ -230,7 +230,7 @@ int EgGraphDatabase::CreateNodeType(const QString& typeName,  EgNodeTypeSettings
         // check if node type exists
         if (dir.exists("egdb/" + typeName + ".ddt"))
         {
-            qDebug()  << "Data node type already exists: " << typeName << FN;
+            EG_LOG_STUB  << "Data node type already exists: " << typeName << FN;
 
             return 1;
         }
@@ -243,7 +243,7 @@ int EgGraphDatabase::CreateNodeType(const QString& typeName,  EgNodeTypeSettings
         // init all
     if (extraInfo)
     {
-        qDebug()  << "Warning: node type extra info exists, CommitNodeType() wasn't called properly before " << typeName << FN;
+        EG_LOG_STUB  << "Warning: node type extra info exists, CommitNodeType() wasn't called properly before " << typeName << FN;
         ClearExtraInfo(extraInfo);
     }
     else
@@ -280,7 +280,7 @@ int EgGraphDatabase::AddDataField(const QString& fieldName, bool uint32index)
 {
     if (! extraInfo)
     {
-        qDebug()  << "CreateNodeType() wasn't called, field not added " << fieldName << FN;
+        EG_LOG_STUB  << "CreateNodeType() wasn't called, field not added " << fieldName << FN;
         return -1;
     }
 
@@ -293,7 +293,7 @@ int EgGraphDatabase::AddLocationField(const QString& fieldName, bool uint32index
 {
     if (! locationExtraInfo)
     {
-        qDebug()  << "CreateNodeType() wasn't called for node location field, it was not added " << fieldName << FN;
+        EG_LOG_STUB  << "CreateNodeType() wasn't called for node location field, it was not added " << fieldName << FN;
         return -1;
     }
 
@@ -307,7 +307,7 @@ int EgGraphDatabase::AddDataField(const QString& fieldName, EgIndexSettings inde
 {
     if (! extraInfo)
     {
-        qDebug()  << "CreateNodeType() wasn't called, field not added " << fieldName << FN;
+        EG_LOG_STUB  << "CreateNodeType() wasn't called, field not added " << fieldName << FN;
         return -1;
     }
 
@@ -320,7 +320,7 @@ int EgGraphDatabase::AddLocationField(const QString& fieldName, EgIndexSettings 
 {
     if (! locationExtraInfo)
     {
-        qDebug()  << "CreateNodeType() wasn't called for node location field, it was not added " << fieldName << FN;
+        EG_LOG_STUB  << "CreateNodeType() wasn't called for node location field, it was not added " << fieldName << FN;
         return -1;
     }
 
@@ -333,7 +333,7 @@ int EgGraphDatabase::CommitNodeType()
 {
     if (! extraInfo)
     {
-        qDebug()  << "CreateNodeType wasn't called" << FN;
+        EG_LOG_STUB  << "CreateNodeType wasn't called" << FN;
         return -1;
     }
 
@@ -435,19 +435,19 @@ int  EgGraphDatabase::AddLinkType(const QString& theLinkName, const QString& fir
             // check if link name exists  
     if (linkTypes.contains(theLinkName))
     {
-        qDebug()  << "Link name alredy exists: " << theLinkName << FN;
+        EG_LOG_STUB  << "Link name alredy exists: " << theLinkName << FN;
         return 1;
     }
 
     if (! dataNodeTypes.contains(firstDataNodeType))
     {
-        qDebug()  << "Data node type doesn't exists: " << firstDataNodeType << FN;
+        EG_LOG_STUB  << "Data node type doesn't exists: " << firstDataNodeType << FN;
         return 1;
     }
 
     if (! dataNodeTypes.contains(secondDataNodeType))
     {
-        qDebug()  << "Data node type doesn't exists: " << secondDataNodeType << FN;
+        EG_LOG_STUB  << "Data node type doesn't exists: " << secondDataNodeType << FN;
         return 1;
     }
 
@@ -463,7 +463,7 @@ int  EgGraphDatabase::AddLinkType(const QString& theLinkName, const QString& fir
 
     if (linksMetaInfo.ConnectServiceNodeType(*this, EgDataNodesLinkNamespace::egLinkTypesFileName) < 0)
     {
-        // qDebug()  << "EgDB connect error: Links meta info doesn't exist: " << EgDataNodesLinkNamespace::egLinkTypesFileName << ".dat" << FN;
+        // EG_LOG_STUB  << "EgDB connect error: Links meta info doesn't exist: " << EgDataNodesLinkNamespace::egLinkTypesFileName << ".dat" << FN;
 
         return -1;
     }
@@ -501,7 +501,7 @@ int  EgGraphDatabase::AddDataNodeTypeMetaInfo(const QString& typeName)
 
     if (typesMetaInfoDatabase.ConnectServiceNodeType(*this, EgDataNodesNamespace::egDataNodesTypesFileName))
     {
-        qDebug()  << "Can't connect nodes types meta-info, aborting" << FN;
+        EG_LOG_STUB  << "Can't connect nodes types meta-info, aborting" << FN;
         return -1;
     }
 
@@ -512,7 +512,7 @@ int  EgGraphDatabase::AddDataNodeTypeMetaInfo(const QString& typeName)
     {
         if(nodesIter.value()["nodeTypeName"].toString() == typeName)
         {
-            qDebug()  << "Node type name alredy exists: " << typeName << FN;
+            EG_LOG_STUB  << "Node type name alredy exists: " << typeName << FN;
             return 1;
         }
     }
@@ -559,7 +559,7 @@ int EgGraphDatabase::AttachNodesType(EgDataNodesType* nType)
 
     if (! isConnected)
     {
-        // qDebug()  << "egGraphDatabase is not connected, connect it prior data nodes types" << FN;
+        // EG_LOG_STUB  << "egGraphDatabase is not connected, connect it prior data nodes types" << FN;
 
         res = (bool) LoadNodeTypesMetaInfo(); // 0 (i.e. false) is ok
 
@@ -572,9 +572,9 @@ int EgGraphDatabase::AttachNodesType(EgDataNodesType* nType)
     if (nType)
     {
         if (! dataNodeTypes.contains(nType-> extraInfo.typeName))
-            qDebug() << "Integrity WARNING: dataNodeTypes doesn't contain " << nType-> extraInfo.typeName << FN;
+            EG_LOG_STUB << "Integrity WARNING: dataNodeTypes doesn't contain " << nType-> extraInfo.typeName << FN;
         // else
-        //    qDebug() << "dataNodeTypes contains " << nType-> extraInfo.typeName << FN;
+        //    EG_LOG_STUB << "dataNodeTypes contains " << nType-> extraInfo.typeName << FN;
 
         if (! attachedNodeTypes.contains(nType-> extraInfo.typeName)) // FIXME check multi instances
             attachedNodeTypes.insert(nType-> extraInfo.typeName, nType);
@@ -589,7 +589,7 @@ int EgGraphDatabase::AttachLinksType(EgLinkType* linkType)
 
     if (! isConnected)
     {
-        // qDebug()  << "egGraphDatabase is not connected, connect it prior data nodes types" << FN;
+        // EG_LOG_STUB  << "egGraphDatabase is not connected, connect it prior data nodes types" << FN;
 
         res = (bool) LoadNodeTypesMetaInfo(); // 0 (i.e. false) is ok
 
@@ -602,21 +602,21 @@ int EgGraphDatabase::AttachLinksType(EgLinkType* linkType)
     if (linkType)
     {
         if (! linkTypes.contains(linkType-> allLinkNames.linkName))
-            qDebug() << "Integrity WARNING: linkTypes doesn't contain " << linkType-> allLinkNames.linkName << FN;
+            EG_LOG_STUB << "Integrity WARNING: linkTypes doesn't contain " << linkType-> allLinkNames.linkName << FN;
         else
         {
             if (linkType-> fromType -> extraInfo.typeName != linkTypes[linkType-> allLinkNames.linkName].firstTypeName)
-                qDebug() << "Integrity WARNING: linksType " << linkType-> allLinkNames.linkName
+                EG_LOG_STUB << "Integrity WARNING: linksType " << linkType-> allLinkNames.linkName
                          << " has bad data node type name: " << linkType-> fromType-> extraInfo.typeName
                          << " instead of: " << linkTypes[linkType-> allLinkNames.linkName].firstTypeName << FN;
 
             if (linkType-> toType-> extraInfo.typeName != linkTypes[linkType-> allLinkNames.linkName].secondTypeName)
-                qDebug() << "Integrity WARNING: linksType " << linkType-> allLinkNames.linkName
+                EG_LOG_STUB << "Integrity WARNING: linksType " << linkType-> allLinkNames.linkName
                          << " has bad data node type name: " << linkType-> toType->extraInfo.typeName
                          << " instead of: " << linkTypes[linkType-> allLinkNames.linkName].secondTypeName << FN;
 
         }
-        //    qDebug() << "linkTypes contains " << linkType-> allLinkNames.linkName << FN;
+        //    EG_LOG_STUB << "linkTypes contains " << linkType-> allLinkNames.linkName << FN;
 
         if (! attachedLinkTypes.contains(linkType-> allLinkNames.linkName)) // FIXME check multi instances
             attachedLinkTypes.insert(linkType-> allLinkNames.linkName, linkType);
@@ -638,7 +638,7 @@ int EgGraphDatabase::LoadLinksMetaInfo()
 
         if (! dir.exists("egdb/" + QString(EgDataNodesLinkNamespace::egLinkTypesFileName) + ".dat"))
         {
-            qDebug()  << "eGraphDb connect error: Link types meta info doesn't exist: " << EgDataNodesLinkNamespace::egLinkTypesFileName << ".dat" << FN;
+            EG_LOG_STUB  << "eGraphDb connect error: Link types meta info doesn't exist: " << EgDataNodesLinkNamespace::egLinkTypesFileName << ".dat" << FN;
 
             return -1;
         }
@@ -646,7 +646,7 @@ int EgGraphDatabase::LoadLinksMetaInfo()
 
     if (linksMetaInfo.ConnectServiceNodeType(*this, EgDataNodesLinkNamespace::egLinkTypesFileName) < 0)
     {
-        // qDebug()  << "EgDB connect error: Links meta info doesn't exist: " << EgDataNodesLinkNamespace::egLinkTypesFileName << ".dat" << FN;
+        // EG_LOG_STUB  << "EgDB connect error: Links meta info doesn't exist: " << EgDataNodesLinkNamespace::egLinkTypesFileName << ".dat" << FN;
 
         return -1;
     }
@@ -658,7 +658,7 @@ int EgGraphDatabase::LoadLinksMetaInfo()
         // QMap<EgDataNodeIDtype, EgDataNode>::iterator
     for (auto nodesIter = linksMetaInfo.dataNodes.begin(); nodesIter != linksMetaInfo.dataNodes.end(); ++nodesIter)
     {
-        // qDebug()  << "nodesIter.value().dataFields = " << nodesIter.value().dataFields << FN;
+        // EG_LOG_STUB  << "nodesIter.value().dataFields = " << nodesIter.value().dataFields << FN;
 
         newLink = new EgLinkType(this);
 
@@ -679,7 +679,7 @@ int EgGraphDatabase::LoadLinksMetaInfo()
 
             linkTypes.insert(nodesIter.value()["linkTypeName"].toString(), newLinkNames);
 
-            // qDebug()  << "Link added to EgGraphDatabase: " << newLink-> linkName << FN;
+            // EG_LOG_STUB  << "Link added to EgGraphDatabase: " << newLink-> linkName << FN;
         }
     }
 
@@ -693,7 +693,7 @@ int EgGraphDatabase::LoadNodeTypesMetaInfo()
 
     if (typesMetaInfoDatabase.ConnectServiceNodeType(*this, EgDataNodesNamespace::egDataNodesTypesFileName))
     {
-        qDebug()  << "Can't connect nodes types meta-info, aborting" << FN;
+        EG_LOG_STUB  << "Can't connect nodes types meta-info, aborting" << FN;
         return -1;
     }
 
@@ -705,7 +705,7 @@ int EgGraphDatabase::LoadNodeTypesMetaInfo()
     for (auto nodesIter = typesMetaInfoDatabase.dataNodes.begin(); nodesIter != typesMetaInfoDatabase.dataNodes.end(); ++nodesIter)
         dataNodeTypes.insert(nodesIter.value()["nodeTypeName"].toString(), nodesIter.value()["nodeTypeName"].toString());
 
-    // qDebug()  << "dataNodeTypes : " << dataNodeTypes.keys() << FN;
+    // EG_LOG_STUB  << "dataNodeTypes : " << dataNodeTypes.keys() << FN;
 
     return 0;
 }

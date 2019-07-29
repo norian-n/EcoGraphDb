@@ -15,6 +15,11 @@
 #include "egExtraInfo.h"
 #include "egDataNodesType.h"
 
+namespace egGraphDatabaseNamespace
+{
+    const char* const egDefaultLogFileName {"egGlobalLogFile"};
+}
+
 #ifdef EG_LIB_BUILD   // library build switch, define it in project or egCore.h
 
 #include "ecographdb_global.h"
@@ -30,9 +35,11 @@ class EgGraphDatabase
 {
 public:
 
+    // TO DO : make it singleton with multi server connections
+
     bool isConnected = false;
 
-    int fieldsCreated = 0; // info for testing
+    int fieldsCreated = 0;          // info for testing
     int locationFieldsCreated = 0;
 
         // node type creation-time temporary info
@@ -60,7 +67,24 @@ public:
     QMap<QString, EgLinkType*>  attachedLinkTypes;
     QMap<QString, EgDataNodesType*>  attachedNodeTypes; // added via AttachNodesType() call
 
-    EgGraphDatabase() {} // : isConnected(false), metaInfo(nullptr), locationMetaInfo(nullptr), attributesMetaInfo(nullptr), connection(nullptr) {}
+#ifdef EG_LOG
+        // logger
+
+    egAsyncLoggerEngine logEngine;
+    egAsyncLogger theLogger;
+
+    EgGraphDatabase() :
+        logEngine(egGraphDatabaseNamespace::egDefaultLogFileName),
+        theLogger(logEngine)
+    {
+        if (logEngine.LaunchLoggerEngine()) // returns not zero
+            qDebug()  << "Can't launch async logger engine, fix (probably file) issue and restart" << FN;
+        else
+            egGlobalLoggerPtr = &theLogger;
+    }
+#else
+    EgGraphDatabase() {}
+#endif
 
     ~EgGraphDatabase(); //  { if (metaInfo) delete metaInfo; if (locationMetaInfo) delete locationMetaInfo; if (attributesMetaInfo) delete attributesMetaInfo; }
 

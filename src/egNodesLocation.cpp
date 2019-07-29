@@ -57,6 +57,9 @@ int EgDataNodesLocation::LoadLocationsData()
 {
     int res = 0;
 
+    if(res) // DUMMY
+        EG_LOG_STUB << FN;
+
     locationStorage-> ClearData();
 
     locationStorage-> IndexOffsets.clear();

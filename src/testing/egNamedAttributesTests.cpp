@@ -43,6 +43,11 @@ bool EgNamedAttributesTests::testCreateAttributes()
 
 bool EgNamedAttributesTests::testAddAttributes()
 {
+    bool res {false};
+
+    if(res) // DUMMY
+        EG_LOG_STUB << FN;
+
     EgDataNodeIdType newID;
     QList<QVariant> addValues;
     QString nameString;
@@ -66,7 +71,7 @@ bool EgNamedAttributesTests::testAddAttributes()
 
     testDataNodes.AutoLoadAllData();
 
-    bool res = (testDataNodes.namedAttributes->namedAttributesStorage-> DataNodesCount() == 10);
+    res = (testDataNodes.namedAttributes->namedAttributesStorage-> DataNodesCount() == 10);
 
     testShowResult(res, FNS);
 

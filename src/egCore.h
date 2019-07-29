@@ -19,9 +19,25 @@
 #include <QString>
 #include <QVariant>
 
-    // debug info definition
-#define FN "[" << __FUNCTION__  << ", " << __FILE__ << "]"
-#define FNS QString("[") + __FUNCTION__ + ", " + __FILE__ + "]"
+#include "egLogging.h"
+
+        // debug info definition
+// #define EG_LOG_STUB *egGlobalLoggerPtr
+
+#define EG_LOG_STUB qDebug()
+
+#ifdef EG_LOG
+    static egAsyncLogger* egGlobalLoggerPtr {nullptr};
+    static egLogFlush eglogflush;
+        // debug info definition
+    #define FN "[" << __FUNCTION__  << ", " << __FILE__ << "]" << eglogflush
+    #define FNS QString("[") + __FUNCTION__ + ", " + __FILE__ + "]"
+#else
+    #define FN "[" << __FUNCTION__  << ", " << __FILE__ << "]"
+    #define FNS QString("[") + __FUNCTION__ + ", " + __FILE__ + "]"
+#endif
+
+
 
     // bool flags aliases
 const bool isIndexed = true;

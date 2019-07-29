@@ -55,7 +55,7 @@ int  EgServerConnection::WaitForSending()
 
     if (! tcpSocket.waitForBytesWritten(egServerTimeout)) // wait up to 10 sec
     {
-        qDebug() << "waitForBytesWritten error" << FN;
+        EG_LOG_STUB << "waitForBytesWritten error" << FN;
         // process error
         return -1;
     }
@@ -70,7 +70,7 @@ int  EgServerConnection::WaitForReadyRead()
 {
     if (! tcpSocket.waitForReadyRead(egServerTimeout)) // wait up to 10 sec
     {
-        qDebug() << FN << "waitForReadyRead error";
+        EG_LOG_STUB << FN << "waitForReadyRead error";
         // process error
         return -1;
     }
@@ -93,13 +93,13 @@ int EgServerConnection::SendCommand(const CommandIdType command, const QString &
     if (tcpSocket.state() != QAbstractSocket::ConnectedState)
         tcpSocket.connectToHost(serverAddress, server_port);
     else
-        qDebug()  << "tcpSocket was not disconnected before" << FN;
+        EG_LOG_STUB  << "tcpSocket was not disconnected before" << FN;
 
     if (! tcpSocket.waitForConnected(egServerTimeout)) // wait up to 10 sec
     {
             // process error
-        // qDebug() << "tcpSocket waitForConnected timeout"  << FN;
-        qDebug() << "can't connect to the server: " << serverAddress << " port " << server_port << FN;
+        // EG_LOG_STUB << "tcpSocket waitForConnected timeout"  << FN;
+        EG_LOG_STUB << "can't connect to the server: " << serverAddress << " port " << server_port << FN;
         return -2;
     }
 
@@ -120,11 +120,11 @@ int EgServerConnection::RemoteStoreFieldDesc(QByteArray* field_descs, QByteArray
     */ /*
     if (RemoteGetOdbId())
     {
-        qDebug() << FN << "RemoteGetOdbId got an error";
+        EG_LOG_STUB << FN << "RemoteGetOdbId got an error";
         return -2;
     }
     */
-    // qDebug() << FN << "opcode_store_fdesc";
+    // EG_LOG_STUB << FN << "opcode_store_fdesc";
 
     /*
         // send opcode
@@ -155,7 +155,7 @@ int EgServerConnection::RemoteStoreFieldDesc(QByteArray* field_descs, QByteArray
 
     tcpSocket.waitForDisconnected();
 
-    // qDebug() << FN << "Disconnected";
+    // EG_LOG_STUB << FN << "Disconnected";
 
     return 0;
 }
@@ -178,7 +178,7 @@ int EgDataClient::StoreData(QList<EgPackedDataNode*>& a_list, QList<EgPackedData
         error_code3 = SendObjData(m_list, opcode_update_dataobj);
 
     if (error_code1 | error_code2 | error_code3)
-       qDebug() << FN << "ERROR: got non-zero error code from callee" ;
+       EG_LOG_STUB << FN << "ERROR: got non-zero error code from callee" ;
 
     return error_code1 | error_code2 | error_code3;
 }
@@ -192,11 +192,11 @@ int EgServerConnection::RemoteLoadFieldDesc(QByteArray* field_descs, QByteArray*
         // get/set egDataNodesTypeID
     */ /*if (RemoteGetOdbId())
     {
-        qDebug() << FN << "RemoteGetOdbId got an error";
+        EG_LOG_STUB << FN << "RemoteGetOdbId got an error";
         return -1;
     }
     */
-    // qDebug() << FN << "opcode_load_fdesc";
+    // EG_LOG_STUB << FN << "opcode_load_fdesc";
 
     /*
         // send opcode
@@ -207,7 +207,7 @@ int EgServerConnection::RemoteLoadFieldDesc(QByteArray* field_descs, QByteArray*
         // start read
     if (! tcpSocket.waitForReadyRead(egServerTimeout)) // wait up to 10 sec
     {
-        qDebug() << FN << "waitForReadyRead error";
+        EG_LOG_STUB << FN << "waitForReadyRead error";
         // process error
         return -2;
     }
@@ -220,14 +220,14 @@ int EgServerConnection::RemoteLoadFieldDesc(QByteArray* field_descs, QByteArray*
 
     in >> *field_descs;    // packed field descriptors
     in >> a_size;
-    // qDebug() << FN << "control desc size =" << a_size;
+    // EG_LOG_STUB << FN << "control desc size =" << a_size;
     if (a_size)
         in >> *control_descs; // packed control descriptors
 
     tcpSocket.disconnectFromHost();
 
-    // qDebug() << FN << *field_descs;
-    // qDebug() << FN << *control_descs;
+    // EG_LOG_STUB << FN << *field_descs;
+    // EG_LOG_STUB << FN << *control_descs;
 
     return 0;
 }
@@ -250,7 +250,7 @@ int EgDataClient::RemoteStoreData(QList<DataObj*>& a_list, QList<DataObj*>& d_li
         error_code3 = RemoteSendObjData(m_list, opcode_update_dataobj);
 
     if (error_code1 | error_code2 | error_code3)
-       qDebug() << FN << "ERROR: got non-zero error code from callee" ;
+       EG_LOG_STUB << FN << "ERROR: got non-zero error code from callee" ;
 
     return error_code1 | error_code2 | error_code3;
 }
@@ -262,10 +262,10 @@ inline int EgDataClient::RemoteSendObjData(QList<DataObj*>& a_list, command_id_t
         // get id
     if (RemoteGetOdbId())
     {
-        qDebug() << FN << "RemoteGetOdbId got an error";
+        EG_LOG_STUB << FN << "RemoteGetOdbId got an error";
         return -1;
     }
-    // qDebug() << FN << "opcode: " << command;
+    // EG_LOG_STUB << FN << "opcode: " << command;
         // send opcode
     out << command; // operation code
     tcpSocket.write(block);
@@ -280,7 +280,7 @@ inline int EgDataClient::RemoteSendObjData(QList<DataObj*>& a_list, command_id_t
     cur_obj = a_list.begin();
     while (cur_obj != a_list.end())
     {
-        // qDebug() << FN << " ID " << (*cur_obj)-> OBJ_ID;
+        // EG_LOG_STUB << FN << " ID " << (*cur_obj)-> OBJ_ID;
             // send as bytearray
         out << (EgDataNodeIDtype)(*cur_obj)-> OBJ_ID;
         out << (DataObj&) *(*cur_obj);
@@ -304,10 +304,10 @@ inline int EgDataClient::SendObjData(QList<EgPackedDataNode*>& a_list, command_i
         // get id
     if (RemoteGetOdbId())
     {
-        qDebug() << FN << "RemoteGetOdbId got an error";
+        EG_LOG_STUB << FN << "RemoteGetOdbId got an error";
         return -1;
     }
-    // qDebug() << FN << "opcode: " << command;
+    // EG_LOG_STUB << FN << "opcode: " << command;
         // send opcode
     out << command; // operation code
     tcpSocket.write(block);
@@ -322,7 +322,7 @@ inline int EgDataClient::SendObjData(QList<EgPackedDataNode*>& a_list, command_i
     cur_obj = a_list.begin();
     while (cur_obj != a_list.end())
     {
-        // qDebug() << FN << " ID " << (*cur_obj)-> OBJ_ID;
+        // EG_LOG_STUB << FN << " ID " << (*cur_obj)-> OBJ_ID;
             // send as bytearray
         out << (EgDataNodeIDtype)(*cur_obj)-> OBJ_ID;
         tcpSocket.write(block);
@@ -355,14 +355,14 @@ int EgServerConnection::RemoteLoadData()
         // get ID
     if (RemoteGetOdbId())
     {
-        qDebug() << FN << "RemoteGetOdbId got an error";
+        EG_LOG_STUB << FN << "RemoteGetOdbId got an error";
         return -1;
     }
 
         // check if filter exists
     if (d_class->RemoteFilterID)
     {
-        // qDebug() << FN << "opcode_load_filtered";
+        // EG_LOG_STUB << FN << "opcode_load_filtered";
             // send opcode
         out << opcode_load_filtered; // operation code
         tcpSocket.write(block);
@@ -378,7 +378,7 @@ int EgServerConnection::RemoteLoadData()
     }
     else
     {
-        // qDebug() << FN << "opcode_load_data";
+        // EG_LOG_STUB << FN << "opcode_load_data";
             // send opcode
         out << opcode_load_data; // operation code
         tcpSocket.write(block);
@@ -388,12 +388,12 @@ int EgServerConnection::RemoteLoadData()
         // start read
     if (! tcpSocket.waitForReadyRead(egServerTimeout)) // wait up to 10 sec
     {
-        qDebug() << FN << "waitForReadyRead error";
+        EG_LOG_STUB << FN << "waitForReadyRead error";
         return -2;
     }
         // get records count
     in >> rec_count;
-    // qDebug() << FN << "rec_count = " << rec_count;
+    // EG_LOG_STUB << FN << "rec_count = " << rec_count;
         // get records
     for (int i = 0; i < rec_count; i++)
     {
@@ -447,7 +447,7 @@ int EgServerConnection::RemoteSendList(QList<QVariant>& d_list) // send variant 
             break;
         default:
                 // process error
-            qDebug() << FN << "RemoteSendList(): not supported QVariant subtype";
+            EG_LOG_STUB << FN << "RemoteSendList(): not supported QVariant subtype";
         }
     }
 

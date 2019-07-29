@@ -36,7 +36,7 @@ inline void EgServerOperProc::ReceiveNodesList(QList<EgDataNode>& dataNodes, QDa
 
     in >> count;
 
-    // qDebug()  << "count = " << count << FN ;
+    // EG_LOG_STUB  << "count = " << count << FN ;
 
     for (uint32_t i =0; i < count; ++i)
     {
@@ -58,13 +58,13 @@ inline void EgServerOperProc::ReceiveIndexesTree(QDataStream& in)
     in >> count;
     in >> rootNodeID;
 
-    // qDebug()  << "count = " << count << FN ;
+    // EG_LOG_STUB  << "count = " << count << FN ;
 
     for (uint32_t i =0; i < count; ++i)
     {
         in >> node;
 
-        // qDebug()  << "node IDs = " << node.nodeID << " " << node.leftID << " " << node.rightID << FN ;
+        // EG_LOG_STUB  << "node IDs = " << node.nodeID << " " << node.leftID << " " << node.rightID << FN ;
 
         indexNodes.insert(node.nodeID, node);
     }
@@ -96,13 +96,13 @@ inline void EgServerOperProc::LoadExtraInfo(QDataStream& out)
 
     // out << metaInfo;
 
-    // qDebug()  << block;
+    // EG_LOG_STUB  << block;
 
     clientConnection-> write(block);
 
     if (! clientConnection-> waitForBytesWritten(egServerTimeout)) // wait up to 10 sec
     {
-        qDebug() << "waitForBytesWritten error" << FN;
+        EG_LOG_STUB << "waitForBytesWritten error" << FN;
     }
 
     block.clear();
@@ -123,18 +123,18 @@ inline void EgServerOperProc::LoadDataNodes(QDataStream& out)
 
     for (auto sendIter = addNodes.begin(); sendIter != addNodes.end(); ++sendIter)
     {
-        // qDebug() << "Sending node " << (int) addIter.value()-> dataNodeID << FN ;
+        // EG_LOG_STUB << "Sending node " << (int) addIter.value()-> dataNodeID << FN ;
 
         out << *sendIter;
     }
 
-    // qDebug()  << block;
+    // EG_LOG_STUB  << block;
 
     clientConnection-> write(block);
 
     if (! clientConnection-> waitForBytesWritten(egServerTimeout)) // wait up to N sec
     {
-        qDebug() << "waitForBytesWritten error" << FN;
+        EG_LOG_STUB << "waitForBytesWritten error" << FN;
     }
 
     block.clear();
@@ -152,7 +152,7 @@ inline void EgServerOperProc::LoadSelectedDataNodes(QDataStream& out)
     if (index_tree)
         index_tree-> CalcTreeSet(rootIndexCondition.iTreeNode, IndexOffsets, &localFiles);
 
-    // qDebug() << "IndexOffsets count: " << IndexOffsets.count() << FN ;
+    // EG_LOG_STUB << "IndexOffsets count: " << IndexOffsets.count() << FN ;
 
     if (! IndexOffsets.isEmpty())
         localFiles.LocalLoadDataNodes(IndexOffsets, addNodes);
@@ -161,18 +161,18 @@ inline void EgServerOperProc::LoadSelectedDataNodes(QDataStream& out)
 
     for (auto sendIter = addNodes.begin(); sendIter != addNodes.end(); ++sendIter)
     {
-        // qDebug() << "Sending node " << (int) addIter.value()-> dataNodeID << FN ;
+        // EG_LOG_STUB << "Sending node " << (int) addIter.value()-> dataNodeID << FN ;
 
         out << *sendIter;
     }
 
-    // qDebug()  << block;
+    // EG_LOG_STUB  << block;
 
     clientConnection-> write(block);
 
     if (! clientConnection-> waitForBytesWritten(egServerTimeout)) // wait up to N sec
     {
-        qDebug() << "waitForBytesWritten error" << FN;
+        EG_LOG_STUB << "waitForBytesWritten error" << FN;
     }
 
     block.clear();
@@ -187,7 +187,7 @@ inline void EgServerOperProc::AppendData(QDataStream& in)
     // addNodes.clear();
     ReceiveNodesList(addNodes, in);
 
-    // qDebug()  << "addNodes.count(): " << addNodes.count() << FN ;
+    // EG_LOG_STUB  << "addNodes.count(): " << addNodes.count() << FN ;
 
     if (addNodes.count() > 0)
         localFiles.LocalAddNodesList(addNodes);
@@ -198,7 +198,7 @@ inline void EgServerOperProc::DeleteData(QDataStream& in)
     // deleteNodes.clear();
     ReceiveNodesList(deleteNodes, in);
 
-    // qDebug()  << "deleteNodes.count(): " << deleteNodes.count() << FN ;
+    // EG_LOG_STUB  << "deleteNodes.count(): " << deleteNodes.count() << FN ;
 
     if (deleteNodes.count() > 0)
         localFiles.LocalDeleteNodesList(deleteNodes);
@@ -209,7 +209,7 @@ inline void EgServerOperProc::UpdateData(QDataStream& in)
     // updateNodes.clear();
     ReceiveNodesList(updateNodes, in);
 
-    // qDebug()  << "updateNodes.count(): " << updateNodes.count() << FN ;
+    // EG_LOG_STUB  << "updateNodes.count(): " << updateNodes.count() << FN ;
 
     if (updateNodes.count() > 0)
         localFiles.LocalModifyNodesList(updateNodes);
@@ -218,11 +218,11 @@ inline void EgServerOperProc::UpdateData(QDataStream& in)
 void EgServerOperProc::processCommand()
 {
 
-    // qDebug() << "processCommand() called";
+    // EG_LOG_STUB << "processCommand() called";
 
     if (! clientConnection-> waitForReadyRead(egServerTimeout)) // wait up to N sec
     {
-        qDebug() << "waitForReadyRead error" << FN;
+        EG_LOG_STUB << "waitForReadyRead error" << FN;
     }
 
     QDataStream in(clientConnection);
@@ -236,7 +236,7 @@ void EgServerOperProc::processCommand()
     in >> commandID;
     in >> nodeTypeName;
 
-    qDebug() << "commandID = " << hex << commandID << ", nodeTypeName = " << nodeTypeName;
+    EG_LOG_STUB << "commandID = " << hex << commandID << ", nodeTypeName = " << nodeTypeName;
 
     extraInfo.typeName = nodeTypeName;
 
@@ -246,7 +246,7 @@ void EgServerOperProc::processCommand()
     {
         // if(! egDbMutexSpace::nodeTypesMutexes[nodeTypeName]->tryLock())
         //{
-        //    qDebug() << "Mutex is locked for nodeTypeName = " << nodeTypeName;
+        //    EG_LOG_STUB << "Mutex is locked for nodeTypeName = " << nodeTypeName;
             egDbMutexSpace::nodeTypesMutexes[nodeTypeName]-> lock();
         //}
     }
@@ -320,16 +320,16 @@ void EgServerOperProc::processCommand()
             localFiles.LocalCloseFiles();
         }
         else
-          qDebug()  << "ERROR: empty indexes map or rootID: " << rootNodeID << "count(): " << indexNodes.count() << FN ;
+          EG_LOG_STUB  << "ERROR: empty indexes map or rootID: " << rootNodeID << "count(): " << indexNodes.count() << FN ;
 
         break;
 
 
     default:
-        qDebug()  << "ERROR: bad opcode " << commandID << FN ;
+        EG_LOG_STUB  << "ERROR: bad opcode " << commandID << FN ;
     }
 
-    // qDebug()  << "Mutex map keys: " << egDbMutexSpace::nodeTypesMutexes.keys() << FN ;
+    // EG_LOG_STUB  << "Mutex map keys: " << egDbMutexSpace::nodeTypesMutexes.keys() << FN ;
 
     egDbMutexSpace::nodeTypesMutexes[nodeTypeName]-> unlock();
 

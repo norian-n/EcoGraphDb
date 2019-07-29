@@ -128,22 +128,18 @@ void FuncBlocksForm::loadFuncblocks()
     // funcblocksTree.LoadLinksFromAllNodes();
     // funcblocksTree.ResolveLinksToPointers();
 
-    Funcblocks.LoadLinkedData("projects_funcblocks", projectID);
+    funcblocksTree.LoadLinks();  //
 
-    Funcblocks.LoadLinkType("funcblocksTree");
-    Funcblocks.myLinkTypes["funcblocksTree"]-> ResolveLinksToPointers();
+    Funcblocks.LoadLinkedData("projects_funcblocks", projectID);
+    // funcblocksTree.LoadLinksOf(egFirstNodeType); // load actual nodes only, const bool egFirstNodeType = true;
+    funcblocksTree.ResolveLinksToPointers();
+
+    // Funcblocks.myLinkTypes["funcblocksTree"]-> ResolveLinksToPointers();
 
     // calleeForm-> Projects.LoadLinkType("projects_funcblocks");   // to add new linked fblocks (?) check if is required
     // calleeForm-> Projects.myLinkTypes["projects_funcblocks"]-> ResolveLinksToPointers(); // (?) check if is required
 
-
-/*
-    qDebug() << "project ID = " << project_id << FN;
-    qDebug() << "projects count = " << Projects.dataNodes.count() << FN;
-    qDebug() << "funcblocks count = " << Funcblocks.dataNodes.count() << FN;
-    */
-
-
+    // qDebug() << "project ID = " << project_id << ", funcblocks count = " << Funcblocks.dataNodes.count() << FN;
 
     Funcblocks.GUI-> DataToModelTree(model, "funcblocksTree");
 
@@ -302,7 +298,9 @@ void FuncBlocksForm::okExit()
     // Funcblocks.PrintObjData();
 
     // calleeForm-> Projects.StoreLinkType("projects_funcblocks");
-    Funcblocks.StoreLinkType("funcblocksTree");
+    // Funcblocks.StoreLinkType("funcblocksTree");
+
+    funcblocksTree.StoreLinks();
         // exit
     close();
 }

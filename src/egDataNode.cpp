@@ -15,6 +15,9 @@ EgDataNode::EgDataNode(EgDataNodeTypeExtraInfo& a_extraInfo):
 {
     for (int i = 0; i < a_extraInfo.dataFields.count(); i++)
         dataFields << QVariant();
+
+    if(dataNodeID) // DUMMY
+        EG_LOG_STUB << FN;
 }
 
 EgDataNode::~EgDataNode()
@@ -49,6 +52,8 @@ void EgDataNode::clear()
 
     dataFileOffset = 0;
     dataNodeID = 0;
+
+
 }
 
 QVariant& EgDataNode::operator [] (QString& fieldName)

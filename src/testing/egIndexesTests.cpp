@@ -17,6 +17,10 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataIndexAddFirs
     egIndexFiles.dataOffset = 0xabcd01;
 
     egIndexFiles.AddIndex();
+
+    if(egIndexFiles.theIndex != 0x1) // DUMMY
+        EG_LOG_STUB << FN;
+
 /*
     egIndexFiles.theIndex  = 0x2;
     egIndexFiles.dataOffset = 0xabcd02;

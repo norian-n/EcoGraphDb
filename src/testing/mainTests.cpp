@@ -13,6 +13,8 @@
 
 // #include <stdio.h>
 
+#include "egCore.h"
+
 #include "egGraphDatabaseTests.h"
 #include "egIndexesTests.h"
 #include "egLinksTests.h"
@@ -78,6 +80,9 @@ int main() // int argc, char *argv[])
 {
     bool res = true;
     bool tmpRes = false;
+
+    if(tmpRes) // DUMMY
+        EG_LOG_STUB << FN;
 
     EgGraphDatabaseTests egDbTests;
 
