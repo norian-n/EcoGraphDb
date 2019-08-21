@@ -18,8 +18,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-win32:CONFIG(release, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_9_2_MinGW_32bit-Release/release -lEcoGraphDb
-else:win32:CONFIG(debug, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_9_2_MinGW_32bit-Debug/debug -lEcoGraphDb
+win32:CONFIG(release, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_12_4_MinGW_64_bit-Release/release -lEcoGraphDb
+else:win32:CONFIG(debug, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_12_4_MinGW_64_bit-Debug/debug -lEcoGraphDb
 
 SOURCES += \
     main_test.cpp \

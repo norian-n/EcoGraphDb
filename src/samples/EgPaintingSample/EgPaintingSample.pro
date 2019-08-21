@@ -30,8 +30,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #win32:CONFIG(release, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_8_0_MinGW_32bit-Release/release -lEcoGraphDb
 #else:win32:CONFIG(debug, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_8_0_MinGW_32bit-Debug/debug -lEcoGraphDb
 
-win32:CONFIG(release, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_9_2_MinGW_32bit-Release/release -lEcoGraphDb
-else:win32:CONFIG(debug, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_9_2_MinGW_32bit-Debug/debug -lEcoGraphDb
+win32:CONFIG(release, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_12_4_MinGW_64_bit-Release/release -lEcoGraphDb
+else:win32:CONFIG(debug, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_12_4_MinGW_64_bit-Debug/debug -lEcoGraphDb
+
+#win64:CONFIG(release, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_12_4_MinGW_64_bit-Release/release -lEcoGraphDb
+#else:win64:CONFIG(debug, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Qt_5_12_4_MinGW_64_bit-Debug/debug -lEcoGraphDb
 
 #else:unix: LIBS += -L$$PWD/build-MyLibrary/ -lMyLibrary
 

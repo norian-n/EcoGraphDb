@@ -57,12 +57,11 @@ int EgEntryNodes::LoadEntryNodes()
 
     entryStorage-> LoadAllDataNodes();
 
+        // hotlist loaded nodes of base type only
     for (auto dataNodeIter = entryStorage-> dataNodes.begin(); dataNodeIter != entryStorage-> dataNodes.end(); ++dataNodeIter)
     {
         if (nodesType->dataNodes.contains(dataNodeIter.key()))
             entryNodesList.append(dataNodeIter.key());
-        else
-            EG_LOG_STUB  << "Can't find the data node ID of entry: " << dataNodeIter.key() << FN;
     }
 
     return 0;

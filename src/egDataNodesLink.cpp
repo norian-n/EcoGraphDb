@@ -124,7 +124,7 @@ int EgLinkType::Connect(EgGraphDatabase& myDB, const QString& linkTypeName, EgDa
         // check if already connected FIXME implement reconnect
     if (isConnected)
     {
-        EG_LOG_STUB  << "Error: attempt to connect again data link type: " << allLinkNames.linkName << " as " << linkTypeName << FN;
+        EG_LOG_STUB  << "Warning: attempt to connect again data link type: " << allLinkNames.linkName << " as " << linkTypeName << FN;
 
         return -1;
     }

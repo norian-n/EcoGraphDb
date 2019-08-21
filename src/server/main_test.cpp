@@ -49,7 +49,7 @@ int main() // int argc, char *argv[])
     // metaInfo.PrintMetaInfo();
     */
 
-    EgGraphDatabase graphDB;
+    EgGraphDatabase graphDB;  // , "localhost"
     EgNodeTypeSettings typeSettings;
 
     // graphDB.CreateEgDb();
@@ -68,7 +68,7 @@ int main() // int argc, char *argv[])
 
     qDebug() << "Tests launched ";
 
-    graphDB.CreateNodeType("serverTestNodeType", typeSettings, "localhost");
+    graphDB.CreateNodeType("serverTestNodeType", typeSettings);
 
     graphDB.AddDataField("name");
     graphDB.AddDataField("status", isIndexed); // true for index
@@ -79,7 +79,7 @@ int main() // int argc, char *argv[])
 
     EgDataNodesType testType;
 
-    testType.Connect(graphDB, "serverTestNodeType", "localhost");
+    testType.Connect(graphDB, "serverTestNodeType");
 
     QList<QVariant> addValues;
 
@@ -109,7 +109,7 @@ int main() // int argc, char *argv[])
 
         // load test
     EgDataNodesType testType2;
-    testType2.Connect(graphDB, "serverTestNodeType", "localhost");
+    testType2.Connect(graphDB, "serverTestNodeType");
 
     // QThread::msleep(200);
     testType2.LoadDataByIndexes(IC("status", EQ, 8));
