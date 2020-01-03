@@ -4,7 +4,7 @@
 #include <QtDebug>
 #include <QGraphicsTextItem>
 
-FingersTreeForm::FingersTreeForm(QWidget *parent) :
+GraphSceneForm::GraphSceneForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::GraphSceneForm)
 {
@@ -14,6 +14,27 @@ FingersTreeForm::FingersTreeForm(QWidget *parent) :
     ui->graphicsView-> setAcceptDrops(true);
 
     ui->iconsPanel-> setScene(&iconsScene);
+
+
+    QAction* openAct = new QAction(tr("Node info"), this);
+    openAct->setStatusTip(tr("Open node contents form"));
+
+    connect(openAct, &QAction::triggered, &scene, &MyGraphicsScene::editNodeContent);
+
+    ui->graphicsView-> addAction(openAct);
+
+    openAct = new QAction(tr("Delete node"), this);
+    openAct->setStatusTip(tr("Delete this node"));
+
+    ui->graphicsView-> addAction(openAct);
+
+    connect(openAct, &QAction::triggered, &scene, &MyGraphicsScene::deleteNode);
+
+    /*
+    connect(openAct, &QAction::triggered, this, &MainWindow::open);
+    fileMenu->addAction(openAct); popupMenuTest
+    fileToolBar->addAction(openAct);
+    */
 
 /*    for (int counterC = 0; counterC < ui->tableWidget->columnCount(); counterC++)
         ui->tableWidget->setColumnWidth(counterC, 50);
@@ -29,13 +50,15 @@ FingersTreeForm::FingersTreeForm(QWidget *parent) :
     scene.myForm = this;
     iconsScene.myForm = this;
 
+    ui->connectsModeButton-> setDown(true);
+
     // graphDB.Connect();
 
 
     // LoadGraph();
 }
 
-void FingersTreeForm::LoadImages()
+void GraphSceneForm::LoadImages()
 {
     iconsScene.clear();
 
@@ -88,60 +111,12 @@ void FingersTreeForm::LoadImages()
     }
 }
 
-void FingersTreeForm::LoadGraph()
+void GraphSceneForm::LoadGraph()
 {
-    QGraphicsItem* newItem;
-
-    QPixmap pixMap(pixmapSizeFixed,pixmapSizeFixed);
-    QString fileName("test.png");
-
-    bool loadRes = pixMap.load(fileName);
-
-    if (loadRes)
-        pixMap = pixMap.scaled(pixmapSizeFixed,pixmapSizeFixed);
-    else
-        pixMap.fill(Qt::green);
-
-    /*QTableWidgetItem* theItem = new QTableWidgetItem();
-    theItem-> setData(Qt::UserRole, fileName);
-    // theItem->setFlags(Qt::ItemIsDragEnabled);
-    theItem-> setIcon(pixMap);
-
-    ui->tableWidget-> setItem(0, 0, theItem);
-
-
-    QBrush circleBrush = QBrush(QColor(0xa6, 0xce, 0x39)); // gradient
-    QPen circlePen = QPen(Qt::black);
-    circlePen.setWidth(1);
-    */
-
-    QPen linkPen = QPen(Qt::darkGreen);
-    linkPen.setWidth(2);
-
-    /*
-    iconsScene.clear();
-
-    iconsScene.addRect(QRect(0, 0, 0, 0)); //, circleBrush); // center stub
-
-
-    for (int k = 0 ; k < 10; k++)
-    {
-        newItem = iconsScene.addPixmap(pixMap);
-        if (newItem)
-            newItem->setPos(-750 + k*50, -pixmapSizeFixed);
-    }
-*/
-
-    scene.clear();
-    firstNodeStored = false;
-
-        // get coords from egDb
-
-    // qDebug() << "Before connect" << FN;
-
     nodes.Connect(graphDB, "locations");
-    linktype.Connect(graphDB, "linktype", nodes, nodes);
 
+    if (! linktype.isConnected)
+        linktype.Connect(graphDB, "linktype", nodes, nodes);
 
     // qDebug() << "Data loading" << FN;
 
@@ -149,14 +124,16 @@ void FingersTreeForm::LoadGraph()
 
     linktype.LoadLinks();
     linktype.ResolveLinksToPointers();
+}
 
-    // qDebug() << "Loaded" << FN;
+void GraphSceneForm::ShowGraphNodes()
+{
+    QGraphicsItem* newItem;
 
-    QList<QVariant> locValues;
+    scene.clear();
+    firstNodeStored = false;
 
-        // nodes size and center
-    // int w = pixmapSizeFixed;
-    // int h = pixmapSizeFixed;
+    QList<QVariant> locValues; // node location - x,y
 
     int x = 0;
     int y = 0;
@@ -164,10 +141,9 @@ void FingersTreeForm::LoadGraph()
     int type;
 
         // add nodes to the scene - QMap<EgDataNodeIDtype, EgDataNode>::iterator
-    // for (auto dataNodeIter = nodes.dataNodes.begin(); dataNodeIter != nodes.dataNodes.end(); ++dataNodeIter)
     for (auto& dataNodeIter : nodes.dataNodes)
     {      
-        nodes.GetLocation(locValues, dataNodeIter.dataNodeID); //key());
+        nodes.GetLocation(locValues, dataNodeIter.dataNodeID);
 
         if (locValues.count() > 2)
         {
@@ -178,13 +154,6 @@ void FingersTreeForm::LoadGraph()
             type = locValues[2].toInt();
 
             QPixmap pixMap(imagesPix[type]);
-
-            /*
-            if (type == 1)
-                newItem = scene.addEllipse(QRect(0, 0, w, h), circlePen, circleBrush);
-            else // if (type == 2)
-                //newItem = scene.addRect(QRect(x-pixmapSizeFixed/2, y-pixmapSizeFixed/2, w, h), circlePen, circleBrush);
-                */
 
             newItem = scene.addPixmap(pixMap);
 
@@ -209,6 +178,18 @@ void FingersTreeForm::LoadGraph()
             // qDebug() << msg << FN;
         }
     }
+}
+
+void GraphSceneForm::ShowGraphLinks()
+{
+
+    QList<QVariant> locValues; // node location - x,y
+
+    QPen linkPen = QPen(Qt::darkGreen);
+    linkPen.setWidth(2);
+
+    int x = 0;
+    int y = 0;
 
         // destination node center
     int xDst = 0;
@@ -258,6 +239,24 @@ void FingersTreeForm::LoadGraph()
 }
 
 
+/*
+QPixmap pixMap(pixmapSizeFixed,pixmapSizeFixed);
+QString fileName("test.png");
+
+bool loadRes = pixMap.load(fileName);
+
+if (loadRes)
+    pixMap = pixMap.scaled(pixmapSizeFixed,pixmapSizeFixed);
+else
+    pixMap.fill(Qt::green);
+
+        if (type == 1)
+            newItem = scene.addEllipse(QRect(0, 0, w, h), circlePen, circleBrush);
+        else // if (type == 2)
+            //newItem = scene.addRect(QRect(x-pixmapSizeFixed/2, y-pixmapSizeFixed/2, w, h), circlePen, circleBrush);
+
+    */
+
 void ItemsMenuGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
 {
     // QPoint clickPoint = mouseEvent->scenePos().toPoint();
@@ -295,15 +294,15 @@ void ItemsMenuGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEve
         dataStream << pixMap << QPoint(pixmapSizeFixed/2,pixmapSizeFixed/2);
 
         QMimeData *mimeData = new QMimeData;
-        mimeData->setData("application/x-dnditemdata", itemData);
-        mimeData->setImageData(imageID);
+        mimeData-> setData("application/x-dnditemdata", itemData);
+        mimeData-> setImageData(imageID);
 
         QDrag *drag = new QDrag(this);
-        drag->setMimeData(mimeData);
-        drag->setPixmap(pixMap);
-        drag->setHotSpot(QPoint(pixmapSizeFixed/2,pixmapSizeFixed/2));
+        drag-> setMimeData(mimeData);
+        drag-> setPixmap(pixMap);
+        drag-> setHotSpot(QPoint(pixmapSizeFixed/2,pixmapSizeFixed/2));
 
-        drag->start(Qt::CopyAction);
+        drag-> exec(Qt::CopyAction);
         // drag->exec(Qt::MoveAction);
     }
 
@@ -332,33 +331,47 @@ void ItemsMenuGraphicsScene::dragLeaveEvent(QGraphicsSceneDragDropEvent *event)
 
 void MyGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
 {
-    // QPoint clickPoint = mouseEvent->scenePos().toPoint();
-
-    // saveX = clickPoint.x();
-    // saveY = clickPoint.y();
+    myForm-> movedNodeID = 0; // reset
 
     if (mouseEvent->button() == Qt::LeftButton)
     {
         isPressed = true;
 
         theItem = itemAt(mouseEvent->scenePos().x(), mouseEvent->scenePos().y(), deviceTransform);
+
+        if (theItem && (myForm-> opsMode == sfModeMoving))
+        {
+            int nodeID = theItem-> data(0).toInt();
+
+            // qDebug() << "image ID:"  << imageID;
+
+            if (nodeID > 0) // is node
+            {
+
+                QPixmap pixMap(static_cast <QGraphicsPixmapItem*> (theItem) -> pixmap()); //(myForm-> imagesPix[imageID]);
+
+                QByteArray itemData;
+
+                QDataStream dataStream(&itemData, QIODevice::WriteOnly);
+                dataStream << pixMap << QPoint(pixmapSizeFixed/2,pixmapSizeFixed/2);
+
+                QMimeData *mimeData = new QMimeData;
+                mimeData-> setData("application/x-dnditemdata", itemData);
+                // mimeData-> setImageData(nodeID);
+
+                myForm-> movedNodeID = nodeID;
+
+                QDrag *drag = new QDrag(this);
+                drag-> setMimeData(mimeData);
+                drag-> setPixmap(pixMap);
+                drag-> setHotSpot(QPoint(pixmapSizeFixed/2,pixmapSizeFixed/2));
+
+                drag-> exec(Qt::MoveAction);
+            }
+        }
     }
-
-    // if (theItem)
-        // theItem->moveBy(-100,-100);
-        // qDebug() << "item at:" << theItem->boundingRect().center().toPoint().x() << " " <<  theItem-> boundingRect().center().toPoint().y();
-
-    // if (theItem)
-    //    qDebug() << "item at:"  << theItem->boundingRect().center().toPoint().x() << ", "
-    //                            << theItem->boundingRect().center().toPoint().y();
-
-    // if (theItem)
-    //    qDebug() << "item scenePos:"  << theItem->scenePos().toPoint().x() << ", "
-    //                            << theItem->scenePos().toPoint().y();
-
-    // if (theItem)
-    //    qDebug() << "item pos:"  << theItem->pos().toPoint().x() << ", "
-    //                            << theItem->pos().toPoint().y();
+    // else
+    //    qDebug() << "mouse right";
 }
 
 void MyGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent)
@@ -371,7 +384,7 @@ void MyGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent)
 
     theDestItem = itemAt(mouseEvent->scenePos().x(), mouseEvent->scenePos().y(), deviceTransform);
 
-    if (isMoved && theItem && theDestItem && (theItem != theDestItem) && (theItem-> data(0).toInt()) && (theDestItem-> data(0).toInt()))
+    if (/*isMoved &&*/ theItem && theDestItem && (theItem != theDestItem) && (theItem-> data(0).toInt()) && (theDestItem-> data(0).toInt()))
     {
         // QGraphicsItem * theLine = addLine(theItem->boundingRect().center().toPoint().x(), theItem->boundingRect().center().toPoint().y(),
         //        theDestItem->boundingRect().center().toPoint().x(), theDestItem->boundingRect().center().toPoint().y(), linkPen);
@@ -393,77 +406,123 @@ void MyGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent)
     }
 
     isPressed = false;
-    isMoved = false;
+
+    resetButtons();
 
     // saveX = 0;
     // saveY = 0;
 
-    // qDebug() << "release at:" <<  clickPoint.x() << " " << clickPoint.y();
+    // qDebug() << "mouseReleaseEvent at: " <<  mouseEvent->scenePos().x() << ", " << mouseEvent->scenePos().y();
 }
 
 
 void MyGraphicsScene::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
 {
-     if (event->mimeData()->hasFormat("application/x-dnditemdata"))
-        // event->accept();
-        event->setAccepted(true);
-    // event->acceptProposedAction();
-     else
-        // event->ignore();
-        event->setAccepted(false);
+        event->setAccepted(event->mimeData()->hasFormat("application/x-dnditemdata"));
 
+        saveDragX = event-> scenePos().x();
+        saveDragY = event-> scenePos().y();
 
-    // qDebug() << "Drag enter event at " <<  event-> scenePos().x() << " " << event-> scenePos().y();
-
-
+        // qDebug() << "Drag enter event at " <<  event-> scenePos().x() << " " << event-> scenePos().y();
 }
+
 
 void MyGraphicsScene::dragMoveEvent(QGraphicsSceneDragDropEvent *event)
 {
     // qDebug() << "Move event at " <<  event-> scenePos().x() << " " << event-> scenePos().y();
 }
 
+
+inline void MyGraphicsScene::resetButtons()
+{
+    if (myForm-> opsMode == sfModeMoving)
+    {
+        myForm->ui->connectsModeButton-> setDown(false);
+        myForm->ui->moveModeButton-> setDown(true);
+    }
+    else
+    {
+        myForm->ui->connectsModeButton-> setDown(true);
+        myForm->ui->moveModeButton-> setDown(false);
+    }
+}
+
 void MyGraphicsScene::dropEvent(QGraphicsSceneDragDropEvent *event)
 {
-    // qDebug() << "dropped item ID: " << event->mimeData()->imageData().toInt();
+    // qDebug() << "Dropped node ID: " << myForm-> movedNodeID;
+    // qDebug() << "Drop event at " <<  event-> scenePos().x() << " " << event-> scenePos().y();
 
-    int imageID = event->mimeData()->imageData().toInt();
+        // check if no actual movement after click
+    if (std::abs(saveDragX - event-> scenePos().x()) < 1 && std::abs(saveDragY - event-> scenePos().y()) < 1)
+    {
+        myForm-> movedNodeID = 0; // reset
+        resetButtons();
 
-    QPixmap pixMap(myForm-> imagesPix[imageID]);
-
-    QGraphicsItem* newItem = addPixmap(pixMap);
+        return;
+    }
 
     QPoint clickPoint = event->scenePos().toPoint();
 
-    if (newItem)
+    if (! myForm-> movedNodeID) // drop from outside
     {
-        newItem->setPos(clickPoint.x()-pixmapSizeFixed/2, clickPoint.y()-pixmapSizeFixed/2);
 
-        EgDataNodeIdType newID;
-        QList<QVariant> addValues;
+        int imageID = event->mimeData()->imageData().toInt();
+
+        // QPixmap pixMap(myForm-> imagesPix[imageID]);
+
+        QGraphicsItem* newItem = addPixmap(QPixmap(myForm-> imagesPix[imageID]));
+
+        if (newItem)
+        {
+            newItem->setPos(clickPoint.x()-pixmapSizeFixed/2, clickPoint.y()-pixmapSizeFixed/2);
+
+            EgDataNodeIdType newID;
+            QList<QVariant> addValues;
+            QList<QVariant> locValues;
+
+            QString nodeName = QVariant(clickPoint.x()).toString() + "," + QVariant(clickPoint.y()).toString();
+
+            addValues.clear();
+            addValues << nodeName << 2;
+
+            myForm-> nodes.AddDataNode(addValues, newID);
+
+            newItem->setData(0, newID); // nodeID
+
+            locValues.clear();
+            locValues << clickPoint.x() << clickPoint.y() << imageID;
+
+            myForm-> nodes.AddLocation(locValues, newID);
+
+            if (! myForm-> firstNode)
+                myForm-> firstNode = newItem;
+        }
+    }
+    else // inside movement
+    {
         QList<QVariant> locValues;
 
-        QString nodeName = QVariant(clickPoint.x()).toString() + "," + QVariant(clickPoint.y()).toString();
+            // get old location
+        myForm-> nodes.GetLocation(locValues, myForm-> movedNodeID);
 
-        addValues.clear();
-        addValues << nodeName << 2;
+            // set new location
+        locValues[0] = clickPoint.x();
+        locValues[1] = clickPoint.y();
 
-        myForm-> nodes.AddDataNode(addValues, newID);
+        myForm-> nodes.UpdateLocation(locValues, myForm-> movedNodeID);
 
-        newItem->setData(0, newID); // nodeID
-
-        locValues.clear();
-        locValues << clickPoint.x() << clickPoint.y() << imageID;
-
-        myForm-> nodes.AddLocation(locValues, newID);
-
-        if (! myForm-> firstNode)
-            myForm-> firstNode = newItem;
+        myForm-> ShowGraphNodes();
+        myForm-> ShowGraphLinks();
     }
+
+    myForm-> movedNodeID = 0; // reset
+
+    resetButtons();
 
     // qDebug() << "Drop event at " <<  event-> scenePos().x() << " " << event-> scenePos().y();
 }
 
+/*
 void MyGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent)
 {
     // QPoint clickPoint = mouseEvent->scenePos().toPoint();
@@ -472,7 +531,9 @@ void MyGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent)
     {
         isMoved = true;
     }
+
 }
+*/
 
 /*
 void MyGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent * mouseEvent)
@@ -485,6 +546,17 @@ void MyGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent * mouseEven
     QPoint clickPoint = mouseEvent->scenePos().toPoint();
 }
 */
+
+void MyGraphicsScene::editNodeContent()
+{
+    qDebug() << "Edit Node Content";
+}
+
+void MyGraphicsScene::deleteNode()
+{
+    qDebug() << "Delete Node";
+}
+
 
 void MyGraphicsScene::wheelEvent(QGraphicsSceneWheelEvent *wheelEvent)
 {
@@ -510,19 +582,40 @@ void MyGraphicsScene::wheelEvent(QGraphicsSceneWheelEvent *wheelEvent)
     // QGraphicsScene::wheelEvent(wheelEvent);
 }
 
-FingersTreeForm::~FingersTreeForm()
+GraphSceneForm::~GraphSceneForm()
 {
     delete ui;
 }
 
-void FingersTreeForm::on_loadButton_clicked()
+void GraphSceneForm::on_loadButton_clicked()
 {
     LoadImages();
     LoadGraph();
+
+    ShowGraphNodes();
+    ShowGraphLinks();
 }
 
-void FingersTreeForm::on_saveButton_clicked()
+void GraphSceneForm::on_saveButton_clicked()
 {
     nodes.StoreData();
     linktype.StoreLinks();
 }
+
+
+void GraphSceneForm::on_moveModeButton_clicked()
+{
+    opsMode = sfModeMoving;
+
+    ui->connectsModeButton-> setDown(false);
+    ui->moveModeButton-> setDown(true);
+}
+
+void GraphSceneForm::on_connectsModeButton_clicked()
+{
+    opsMode = sfModeConnecting;
+
+    ui->connectsModeButton-> setDown(true);
+    ui->moveModeButton-> setDown(false);
+}
+

@@ -687,6 +687,11 @@ int EgDataNodesType::GetLocation(QList<QVariant>& locationData, EgDataNodeIdType
     return locations-> GetLocation(locationData, nodeID);
 }
 
+int EgDataNodesType::UpdateLocation(QList<QVariant>& locationData, EgDataNodeIdType nodeID)
+{
+    return locations-> UpdateLocation(locationData, nodeID);
+}
+
 
 /*
 int EgDataNodesType::AddLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype nodeID)

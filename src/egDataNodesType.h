@@ -108,6 +108,7 @@ public:
 
     int AddLocation(QList<QVariant>& locationData, EgDataNodeIdType nodeID);
     int GetLocation(QList<QVariant>& locationData, EgDataNodeIdType nodeID);
+    int UpdateLocation(QList<QVariant>& locationData, EgDataNodeIdType nodeID);
 
     int AddEntryNode(EgDataNodeIdType entryNodeID); // e.g. tree root
 

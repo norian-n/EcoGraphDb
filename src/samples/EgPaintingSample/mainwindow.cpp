@@ -232,7 +232,7 @@ void MainWindow::AddImages()
 void MainWindow::on_sceneButton_clicked()
 {
     if (! sceneForm)
-        sceneForm = new FingersTreeForm();
+        sceneForm = new GraphSceneForm();
 
     sceneForm->show();
 

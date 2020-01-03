@@ -44,7 +44,8 @@ const bool isIndexed = true;
 const bool useLocations = true;
 
     // ID types
-typedef uint32_t EgDataNodesTypeID;     // data object class ID type
+// typedef uint32_t EgDataNodesClassIDType;     // data object class ID type
+
 typedef int32_t  EgDataNodeIdType;      // data object ID type
 typedef uint16_t EgFieldIDtype;         // data field ID type
 typedef uint32_t EgIndexNodeIDtype;     // index node ID type

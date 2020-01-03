@@ -39,11 +39,14 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L../build-EcoGraphDb-Desktop_Q
 #else:unix: LIBS += -L$$PWD/build-MyLibrary/ -lMyLibrary
 
 SOURCES += main.cpp\
+        NodeForm.cpp \
         mainwindow.cpp \
         GraphSceneForm.cpp
 
 HEADERS  += mainwindow.h \
-        GraphSceneForm.h
+        GraphSceneForm.h \
+        NodeForm.h
 
 FORMS    += mainwindow.ui \
-        GraphSceneForm.ui
+        GraphSceneForm.ui \
+        NodeForm.ui

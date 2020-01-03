@@ -7,6 +7,7 @@
 #include <QMimeData>
 #include <QDrag>
 #include <QMap>
+#include <QAction>
 
 // #include <QGraphicsSceneMouseEvent>
 
@@ -19,7 +20,7 @@ namespace Ui {
 class GraphSceneForm;
 }
 
-class FingersTreeForm;
+class GraphSceneForm;
 
 class MyGraphicsScene : public QGraphicsScene
 {
@@ -29,7 +30,8 @@ public:
     // virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * mouseEvent);
 
     virtual void wheelEvent(QGraphicsSceneWheelEvent *wheelEvent);
-    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent);
+
+    // virtual void mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent);
     virtual void mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent);
 
@@ -37,10 +39,13 @@ public:
     virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event);
     virtual void dropEvent(QGraphicsSceneDragDropEvent *event);
 
-    FingersTreeForm* myForm = nullptr;
+    GraphSceneForm* myForm = nullptr;
 signals:
 
 public slots:
+
+    void editNodeContent();
+    void deleteNode();
 
 private:
     // QList <QPointF> m_points;
@@ -49,13 +54,15 @@ private:
 
     bool isMoved = false;
 
-    int saveX = 0;
-    int saveY = 0;
+    qreal saveDragX = 0;
+    qreal saveDragY = 0;
 
     qreal scaleFactor = 1.0;
 
     QTransform deviceTransform;
     QGraphicsItem* theItem = nullptr;
+
+    inline void resetButtons();
 };
 
 class ItemsMenuGraphicsScene : public QGraphicsScene
@@ -78,7 +85,7 @@ public:
 
 
 
-    FingersTreeForm* myForm = nullptr;
+    GraphSceneForm* myForm = nullptr;
 signals:
 
 public slots:
@@ -97,7 +104,13 @@ private:
     QGraphicsItem* theItem = nullptr;
 };
 
-class FingersTreeForm : public QWidget
+enum sfModeType
+{
+    sfModeConnecting,
+    sfModeMoving
+};
+
+class GraphSceneForm : public QWidget
 {
     Q_OBJECT
 
@@ -114,13 +127,21 @@ public:
     bool firstNodeStored = false;
     QGraphicsItem* firstNode = nullptr;
 
-    explicit FingersTreeForm(QWidget *parent = 0);
-    ~FingersTreeForm();
+    sfModeType opsMode {sfModeConnecting};
+    EgDataNodeIdType movedNodeID {0};
+
+    explicit GraphSceneForm(QWidget *parent = nullptr);
+    ~GraphSceneForm();
+
+    void ShowGraphNodes();
+    void ShowGraphLinks();
 
 private slots:
     void on_loadButton_clicked();
-
     void on_saveButton_clicked();
+
+    void on_moveModeButton_clicked();
+    void on_connectsModeButton_clicked();
 
 private:
 

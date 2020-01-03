@@ -19,7 +19,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:
@@ -31,7 +31,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    FingersTreeForm *sceneForm = nullptr;
+    GraphSceneForm *sceneForm = nullptr;
 
     EgGraphDatabase graphDB;
 
