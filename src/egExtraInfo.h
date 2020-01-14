@@ -48,15 +48,21 @@ public:
 
 
     EgDataNodeTypeExtraInfo(): typeName("Error_no_type_name") {}
-    EgDataNodeTypeExtraInfo(const QString& a_typeName) : typeName(a_typeName)
+    EgDataNodeTypeExtraInfo(const QString& a_typeName) : typeName(a_typeName) { }
+
+    EgDataNodeTypeExtraInfo(const EgDataNodeTypeExtraInfo& copyInfoFrom)
     {
-        /*
-        typeSettings.useEntryNodes = false;
-        typeSettings.useLocation = false;
-        typeSettings.useNamedAttributes = false;
-        typeSettings.useLinks = false;
-        typeSettings.useGUIsettings = false;
-        */
+        typeName = copyInfoFrom.typeName;
+
+        nodesCount = copyInfoFrom.nodesCount;
+        nextNodeID = copyInfoFrom.nextNodeID;
+
+        typeSettings = copyInfoFrom.typeSettings;
+        myECoGraphDB = copyInfoFrom.myECoGraphDB;
+
+        dataFields = copyInfoFrom.dataFields;
+        nameToOrder = copyInfoFrom.nameToOrder;
+        indexedFields = copyInfoFrom.indexedFields;
     }
 
     ~EgDataNodeTypeExtraInfo();

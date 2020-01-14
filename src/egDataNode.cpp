@@ -20,9 +20,28 @@ EgDataNode::EgDataNode(EgDataNodeTypeExtraInfo& a_extraInfo):
         EG_LOG_STUB << FN;
 }
 
+
+EgDataNode::EgDataNode(const EgDataNode &copyNode)
+{
+    dataNodeID = copyNode.dataNodeID;
+    dataFileOffset = copyNode.dataFileOffset;
+    isAdded = copyNode.isAdded;
+    extraInfo = copyNode.extraInfo; // backlink to parent class
+
+    if (copyNode.nodeLinks)
+        nodeLinks = new EgDataNodeLinks(*(copyNode.nodeLinks));
+
+    dataFields = copyNode.dataFields;
+
+    // for (int i = 0; i < copyNode.dataFields.count(); i++)
+    //    dataFields << copyNode.dataFields[i];
+}
+
+
 EgDataNode::~EgDataNode()
 {
     dataFields.clear();
+
     if (nodeLinks)
     {
         nodeLinks-> inLinks.clear();
@@ -52,8 +71,6 @@ void EgDataNode::clear()
 
     dataFileOffset = 0;
     dataNodeID = 0;
-
-
 }
 
 QVariant& EgDataNode::operator [] (QString& fieldName)

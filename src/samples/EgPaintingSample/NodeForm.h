@@ -1,34 +1,31 @@
 #ifndef PROJECT_FORM_H
 #define PROJECT_FORM_H
 
-#include "ui_node_form.h"
+#include <QDialog>
+
+#include "ui_NodeForm.h"
 #include "../../egDataNodesType.h"
 
 class GraphSceneForm;
 
-class NodeForm :  public QWidget
+class NodeForm :  public QDialog
 {
     Q_OBJECT
 
 public:
     NodeForm(QWidget *parent = 0);
 
-    GraphSceneForm* main_callee;
+    GraphSceneForm* mainCallee;
 
-    int projectID;
-    int formMode;
+    EgDataNodeIdType nodeID;
+    formMode theFormMode;
 
-    void initProject();
-    void openProject();
+    void openNode();
 
     EgDataNode newProject;
 
-    EgDataNodesType* Projects;
-    EgDataNode theProject; // update or delete
-
-        // references
-    EgDataNodesType* Statuses;
-    EgDataNodesType* Owners;
+    EgDataNodesType* Nodes;
+    EgDataNode theNode;
 
 private slots:
 

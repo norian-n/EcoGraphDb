@@ -708,6 +708,79 @@ int EgDataNodesType::AddLocationOfNode(QList<QVariant>& myData, EgDataNodeIDtype
     }
 }
 */
+
+
+int EgDataNodesType::DeleteLinksOfNode(EgDataNodeIdType nodeID)
+{
+    auto const& dataNodeIter = dataNodes.find(nodeID);
+
+    if (dataNodeIter != dataNodes.end())    // node found
+    {
+        if (dataNodeIter-> nodeLinks)
+        {
+                // remove outlinks
+            for (auto linksIter = dataNodeIter->nodeLinks-> outLinks.begin(); linksIter !=  dataNodeIter->nodeLinks-> outLinks.end(); linksIter++)
+            {
+                for (auto linkIter : linksIter.value())
+                {
+
+                        // delete corresponding node link
+                    auto findIter = linkIter.dataNodePtr ->nodeLinks->inLinks.find(linksIter.key());
+                    if (findIter != linkIter.dataNodePtr ->nodeLinks->inLinks.end()) // link type found
+                        for (auto listIter = findIter.value().begin(); listIter != findIter.value().end(); listIter++)
+                        {
+                            if (listIter-> dataNodeID == nodeID) // got it
+                            {
+                              findIter.value().erase(listIter);
+                              break;
+                            }
+                        }
+
+                        // delete link in database
+                    if (! extraInfo.myECoGraphDB-> attachedLinkTypes.contains(linksIter.key()))
+                    {
+                        EG_LOG_STUB << extraInfo.typeName << " : link type was not connected : " << linksIter.key() << FN;
+                    }
+
+                    extraInfo.myECoGraphDB-> attachedLinkTypes[linksIter.key()]-> DeleteLink(linkIter.linkID);
+
+                    qDebug() << " Delete out link of nodeID " << nodeID << " by linkID " << linkIter.linkID << FN;
+                }
+            }
+                // remove inlinks
+            for (auto linksIter = dataNodeIter->nodeLinks-> inLinks.begin(); linksIter !=  dataNodeIter->nodeLinks-> inLinks.end(); linksIter++)
+            {
+                for (auto linkIter : linksIter.value())
+                {
+
+                        // delete corresponding node link
+                    auto findIter = linkIter.dataNodePtr ->nodeLinks->outLinks.find(linksIter.key());
+                    if (findIter != linkIter.dataNodePtr ->nodeLinks->outLinks.end()) // link type found
+                        for (auto listIter = findIter.value().begin(); listIter != findIter.value().end(); listIter++)
+                        {
+                            if (listIter-> dataNodeID == nodeID) // got it
+                            {
+                                findIter.value().erase(listIter);
+                                break;
+                            }
+                        }
+
+                        // delete link in database
+                    if (! extraInfo.myECoGraphDB-> attachedLinkTypes.contains(linksIter.key()))
+                    {
+                        EG_LOG_STUB << extraInfo.typeName << " : link type was not connected : " << linksIter.key() << FN;
+                    }
+
+                    extraInfo.myECoGraphDB-> attachedLinkTypes[linksIter.key()]-> DeleteLink(linkIter.linkID);
+
+                    qDebug() << " Delete in link of nodeID " << nodeID << " by linkID " << linkIter.linkID << FN;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
 int EgDataNodesType::DeleteDataNode(EgDataNodeIdType nodeID)
 {
     QMap<EgDataNodeIdType, EgDataNode>::iterator dataNodesIter;
@@ -734,6 +807,7 @@ int EgDataNodesType::DeleteDataNode(EgDataNodeIdType nodeID)
         if (auxIter != updatedDataNodes.end())
             updatedDataNodes.erase(auxIter);
 
+            // FIXME move semantics required for internal lists
         deletedDataNodes.insert(dataNodesIter.key(), dataNodesIter.value());
         dataNodes.erase(dataNodesIter);
 

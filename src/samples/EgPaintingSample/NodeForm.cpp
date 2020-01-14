@@ -3,7 +3,7 @@
 
 #include <QtDebug>
 
-NodeForm::NodeForm(QWidget *parent): QWidget(parent)
+NodeForm::NodeForm(QWidget *parent): QDialog(parent)
   , ui(new Ui::NodeForm)
 
 {
@@ -13,23 +13,17 @@ NodeForm::NodeForm(QWidget *parent): QWidget(parent)
     connect(ui->okButton, SIGNAL(clicked()),this, SLOT(okExit()));
 }
 
-void NodeForm::initProject()
-{
-    theProject.extraInfo = &(Projects-> extraInfo);
-        // init combos
-}
-
-void NodeForm::openProject()
+void NodeForm::openNode()
 {
         // check mode
-    if (formMode != formModeAdd) // (projectID != 0)    // edit data object
+    if (theFormMode != formModeAdd) // (projectID != 0)    // edit data object
     {
         // theProject = (*Projects)[projectID];
 
-        ui->nameEdit->setText((*Projects)[projectID]["name"].toString());
-        ui->descEdit->setText((*Projects)[projectID]["description"].toString());
+        ui->nameEdit->setText(mainCallee-> nodes[nodeID]["name"].toString());
+        // ui->descEdit->setText(mainCallee-> nodes[nodeID]["description"].toString());
 
-        ui->idLabel->setText(QVariant((*Projects)[projectID].dataNodeID).toString());
+        ui->idLabel->setText(QVariant(mainCallee-> nodes[nodeID].dataNodeID).toString());
     }
     else    // add new
     {
@@ -37,6 +31,7 @@ void NodeForm::openProject()
         ui->descEdit->clear();
         ui->idLabel->clear();
     }
+
     ui->nameEdit->setFocus();
 
 // #undef FIELD
@@ -55,64 +50,51 @@ void NodeForm::okExit()
     // theProject = new DataObj();
 
 
-    if (formMode == formModeEdit) // edit project
+    if (theFormMode == formModeEdit) // edit project
     {
-        theProject.dataFields.clear();
-        for (int k = 0; k < Projects->FieldsCount(); k++)
-            theProject.dataFields << QVariant();   // FIXME theProject.Init(); or clearData();
+        mainCallee-> nodes[nodeID]["name"] = ui->nameEdit->text();
+        // mainCallee-> nodes[nodeID]["description"] = ui->descEdit->text();
 
-            // update data fields
-        theProject["name"]        = ui->nameEdit->text();
-        theProject["description"] = ui->descEdit->text();
+        mainCallee-> nodes.UpdateDataNode(nodeID); // mark as updated
+        // mainCallee-> nodes.StoreData();
 
-            // check for modified fields
-        if (theProject.dataFields != (*Projects)[projectID].dataFields)
-        {
-            Projects-> UpdateDataNode(theProject.dataFields, projectID);
-                // save data
-            Projects-> StoreData();
-                // update parent view
-            if (main_callee)
-            {
-                main_callee->ShowGraphNodes();
-                main_callee->ShowGraphLinks();
-            }
-        }
+        mainCallee-> ShowGraphNodes();
+        mainCallee-> ShowGraphLinks();
     }
-    else if (formMode == formModeAdd) // insert project
+    /*
+    else if (theFormMode == formModeAdd) // insert project
     {
-        theProject.dataFields.clear();
-        for (int k = 0; k < Projects->FieldsCount(); k++)
-            theProject.dataFields << QVariant();   // FIXME theProject.Init(); or clearData();
+        theNode.dataFields.clear();
+        for (int k = 0; k < Nodes->FieldsCount(); k++)
+            theNode.dataFields << QVariant();   // FIXME theProject.Init(); or clearData();
 
             // update data fields
-        theProject["name"]        = ui->nameEdit->text();
-        theProject["description"] = ui->descEdit->text();
+        theNode["name"]        = ui->nameEdit->text();
+        theNode["description"] = ui->descEdit->text();
 
-        Projects-> AddDataNode(theProject.dataFields);
+        Nodes-> AddDataNode(theNode.dataFields);
             // save data
-        Projects->StoreData();
+        Nodes->StoreData();
             // update parent view
-        if (main_callee)
+        if (mainCallee)
         {
-            main_callee->ShowGraphNodes();
-            main_callee->ShowGraphLinks();
+            mainCallee->ShowGraphNodes();
+            mainCallee->ShowGraphLinks();
         }
     }
-    else if (formMode == formModeDelete) // delete project
+    */
+    else if (theFormMode == formModeDelete) // delete project
     {
-        Projects-> DeleteDataNode(projectID);
+        mainCallee-> nodes.DeleteLinksOfNode(nodeID);
+        mainCallee-> nodes.DeleteDataNode(nodeID);
+        // mainCallee-> nodes.StoreData();
 
-        Projects->StoreData();
             // update parent view
-        if (main_callee)
-        {
-            main_callee->ShowGraphNodes();
-            main_callee->ShowGraphLinks();
-        }
+        mainCallee->ShowGraphNodes();
+        mainCallee->ShowGraphLinks();
     }
         // clean up
-    theProject.dataFields.clear();
+    // theNode.dataFields.clear();
     // delete theProject;
         // exit
     close();
@@ -121,7 +103,7 @@ void NodeForm::okExit()
 void NodeForm::cancelExit()
 {
         // clean up
-    theProject.dataFields.clear();
+    theNode.dataFields.clear();
 
     close();
 }

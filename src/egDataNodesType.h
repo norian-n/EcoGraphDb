@@ -100,6 +100,7 @@ public:
     int AddDataNode(EgDataNode& tmpObj);
 
     int DeleteDataNode(EgDataNodeIdType nodeID);
+    int DeleteLinksOfNode(EgDataNodeIdType nodeID);
 
     int UpdateDataNode(QList<QVariant>& my_data, EgDataNodeIdType nodeID);
     int UpdateDataNode(EgDataNodeIdType nodeID);

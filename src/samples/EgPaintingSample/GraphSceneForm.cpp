@@ -333,11 +333,11 @@ void MyGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
 {
     myForm-> movedNodeID = 0; // reset
 
+    theItem = itemAt(mouseEvent->scenePos().x(), mouseEvent->scenePos().y(), deviceTransform);
+
     if (mouseEvent->button() == Qt::LeftButton)
     {
         isPressed = true;
-
-        theItem = itemAt(mouseEvent->scenePos().x(), mouseEvent->scenePos().y(), deviceTransform);
 
         if (theItem && (myForm-> opsMode == sfModeMoving))
         {
@@ -370,7 +370,19 @@ void MyGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
             }
         }
     }
-    // else
+    else
+    {
+        if (theItem)
+        {
+            myForm-> ui->graphicsView-> setContextMenuPolicy(Qt::ActionsContextMenu);
+
+            myForm-> contextMenuNodeID = theItem-> data(0).toInt();
+        }
+        else
+            myForm-> ui->graphicsView-> setContextMenuPolicy(Qt::NoContextMenu);
+    }
+
+
     //    qDebug() << "mouse right";
 }
 
@@ -480,10 +492,10 @@ void MyGraphicsScene::dropEvent(QGraphicsSceneDragDropEvent *event)
             QList<QVariant> addValues;
             QList<QVariant> locValues;
 
-            QString nodeName = QVariant(clickPoint.x()).toString() + "," + QVariant(clickPoint.y()).toString();
+            // QString nodeName = QVariant(clickPoint.x()).toString() + "," + QVariant(clickPoint.y()).toString();
 
             addValues.clear();
-            addValues << nodeName << 2;
+            addValues << "New node" << 2; // nodeName
 
             myForm-> nodes.AddDataNode(addValues, newID);
 
@@ -496,6 +508,12 @@ void MyGraphicsScene::dropEvent(QGraphicsSceneDragDropEvent *event)
 
             if (! myForm-> firstNode)
                 myForm-> firstNode = newItem;
+
+                // show label
+            QGraphicsTextItem* label = new QGraphicsTextItem("New node"); // .value()
+            label->setPos(clickPoint.x()-pixmapSizeFixed+10, clickPoint.y()-pixmapSizeFixed);
+
+            addItem(label);
         }
     }
     else // inside movement
@@ -549,12 +567,56 @@ void MyGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent * mouseEven
 
 void MyGraphicsScene::editNodeContent()
 {
-    qDebug() << "Edit Node Content";
+    // qDebug() << "Edit Node Content";
+
+    if (! myForm-> contextMenuNodeID) // bad node id
+        return;
+
+    if (! nodeForm)
+    {
+        nodeForm = new NodeForm();
+        nodeForm-> mainCallee = myForm; // PARANOID: check form pointer
+
+        nodeForm-> setWindowFlags(Qt::WindowTitleHint | Qt::CustomizeWindowHint); //   | Qt::Window
+        nodeForm-> setFixedSize(nodeForm->size());
+        nodeForm-> setModal(true);
+    }
+
+    nodeForm-> theFormMode = formModeEdit;
+    nodeForm-> setWindowTitle("Edit Node Data");
+
+    nodeForm-> nodeID = myForm-> contextMenuNodeID;
+    nodeForm-> openNode();
+
+    nodeForm-> show();
+
+    myForm-> contextMenuNodeID = 0; // reset
 }
 
 void MyGraphicsScene::deleteNode()
 {
-    qDebug() << "Delete Node";
+    if (! myForm-> contextMenuNodeID) // bad node id
+        return;
+
+    if (! nodeForm)
+    {
+        nodeForm = new NodeForm();
+        nodeForm-> mainCallee = myForm; // PARANOID: check form pointer
+
+        nodeForm-> setWindowFlags(Qt::WindowTitleHint | Qt::CustomizeWindowHint); //   | Qt::Window
+        nodeForm-> setFixedSize(nodeForm->size());
+        nodeForm-> setModal(true);
+    }
+
+    nodeForm-> theFormMode = formModeDelete;
+    nodeForm-> setWindowTitle("Delete Node");
+
+    nodeForm-> nodeID = myForm-> contextMenuNodeID;
+    nodeForm-> openNode();
+
+    nodeForm-> show();
+
+    myForm-> contextMenuNodeID = 0; // reset
 }
 
 

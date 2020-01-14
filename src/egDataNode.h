@@ -34,18 +34,17 @@ class EgDataNodeTypeExtraInfo;
 
 struct EgExtendedLinkType
 {
-      EgDataNodeIdType dataNodeID { 0 };
-      EgDataNode* dataNodePtr     { nullptr };
+    EgDataNodeIdType linkID     { 0 };
+    EgDataNodeIdType dataNodeID { 0 };
+    EgDataNode* dataNodePtr     { nullptr };
 
-      // EgExtendedLinkType(): dataNodeID(0), dataNodePtr(nullptr) {}
+    // EgExtendedLinkType(): dataNodeID(0), dataNodePtr(nullptr) {}
 };
 
-class EgDataNodeLinks           // Data Object Instance 1
-{
-public:
-
-  QMap < QString, QList<EgExtendedLinkType> > inLinks;
-  QMap < QString, QList<EgExtendedLinkType> > outLinks;
+struct EgDataNodeLinks           // Data Object Instance 1
+{ 
+    QMap < QString, QList<EgExtendedLinkType> > inLinks;
+    QMap < QString, QList<EgExtendedLinkType> > outLinks;
 };
 
 #ifdef EG_LIB_BUILD     // library build switch, define it in project or egCore.h
@@ -68,13 +67,15 @@ public:
 
     bool isAdded {false};                               // is not stored yet
 
-    EgDataNodeTypeExtraInfo* extraInfo { nullptr };     // data type extrainfo backlink
-    EgDataNodeLinks* nodeLinks         { nullptr };     // links to other nodes if required
+    EgDataNodeTypeExtraInfo* extraInfo { nullptr };     // data type extrainfo backlink to parent class
+    EgDataNodeLinks* nodeLinks         { nullptr };     // links to other nodes, would be created if required only
 
     QList<QVariant> dataFields;                         // data itself
 
     EgDataNode() {}
     EgDataNode(EgDataNodeTypeExtraInfo& a_extraInfo);
+
+    EgDataNode(const EgDataNode& copyNode);
 
     ~EgDataNode();
 

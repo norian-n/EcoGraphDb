@@ -14,6 +14,8 @@
 #include "../../egDataNodesType.h"
 #include "../../egGraphDatabase.h"
 
+#include "NodeForm.h"
+
 const int pixmapSizeFixed  = 40;
 
 namespace Ui {
@@ -39,7 +41,9 @@ public:
     virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event);
     virtual void dropEvent(QGraphicsSceneDragDropEvent *event);
 
-    GraphSceneForm* myForm = nullptr;
+    GraphSceneForm* myForm = nullptr;  
+    NodeForm* nodeForm = nullptr;
+
 signals:
 
 public slots:
@@ -129,6 +133,7 @@ public:
 
     sfModeType opsMode {sfModeConnecting};
     EgDataNodeIdType movedNodeID {0};
+    EgDataNodeIdType contextMenuNodeID {0};
 
     explicit GraphSceneForm(QWidget *parent = nullptr);
     ~GraphSceneForm();

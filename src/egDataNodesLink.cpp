@@ -245,12 +245,14 @@ int EgLinkType::ResolveLinksToPointers()
         if (fromType-> dataNodes.contains(fromNode) && toType-> dataNodes.contains(toNode))
         {
                 // fill new links info
+            fwdLink.linkID = Iter.key();
             fwdLink.dataNodeID = toNode;
             fwdLink.dataNodePtr = &(toType-> dataNodes[toNode]);
 
             if (! fwdLink.dataNodePtr-> nodeLinks)
                 fwdLink.dataNodePtr-> nodeLinks = new EgDataNodeLinks();
 
+            backLink.linkID = Iter.key();
             backLink.dataNodeID = fromNode;
             backLink.dataNodePtr = &(fromType-> dataNodes[fromNode]);
 
