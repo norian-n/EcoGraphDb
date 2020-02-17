@@ -36,8 +36,6 @@ public:
     KeyType newMinValue;
     KeyType newMaxValue;
 
-    // keysCountType newKeysCount;
-
     bool minValueChanged;
     bool maxValueChanged;
 
@@ -74,28 +72,33 @@ public:
 
     ~EgFingers() { if (localStream) delete localStream; if (fingersChunk) delete[] fingersChunk;}
 
+        // init, load, store ops
     void InitRootFinger();
-
-    void LoadRootFinger();              // meta-info of fingers tree, also for non-zero offset
-    void StoreRootFinger();
-    void StoreRootFingerMinMax();
-
     void InitFingersChunk();
 
-    inline int LoadFingersChunk(); // default: to fingersBA.data() from parentFinger.nextChunkOffset
-    int LoadFingersChunk(char* chunkPtr, const quint64 fingersChunkOffset);
+    void LoadRootFinger();          // meta-info of fingers tree, also for non-zero offset
+    void StoreRootFinger();
+    void StoreRootFingerMinMaxOnly();
 
+    int LoadFingersChunk();         // default: to fingersBA.data() from parentFinger.nextChunkOffset
     int StoreFingersChunk(quint64 fingersChunkOffset, char* chunkPtr);
 
-    // int FindIndexChunkToInsert();
-    // int FindNextLevelOffsetToInsert();
-    // int SelectClosestFingerToInsert(QDataStream &localFingersStream);
+        // insert ops
+    inline void GetChunkLevel(); // to currentFinger.myLevel
 
     int FindIndexChunkToInsert();
 
-    inline int FindFingerInChunkToInsert();
+    int AppendFingersChunk();
+    int SplitFingersChunk();
 
-    int  GetFingerByOffset(quint64 updatedFingerOffset);    // get by updatedFingerOffset if fingerIsMoved by indexes
+    inline void AddNewSubRootChunk();
+
+    inline void MoveTailToInsert(char* chunkPtr, int fingerPosition, int fingersToMove);
+    int InsertSplittedFinger();
+    int InsertNewFinger(int posToInsert, int itemsCount);
+
+    inline void GetFingerByOffset(quint64 updatedFingerOffset);    // get by updatedFingerOffset if fingerIsMoved by indexes
+    int StoreParentOffset(quint64 fingersChunkOffset, quint64 parentFingerOffset);
 
     int UpdateCurrentFingerAfterInsert();
 
@@ -109,42 +112,39 @@ public:
     int UpdateMinValueUp();
     int UpdateMaxValueUp();
 
+        // delete ops
     inline void DeleteSpecificFinger(keysCountType keysCount);
     int  DeleteParentFinger();
 
     void DeleteFingersChunk(quint64 fingersChunkOffset);
 
-    void ReadFinger  (QDataStream &localFingersStream, egFinger<KeyType>& theFinger);
-    inline void WriteFinger (QDataStream &localFingersStream, egFinger<KeyType>& theFinger);
+        // basic finger ops
+    void ReadFinger (egFinger<KeyType>& theFinger, const int fingerPosition);
+    inline void WriteFinger (QDataStream &localFingersStream, egFinger<KeyType>& theFinger); 
 
     inline void UpdateTheFingerMinMax(egFinger<KeyType>& theFinger);
 
-    inline void AddNewSubRootChunk();
-
-    inline void MoveTailToInsert(char* chunkPtr, int fingerPosition, int fingersToMove);
-
-    int InsertSplittedFinger();
-
-    int SplitFingersChunk();
-
-    int InsertNewFinger(int posToInsert, int itemsCount);
+        // updates
     int UpdateBackptrOffsets(quint64 myChunkOffset,  int posToInsert, int itemsCount, fingersLevelType myLocalLevel);
-
     void UpdateMinMax(egFinger<KeyType>& theFinger);
 
-    int AppendFingersChunk();
+        // lookups
+    void FindFingerGE();
+    int  FindIndexChunkGE(); // first finger for key greater or equal then min value
 
-    int FindIndexChunkFirst(bool isExactEqual); // CompareFunctionType myCompareFunc
-    int FindNextLevelOffsetFirst(bool isExactEqual);
+    void FindFingerGT(); // first finger for key greater then its min value
+    int  FindIndexChunkGT();
 
-    int FindIndexChunkLast(bool isExactEqual); // CompareFunctionType myCompareFunc
-    int FindNextLevelOffsetLast(bool isExactEqual);
+    void FindFingerLE(); // last finger for key less or equal then max value
+    int  FindIndexChunkLE();
 
-    int StoreParentOffset(quint64 fingersChunkOffset, quint64 parentFingerOffset);
-    int GetParentOffset(quint64& parentFingerOffset); // debug
+    void FindFingerLT(); // last finger for key less then its max value
+    int  FindIndexChunkLT();
 
-    // debug
+    int FindFingerEQ(); // first finger for key greater then its min value
+    int FindIndexChunkEQ(); // first EQ fnger on index chunk (0 level)
 
+        // debug
     void PrintFingerInfo(egFinger<KeyType>& fingerInfo, const QString &theMessage);
     void PrintFingersChunk(char* theFingersChunk, const QString& theMessage);
     void PrintChunkInfo(quint64 fingersChunkOffset);

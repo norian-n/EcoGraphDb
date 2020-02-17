@@ -265,7 +265,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::UpdateIndex(bool isChange
 
     // EG_LOG_STUB << "Update index files name:  " << IndexFileName << FN;
 
-    if (fingersTree.FindIndexChunkFirst(true))
+    if (fingersTree.FindIndexChunkEQ()) // FindIndexChunkFirst(true))
     {
         EG_LOG_STUB << "IndexChunk not found " << FN;
         return -1;
@@ -297,9 +297,6 @@ template <typename KeyType> int EgIndexFiles<KeyType>::UpdateIndex(bool isChange
         indexChunks.oldDataOffset = newOffset;
 
         fingersTree.FindIndexChunkToInsert();   // FIXME check result
-
-        // EG_LOG_STUB << "nextOffset: " << hex << (int) indexChunks. << FN;
-
         indexChunks.InsertToIndexChunk();
     }
 
@@ -317,7 +314,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::DeleteIndex(bool isPrimar
 
     // EG_LOG_STUB << "Delete index file name:  " << IndexFileName << FN;
 
-    if (fingersTree.FindIndexChunkFirst(true)) // true means exact equal
+    if (fingersTree.FindIndexChunkEQ()) // FindIndexChunkFirst(true)) // true means exact equal
     {
         EG_LOG_STUB << "IndexChunk not found " << FN;
         return -1;
@@ -361,14 +358,14 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_EQ(QSet<quint64>& in
 
     indexChunks.theKey   = Key;
 
-    res = fingersTree.FindIndexChunkFirst(true);
+    res = fingersTree.FindIndexChunkEQ(); // FindIndexChunkFirst(true);
 
     // EG_LOG_STUB << "filename: " << IndexFileName << " ,key: " << hex << (int) indexChunks.theKey
     //         << ", offset: " << hex << (int) indexChunks.indexesChunkOffset << "res = " << res << FN;
 
 
     if (! res)  // ok
-        indexChunks.LoadDataByChunkEqual(index_offsets);
+        res = indexChunks.LoadDataByChunkEqual(index_offsets);
 
     CloseFiles();
 
@@ -386,10 +383,10 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GE(QSet<quint64>& in
         // have to set this field to use indexes
     indexChunks.theKey   = Key;
 
-    res = fingersTree.FindIndexChunkFirst(true); // FIXME - process borders
+    res = fingersTree.FindIndexChunkGE(); // FindIndexChunkFirst(true); // FIXME - process borders
 
     if (! res)  // ok
-        indexChunks.LoadDataByChunkUp(index_offsets, EgIndexes<KeyType>::CompareGE);
+        res = indexChunks.LoadDataByChunkUp(index_offsets, EgIndexes<KeyType>::CompareGE);
 
     CloseFiles();
 
@@ -406,10 +403,10 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_GT(QSet<quint64>& in
         // have to set this field to use indexes
     indexChunks.theKey = Key;
 
-    res = fingersTree.FindIndexChunkLast(false); // FIXME - process borders
+    res = fingersTree.FindIndexChunkGT(); // FindIndexChunkLast(false); // FIXME - process borders
 
     if (! res)
-        indexChunks.LoadDataByChunkUp(index_offsets, EgIndexes<KeyType>::CompareGT);
+        res = indexChunks.LoadDataByChunkUp(index_offsets, EgIndexes<KeyType>::CompareGT);
 
     // EG_LOG_STUB  << "res = " << res << "index_offsets count = " << index_offsets.count() << FN;
 
@@ -428,10 +425,10 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LE(QSet<quint64>& in
             // have to set this field to use indexes
     indexChunks.theKey   = Key;
 
-    res = fingersTree.FindIndexChunkLast(true); // FIXME - process borders
+    res = fingersTree.FindIndexChunkLE(); // FindIndexChunkLast(true); // FIXME - process borders
 
     if (! res)
-        indexChunks.LoadDataByChunkDown(index_offsets, EgIndexes<KeyType>::CompareLE);
+        res = indexChunks.LoadDataByChunkDown(index_offsets, EgIndexes<KeyType>::CompareLE);
 
     CloseFiles();
 
@@ -448,10 +445,10 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LT(QSet<quint64>& in
             // have to set this field to use indexes
     indexChunks.theKey = Key;
 
-    res = fingersTree.FindIndexChunkFirst(false); // FIXME - process borders
+    res = fingersTree.FindIndexChunkLT(); // FindIndexChunkFirst(false); // FIXME - process borders
 
     if (! res)
-        indexChunks.LoadDataByChunkDown(index_offsets, EgIndexes<KeyType>::CompareLT);
+        res = indexChunks.LoadDataByChunkDown(index_offsets, EgIndexes<KeyType>::CompareLT);
 
     // EG_LOG_STUB  << "res = " << res << "index_offsets count = " << index_offsets.count() << FN;
 

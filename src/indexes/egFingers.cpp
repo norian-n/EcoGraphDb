@@ -171,12 +171,6 @@ template <typename KeyType> void EgFingers<KeyType>::InitRootFinger()
     rootFinger.itemsCount = 1;
 
     rootFinger.nextChunkOffset = indexHeaderSize;
-
-    if(rootFinger.myLevel) // DUMMY
-        EG_LOG_STUB << FN;
-
-    // rootFinger.myChunkOffset = 0;
-    // rootFinger.myOffset = 0;
 }
 
 
@@ -195,20 +189,8 @@ template <typename KeyType> void EgFingers<KeyType>::LoadRootFinger()
 
     fingerStream >> rootFinger.myLevel;
 
-    rootFinger.myChunkOffset = 0;
-    rootFinger.myOffsetInChunk = 0;
-
     // PrintFingerInfo(fingersRootHeader, "fingersRootHeader " + FNS);
 }
-
-template <typename KeyType> void EgFingers<KeyType>::StoreRootFingerMinMax()
-{
-    fingerStream.device()->seek(0);
-
-    fingerStream << rootFinger.minKey;
-    fingerStream << rootFinger.maxKey;
-}
-
 
 template <typename KeyType> void EgFingers<KeyType>::StoreRootFinger()
 {
@@ -222,6 +204,15 @@ template <typename KeyType> void EgFingers<KeyType>::StoreRootFinger()
 
     fingerStream << rootFinger.myLevel;
 }
+
+template <typename KeyType> void EgFingers<KeyType>::StoreRootFingerMinMaxOnly()
+{
+    fingerStream.device()->seek(0);
+
+    fingerStream << rootFinger.minKey;
+    fingerStream << rootFinger.maxKey;
+}
+
 
 template <typename KeyType> inline void EgFingers<KeyType>::InitFingersChunk()
 {   
@@ -239,14 +230,13 @@ template <typename KeyType> inline void EgFingers<KeyType>::InitFingersChunk()
 
 template <typename KeyType> int EgFingers<KeyType>::StoreFingersChunk(quint64 fingersChunkOffset, char* chunkPtr)
 {
-    fingerStream.device()->seek(fingersChunkOffset);
+    fingerStream.device()-> seek(fingersChunkOffset);
     // fingerStream.writeRawData(chunkPtr, fingersChunkSize);
 
         // int res =
-    fingerStream.device()->write(chunkPtr, fingersChunkSize);
+    fingerStream.device()-> write(chunkPtr, fingersChunkSize);
 
     // EG_LOG_STUB << "fingersChunkOffset" << hex << (int) fingersChunkOffset << FN;
-
     return 0; // FIXME
 }
 
@@ -256,376 +246,337 @@ template <typename KeyType> int EgFingers<KeyType>::StoreParentOffset(quint64 fi
     fingerStream << parentFingerOffset;
 
     // EG_LOG_STUB << "fingersChunkOffset" << hex << (int) fingersChunkOffset << ", parentFingerOffset" << hex << (int) parentFingerOffset << FN;
-
-    return 0; // FIXME
+    return 0;
 }
 
+/*
 template <typename KeyType> int EgFingers<KeyType>::GetParentOffset(quint64& parentFingerOffset)
 {
     localStream->device()-> seek(egChunkVolume * oneFingerSize);
     *localStream >> parentFingerOffset;
 
     // EG_LOG_STUB << "fingerOffset = " << hex << (int) fingerOffset << FN;
-
     return 0;
 }
+*/
 
-template <typename KeyType> inline int EgFingers<KeyType>::LoadFingersChunk()
+template <typename KeyType> int EgFingers<KeyType>::LoadFingersChunk()
 {
     fingerStream.device()->seek(parentFinger.nextChunkOffset);
     fingerStream.readRawData(fingersBA.data(), fingersChunkSize);
 
-    return 0; // FIXME process load returns in paranoid mode
+    return 0;
 }
 
-template <typename KeyType> int EgFingers<KeyType>::LoadFingersChunk(char* chunkPtr, const quint64 fingersChunkOffset)
+/*
+template <typename KeyType> int EgFingers<KeyType>::LoadFingersChunkExplicit(char* chunkPtr, const quint64 fingersChunkOffset)
 {
     fingerStream.device()->seek(fingersChunkOffset);
     fingerStream.readRawData(chunkPtr, fingersChunkSize);
 
-    return 0; // FIXME process load returns in paranoid mode
+    return 0;
+}
+*/
+
+template <typename KeyType> void EgFingers<KeyType>::ReadFinger(egFinger<KeyType>& theFinger, const int fingerPosition)
+{
+    theFinger.myOffsetInChunk = fingerPosition * oneFingerSize;
+
+    localStream->device()->seek(theFinger.myOffsetInChunk);
+
+    *localStream >> theFinger.minKey;
+    *localStream >> theFinger.maxKey;
+    *localStream >> theFinger.itemsCount;
+    *localStream >> theFinger.nextChunkOffset;
 }
 
-template <typename KeyType> void EgFingers<KeyType>::ReadFinger(QDataStream &localFingersStream, egFinger<KeyType>& theFinger)
-{
-    localFingersStream.device()->seek(theFinger.myOffsetInChunk);
+// *****************************************************************************************
 
-    localFingersStream >> theFinger.minKey;
-    localFingersStream >> theFinger.maxKey;
-    localFingersStream >> theFinger.itemsCount;
-    localFingersStream >> theFinger.nextChunkOffset;
+template <typename KeyType> void EgFingers<KeyType>::FindFingerGE()
+{
+    int fingerPosition = 0;
+
+    do
+        ReadFinger(currentFinger, fingerPosition);
+    while ((currentFinger.maxKey < indexChunks-> theKey) && (++fingerPosition < parentFinger.itemsCount));
 }
 
-
-template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetFirst(bool isExactEqual)
+template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkGE()
 {
-    int fingerPosition;
-    egFinger<KeyType> secondFinger;
+    int result = 0;
 
-    if (parentFinger.itemsCount == 0)  // no fingers
-        return -2;
+    // EG_LOG_STUB << "theKey = " << hex << indexChunks-> theKey << FN;
 
-    if ((indexChunks-> theKey < parentFinger.minKey) || (parentFinger.itemsCount == 1)) // out of range or only one
-    {
-        currentFinger.myOffsetInChunk = 0;
-        ReadFinger(*localStream, currentFinger);
-
-        if (indexChunks-> theKey < parentFinger.minKey) // out of range
+    if (indexChunks-> theKey > rootFinger.maxKey) // key out of range
             return 1;
 
+    if (rootFinger.myLevel == 0) // only root finger exists
+    {
+        currentFinger = rootFinger;
         return 0;
     }
 
-    if (indexChunks-> theKey > parentFinger.maxKey) // out of range or only one
-    {
-        currentFinger.myOffsetInChunk = (parentFinger.itemsCount - 1);
-        ReadFinger(*localStream, currentFinger);
+    parentFinger = rootFinger;
 
-        return 1;
-    }
-
-    // FIXME - write tests
-
-    // PrintFingerInfo(parentFinger, "parentFinger " + FNS);
-        // proportional finger lookup
-
-    if (parentFinger.maxKey > parentFinger.minKey)
-        fingerPosition = (indexChunks-> theKey - parentFinger.minKey)*(parentFinger.itemsCount - 1)/(parentFinger.maxKey - parentFinger.minKey);
-    else // parentFinger.maxKey == parentFinger.minKey
-    {
-        currentFinger.myOffsetInChunk = 0;
-        ReadFinger(*localStream, currentFinger);
-
-        return 0;
-    }
-
-    // EG_LOG_STUB << "indexChunks-> theKey = " << indexChunks-> theKey << "fingerPosition = " << fingerPosition << FN;
-
-    currentFinger.myOffsetInChunk = fingerPosition*oneFingerSize;
-    ReadFinger(*localStream, currentFinger);
-
-    // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
-
-    secondFinger.myLevel = currentFinger.myLevel;
-
-    if (isExactEqual)
+        // go fingers chain
     do
     {
-        if (indexChunks-> theKey > currentFinger.maxKey)
-        {
-            if (fingerPosition < (parentFinger.itemsCount - 1))
-            {
-                fingerPosition ++;
+        // PrintFingerInfo(parentFinger, "parentFinger " + FNS);
 
-                // EG_LOG_STUB << "fingerPosition = " << fingerPosition << FN;
+        LoadFingersChunk(); // to fingersBA.data() from parentFinger.nextChunkOffset
+        GetChunkLevel();    // to currentFinger.myLevel
 
-                currentFinger.myOffsetInChunk = fingerPosition*oneFingerSize;
-                ReadFinger(*localStream, currentFinger);
-            }
-        }
+        // EG_LOG_STUB << "myLevel = " << currentFinger.myLevel << FN;
+
+            // if one finger just return it
+        if (parentFinger.itemsCount == 1)
+            ReadFinger(currentFinger, 0);
         else
-        {
-            if (indexChunks-> theKey > currentFinger.minKey)
-            {
-                // PrintFingerInfo(currentFinger, "currentFinger (equal) found " + FNS);
-                return 0;
-            }
-            else
-            {
-                if (fingerPosition > 0)
-                {
-                    secondFinger.myOffsetInChunk = (fingerPosition-1)*oneFingerSize;
-                    ReadFinger(*localStream, secondFinger);
+            FindFingerGE();  // go get currentFinger
 
-                    if (indexChunks-> theKey > secondFinger.maxKey) // finger found
-                    {
-                        if (indexChunks-> theKey == currentFinger.minKey)
-                            return 0;
+        // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
 
-                        return 1;   // between fingers
-                    }
-                    else
-                    {
-                        fingerPosition --;
-
-                        currentFinger = secondFinger;
-                    }
-                }
-            }
-        }
+        if (currentFinger.myLevel > 0)
+            parentFinger = currentFinger;
     }
-    while ((fingerPosition > 0) && (fingerPosition < (parentFinger.itemsCount - 1)) /*&& (emergencyCounter < (parentFinger.itemsCount + 1))*/);
+    while ((currentFinger.myLevel > 0) && !result);
 
-    else    // ! isExactEqual
+    currentFinger.myChunkOffset = parentFinger.nextChunkOffset;  // FIXME chck if required
+
+    return result;
+}
+
+template <typename KeyType> void EgFingers<KeyType>::FindFingerGT()
+{
+    int fingerPosition = 0;
 
     do
-    {
-        if (indexChunks-> theKey >= currentFinger.maxKey)
-        {
-            if (fingerPosition < (parentFinger.itemsCount - 1))
-            {
-                fingerPosition ++;
-
-                currentFinger.myOffsetInChunk = fingerPosition*oneFingerSize;
-                ReadFinger(*localStream, currentFinger);
-            }
-        }
-        else
-        {
-            if (indexChunks-> theKey >= currentFinger.minKey)
-            {
-                // PrintFingerInfo(currentFinger, "currentFinger (not equal) found " + FNS);
-                return 0;
-            }
-            else
-            {
-                if (fingerPosition > 0)
-                {
-                    secondFinger.myOffsetInChunk = (fingerPosition-1)*oneFingerSize;
-                    ReadFinger(*localStream, secondFinger);
-
-                    if (indexChunks-> theKey >= secondFinger.maxKey) // finger found
-                    {
-                        return 0;
-                    }
-                    else
-                    {
-                        fingerPosition --;
-                        currentFinger = secondFinger;
-                    }
-                }
-            }
-        }
-    }
-    while ((fingerPosition > 0) && (fingerPosition < (parentFinger.itemsCount - 1)) /*&& (emergencyCounter < (parentFinger.itemsCount + 1))*/);
-
-    currentFinger.myOffsetInChunk = fingerPosition*oneFingerSize;
-    ReadFinger(*localStream, currentFinger);
-
-    return 0;
+        ReadFinger(currentFinger, fingerPosition);
+    while ((currentFinger.maxKey <= indexChunks-> theKey) && (++fingerPosition < parentFinger.itemsCount));
 }
 
-
-template <typename KeyType> inline int EgFingers<KeyType>::FindFingerInChunkToInsert()
+template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkGT()
 {
-    if (parentFinger.itemsCount == 0)  // no fingers, corrupted structure FIXME process
-    {
-        PrintFingerInfo(parentFinger, "Error: corrupted parentFinger, 0 items " + FNS);
-        return -1;
-    }
+    int result = 0;
 
-    int fingerPosition = parentFinger.itemsCount - 1; // last finger first
+    // EG_LOG_STUB << "theKey = " << hex << indexChunks-> theKey << FN;
 
-        // read last finger
-    currentFinger.myOffsetInChunk = fingerPosition*oneFingerSize;
-    ReadFinger(*localStream, currentFinger);
-
-    fingerPosition--;
-
-        // go left until appropriate finger
-    while ((fingerPosition >= 0) && (indexChunks-> theKey < currentFinger.minKey))
-    {
-        currentFinger.myOffsetInChunk = fingerPosition*oneFingerSize;
-        ReadFinger(*localStream, currentFinger);
-
-        fingerPosition--;
-    }
-
-    return 0;
-}
-
-template <typename KeyType> int EgFingers<KeyType>::FindNextLevelOffsetLast(bool isExactEqual)
-{
-    int fingerPosition;
-    egFinger<KeyType> secondFinger;
-
-    if (parentFinger.itemsCount == 0)  // no fingers FIXME STUB
-        return -2;
-
-    if ((indexChunks-> theKey > parentFinger.maxKey) || (parentFinger.itemsCount == 1)) // out of range or only one
-    {
-        currentFinger.myOffsetInChunk = (parentFinger.itemsCount - 1)*oneFingerSize;
-        ReadFinger(*localStream, currentFinger);
-
-        if (indexChunks-> theKey > parentFinger.maxKey) // out of range
+    if (indexChunks-> theKey >= rootFinger.maxKey) // key out of range
             return 1;
 
+    if (rootFinger.myLevel == 0) // only root finger exists
+    {
+        currentFinger = rootFinger;
         return 0;
     }
 
-    if (indexChunks-> theKey < parentFinger.minKey) // out of range or only one
-    {
-        currentFinger.myOffsetInChunk = 0;
-        ReadFinger(*localStream, currentFinger);
+    parentFinger = rootFinger;
 
+        // go fingers chain
+    do
+    {
+        // PrintFingerInfo(parentFinger, "parentFinger " + FNS);
+
+        LoadFingersChunk(); // to fingersBA.data() from parentFinger.nextChunkOffset
+        GetChunkLevel(); // to currentFinger.myLevel
+
+        // EG_LOG_STUB << "myLevel = " << currentFinger.myLevel << FN;
+
+            // if one finger just return it
+        if (parentFinger.itemsCount == 1)
+            ReadFinger(currentFinger, 0);
+        else
+            FindFingerGT();  // go get currentFinger
+
+        // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
+
+        if (currentFinger.myLevel > 0)
+            parentFinger = currentFinger;
+    }
+    while ((currentFinger.myLevel > 0) && !result);
+
+    currentFinger.myChunkOffset = parentFinger.nextChunkOffset;  // FIXME chck if required
+
+    return result;
+}
+
+template <typename KeyType> void EgFingers<KeyType>::FindFingerLT()
+{   
+    int fingerPosition = parentFinger.itemsCount-1;
+
+    do
+        ReadFinger(currentFinger, fingerPosition);
+    while ((currentFinger.minKey >= indexChunks-> theKey) && (--fingerPosition >= 0));
+}
+
+template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkLT()
+{
+    int result = 0;
+
+    // EG_LOG_STUB << "theKey = " << hex << indexChunks-> theKey << FN;
+
+    if (indexChunks-> theKey <= rootFinger.minKey) // key out of range
+            return 1;
+
+    if (rootFinger.myLevel == 0) // only root finger exists
+    {
+        currentFinger = rootFinger;
+        return 0;
+    }
+
+    parentFinger = rootFinger;
+
+        // go fingers chain
+    do
+    {
+        // PrintFingerInfo(parentFinger, "parentFinger " + FNS);
+
+        LoadFingersChunk(); // to fingersBA.data() from parentFinger.nextChunkOffset
+        GetChunkLevel();    // to currentFinger.myLevel
+
+        // EG_LOG_STUB << "myLevel = " << currentFinger.myLevel << FN;
+
+            // if one finger just return it
+        if (parentFinger.itemsCount == 1)
+            ReadFinger(currentFinger, 0);
+        else
+            FindFingerLT();  // go get currentFinger
+
+        // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
+
+        if (currentFinger.myLevel > 0)
+            parentFinger = currentFinger;
+    }
+    while ((currentFinger.myLevel > 0) && !result);
+
+    currentFinger.myChunkOffset = parentFinger.nextChunkOffset;  // FIXME chck if required
+
+    return result;
+}
+
+
+template <typename KeyType> void EgFingers<KeyType>::FindFingerLE()
+{
+    int fingerPosition = parentFinger.itemsCount-1;
+
+    do
+        ReadFinger(currentFinger, fingerPosition);
+    while ((currentFinger.minKey > indexChunks-> theKey) && (--fingerPosition >= 0));
+}
+
+template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkLE()
+{
+    int result = 0;
+
+    // EG_LOG_STUB << "theKey = " << hex << indexChunks-> theKey << FN;
+
+    if (indexChunks-> theKey < rootFinger.minKey) // key out of range
+            return 1;
+
+    if (rootFinger.myLevel == 0) // only root finger exists
+    {
+        currentFinger = rootFinger;
+        return 0;
+    }
+
+    parentFinger = rootFinger;
+
+        // go fingers chain
+    do
+    {
+        // PrintFingerInfo(parentFinger, "parentFinger " + FNS);
+
+        LoadFingersChunk(); // to fingersBA.data() from parentFinger.nextChunkOffset
+        GetChunkLevel();    // to currentFinger.myLevel
+
+        // EG_LOG_STUB << "myLevel = " << currentFinger.myLevel << FN;
+
+            // if one finger just return it
+        if (parentFinger.itemsCount == 1)
+            ReadFinger(currentFinger, 0);
+        else
+            FindFingerLE();  // go get currentFinger
+
+        // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
+
+        if (currentFinger.myLevel > 0)
+            parentFinger = currentFinger;
+    }
+    while ((currentFinger.myLevel > 0) && !result);
+
+    currentFinger.myChunkOffset = parentFinger.nextChunkOffset;  // FIXME chck if required
+
+    return result;
+}
+
+template <typename KeyType> int EgFingers<KeyType>::FindFingerEQ()
+{
+    int fingerPosition = 0;
+
+    do
+        ReadFinger(currentFinger, fingerPosition);
+    while ((currentFinger.maxKey < indexChunks-> theKey) && (++fingerPosition < parentFinger.itemsCount));
+
+        // check if key between fingers
+    if (indexChunks-> theKey < currentFinger.minKey) // ||  (fingerPosition >= parentFinger.itemsCount)
         return 1;
-    }
-
-    // FIXME - write tests
-
-    // PrintFingerInfo(parentFinger, "parentFinger " + FNS);
-
-
-        // proportional finger lookup
-
-    if (parentFinger.maxKey > parentFinger.minKey)
-        fingerPosition = (indexChunks-> theKey - parentFinger.minKey)*(parentFinger.itemsCount - 1)/(parentFinger.maxKey - parentFinger.minKey);
-    else // parentFinger.maxKey == parentFinger.minKey
-    {
-        currentFinger.myOffsetInChunk = (parentFinger.itemsCount - 1)*oneFingerSize;
-        ReadFinger(*localStream, currentFinger);
-
-        return 0;
-    }
-
-    // EG_LOG_STUB << "fingerPosition = " << fingerPosition << FN;
-
-    currentFinger.myOffsetInChunk = fingerPosition*oneFingerSize;
-    ReadFinger(*localStream, currentFinger);
-
-    secondFinger.myLevel = currentFinger.myLevel;
-
-    if (isExactEqual)
-    do
-    {
-        if (indexChunks-> theKey < currentFinger.minKey)
-        {
-            if (fingerPosition > 0)
-            {
-                fingerPosition --;
-
-                currentFinger.myOffsetInChunk = fingerPosition*oneFingerSize;
-                ReadFinger(*localStream, currentFinger);
-            }
-        }
-        else
-        {
-            if (indexChunks-> theKey < currentFinger.maxKey)
-            {
-                // PrintFingerInfo(currentFinger, "currentFinger (equal) found " + FNS);
-                return 0;
-            }
-            else
-            {
-                if (fingerPosition < (parentFinger.itemsCount - 1))
-                {
-                    secondFinger.myOffsetInChunk = (fingerPosition+1)*oneFingerSize;
-                    ReadFinger(*localStream, secondFinger);
-
-                    if (indexChunks-> theKey < secondFinger.minKey) // finger found
-                    {
-                        if (indexChunks-> theKey == currentFinger.maxKey)
-                            return 0;
-
-                        return 1;   // between fingers
-                    }
-                    else
-                    {
-                        fingerPosition ++;
-
-                        currentFinger = secondFinger;
-                    }
-                }
-            }
-        }
-    }
-    while ((fingerPosition > 0) && (fingerPosition < (parentFinger.itemsCount - 1)) /*&& (emergencyCounter < (parentFinger.itemsCount + 1))*/);
-
-    else    // ! isExactEqual
-
-    do
-    {
-        if (indexChunks-> theKey <= currentFinger.minKey)
-        {
-            if (fingerPosition > 0)
-            {
-                fingerPosition --;
-
-                currentFinger.myOffsetInChunk = fingerPosition*oneFingerSize;
-                ReadFinger(*localStream, currentFinger);
-            }
-        }
-        else
-        {
-            if (indexChunks-> theKey <= currentFinger.maxKey)
-            {
-                // PrintFingerInfo(currentFinger, "currentFinger (not equal) found " + FNS);
-                return 0;
-            }
-            else
-            {
-                if (fingerPosition < (parentFinger.itemsCount - 1))
-                {
-                    secondFinger.myOffsetInChunk = (fingerPosition+1)*oneFingerSize;
-                    ReadFinger(*localStream, secondFinger);
-
-                    if (indexChunks-> theKey <= secondFinger.minKey) // finger found
-                    {
-                        return 0;
-                    }
-                    else
-                    {
-                        fingerPosition ++;
-                        currentFinger = secondFinger;
-                    }
-                }
-            }
-        }
-    }
-    while ((fingerPosition > 0) && (fingerPosition < (parentFinger.itemsCount - 1)) /*&& (emergencyCounter < (parentFinger.itemsCount + 1))*/);
-
-    currentFinger.myOffsetInChunk = fingerPosition*oneFingerSize;
-    ReadFinger(*localStream, currentFinger);
 
     return 0;
+}
+
+template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkEQ()
+{
+    int result = 0;
+
+    // EG_LOG_STUB << "theKey = " << hex << indexChunks-> theKey << FN;
+
+    if ((indexChunks-> theKey < rootFinger.minKey) || (indexChunks-> theKey > rootFinger.maxKey)) // key out of range
+            return 1;
+
+    if (rootFinger.myLevel == 0) // only root finger exists
+    {
+        currentFinger = rootFinger;
+        return 0;
+    }
+
+    parentFinger = rootFinger;
+
+        // go fingers chain
+    do
+    {
+        // PrintFingerInfo(parentFinger, "parentFinger " + FNS);
+
+        LoadFingersChunk(); // to fingersBA.data() from parentFinger.nextChunkOffset
+        GetChunkLevel();    // to currentFinger.myLevel
+
+        // EG_LOG_STUB << "myLevel = " << currentFinger.myLevel << FN;
+
+            // if one finger just return it
+        if (parentFinger.itemsCount == 1)
+            ReadFinger(currentFinger, 0);
+        else
+            result = FindFingerEQ();  // go get currentFinger, 1 - between fingers, key not found, exit
+
+        // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
+
+        if (currentFinger.myLevel > 0)
+            parentFinger = currentFinger;
+    }
+    while ((currentFinger.myLevel > 0) && !result);
+
+    currentFinger.myChunkOffset = parentFinger.nextChunkOffset;  // FIXME chck if required
+
+    return result;
+}
+
+template <typename KeyType> inline void EgFingers<KeyType>::GetChunkLevel()
+{
+    localStream->device()-> seek(egChunkVolume * oneFingerSize + sizeof(quint64));
+    *localStream >> currentFinger.myLevel;
 }
 
 template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkToInsert()
 {
-    int res = 0;
-
-    fingersChain.clear();
-
     LoadRootFinger();
 
     if (rootFinger.myLevel == 0) // root only
@@ -637,7 +588,10 @@ template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkToInsert()
 
     // FIXME TODO check global min/max and use first/last index chunk directly
 
+    // int res = 0;
+
     parentFinger = rootFinger;
+    fingersChain.clear();
 
     // PrintFingerInfo(fingersRootHeader, "fingersRootHeader " + FNS);
 
@@ -645,169 +599,29 @@ template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkToInsert()
     do
     {
         LoadFingersChunk(); // to fingersBA.data() from parentFinger.nextChunkOffset
+        GetChunkLevel();
+        FindFingerLE();
 
-            // get level
-        localStream->device()-> seek(egChunkVolume * oneFingerSize + sizeof(quint64));
-        *localStream >> currentFinger.myLevel;
-
-        // EG_LOG_STUB << "myLevel = " << currentFinger.myLevel << FN;
-
-        res = FindFingerInChunkToInsert(); // *localStream
-
-        currentFinger.myChunkOffset = parentFinger.nextChunkOffset; // shortcut (???)
-
+        currentFinger.myChunkOffset = parentFinger.nextChunkOffset;
         fingersChain.append(parentFinger);
 
         if ( currentFinger.myLevel > 0 )
             parentFinger = currentFinger;
     }
-    while ((currentFinger.myLevel > 0) && (res >= 0));
+    while ((currentFinger.myLevel > 0) /*&& (res >= 0)*/);
 
     // EG_LOG_STUB << "theKey = " << hex << (int) indexChunks-> theKey << FN;
 
     // PrintFingerInfo(parentFinger, "parentFinger " + FNS);
     // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
 
-    return res;
+    return 0; // res;
 }
 
-template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkFirst(bool isExactEqual)
+template <typename KeyType> inline void EgFingers<KeyType>::GetFingerByOffset(quint64 updatedFingerOffset)
 {
-    // PrintFingerInfo(rootFinger, "rootFinger " + FNS);
-
-    LoadRootFinger();
-
-    if (rootFinger.myLevel == 0) // only root finger exists
-    {
-        if (isExactEqual && (indexChunks-> theKey >= rootFinger.minKey) && (indexChunks-> theKey <= rootFinger.maxKey))
-        {
-            currentFinger = rootFinger;
-
-            return 0;
-        }
-
-        if (!isExactEqual && (indexChunks-> theKey > rootFinger.minKey) && (indexChunks-> theKey < rootFinger.maxKey))
-        {
-            currentFinger = rootFinger;
-
-            return 0;
-        }
-
-        return 1; // out of range
-    }
-
-    int res = 0;
-
-        // check root borders
-    // if (indexChunks-> theKey > fingersRootHeader.maxKey) // no first chunk found
-    //    return -1;
-
-    // int myLevel  = fingersRootHeader.myLevel;
-    parentFinger = rootFinger;
-
-        // go fingers chain
-    do
-    {
-        // PrintFingerInfo(parentFinger, "parentFinger " + FNS);
-
-        LoadFingersChunk(); // to fingersBA.data() from parentFinger.nextChunkOffset
-
-            // get level
-        localStream->device()-> seek(egChunkVolume * oneFingerSize + sizeof(quint64));
-        *localStream >> currentFinger.myLevel;
-
-        // EG_LOG_STUB << "myLevel = " << currentFinger.myLevel << FN;
-
-        res = FindNextLevelOffsetFirst(isExactEqual);  // get currentFinger, uses localStream
-
-        currentFinger.myChunkOffset = parentFinger.nextChunkOffset; // shortcut (???)
-
-        // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
-
-        if (currentFinger.myLevel > 0)
-            parentFinger = currentFinger;
-        // myLevel--;
-    }
-    while ((currentFinger.myLevel > 0) && (res >= 0)); // FIXME
-
-    // PrintFingerInfo(parentFinger, "parentFinger " + FNS);
-    // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
-
-    return res;
-}
-
-
-template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkLast(bool isExactEqual)
-{
-    // PrintFingerInfo(fingersRootHeader, "fingersRootHeader " + FNS);
-
-    LoadRootFinger();
-
-    if (rootFinger.myLevel == 0) // only root finger exists
-    {
-        if (isExactEqual && (indexChunks-> theKey >= rootFinger.minKey) && (indexChunks-> theKey <= rootFinger.maxKey))
-        {
-            currentFinger = rootFinger;
-
-            return 0;
-        }
-
-        if (!isExactEqual && (indexChunks-> theKey > rootFinger.minKey) && (indexChunks-> theKey < rootFinger.maxKey))
-        {
-            currentFinger = rootFinger;
-
-            return 0;
-        }
-
-        return 1; // out of range
-    }
-
-    int res = 0;
-
-        // check root borders
-    // if (indexChunks-> theKey < fingersRootHeader.minKey) // no first chunk found
-    //    return -1;
-
-    // int myLevel  = fingersRootHeader.myLevel;
-    parentFinger = rootFinger;
-
-        // fill fingers chain
-    do
-    {
-        LoadFingersChunk();  // to fingersBA.data() from parentFinger.nextChunkOffset
-
-            // get level
-        localStream->device()-> seek(egChunkVolume * oneFingerSize + sizeof(quint64));
-        *localStream >> currentFinger.myLevel;
-
-        res = FindNextLevelOffsetLast(isExactEqual);  // get currentFinger, uses localStream
-
-        // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
-
-        currentFinger.myChunkOffset = parentFinger.nextChunkOffset; // shortcut (???)
-
-
-        if (currentFinger.myLevel > 0)
-            parentFinger = currentFinger;
-        // myLevel--;
-    }
-    while ((currentFinger.myLevel > 0) && (res >= 0)); // FIXME
-
-    // PrintFingerInfo(parentFinger, "parentFinger " + FNS);
-    // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
-
-    return res;
-}
-
-
-template <typename KeyType> int EgFingers<KeyType>::GetFingerByOffset(quint64 updatedFingerOffset)
-{
-    // PrintFingerInfo(currentFinger, "currentFinger " + FNS );
-
-    currentFinger.myOffsetInChunk = (updatedFingerOffset-rootHeaderSize) % fingersChunkSize;
-    currentFinger.myChunkOffset = updatedFingerOffset - currentFinger.myOffsetInChunk;
-
-    return 0;
+    currentFinger.myOffsetInChunk = (updatedFingerOffset - rootHeaderSize) % fingersChunkSize;
+    currentFinger.myChunkOffset   =  updatedFingerOffset - currentFinger.myOffsetInChunk;
 }
 
 template <typename KeyType> int EgFingers<KeyType>::UpdateCurrentFingerAfterInsert()
@@ -831,8 +645,7 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateCurrentFingerAfterInse
 
 template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterInsert()
 {
-
-    if (rootFinger.myLevel == 0)
+    if (rootFinger.myLevel == 0) // root only
     {
         UpdateTheFingerMinMax(rootFinger);
         rootFinger.itemsCount++;
@@ -873,7 +686,7 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterInser
         UpdateTheFingerMinMax(rootFinger);   // do not increment count
 
         // indexChunks-> StoreRootHeader(true); // true means store min max only
-        StoreRootFingerMinMax();
+        StoreRootFingerMinMaxOnly();
     }
 
     return 0;
@@ -1037,7 +850,7 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterDelet
             else if (minValueChanged)
                 rootFinger.minKey =  newMinValue;
 
-            StoreRootFingerMinMax();
+            StoreRootFingerMinMaxOnly();
         }
 
         return 0;
@@ -1126,7 +939,7 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterDelet
             else if (minValueChanged)
                 rootFinger.minKey =  newMinValue;
 
-            StoreRootFingerMinMax();
+            StoreRootFingerMinMaxOnly();
         }
     }
 
@@ -1139,7 +952,8 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterDelet
 
 template <typename KeyType> inline void EgFingers<KeyType>::DeleteSpecificFinger(keysCountType keysCount)
 {
-    LoadFingersChunk(fingersBA.data(), currentFinger.myChunkOffset);
+    parentFinger.nextChunkOffset = currentFinger.myChunkOffset;
+    LoadFingersChunk(); // Explicit(fingersBA.data(), currentFinger.myChunkOffset);
 
     keysCountType fingerPosition = currentFinger.myOffsetInChunk / oneFingerSize;
     fingersLevelType myLocalLevel;
@@ -1343,6 +1157,7 @@ template <typename KeyType> inline void EgFingers<KeyType>::AddNewSubRootChunk()
     WriteFinger(*localStream, currentFinger);     // update current finger
     WriteFinger(*localStream, newFinger);         // add new finger
 
+        // set level
     localStream->device()-> seek(egChunkVolume * oneFingerSize + sizeof(quint64));
     *localStream << (keysCountType) (rootFinger.myLevel - 1);
 

@@ -141,10 +141,10 @@ int main() // int argc, char *argv[])
     tmpRes = indexTests.testEgDataInsertIndexes(testIndexFiles);
     res = res && tmpRes;
 
-    // return 0; // FIXME STUB
-
     tmpRes = indexTests.testSelectOperations(testIndexFiles);
     res = res && tmpRes;
+
+    // return 0; // FIXME STUB
 
     // tmpRes = indexTests.testEgDataDeleteAllIndexes(testIndexFiles);
 

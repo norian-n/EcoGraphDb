@@ -111,10 +111,10 @@ public:
     void LoadAllData(QSet<quint64>& index_offsets);
     void LoadDataUp(QSet<quint64>& index_offsets);
 
-    void LoadDataByChunkUp(QSet<quint64>& index_offsets, CompareFunctionType myCompareFunc);
+    int LoadDataByChunkUp(QSet<quint64>& index_offsets, CompareFunctionType myCompareFunc);
     int LoadDataByChunkDown(QSet<quint64>& index_offsets, CompareFunctionType myCompareFunc);
 
-    void LoadDataByChunkEqual(QSet<quint64>& index_offsets);
+    int LoadDataByChunkEqual(QSet<quint64>& index_offsets);
 
     int FindIndexByDataOffset(bool isPrimary);
 

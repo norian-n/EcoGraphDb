@@ -573,16 +573,17 @@ inline int EgDataFiles::LocalModifyNodesMap(const QMap<EgDataNodeIdType, EgDataN
                     // EG_LOG_STUB  << "Update index from " << tmpNode.dataFields  // << tmpNode.dataFields[indIter.value()].toInt()
                     //          << " to " << addIter.value()-> dataFields[indIter.value()].toInt() << FN;
 
+                        // set up index engine
                     indexFiles[indIter.key()]-> setIndex(tmpNode.dataFields[indIter.value().fieldNum]); // TODO - calc index of QVariant
                     indexFiles[indIter.key()]-> setDataOffset(primIndexFiles-> dataOffset);
 
+                    indexFiles[indIter.key()]-> setNewIndex(addIter.value()-> dataFields[indIter.value().fieldNum]);
+                    indexFiles[indIter.key()]-> setNewOffset(primIndexFiles-> newOffset);
 
                     bool isUpdated = tmpNode.dataFields[indIter.value().fieldNum] != addIter.value()-> dataFields[indIter.value().fieldNum];
 
-                    indexFiles[indIter.key()]-> setNewOffset(primIndexFiles-> newOffset);
-                    indexFiles[indIter.key()]-> setNewIndex(addIter.value()-> dataFields[indIter.value().fieldNum]);
-                    indexFiles[indIter.key()]-> UpdateIndex(isUpdated, false);
-
+                        // launch it
+                    indexFiles[indIter.key()]-> UpdateIndex(isUpdated, false); // false means not primary index FIXME check if needed
                 }
                 else
                     EG_LOG_STUB << "Error: Index not found: " << indIter.key() << FN;
@@ -642,15 +643,17 @@ int EgDataFiles::LocalModifyNodesList(const QList<EgDataNode> &updatedDataNodes)
                     // EG_LOG_STUB  << "Update index from " << tmpNode.dataFields  // << tmpNode.dataFields[indIter.value()].toInt()
                     //          << " to " << addIter.value()-> dataFields[indIter.value()].toInt() << FN;
 
+                        // set up index engine
                     indexFiles[indIter.key()]-> setIndex(tmpNode.dataFields[indIter.value().fieldNum]); // TODO - calc index of QVariant
                     indexFiles[indIter.key()]-> setDataOffset(primIndexFiles-> dataOffset);
 
+                    indexFiles[indIter.key()]-> setNewIndex(updIter.dataFields[indIter.value().fieldNum]);
+                    indexFiles[indIter.key()]-> setNewOffset(primIndexFiles-> newOffset);
 
                     bool isUpdated = tmpNode.dataFields[indIter.value().fieldNum] != updIter.dataFields[indIter.value().fieldNum];
 
-                    indexFiles[indIter.key()]-> setNewOffset(primIndexFiles-> newOffset);
-                    indexFiles[indIter.key()]-> setNewIndex(updIter.dataFields[indIter.value().fieldNum]);
-                    indexFiles[indIter.key()]-> UpdateIndex(isUpdated, false);
+                        // launch it
+                    indexFiles[indIter.key()]-> UpdateIndex(isUpdated, false);  // false means not primary index FIXME check if needed
 
                 }
                 else

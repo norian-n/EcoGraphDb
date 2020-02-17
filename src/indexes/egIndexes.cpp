@@ -182,6 +182,9 @@ template <typename KeyType> int EgIndexes<KeyType>::InsertToIndexChunk()
             AppendIndexChunk();
         else
             SplitIndexChunk();
+
+            // update fingers tree
+        fingersTree-> UpdateFingersChainAfterSplit();
     }
 
     return 0;
@@ -270,9 +273,6 @@ template <typename KeyType> int EgIndexes<KeyType>::SplitIndexChunk()
 
     // PrintIndexesChunk(indexBA.data(), "new_chunk " + FNS);
 
-        // update fingers tree
-    fingersTree-> UpdateFingersChainAfterSplit();
-
     return 0;
 }
 
@@ -322,9 +322,6 @@ template <typename KeyType> int EgIndexes<KeyType>::AppendIndexChunk()
         indexStream.device()->seek(nextOffsetPtr + egChunkVolume * oneIndexSize);
         indexStream << fingersTree-> newFinger.nextChunkOffset;
     }
-
-        // update fingers tree
-    fingersTree-> UpdateFingersChainAfterSplit();
 
     return 0;
 }
@@ -527,7 +524,7 @@ template <typename KeyType> void EgIndexes<KeyType>::LoadAllData(QSet<quint64>& 
     LoadDataUp(index_offsets);
 }
 
-template <typename KeyType> void EgIndexes<KeyType>::LoadDataByChunkUp(QSet<quint64>& index_offsets, CompareFunctionType myCompareFunc)
+template <typename KeyType> int EgIndexes<KeyType>::LoadDataByChunkUp(QSet<quint64>& index_offsets, CompareFunctionType myCompareFunc)
 {
     LoadIndexChunk(); // indexBA.data()
 
@@ -537,6 +534,8 @@ template <typename KeyType> void EgIndexes<KeyType>::LoadDataByChunkUp(QSet<quin
 
     if (indexPosition >= 0)
         LoadDataUp(index_offsets);
+
+    return 0;
 }
 
 template <typename KeyType> void EgIndexes<KeyType>::LoadDataUp(QSet<quint64>& index_offsets)
@@ -654,7 +653,7 @@ template <typename KeyType> int EgIndexes<KeyType>::LoadDataByChunkDown(QSet<qui
     return 0;
 }
 
-template <typename KeyType> void EgIndexes<KeyType>::LoadDataByChunkEqual(QSet<quint64>& index_offsets)
+template <typename KeyType> int EgIndexes<KeyType>::LoadDataByChunkEqual(QSet<quint64>& index_offsets)
 {
     KeyType currentIndex;
     quint64 dataOffset;
@@ -717,6 +716,8 @@ template <typename KeyType> void EgIndexes<KeyType>::LoadDataByChunkEqual(QSet<q
         localStream->device()-> seek((egChunkVolume * oneIndexSize) + (sizeof(quint64)));
         *localStream >> nextChunkPtr;
     }
+
+    return 0;
 }
 
 
@@ -830,26 +831,29 @@ template <typename KeyType> int EgIndexes<KeyType>::DeleteDataOffset()
         // write zeroes
     memset(indexBA.data() + (chunkCount - 1)*oneIndexSize, 0, oneIndexSize);
 
-    --chunkCount; // DECREASE
-
+        // reset flags
     fingersTree-> minValueChanged = false;
     fingersTree-> maxValueChanged = false;
 
-        // get new min/max FIXME remove it
+        // get new min/max FIXME check
     if (indexPosition == 0)
     {
-        fingersTree-> minValueChanged = true;
-
         localStream->device()->seek(0);
-        *localStream >> fingersTree->newMinValue;
-    }
-    else if (indexPosition == chunkCount)
-    {
-        fingersTree-> maxValueChanged = true;
+        *localStream >> fingersTree-> newMinValue;
 
-        localStream->device()->seek((chunkCount-1)*oneIndexSize);
-        *localStream >> fingersTree->newMaxValue;
+        if (theKey < fingersTree-> newMinValue)
+            fingersTree-> minValueChanged = true;
     }
+    else if ((indexPosition == chunkCount-1) && (chunkCount > 1))
+    {
+        localStream->device()->seek((chunkCount-2)*oneIndexSize);
+        *localStream >> fingersTree->newMaxValue;
+
+        if (theKey > fingersTree-> newMaxValue)
+            fingersTree-> maxValueChanged = true;
+    }
+
+    --chunkCount; // chunkCount DECREMENT here
 
         // write decreased count
     localStream->device()->seek((egChunkVolume * oneIndexSize) + (sizeof(quint64) * 2));
@@ -889,7 +893,7 @@ template <typename KeyType> int EgIndexes<KeyType>::DeleteIndex(bool isPrimary)
 
         if (chunkCount > 1) // not last index
         {
-            DeleteDataOffset(); // count decrease
+            DeleteDataOffset(); // chunkCount decrement here
 
             // EG_LOG_STUB << "chunkCount 2 =  " << hex << (int) chunkCount << FN;
             // EG_LOG_STUB << "fingersTree-> currentFingerOffset " << hex << (int) fingersTree-> currentFingerOffset << FN;
