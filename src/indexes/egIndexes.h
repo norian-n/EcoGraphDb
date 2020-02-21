@@ -126,6 +126,8 @@ public:
 
     void RemoveChunkFromChain();
 
+    bool checkIndexesIntegrity();
+
     void PrintIndexesChunk(char* theChunk, const QString& theMessage);  // debug
 };
 

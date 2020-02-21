@@ -85,6 +85,7 @@ public:
 
         // insert ops
     inline void GetChunkLevel(); // to currentFinger.myLevel
+    inline void UpdateChunkLevel(const fingersLevelType& theLevel);
 
     int FindIndexChunkToInsert();
 
@@ -94,6 +95,7 @@ public:
     inline void AddNewSubRootChunk();
 
     inline void MoveTailToInsert(char* chunkPtr, int fingerPosition, int fingersToMove);
+
     int InsertSplittedFinger();
     int InsertNewFinger(int posToInsert, int itemsCount);
 
@@ -135,7 +137,7 @@ public:
     void FindFingerGT(); // first finger for key greater then its min value
     int  FindIndexChunkGT();
 
-    void FindFingerLE(); // last finger for key less or equal then max value
+    void FindFingerLE(); // ==  FindFingerToInsert() : last finger for key less or equal then max value
     int  FindIndexChunkLE();
 
     void FindFingerLT(); // last finger for key less then its max value
@@ -145,6 +147,8 @@ public:
     int FindIndexChunkEQ(); // first EQ fnger on index chunk (0 level)
 
         // debug
+    bool checkFingersTreeIntegrity();
+
     void PrintFingerInfo(egFinger<KeyType>& fingerInfo, const QString &theMessage);
     void PrintFingersChunk(char* theFingersChunk, const QString& theMessage);
     void PrintChunkInfo(quint64 fingersChunkOffset);

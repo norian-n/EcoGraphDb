@@ -575,6 +575,12 @@ template <typename KeyType> inline void EgFingers<KeyType>::GetChunkLevel()
     *localStream >> currentFinger.myLevel;
 }
 
+template <typename KeyType> inline void EgFingers<KeyType>::UpdateChunkLevel(const fingersLevelType& theLevel)
+{
+    localStream->device()->seek(egChunkVolume * oneFingerSize + sizeof(quint64));
+    *localStream << theLevel;
+}
+
 template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkToInsert()
 {
     LoadRootFinger();
@@ -599,6 +605,7 @@ template <typename KeyType> int EgFingers<KeyType>::FindIndexChunkToInsert()
     do
     {
         LoadFingersChunk(); // to fingersBA.data() from parentFinger.nextChunkOffset
+
         GetChunkLevel();
         FindFingerLE();
 
@@ -1318,9 +1325,6 @@ template <typename KeyType> int EgFingers<KeyType>::SplitFingersChunk()
     // EG_LOG_STUB << "posToInsert = " << posToInsert << ", fingersCount = " << parentFinger.itemsCount << FN;
 
     if (posToInsert < parentFinger.itemsCount) // not last
-        // memmove (fingersBA.data() + (posToInsert+1)*oneFingerSize, fingersBA.data() + posToInsert*oneFingerSize,
-        //         oneFingerSize*(egChunkVolume - posToInsert + 1)); // FIXME MoveTail
-
         MoveTailToInsert(fingersBA.data(), posToInsert, parentFinger.itemsCount-posToInsert);
 
         // write updated current and new finger
@@ -1351,8 +1355,7 @@ template <typename KeyType> int EgFingers<KeyType>::SplitFingersChunk()
     memcpy(fingersBA.data(), &new_chunk, fingersChunkSize);
 
         // store chunk level
-    localStream->device()-> seek(egChunkVolume * oneFingerSize + sizeof(quint64));
-    *localStream << currentFinger.myLevel;
+    UpdateChunkLevel(currentFinger.myLevel);
 
     StoreFingersChunk(newChunkOffset, fingersBA.data());
 
@@ -1386,14 +1389,6 @@ template <typename KeyType> int EgFingers<KeyType>::SplitFingersChunk()
 
 template <typename KeyType> int EgFingers<KeyType>::AppendFingersChunk()
 {
-    /*
-    PrintFingerInfo(parentFinger, "parentFinger " + FNS);
-    PrintFingerInfo(currentFinger, "currentFinger " + FNS);
-    PrintFingerInfo(newFinger, "newFinger " + FNS);
-    */
-
-    // PrintFingerInfo(currentFinger, "currentFinger " + FNS);
-
         // init new chunk
     memset(fingersBA.data(), 0, fingersChunkSize);
 
@@ -1401,13 +1396,12 @@ template <typename KeyType> int EgFingers<KeyType>::AppendFingersChunk()
     localStream->device()-> seek(0);
     WriteFinger(*localStream, newFinger);
 
-    localStream->device()->seek(egChunkVolume * oneFingerSize + sizeof(quint64));
-    *localStream << currentFinger.myLevel;
+    UpdateChunkLevel(currentFinger.myLevel);
 
         // set parent back link to new finger at fingerStream.device()->size()
     if (currentFinger.myLevel > 0)
         StoreParentOffset(newFinger.nextChunkOffset, fingerStream.device()->size()); // FIXME check
-    else // update backlink
+    else // update index chunk backlink
         indexChunks-> StoreFingerOffset(newFinger.nextChunkOffset, fingerStream.device()->size());
 
         // level up
@@ -1422,6 +1416,12 @@ template <typename KeyType> int EgFingers<KeyType>::AppendFingersChunk()
     StoreFingersChunk(newFinger.nextChunkOffset, fingersBA.data());
 
     return 0;
+}
+
+template <typename KeyType> bool EgFingers<KeyType>::checkFingersTreeIntegrity()
+{
+
+    return true; // ok
 }
 
 /*

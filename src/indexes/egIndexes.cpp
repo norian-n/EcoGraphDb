@@ -960,6 +960,13 @@ template <typename KeyType> void EgIndexes<KeyType>::RemoveChunkFromChain()
 
 }
 
+template <typename KeyType> bool EgIndexes<KeyType>::checkIndexesIntegrity()
+{
+
+
+   return true; // ok
+}
+
 /*
 EgIndexes<qint32> EgIndexesqint32;
 EgIndexes<quint32> EgIndexesquint32;
