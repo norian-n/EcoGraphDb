@@ -1,5 +1,16 @@
-#ifndef EGLINKSTESTS_H
-#define EGLINKSTESTS_H
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2020 Dmitry 'Norian' Solodkiy
+ *
+ * License: defined in license.txt file located in the root sources dir
+ *
+ */
+
+// #ifndef EGLINKSTESTS_H
+// #define EGLINKSTESTS_H
+
+#pragma once
 
 #include <QtDebug>
 
@@ -42,4 +53,4 @@ public:
 };
 
 
-#endif // EGLINKSTESTS_H
+// #endif // EGLINKSTESTS_H

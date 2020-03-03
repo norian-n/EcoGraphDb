@@ -1,14 +1,16 @@
 /*
  * EcoGraphDB - Exo Cortex Graph Database Engine
  *
- * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
+ * Copyright (c) 2020 Dmitry 'Norian' Solodkiy
  *
  * License: defined in license.txt file located in the root sources dir
  *
  */
 
-#ifndef EG_DATA_NODES_GUI_CONNECT_H
-#define EG_DATA_NODES_GUI_CONNECT_H
+// #ifndef EG_DATA_NODES_GUI_CONNECT_H
+// #define EG_DATA_NODES_GUI_CONNECT_H
+
+#pragma once
 
 #include <QStandardItemModel>
 #include <QTableView>
@@ -16,6 +18,10 @@
 #include <QComboBox>
 
 #include "egDataNode.h"
+
+    // Qt data model related constants - service fields location
+const int data_status = Qt::UserRole + 1;   // DataStatusType equivalent
+const int data_id     = Qt::UserRole + 2;   // egDb data node ID
 
 class EgDataNodesType;
 
@@ -112,4 +118,4 @@ public:
 };
 
 
-#endif // EG_DATA_NODES_GUI_CONNECT_H
+// #endif // EG_DATA_NODES_GUI_CONNECT_H

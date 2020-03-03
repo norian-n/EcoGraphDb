@@ -1,15 +1,16 @@
 /*
  * EcoGraphDB - Exo Cortex Graph Database Engine
  *
- * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
+ * Copyright (c) 2020 Dmitry 'Norian' Solodkiy
  *
  * License: defined in license.txt file located in the root sources dir
  *
  */
 
-#ifndef EG_SERVER_ENGINE_H
-#define EG_SERVER_ENGINE_H
+// #ifndef EG_SERVER_ENGINE_H
+// #define EG_SERVER_ENGINE_H
 
+#pragma once
 
 #include <QString>
 #include <QList>
@@ -85,4 +86,4 @@ private slots:
 };
 
 
-#endif // EG_SERVER_ENGINE_H
+// #endif // EG_SERVER_ENGINE_H

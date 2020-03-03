@@ -12,6 +12,7 @@
 #include "egDataClient.h"
 #include "egGraphDatabase.h"
 
+#include <QDir>
 #include <QtDebug>
 
 EgDataNodeTypeExtraInfo::~EgDataNodeTypeExtraInfo()

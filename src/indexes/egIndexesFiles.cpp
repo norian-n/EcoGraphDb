@@ -457,6 +457,12 @@ template <typename KeyType> int EgIndexFiles<KeyType>::Load_LT(QSet<quint64>& in
     return res;
 }
 
+template <typename KeyType> bool EgIndexFiles<KeyType>::CheckIndexIntegrity()
+{
+    bool res = fingersTree.checkFingersTreeIntegrity();
+    return (res && indexChunks.checkIndexesIntegrity());
+}
+
 /*
 EgIndexFiles<qint32>  EgIndexFilesqint32(QString("EgIndexFilesqint32"));
 EgIndexFiles<quint32> EgIndexFilesquint32(QString("EgIndexFilesquint32"));

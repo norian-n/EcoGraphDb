@@ -1,10 +1,29 @@
-#ifndef PROJECT_FORM_H
-#define PROJECT_FORM_H
+/*
+ * EcoGraphDB - Exo Cortex Graph Database Engine
+ *
+ * Copyright (c) 2020 Dmitry 'Norian' Solodkiy
+ *
+ * License: defined in license.txt file located in the root sources dir
+ *
+ */
+
+// #ifndef PROJECT_FORM_H
+// #define PROJECT_FORM_H
+
+#pragma once
 
 #include <QDialog>
 
 #include "ui_NodeForm.h"
 #include "../../egDataNodesType.h"
+
+// Qt form data node operations
+enum formMode
+{
+    formModeAdd,
+    formModeEdit,
+    formModeDelete
+};
 
 class GraphSceneForm;
 
@@ -36,4 +55,4 @@ private:
     Ui::NodeForm *ui;
 };
 
-#endif // PROJECT_FORM_H
+// #endif // PROJECT_FORM_H

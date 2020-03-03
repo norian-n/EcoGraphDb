@@ -1,14 +1,19 @@
 /*
  * EcoGraphDB - Exo Cortex Graph Database Engine
  *
- * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
+ * Copyright (c) 2020 Dmitry 'Norian' Solodkiy
  *
  * License: defined in license.txt file located in the root sources dir
  *
  */
 
-#ifndef EG_GRAPH_DATABASE_H
-#define EG_GRAPH_DATABASE_H
+// /* Almost all compilers support "pragma once"                                     */
+// /* If you got an ugly one someway, uncomment and double-check the define guards manually */
+
+// #ifndef EG_GRAPH_DATABASE_H
+// #define EG_GRAPH_DATABASE_H
+
+#pragma once
 
 #include <QDir>
 
@@ -127,6 +132,6 @@ public:
 };
 
 
-#endif // EG_GRAPH_DATABASE_H
+// #endif // EG_GRAPH_DATABASE_H
 
 

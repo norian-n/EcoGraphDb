@@ -1,5 +1,7 @@
-#ifndef GRAPHSCENEFORM_H
-#define GRAPHSCENEFORM_H
+// #ifndef GRAPHSCENEFORM_H
+// #define GRAPHSCENEFORM_H
+
+#pragma once
 
 #include <QWidget>
 #include <QGraphicsScene>
@@ -158,4 +160,4 @@ private:
     void LoadGraph();
 };
 
-#endif // GRAPHSCENEFORM_H
+// #endif // GRAPHSCENEFORM_H

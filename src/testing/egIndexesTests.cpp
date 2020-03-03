@@ -45,9 +45,11 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataIndexAddFirs
     // egIndexFiles.LoadFingersChunk();
     // egIndexFiles.LoadIndexChunk();
 
+    bool res = egIndexFiles.CheckIndexIntegrity();
+
     egIndexFiles.CloseFiles();
 
-    return true;
+    return res;
 }
 
 template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataIndexDelFirst(EgIndexFiles<KeyType> &egIndexFiles)
@@ -59,12 +61,14 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataIndexDelFirs
 
     egIndexFiles.DeleteIndex();
 
+    bool res = true; // egIndexFiles.CheckIndexIntegrity();
+
     // egIndexFiles.LoadFingersChunk();
     // egIndexFiles.LoadIndexChunk();
 
     egIndexFiles.CloseFiles();
 
-    return true;
+    return res;
 }
 
 template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataInsertIndexes(EgIndexFiles<KeyType> &egIndexFiles)
@@ -91,9 +95,11 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataInsertIndexe
 
     // egIndexFiles.fingersTree.PrintAllChunksInfo("After insert");
 
+    bool res = egIndexFiles.CheckIndexIntegrity();
+
     egIndexFiles.CloseFiles();
 
-    return true;
+    return res;
 }
 
 template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataDeleteAllIndexes(EgIndexFiles<KeyType> &egIndexFiles)
@@ -118,9 +124,11 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataDeleteAllInd
 
     // egIndexFiles.fingersTree.PrintAllChunksInfo("After delete");
 
+    bool res = true; // egIndexFiles.CheckIndexIntegrity();
+
     egIndexFiles.CloseFiles();
 
-    return true;
+    return res;
 }
 
 template <typename KeyType> bool EgIndexesTests<KeyType>::testSelectOperations(EgIndexFiles<KeyType> &egIndexFiles)
@@ -165,6 +173,12 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testSelectOperations(E
     // for (QSet<quint64>::iterator offsets_iter = theIndexOffsets.begin(); offsets_iter != theIndexOffsets.end(); ++offsets_iter)
     //    qDebug() <<  "Seek data pos = " << hex << (unsigned int) *offsets_iter << FN;
 
+    egIndexFiles.OpenFilesToRead();
+
+    res = res && egIndexFiles.CheckIndexIntegrity();
+
+    egIndexFiles.CloseFiles();
+
     testShowResult(res, FNS);
 
     return res;
@@ -182,9 +196,11 @@ template <typename KeyType> bool EgIndexesTests<KeyType>::testEgDataDeleteIndex(
     // egIndexFiles.LoadFingersChunk();
     // egIndexFiles.LoadIndexChunk();
 
+    bool res = egIndexFiles.CheckIndexIntegrity();
+
     egIndexFiles.CloseFiles();
 
-    return true;
+    return res;
 }
 
 template class EgIndexesTests<qint32>;

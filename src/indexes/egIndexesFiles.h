@@ -1,14 +1,16 @@
 /*
  * EcoGraphDB - Exo Cortex Graph Database Engine
  *
- * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
+ * Copyright (c) 2020 Dmitry 'Norian' Solodkiy
  *
  * License: defined in license.txt file located in the root sources dir
  *
  */
 
-#ifndef EGINDEXES_FILES3_H
-#define EGINDEXES_FILES3_H
+// #ifndef EGINDEXES_FILES3_H
+// #define EGINDEXES_FILES3_H
+
+#pragma once
 
 #include <QDir>
 #include <QVariant>
@@ -60,6 +62,8 @@ public:
 
     virtual int Load_LE(QSet<quint64>& index_offsets, QVariant& Key) = 0;
     virtual int Load_LT(QSet<quint64>& index_offsets, QVariant& Key) = 0;
+
+    virtual bool CheckIndexIntegrity() = 0;
 
 };
 
@@ -164,7 +168,7 @@ public:
     int Load_LT(QSet<quint64>& index_offsets, KeyType Key);       // load lesser objects
     int Load_EQ(QSet<quint64>& index_offsets, KeyType Key);       // load equal objects
 
-
+    bool CheckIndexIntegrity();
 };
 
-#endif // EGINDEXESFILES3_H
+// #endif // EGINDEXESFILES3_H

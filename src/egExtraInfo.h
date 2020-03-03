@@ -1,16 +1,17 @@
 /*
  * EcoGraphDB - Exo Cortex Graph Database Engine
  *
- * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
+ * Copyright (c) 2020 Dmitry 'Norian' Solodkiy
  *
  * License: defined in license.txt file located in the root sources dir
  *
  */
 
-#ifndef EG_META_INFO_H
-#define EG_META_INFO_H
+// #ifndef EG_META_INFO_H
+// #define EG_META_INFO_H
 
-#include <QDir>
+#pragma once
+
 #include <QDataStream>
 
 #include "egDataNode.h"
@@ -96,4 +97,4 @@ QDataStream& operator << (QDataStream& dStream, EgDataNodeTypeExtraInfo& metaInf
 QDataStream& operator >> (QDataStream& dStream, EgDataNodeTypeExtraInfo& metaInfo);
 
 
-#endif // EG_META_INFO_H
+// #endif // EG_META_INFO_H

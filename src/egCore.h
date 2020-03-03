@@ -1,27 +1,33 @@
 /*
  * EcoGraphDB - Exo Cortex Graph Database Engine
  *
- * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
+ * Copyright (c) 2020 Dmitry 'Norian' Solodkiy
  *
  * License: defined in license.txt file located in the root sources dir
  *
  */
 
-#ifndef EG_CORE_H
-#define EG_CORE_H
+// /* Almost all compilers support "pragma once"                                     */
+// /* If you got an ugly one someway, uncomment and double-check the define guards manually */
 
-// #define EG_LIB_BUILD
+// #ifndef EG_CORE_H
+// #define EG_CORE_H
+
+// #define EG_LIB_BUILD // or use it in compiler options for the lib setup
 
 // egCore - basic types and constants
 
-#include <QtDebug>
+#pragma once
 
-#include <QString>
-#include <QVariant>
-
-#include "egLogging.h"
+// #include <QString>
+// #include <QVariant>
 
         // debug info definition
+#include <QtDebug>
+#include "egLogging.h"
+
+// The custom async singleton logger to log file would be better for release version, qDebug used for development stage
+
 // #define EG_LOG_STUB *egGlobalLoggerPtr
 
 #define EG_LOG_STUB qDebug()
@@ -37,8 +43,6 @@
     #define FNS QString("[") + __FUNCTION__ + ", " + __FILE__ + "]"
 #endif
 
-
-
     // bool flags aliases
 const bool isIndexed = true;
 const bool useLocations = true;
@@ -49,11 +53,6 @@ const bool useLocations = true;
 typedef int32_t  EgDataNodeIdType;      // data object ID type
 typedef uint16_t EgFieldIDtype;         // data field ID type
 typedef uint32_t EgIndexNodeIDtype;     // index node ID type
-
-class EgDataNode;
-
-    // custom filter function type (remote filter could be set via Qt plugins)
-typedef bool (*FilterFunctionType) (EgDataNode& dataNode, QList<QVariant>& filterValues);
 
 // sample: bool FilterTest (EgDataNode& dataNode, QList<QVariant>& filterValues)
 
@@ -106,24 +105,4 @@ struct EgIndexSettings
 
 };
 
-    // data node add-on for uncommon data
-struct NamedAttribute
-{
-    QString  name;
-    QVariant value;
-};
-
-    // Qt form data node operations
-enum formMode
-{
-    formModeAdd,
-    formModeEdit,
-    formModeDelete
-};
-
-    // Qt data model related constants - service fields location
-const int data_status = Qt::UserRole + 1;   // DataStatusType equivalent
-const int data_id     = Qt::UserRole + 2;   // egDb data node ID
-
-
-#endif // EG_CORE_H
+// #endif // EG_CORE_H

@@ -278,6 +278,19 @@ template <typename KeyType> int EgFingers<KeyType>::LoadFingersChunkExplicit(cha
 }
 */
 
+template <typename KeyType> void EgFingers<KeyType>::LoadFingerDirect(egFinger<KeyType>& theFinger, const quint64 fingerOffset)
+{
+    theFinger.myOffsetInChunk = (fingerOffset - rootHeaderSize) % fingersChunkSize;
+    theFinger.myChunkOffset   =  fingerOffset - currentFinger.myOffsetInChunk;
+
+    fingerStream.device()->seek(fingerOffset);
+
+    fingerStream >> theFinger.minKey;
+    fingerStream >> theFinger.maxKey;
+    fingerStream >> theFinger.itemsCount;
+    fingerStream >> theFinger.nextChunkOffset;
+}
+
 template <typename KeyType> void EgFingers<KeyType>::ReadFinger(egFinger<KeyType>& theFinger, const int fingerPosition)
 {
     theFinger.myOffsetInChunk = fingerPosition * oneFingerSize;
@@ -960,23 +973,20 @@ template <typename KeyType> int EgFingers<KeyType>::UpdateFingersChainAfterDelet
 template <typename KeyType> inline void EgFingers<KeyType>::DeleteSpecificFinger(keysCountType keysCount)
 {
     parentFinger.nextChunkOffset = currentFinger.myChunkOffset;
-    LoadFingersChunk(); // Explicit(fingersBA.data(), currentFinger.myChunkOffset);
+    LoadFingersChunk();     // to fingersBA.data() by currentFinger.myChunkOffset);
 
     keysCountType fingerPosition = currentFinger.myOffsetInChunk / oneFingerSize;
-    fingersLevelType myLocalLevel;
 
-    localStream->device()-> seek(egChunkVolume * oneFingerSize + sizeof(quint64));
-    *localStream >> myLocalLevel;
+    GetChunkLevel();        // to currentFinger.myLevel
 
     // EG_LOG_STUB << "keysCount = " << keysCount << ", fingerPosition = " << fingerPosition << ", myLocalLevel = " << myLocalLevel << FN;
-
     // PrintFingersChunk(fingersBA.data(), "fingers chunk before delete " + FNS);
 
         // move tail if required
     if (fingerPosition < keysCount-1)
     {
         memmove (fingersBA.data() + fingerPosition*oneFingerSize, fingersBA.data() + (fingerPosition+1)*oneFingerSize,  oneFingerSize*(keysCount - 1 - fingerPosition));
-        UpdateBackptrOffsets(currentFinger.myChunkOffset,  fingerPosition, keysCount-1, myLocalLevel);
+        UpdateBackptrOffsets(currentFinger.myChunkOffset,  fingerPosition, keysCount-1, currentFinger.myLevel);
     }
 
     memset(fingersBA.data()+ oneFingerSize*(keysCount-1), 0, oneFingerSize);
@@ -1010,11 +1020,11 @@ template <typename KeyType> int EgFingers<KeyType>::DeleteParentFinger() // recu
     {
         GetFingerByOffset(currentFingerOffset); // set current finger offsets
 
-        // get parent
+            // get parent
         fingerStream.device()->seek(currentFinger.myChunkOffset + egChunkVolume * oneFingerSize);
         fingerStream >> parentFingerOffset;
 
-        // check fingers count
+            // check fingers count
         if (parentFingerOffset) // parent not root
         {
             fingerStream.device()->seek(parentFingerOffset);
@@ -1419,7 +1429,66 @@ template <typename KeyType> int EgFingers<KeyType>::AppendFingersChunk()
 }
 
 template <typename KeyType> bool EgFingers<KeyType>::checkFingersTreeIntegrity()
-{
+{   
+    LoadRootFinger();
+
+        // check root finger, it has to have at least one index
+    if (! rootFinger.itemsCount || ! rootFinger.nextChunkOffset)
+    {
+        EG_LOG_STUB << "Possible fingers structure corrupted: zero count or data offset " << FN;
+        return false;
+    }
+
+    if (rootFinger.myLevel == 0) // root only
+        return true;
+
+    parentFinger = rootFinger;
+    fingersChain.clear();
+
+        // use queue (QList) to walk tree and fingers counter to check loops (?)
+    do
+    {
+        LoadFingersChunk(); // to fingersBA.data() from parentFinger.nextChunkOffset
+        GetChunkLevel();    // to currentFinger.myLevel
+
+            // check parent offset
+        localStream-> device()->seek(egChunkVolume * oneFingerSize);
+        *localStream >> parentFingerOffset;
+
+        egFinger<KeyType> testFinger;
+        LoadFingerDirect(testFinger, parentFingerOffset);
+
+        if (testFinger.nextChunkOffset != parentFinger.nextChunkOffset)
+        {
+            EG_LOG_STUB << "Possible fingers structure corrupted: bad parent finger backlink " << FN;
+            return false;
+        }
+
+            // check chunk content
+        for (int i=0; i < parentFinger.itemsCount; i++)
+        {
+                // check next offset
+            ReadFinger(currentFinger, i);
+
+            if (! currentFinger.itemsCount || ! currentFinger.nextChunkOffset)
+            {
+                EG_LOG_STUB << "Possible fingers structure corrupted: zero count or data offset " << FN;
+                return false;
+            }
+
+            if ( currentFinger.myLevel > 0 )
+                fingersChain.append(currentFinger);
+        }
+
+        if ( ! fingersChain.isEmpty() )
+        {
+            parentFinger = fingersChain.first();
+            fingersChain.removeFirst();
+        }
+
+        // EG_LOG_STUB << "fingersChain.count() = " << fingersChain.count() << FN;
+    }
+    while (! fingersChain.isEmpty()); // ! fingersChain.isEmpty()
 
     return true; // ok
 }

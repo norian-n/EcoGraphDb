@@ -1,17 +1,19 @@
 /*
  * EcoGraphDB - Exo Cortex Graph Database Engine
  *
- * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
+ * Copyright (c) 2020 Dmitry 'Norian' Solodkiy
  *
  * License: defined in license.txt file located in the root sources dir
  *
  */
 
-#ifndef EG_DATANODE_H
-#define EG_DATANODE_H
+// #ifndef EG_DATANODE_H
+// #define EG_DATANODE_H
 
-// #include <QString>
-// #include <QVariant>
+#pragma once
+
+#include <QString>
+#include <QVariant>
 
 #include "egCore.h"
 
@@ -30,7 +32,12 @@ namespace EgDataNodesNamespace
 
 static QVariant egNotFound("<Not found>");
 
-class EgDataNodeTypeExtraInfo;
+// static const char* const egNotFound { "<Not found>" };
+
+class EgDataNode;
+
+    // custom filter function type (remote filter could be set via Qt plugins)
+typedef bool (*FilterFunctionType) (EgDataNode& dataNode, QList<QVariant>& filterValues);
 
 struct EgExtendedLinkType
 {
@@ -46,6 +53,8 @@ struct EgDataNodeLinks           // Data Object Instance 1
     QMap < QString, QList<EgExtendedLinkType> > inLinks;
     QMap < QString, QList<EgExtendedLinkType> > outLinks;
 };
+
+class EgDataNodeTypeExtraInfo;
 
 #ifdef EG_LIB_BUILD     // library build switch, define it in project or egCore.h
 
@@ -98,4 +107,4 @@ QDataStream& operator << (QDataStream& dStream, EgDataNode& dNode);    // transf
 QDataStream& operator >> (QDataStream& dStream, EgDataNode& dNode);    // transfer and file operations
 
 
-#endif // EG_DATANODE_H
+// #endif // EG_DATANODE_H

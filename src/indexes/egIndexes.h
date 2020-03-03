@@ -1,14 +1,16 @@
 /*
  * EcoGraphDB - Exo Cortex Graph Database Engine
  *
- * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
+ * Copyright (c) 2020 Dmitry 'Norian' Solodkiy
  *
  * License: defined in license.txt file located in the root sources dir
  *
  */
 
-#ifndef EG_INDEXES3_H
-#define EG_INDEXES3_H
+// #ifndef EG_INDEXES3_H
+// #define EG_INDEXES3_H
+
+#pragma once
 
 #include <QDataStream>
 #include <QList>
@@ -80,7 +82,9 @@ public:
     int StoreFingerOffset(quint64 chunkOffset, quint64 fingerOffset);   // update finger backptr
 
     int GetFingerOffset(quint64& fingerOffset);                 // visual tree support
-    int GetChainPointers(quint64& fwdPtr, quint64& backPtr);
+    int GetChainPointers(quint64& nextPtr, quint64& prevPtr);
+
+    inline void GetKeyByFileOffset(quint64 chunkOffset, int indexPosition, KeyType& theKey);
 
     int LoadIndexChunk(char *chunkPtr, quint64 chunkOffset);    // by indexesChunkOffset
     int LoadIndexChunk();        // default: loads fingersTree-> currentFinger.nextChunkOffset to indexBA.data()
@@ -126,9 +130,12 @@ public:
 
     void RemoveChunkFromChain();
 
-    bool checkIndexesIntegrity();
+    inline bool checkIndexesChainFwd(quint64 &doubleSpeedOffset);     // check indexes chain for loops
+    inline bool checkIndexesChainBack();
+
+    bool checkIndexesIntegrity();  // don't use it inside operations
 
     void PrintIndexesChunk(char* theChunk, const QString& theMessage);  // debug
 };
 
-#endif // EG_INDEXES3_H
+// #endif // EG_INDEXES3_H

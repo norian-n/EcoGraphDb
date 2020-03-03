@@ -1,14 +1,16 @@
 /*
  * EcoGraphDB - Exo Cortex Graph Database Engine
  *
- * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
+ * Copyright (c) 2020 Dmitry 'Norian' Solodkiy
  *
  * License: defined in license.txt file located in the root sources dir
  *
  */
 
-#ifndef EG_DATA_NODES_TYPE_H
-#define EG_DATA_NODES_TYPE_H
+// #ifndef EG_DATA_NODES_TYPE_H
+// #define EG_DATA_NODES_TYPE_H
+
+#pragma once
 
 #include "egDataNode.h"
 #include "egExtraInfo.h"
@@ -151,5 +153,5 @@ public:
 
 };
 
-#endif // EG_DATA_NODES_TYPE_H
+// #endif // EG_DATA_NODES_TYPE_H
 

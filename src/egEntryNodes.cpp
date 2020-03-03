@@ -10,6 +10,7 @@
 #include "egEntryNodes.h"
 #include "egDataNodesType.h"
 
+#include <QDir>
 #include <QFile>
 
 EgEntryNodes::EgEntryNodes(EgDataNodesType* theNodesType):

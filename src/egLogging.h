@@ -1,14 +1,16 @@
 /*
  * EcoGraphDB - Exo Cortex Graph Database Engine
  *
- * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
+ * Copyright (c) 2020 Dmitry 'Norian' Solodkiy
  *
  * License: defined in license.txt file located in the root sources dir
  *
  */
 
-#ifndef EG_LOGGING_ASYNC_H
-#define EG_LOGGING_ASYNC_H
+#pragma once
+
+// #ifndef EG_LOGGING_ASYNC_H
+// #define EG_LOGGING_ASYNC_H
 
 #include <QString>
 
@@ -201,4 +203,4 @@ inline egAsyncLogger& operator<<(egAsyncLogger& theLogger, const QHash<K, V> &c)
     return theLogger;
 }
 
-#endif // EG_LOGGING_ASYNC_H
+// #endif // EG_LOGGING_ASYNC_H

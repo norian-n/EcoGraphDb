@@ -58,11 +58,17 @@ template <typename KeyType> int EgIndexes<KeyType>::GetFingerOffset(quint64& fin
     return 0;
 }
 
-template <typename KeyType> int EgIndexes<KeyType>::GetChainPointers(quint64& fwdPtr, quint64& backPtr)
+template <typename KeyType> inline void EgIndexes<KeyType>::GetKeyByFileOffset(quint64 chunkOffset, int indexPosition, KeyType& theKey)
+{
+    indexStream.device()-> seek(chunkOffset + indexPosition * oneIndexSize);
+    indexStream >> theKey;
+}
+
+template <typename KeyType> int EgIndexes<KeyType>::GetChainPointers(quint64& nextPtr, quint64& prevPtr)
 {
     localStream->device()-> seek(egChunkVolume * oneIndexSize);
-    *localStream >> fwdPtr;
-    *localStream >> backPtr;
+    *localStream >> prevPtr;
+    *localStream >> nextPtr;
 
     return 0;
 }
@@ -960,9 +966,175 @@ template <typename KeyType> void EgIndexes<KeyType>::RemoveChunkFromChain()
 
 }
 
+template <typename KeyType> bool EgIndexes<KeyType>::checkIndexesChainFwd(quint64 &doubleSpeedOffset)
+{
+    if (doubleSpeedOffset)
+    {
+        indexStream.device()->seek(doubleSpeedOffset + (egChunkVolume * oneIndexSize + sizeof(quint64)));
+        indexStream >> doubleSpeedOffset;
+
+        if (doubleSpeedOffset == nextOffsetPtr)
+            return false;
+
+        if (doubleSpeedOffset)
+        {
+            indexStream.device()->seek(doubleSpeedOffset + (egChunkVolume * oneIndexSize + sizeof(quint64)));
+            indexStream >> doubleSpeedOffset;
+
+            if (doubleSpeedOffset == nextOffsetPtr)
+                return false;
+        }
+    }
+
+    return true;
+}
+
+template <typename KeyType> bool EgIndexes<KeyType>::checkIndexesChainBack()
+{
+    quint64 doubleSpeedOffset = prevOffsetPtr;
+
+    while (prevOffsetPtr && doubleSpeedOffset)
+    {
+        indexStream.device()->seek(doubleSpeedOffset + (egChunkVolume * oneIndexSize));
+        indexStream >> doubleSpeedOffset;
+
+        if (doubleSpeedOffset == prevOffsetPtr)
+            return false;
+
+        if (doubleSpeedOffset)
+        {
+            indexStream.device()->seek(doubleSpeedOffset + (egChunkVolume * oneIndexSize));
+            indexStream >> doubleSpeedOffset;
+
+            if (doubleSpeedOffset == prevOffsetPtr)
+                return false;
+        }
+
+        indexStream.device()->seek(prevOffsetPtr + (egChunkVolume * oneIndexSize));
+        indexStream >> prevOffsetPtr;
+    }
+
+    return true;
+}
+
 template <typename KeyType> bool EgIndexes<KeyType>::checkIndexesIntegrity()
 {
+    KeyType currentKey, chunkMin, chunkMax, nextMin, prevMax;
+    quint64 dataOffset, fingerOffset;
 
+    keysCountType prevChunkCount;
+
+        // get first index offset from header
+    indexStream.device()->seek(0);
+    indexStream >> nextOffsetPtr;
+
+    quint64 doubleSpeedOffset = nextOffsetPtr;
+
+    while (nextOffsetPtr)
+    {
+        LoadIndexChunk(indexBA.data(), nextOffsetPtr); // fingersTree-> currentFinger.nextChunkOffset to indexBA.data()
+
+        localStream->device()->seek(egChunkVolume * oneIndexSize + sizeof(quint64) * 2);
+        *localStream >> chunkCount;
+
+        // EG_LOG_STUB << "indexPosition =  " << indexPosition  << " , chunkCount =  " << chunkCount << FN;
+
+        indexPosition = 0;
+
+        while (indexPosition < chunkCount)
+        {
+            localStream->device()->seek(indexPosition * oneIndexSize);
+            *localStream >> currentKey;
+            *localStream >> dataOffset;
+
+            // check for both zero index key and data offset
+            if (! static_cast<int> (currentKey) && ! dataOffset)
+            {
+                EG_LOG_STUB << "Possible structure corrupted: zero index key and data offset " << FN;
+                return false;
+            }
+
+            if (! indexPosition)
+                chunkMin = currentKey;
+
+            if (indexPosition == chunkCount-1)
+                chunkMax = currentKey;
+
+            indexPosition++;
+        }
+
+            // check for parent finger count and downlink
+        GetFingerOffset(fingerOffset);
+        fingersTree->LoadFingerDirect(fingersTree->currentFinger, fingerOffset);
+
+        if ((fingersTree->currentFinger.minKey != chunkMin) ||
+            (fingersTree->currentFinger.maxKey != chunkMax) ||
+            (fingersTree->currentFinger.itemsCount != chunkCount) ||
+             fingersTree->currentFinger.nextChunkOffset != nextOffsetPtr)
+        {
+            EG_LOG_STUB << "Possible bad finger for index chunk " << FN;
+
+            EG_LOG_STUB << "Min: " << static_cast<int> (chunkMin)
+                        << " Max: " << static_cast<int> (chunkMax)
+                        << " Chunk offset: " << nextOffsetPtr
+                        << " Chunk count: "  << chunkCount;
+            fingersTree->PrintFingerInfo(fingersTree->currentFinger, "Finger by chunk uplink");
+
+            return false;
+        }
+
+            // check indexes chain for loops:
+        if (doubleSpeedOffset && ! checkIndexesChainFwd(doubleSpeedOffset))
+        {
+            EG_LOG_STUB << "Possible indexes chain loop detected on fwd links" << FN;
+            return false;
+        }
+
+            // get next chunk
+        GetChainPointers(nextOffsetPtr, prevOffsetPtr);
+
+            // check for min/max issues with prev/next chunk
+        if (nextOffsetPtr)
+        {
+            GetKeyByFileOffset(nextOffsetPtr, 0, nextMin);
+
+            if (nextMin < chunkMax)
+            {
+                EG_LOG_STUB << "Possible indexes chain min/max failure, max = " << (int) chunkMax << " , next min = " << (int) nextMin  << FN;
+                EG_LOG_STUB << "nextOffsetPtr = " << hex << nextOffsetPtr << FN;
+                EG_LOG_STUB << "prevOffsetPtr = " << hex << prevOffsetPtr << FN;
+                return false;
+            }
+        }
+
+        if (prevOffsetPtr)
+        {
+            indexStream.device()-> seek(prevOffsetPtr + egChunkVolume * oneIndexSize + sizeof(quint64) * 2);
+            indexStream >> prevChunkCount;
+
+            GetKeyByFileOffset(prevOffsetPtr, prevChunkCount - 1, prevMax);
+
+            if (prevMax > chunkMin)
+            {
+                EG_LOG_STUB << "Possible indexes chain min/max failure, prev max = " << (int) prevMax << " , min = " << (int) chunkMin  << FN;
+                EG_LOG_STUB << "nextOffsetPtr = " << hex << nextOffsetPtr << FN;
+                EG_LOG_STUB << "prevOffsetPtr = " << hex << prevOffsetPtr << FN;
+
+                return false;
+            }
+        }
+
+    }
+
+        // check indexes chain backlinks
+    localStream->device()->seek(egChunkVolume * oneIndexSize);
+    *localStream >> prevOffsetPtr;
+
+    if (! checkIndexesChainBack())
+    {
+        EG_LOG_STUB << "Possible indexes chain loop detected on backward links" << FN;
+        return false;
+    }
 
    return true; // ok
 }

@@ -1,14 +1,16 @@
 /*
  * EcoGraphDB - Exo Cortex Graph Database Engine
  *
- * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
+ * Copyright (c) 2020 Dmitry 'Norian' Solodkiy
  *
  * License: defined in license.txt file located in the root sources dir
  *
  */
 
-#ifndef EG_FINGERS_H
-#define EG_FINGERS_H
+// #ifndef EG_FINGERS_H
+// #define EG_FINGERS_H
+
+#pragma once
 
 #include <QList>
 #include <QVariant>
@@ -83,6 +85,8 @@ public:
     int LoadFingersChunk();         // default: to fingersBA.data() from parentFinger.nextChunkOffset
     int StoreFingersChunk(quint64 fingersChunkOffset, char* chunkPtr);
 
+    void LoadFingerDirect(egFinger<KeyType>& theFinger, const quint64 fingerOffset);
+
         // insert ops
     inline void GetChunkLevel(); // to currentFinger.myLevel
     inline void UpdateChunkLevel(const fingersLevelType& theLevel);
@@ -147,7 +151,7 @@ public:
     int FindIndexChunkEQ(); // first EQ fnger on index chunk (0 level)
 
         // debug
-    bool checkFingersTreeIntegrity();
+    bool checkFingersTreeIntegrity();  // don't use it inside operations
 
     void PrintFingerInfo(egFinger<KeyType>& fingerInfo, const QString &theMessage);
     void PrintFingersChunk(char* theFingersChunk, const QString& theMessage);
@@ -157,4 +161,4 @@ public:
 
 };
 
-#endif // EG_FINGERS_H
+// #endif // EG_FINGERS_H

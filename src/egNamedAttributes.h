@@ -1,16 +1,18 @@
 /*
  * EcoGraphDB - Exo Cortex Graph Database Engine
  *
- * Copyright (c) 2018 Dmitry 'Norian' Solodkiy
+ * Copyright (c) 2020 Dmitry 'Norian' Solodkiy
  *
  * License: defined in license.txt file located in the root sources dir
  *
  */
 
-#ifndef NAMED_ATTRIBUTES_H
-#define NAMED_ATTRIBUTES_H
+// #ifndef NAMED_ATTRIBUTES_H
+// #define NAMED_ATTRIBUTES_H
 
-#include "egCore.h"
+#pragma once
+
+#include "egDataNode.h"
 
 class EgDataNodesType;
 
@@ -20,8 +22,8 @@ public:
 
     // FIXME TODO check if all functionality implemented, write coverage tests
 
-    EgDataNodesType* primaryNodesType;                  // backlink to my type
-    EgDataNodesType* namedAttributesStorage;            // data
+    EgDataNodesType* primaryNodesType;                  // backlink to my master type
+    EgDataNodesType* namedAttributesStorage;            // data pile
 
     // EgDataNodeIDtype currentNodeId = 0;              // last for GetNamedAttributes
     QMap <QString, QVariant>  namedAttributesOfNode;    // temporary for GetNamedAttributes
@@ -48,4 +50,4 @@ public:
 };
 
 
-#endif // NAMED_ATTRIBUTES_H
+// #endif // NAMED_ATTRIBUTES_H
