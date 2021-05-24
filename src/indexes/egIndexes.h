@@ -75,6 +75,9 @@ public:
     static bool CompareLT (KeyType& currentIndex, KeyType& theKey) {return (currentIndex < theKey);}
     static bool CompareLE (KeyType& currentIndex, KeyType& theKey) {return (currentIndex <= theKey);}
 
+    inline void InitMinMaxFlags();
+    inline void SetMinMaxFlags();
+
     void InitIndexChunk();
     void StoreRootHeader(); // meta-info of indexes (first chunk for loadAll, empty chain(TBD)), also for non-zero offset
 
@@ -122,11 +125,10 @@ public:
 
     int FindIndexByDataOffset(bool isPrimary);
 
-    void UpdateIndex(bool isPrimary = false);
+    void UpdateDataOffsetForIndex(bool isPrimary = false);
     int DeleteIndex(bool isPrimary = false);
 
-    int UpdateDataOffset();
-    int DeleteDataOffset();
+    int DeleteIndexInChunk();
 
     void RemoveChunkFromChain();
 

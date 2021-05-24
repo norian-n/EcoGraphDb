@@ -272,7 +272,7 @@ template <typename KeyType> int EgIndexFiles<KeyType>::UpdateIndex(bool isChange
     }
 
     if (! isChanged)
-        indexChunks.UpdateIndex(isPrimary);
+        indexChunks.UpdateDataOffsetForIndex(isPrimary);
     else
     {
         if (indexChunks.DeleteIndex(isPrimary) == 1) // last index, recreate

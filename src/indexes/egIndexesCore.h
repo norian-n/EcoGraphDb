@@ -15,13 +15,6 @@
 typedef uint16_t keysCountType;
 typedef uint16_t fingersLevelType;
 
-namespace egIndexesNamespace
-{
-    const int indexHeaderSize = sizeof(uint64_t) * 2;    // header of index file
-    const keysCountType egChunkVolume = 4;              // keys in chunk
-
-} // egIndexesNamespace
-
 
 template <typename KeyType> struct egFinger
 {
@@ -36,6 +29,15 @@ template <typename KeyType> struct egFinger
     uint64_t myOffsetInChunk {0};       // finger position in current chunk
     uint64_t myChunkOffset {0};  // file offset of current chunk -> parent
 };
+
+namespace egIndexesNamespace
+{
+    const int indexHeaderSize = sizeof(uint64_t) * 2;    // header of index file
+    const keysCountType egChunkVolume = 4;               // keys in chunk
+
+} // egIndexesNamespace
+
+
 
 
 // #endif // EGINDEXES_CORE_H

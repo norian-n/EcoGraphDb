@@ -18,7 +18,29 @@ template <typename KeyType> void EgIndexes<KeyType>::PrintIndexesChunk(char* the
     EG_LOG_STUB << QByteArray(theChunk, indexChunkSize).toHex() << theMessage;
 }
 
-template <typename KeyType> inline void EgIndexes<KeyType>::InitIndexChunk()
+template <typename KeyType> inline void EgIndexes<KeyType>::InitMinMaxFlags()
+{
+    fingersTree-> anyMinMaxChanged = false;
+
+    fingersTree-> minValueChanged = false;
+    fingersTree-> maxValueChanged = false;
+}
+
+template <typename KeyType> inline void EgIndexes<KeyType>::SetMinMaxFlags()
+{
+    if (theKey < fingersTree-> currentFinger.minKey)
+    {
+        fingersTree-> anyMinMaxChanged = true;
+        fingersTree-> minValueChanged = true;
+    }
+    else if (theKey > fingersTree-> currentFinger.maxKey)
+    {
+        fingersTree-> anyMinMaxChanged = true;
+        fingersTree-> maxValueChanged = true;
+    }
+}
+
+template <typename KeyType> void EgIndexes<KeyType>::InitIndexChunk()
 {
     memset(indexBA.data(), 0, indexChunkSize);
 
@@ -166,6 +188,9 @@ template <typename KeyType> inline int EgIndexes<KeyType>::InsertInsideIndexChun
 
 template <typename KeyType> int EgIndexes<KeyType>::InsertToIndexChunk()
 {
+    InitMinMaxFlags();
+    SetMinMaxFlags();
+
     LoadIndexChunk(); // fingersTree-> currentFinger.nextChunkOffset to indexBA.data()
 
     // fingersTree-> PrintFingerInfo(fingersTree-> currentFinger);
@@ -808,16 +833,7 @@ template <typename KeyType> int EgIndexes<KeyType>::FindIndexByDataOffset(bool i
     return 1; // not found
 }
 
-template <typename KeyType> int EgIndexes<KeyType>::UpdateDataOffset()
-{
-    indexStream.device()->seek(fingersTree-> currentFinger.nextChunkOffset + indexPosition*oneIndexSize + sizeof(KeyType));
-    indexStream << newDataOffset;
-
-    return 0;
-}
-
-
-template <typename KeyType> int EgIndexes<KeyType>::DeleteDataOffset()
+template <typename KeyType> int EgIndexes<KeyType>::DeleteIndexInChunk()
 {
 
         // get count
@@ -873,10 +889,13 @@ template <typename KeyType> int EgIndexes<KeyType>::DeleteDataOffset()
     return 0;
 }
 
-template <typename KeyType> void EgIndexes<KeyType>::UpdateIndex(bool isPrimary)
+template <typename KeyType> void EgIndexes<KeyType>::UpdateDataOffsetForIndex(bool isPrimary)
 {
     if (FindIndexByDataOffset(isPrimary) == 0) // index found
-        UpdateDataOffset();
+    {
+        indexStream.device()->seek(fingersTree-> currentFinger.nextChunkOffset + indexPosition*oneIndexSize + sizeof(KeyType));
+        indexStream << newDataOffset;
+    }
     else
         EG_LOG_STUB << "Index to update not found, theKey = " << theKey << ", IndexFileName = " << fingersTree-> IndexFileName << FN;
 }
@@ -899,18 +918,9 @@ template <typename KeyType> int EgIndexes<KeyType>::DeleteIndex(bool isPrimary)
 
         if (chunkCount > 1) // not last index
         {
-            DeleteDataOffset(); // chunkCount decrement here
+            DeleteIndexInChunk(); // chunkCount decrement here
 
-            // EG_LOG_STUB << "chunkCount 2 =  " << hex << (int) chunkCount << FN;
-            // EG_LOG_STUB << "fingersTree-> currentFingerOffset " << hex << (int) fingersTree-> currentFingerOffset << FN;
-
-            // fingersTree-> currentKeysCount = chunkCount;
             fingersTree-> UpdateFingerCountAfterDelete(chunkCount); // by fingersTree-> currentFingerOffset
-
-            if (fingersTree-> minValueChanged)
-                fingersTree-> UpdateMinValueUp();
-            else if (fingersTree-> maxValueChanged)
-                fingersTree-> UpdateMaxValueUp();
         }
         else if (chunkCount == 1) // last index, delete finger by fingersTree-> currentFingerOffset
         {

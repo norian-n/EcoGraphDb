@@ -231,8 +231,14 @@ void MainWindow::AddImages()
 
 void MainWindow::on_sceneButton_clicked()
 {
+    ui->labelConnecting->setText("Connecting ...");
+
     if (! sceneForm)
         sceneForm = new GraphSceneForm();
+
+    sceneForm-> LoadImages();
+
+    ui->labelConnecting->setText("");
 
     sceneForm->show();
 

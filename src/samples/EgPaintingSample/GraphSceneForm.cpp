@@ -15,6 +15,7 @@ GraphSceneForm::GraphSceneForm(QWidget *parent) :
 
     ui->iconsPanel-> setScene(&iconsScene);
 
+        // right-button popup menu setup
 
     QAction* openAct = new QAction(tr("Node info"), this);
     openAct->setStatusTip(tr("Open node contents form"));
@@ -60,12 +61,23 @@ GraphSceneForm::GraphSceneForm(QWidget *parent) :
 
 void GraphSceneForm::LoadImages()
 {
+    const int imagesShiftPosition = -750;
+
+        // connect all
+
+    images.Connect(graphDB, "images");
+
+    nodes.Connect(graphDB, "locations");
+
+    linktype.Connect(graphDB, "linktype", nodes, nodes);
+
+        // show
+
     iconsScene.clear();
 
     iconsScene.addRect(QRect(0, 0, 0, 0)); //, circleBrush); // center stub
 
-    images.Connect(graphDB, "images");
-
+    // if (! linktype.isConnected)
     // qDebug() << "Data loading" << FN;
 
     images.AutoLoadAllData();
@@ -101,7 +113,7 @@ void GraphSceneForm::LoadImages()
 
             // qDebug() << "new item ID: " << newItem-> data(0).toInt();
 
-            newItem->setPos(-750 + k*(pixmapSizeFixed+10), -pixmapSizeFixed);
+            newItem->setPos(imagesShiftPosition + k * (pixmapSizeFixed + 10), -pixmapSizeFixed);
             // qDebug() << "new item placed at " << -750 + k*50 << FN;
 
         }
@@ -113,11 +125,6 @@ void GraphSceneForm::LoadImages()
 
 void GraphSceneForm::LoadGraph()
 {
-    nodes.Connect(graphDB, "locations");
-
-    if (! linktype.isConnected)
-        linktype.Connect(graphDB, "linktype", nodes, nodes);
-
     // qDebug() << "Data loading" << FN;
 
     nodes.AutoLoadAllData();
@@ -170,7 +177,7 @@ void GraphSceneForm::ShowGraphNodes()
                 }
 
                 QGraphicsTextItem* label = new QGraphicsTextItem(dataNodeIter["name"].toString()); // .value()
-                label->setPos(x-pixmapSizeFixed+10, y-pixmapSizeFixed);
+                label->setPos(x - pixmapSizeFixed + 10, y + pixmapSizeFixed/2);
 
                 scene.addItem(label);
             }
@@ -438,11 +445,12 @@ void MyGraphicsScene::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
         // qDebug() << "Drag enter event at " <<  event-> scenePos().x() << " " << event-> scenePos().y();
 }
 
-
+/*
 void MyGraphicsScene::dragMoveEvent(QGraphicsSceneDragDropEvent *event)
 {
     // qDebug() << "Move event at " <<  event-> scenePos().x() << " " << event-> scenePos().y();
 }
+*/
 
 
 inline void MyGraphicsScene::resetButtons()
@@ -464,6 +472,13 @@ void MyGraphicsScene::dropEvent(QGraphicsSceneDragDropEvent *event)
     // qDebug() << "Dropped node ID: " << myForm-> movedNodeID;
     // qDebug() << "Drop event at " <<  event-> scenePos().x() << " " << event-> scenePos().y();
 
+    const int gridStep = 8;
+
+    EgDataNodeIdType newID;
+
+    QList<QVariant> addValues;
+    QList<QVariant> locValues;
+
         // check if no actual movement after click
     if (std::abs(saveDragX - event-> scenePos().x()) < 1 && std::abs(saveDragY - event-> scenePos().y()) < 1)
     {
@@ -473,7 +488,11 @@ void MyGraphicsScene::dropEvent(QGraphicsSceneDragDropEvent *event)
         return;
     }
 
-    QPoint clickPoint = event->scenePos().toPoint();
+    QPoint clickPoint = event-> scenePos().toPoint();
+
+        // align to virtual grid
+    clickPoint.setX(clickPoint.x() - (clickPoint.x() % gridStep));
+    clickPoint.setY(clickPoint.y() - (clickPoint.y() % gridStep));
 
     if (! myForm-> movedNodeID) // drop from outside
     {
@@ -487,10 +506,6 @@ void MyGraphicsScene::dropEvent(QGraphicsSceneDragDropEvent *event)
         if (newItem)
         {
             newItem->setPos(clickPoint.x()-pixmapSizeFixed/2, clickPoint.y()-pixmapSizeFixed/2);
-
-            EgDataNodeIdType newID;
-            QList<QVariant> addValues;
-            QList<QVariant> locValues;
 
             // QString nodeName = QVariant(clickPoint.x()).toString() + "," + QVariant(clickPoint.y()).toString();
 
@@ -511,15 +526,13 @@ void MyGraphicsScene::dropEvent(QGraphicsSceneDragDropEvent *event)
 
                 // show label
             QGraphicsTextItem* label = new QGraphicsTextItem("New node"); // .value()
-            label->setPos(clickPoint.x()-pixmapSizeFixed+10, clickPoint.y()-pixmapSizeFixed);
+            label->setPos(clickPoint.x()-pixmapSizeFixed + 10, clickPoint.y() + pixmapSizeFixed/2);
 
             addItem(label);
         }
     }
     else // inside movement
     {
-        QList<QVariant> locValues;
-
             // get old location
         myForm-> nodes.GetLocation(locValues, myForm-> movedNodeID);
 
@@ -651,7 +664,7 @@ GraphSceneForm::~GraphSceneForm()
 
 void GraphSceneForm::on_loadButton_clicked()
 {
-    LoadImages();
+    // LoadImages();
     LoadGraph();
 
     ShowGraphNodes();

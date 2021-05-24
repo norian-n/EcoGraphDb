@@ -40,7 +40,7 @@ public:
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent);
 
     virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *event);
-    virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event);
+    // virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event);
     virtual void dropEvent(QGraphicsSceneDragDropEvent *event);
 
     GraphSceneForm* myForm = nullptr;  
@@ -140,10 +140,13 @@ public:
     explicit GraphSceneForm(QWidget *parent = nullptr);
     ~GraphSceneForm();
 
+    void LoadImages();
+
     void ShowGraphNodes();
     void ShowGraphLinks();
 
 private slots:
+
     void on_loadButton_clicked();
     void on_saveButton_clicked();
 
@@ -156,7 +159,6 @@ private:
     ItemsMenuGraphicsScene iconsScene;
     EgGraphDatabase graphDB;
 
-    void LoadImages();
     void LoadGraph();
 };
 
