@@ -10,6 +10,9 @@
     <height>627</height>
    </rect>
   </property>
+  <property name="acceptDrops">
+   <bool>false</bool>
+  </property>
   <property name="windowTitle">
    <string>Graph Scene</string>
   </property>
@@ -33,6 +36,9 @@
    </item>
    <item>
     <widget class="QGroupBox" name="groupBox">
+     <property name="acceptDrops">
+      <bool>false</bool>
+     </property>
      <property name="title">
       <string/>
      </property>

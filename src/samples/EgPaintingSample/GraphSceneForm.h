@@ -40,7 +40,7 @@ public:
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent);
 
     virtual void dragEnterEvent(QGraphicsSceneDragDropEvent *event);
-    // virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event);
+    virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event);  // dummy required for auto drag & drop
     virtual void dropEvent(QGraphicsSceneDragDropEvent *event);
 
     GraphSceneForm* myForm = nullptr;  
@@ -77,19 +77,6 @@ class ItemsMenuGraphicsScene : public QGraphicsScene
 public:
 
     virtual void mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent);
-
-    // virtual void dragMoveEvent(QGraphicsSceneDragDropEvent *event);
-    // virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent *event);
-
-    /*
-    virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * mouseEvent);
-    virtual void wheelEvent(QGraphicsSceneWheelEvent *wheelEvent);
-    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent);
-    virtual void mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent);
-    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent);
-    */
-
-
 
     GraphSceneForm* myForm = nullptr;
 signals:
@@ -133,9 +120,11 @@ public:
     bool firstNodeStored = false;
     QGraphicsItem* firstNode = nullptr;
 
-    sfModeType opsMode {sfModeConnecting};
+    sfModeType opsMode {sfModeMoving};
     EgDataNodeIdType movedNodeID {0};
     EgDataNodeIdType contextMenuNodeID {0};
+
+    bool dragDropAction = false;
 
     explicit GraphSceneForm(QWidget *parent = nullptr);
     ~GraphSceneForm();

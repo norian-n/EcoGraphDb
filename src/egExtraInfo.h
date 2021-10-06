@@ -19,7 +19,7 @@
 class EgGraphDatabase;
 class EgServerConnection;
 
-class EgDataNodeTypeExtraInfo
+class EgDataNodeTypeExtraInfo               // data nodes type info stored in special class
 {
 public:
     // EgDataNodeIDtype typeID;             // data class ID
@@ -47,8 +47,7 @@ public:
     QFile extraInfoFile;
     QDataStream localExtraInfoStream;
 
-
-    EgDataNodeTypeExtraInfo(): typeName("Error_no_type_name") {}
+    EgDataNodeTypeExtraInfo(): typeName("Error_no_type_name_set") {}
     EgDataNodeTypeExtraInfo(const QString& a_typeName) : typeName(a_typeName) { }
 
     EgDataNodeTypeExtraInfo(const EgDataNodeTypeExtraInfo& copyInfoFrom)
@@ -87,7 +86,6 @@ public:
     int  LoadExtraInfoFromStream(QDataStream& extraInfoStream);
 
     void PrintExtraInfo();               // debug print of field descriptions
-
 };
 
 QDataStream& operator << (QDataStream& dStream, EgNodeTypeSettings& typeSettings);    // transfer and file operations

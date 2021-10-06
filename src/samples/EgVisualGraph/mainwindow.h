@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <GraphSceneForm.h>
+#include <EgGraphForm.h>
 
 #include <QFile>
 #include <QDir>
@@ -56,7 +56,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    GraphSceneForm *sceneForm = nullptr;
+    EgGraphForm *sceneForm = nullptr;
 
     EgGraphDatabase graphDB;
 

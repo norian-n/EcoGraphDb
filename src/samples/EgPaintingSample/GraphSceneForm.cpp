@@ -11,9 +11,10 @@ GraphSceneForm::GraphSceneForm(QWidget *parent) :
     ui->setupUi(this);
 
     ui->graphicsView-> setScene(&scene);
-    ui->graphicsView-> setAcceptDrops(true);
+    // ui->graphicsView-> setAcceptDrops(true);
 
     ui->iconsPanel-> setScene(&iconsScene);
+
 
         // right-button popup menu setup
 
@@ -30,6 +31,8 @@ GraphSceneForm::GraphSceneForm(QWidget *parent) :
     ui->graphicsView-> addAction(openAct);
 
     connect(openAct, &QAction::triggered, &scene, &MyGraphicsScene::deleteNode);
+
+
 
     /*
     connect(openAct, &QAction::triggered, this, &MainWindow::open);
@@ -51,7 +54,9 @@ GraphSceneForm::GraphSceneForm(QWidget *parent) :
     scene.myForm = this;
     iconsScene.myForm = this;
 
-    ui->connectsModeButton-> setDown(true);
+    ui->moveModeButton-> setDown(true);
+
+
 
     // graphDB.Connect();
 
@@ -309,7 +314,12 @@ void ItemsMenuGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEve
         drag-> setPixmap(pixMap);
         drag-> setHotSpot(QPoint(pixmapSizeFixed/2,pixmapSizeFixed/2));
 
+        // Qt::DropAction dAct =
+        myForm-> dragDropAction = true;
         drag-> exec(Qt::CopyAction);
+        myForm-> dragDropAction = false;
+
+        // qDebug() << "Drag action: "  << hex << dAct;
         // drag->exec(Qt::MoveAction);
     }
 
@@ -373,7 +383,9 @@ void MyGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
                 drag-> setPixmap(pixMap);
                 drag-> setHotSpot(QPoint(pixmapSizeFixed/2,pixmapSizeFixed/2));
 
+                myForm-> dragDropAction = true;
                 drag-> exec(Qt::MoveAction);
+                myForm-> dragDropAction = false;
             }
         }
     }
@@ -437,20 +449,26 @@ void MyGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent)
 
 void MyGraphicsScene::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
 {
-        event->setAccepted(event->mimeData()->hasFormat("application/x-dnditemdata"));
+    if (myForm-> dragDropAction)// if(event->mimeData()->hasFormat("application/x-dnditemdata"))
+    {
+        event->acceptProposedAction();
 
         saveDragX = event-> scenePos().x();
         saveDragY = event-> scenePos().y();
 
-        // qDebug() << "Drag enter event at " <<  event-> scenePos().x() << " " << event-> scenePos().y();
+        // qDebug() << "Drag enter event at " <<  event-> scenePos().x() << " " << event-> scenePos().y()
+        //         << " " << hex << event-> possibleActions() << " " << hex << event-> dropAction() ;
+    }
+    else
+      event->ignore();
 }
 
-/*
+    // dummy required for auto drag & drop
 void MyGraphicsScene::dragMoveEvent(QGraphicsSceneDragDropEvent *event)
 {
-    // qDebug() << "Move event at " <<  event-> scenePos().x() << " " << event-> scenePos().y();
+
 }
-*/
+
 
 
 inline void MyGraphicsScene::resetButtons()
@@ -472,7 +490,7 @@ void MyGraphicsScene::dropEvent(QGraphicsSceneDragDropEvent *event)
     // qDebug() << "Dropped node ID: " << myForm-> movedNodeID;
     // qDebug() << "Drop event at " <<  event-> scenePos().x() << " " << event-> scenePos().y();
 
-    const int gridStep = 8;
+    const int gridStep = 4;  // FIXME make const
 
     EgDataNodeIdType newID;
 
@@ -480,7 +498,7 @@ void MyGraphicsScene::dropEvent(QGraphicsSceneDragDropEvent *event)
     QList<QVariant> locValues;
 
         // check if no actual movement after click
-    if (std::abs(saveDragX - event-> scenePos().x()) < 1 && std::abs(saveDragY - event-> scenePos().y()) < 1)
+    if (std::abs(saveDragX - event-> scenePos().x()) < gridStep && std::abs(saveDragY - event-> scenePos().y()) < gridStep)
     {
         myForm-> movedNodeID = 0; // reset
         resetButtons();
@@ -669,6 +687,11 @@ void GraphSceneForm::on_loadButton_clicked()
 
     ShowGraphNodes();
     ShowGraphLinks();
+
+    opsMode = sfModeMoving;
+
+    ui->connectsModeButton-> setDown(false);
+    ui->moveModeButton-> setDown(true);
 }
 
 void GraphSceneForm::on_saveButton_clicked()

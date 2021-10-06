@@ -303,7 +303,7 @@ int EgDataFiles::LocalLoadDataNodes(const QSet<quint64> &dataOffsets, QList<EgDa
             if (! FilterCallback(tmpNode, filterValues))
                 continue;
 
-        dataNodes.append(tmpNode);
+        dataNodes.append(std::move(tmpNode));
     }
 
     // EG_LOG_STUB << FN <<  "dataNodesMap.count() =" << dataNodesMap.count();
@@ -362,7 +362,7 @@ int EgDataFiles::LocalLoadData(QSet<quint64>& dataOffsets, QMap<EgDataNodeIdType
             if (! FilterCallback(tmpNode2, filterValues))
                 continue;
 
-        dataNodesMap.insert(tmpNode2.dataNodeID, tmpNode2);
+        dataNodesMap.insert(tmpNode2.dataNodeID, std::move(tmpNode2));
     }
 
     dat_file.close();

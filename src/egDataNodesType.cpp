@@ -609,7 +609,7 @@ int EgDataNodesType::AddDataNode(EgDataNode& tmpObj)
     tmpObj.extraInfo = &extraInfo;
 
         // copy to map and then add to pointers list
-    dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, tmpObj);
+    dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, std::move(tmpObj));
     addedDataNodes.insert(tmpObj.dataNodeID, &(dataNodesIter.value()));
 
     // EG_LOG_STUB << "tmpObj.dataNodeID = " << tmpObj.dataNodeID << FN;
@@ -629,7 +629,7 @@ int EgDataNodesType::AddDataNode(QList<QVariant>& myData)
     tmpObj.extraInfo = &extraInfo;
 
         // copy to map and then add to pointers list
-    dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, tmpObj);
+    dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, std::move(tmpObj));
     addedDataNodes.insert(tmpObj.dataNodeID, &(dataNodesIter.value()));
 
     return 0;
@@ -647,7 +647,7 @@ int EgDataNodesType::AddDataNode(QList<QVariant>& myData, EgDataNodeIdType& newI
     tmpObj.extraInfo = &extraInfo;
 
         // copy to map and then add to pointers list
-    dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, tmpObj);
+    dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, std::move(tmpObj));
     addedDataNodes.insert(tmpObj.dataNodeID, &(dataNodesIter.value()));
 
     newID = tmpObj.dataNodeID;
@@ -670,7 +670,7 @@ int EgDataNodesType::AddHardLinked(QList<QVariant>& myData, EgDataNodeIdType nod
     tmpObj.extraInfo = &extraInfo;
 
         // copy to map and then add to pointers list
-    dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, tmpObj);
+    dataNodesIter = dataNodes.insert(tmpObj.dataNodeID, std::move(tmpObj));
     addedDataNodes.insert(tmpObj.dataNodeID, &(dataNodesIter.value()));
 
     return 0;
